@@ -1,0 +1,13 @@
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:13.950Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:54.841Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:18.980Z"}
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:33.407Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:08.608Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:27.955Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:58:49.035Z"}
+{"level":"error","message":"Error generating response with phi:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:14.526Z"}
+{"level":"error","message":"Error generating response with phi:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:15.373Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:22.552Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.091Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:59.693Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:25.320Z"}

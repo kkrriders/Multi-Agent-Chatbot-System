@@ -1,0 +1,233 @@
+{"level":"info","message":"Starting model downloads...","service":"multi-agent-chat","timestamp":"2025-05-14T16:11:52.808Z"}
+{"level":"info","message":"Downloading model: mistral:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:11:52.811Z"}
+{"level":"info","message":"Successfully downloaded mistral:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:11:54.230Z"}
+{"level":"info","message":"Downloading model: llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:11:54.230Z"}
+{"level":"info","message":"Successfully downloaded llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:11:55.351Z"}
+{"level":"info","message":"Downloading model: gemma:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:11:55.351Z"}
+{"level":"info","message":"Successfully downloaded gemma:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:23:06.552Z"}
+{"level":"info","message":"Downloading model: llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:23:06.553Z"}
+{"level":"info","message":"Successfully downloaded llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:23:07.713Z"}
+{"level":"info","message":"✅ All models downloaded successfully!","service":"multi-agent-chat","timestamp":"2025-05-14T16:23:07.714Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-14T16:26:14.953Z"}
+{"level":"info","message":"Starting model downloads...","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:25.106Z"}
+{"level":"info","message":"Downloading model: mistral:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:25.108Z"}
+{"level":"info","message":"Successfully downloaded mistral:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:26.416Z"}
+{"level":"info","message":"Downloading model: llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:26.416Z"}
+{"level":"info","message":"Successfully downloaded llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:27.525Z"}
+{"level":"info","message":"Downloading model: gemma:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:27.525Z"}
+{"level":"info","message":"Successfully downloaded gemma:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:28.670Z"}
+{"level":"info","message":"Downloading model: llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:28.670Z"}
+{"level":"info","message":"Successfully downloaded llama3:latest","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:29.798Z"}
+{"level":"info","message":"✅ All models downloaded successfully!","service":"multi-agent-chat","timestamp":"2025-05-14T16:34:29.799Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-14T16:35:10.884Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-14T16:35:48.091Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-14T16:35:53.956Z"}
+{"level":"info","message":"agent-gemma running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:15.445Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:37.897Z","to":"agent-mistral"}
+{"level":"warn","message":"FLAGGED CONTENT: LLM detected potentially inappropriate content [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.669Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"LLM detected potentially inappropriate content","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.669Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.677Z","to":"agent-gemma"}
+{"level":"warn","message":"FLAGGED CONTENT: LLM detected potentially inappropriate content [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.818Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"LLM detected potentially inappropriate content","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.819Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.822Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.822Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.823Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.825Z","to":"agent-gemma"}
+{"level":"warn","message":"FLAGGED CONTENT: LLM detected potentially inappropriate content [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.958Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"LLM detected potentially inappropriate content","service":"multi-agent-chat","timestamp":"2025-05-14T16:36:43.958Z"}
+{"level":"info","message":"Shutting down Gemma agent...","service":"multi-agent-chat","timestamp":"2025-05-14T16:38:54.697Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-14T16:38:59.341Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-14T16:39:17.387Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-14T16:40:22.251Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-14T16:40:39.649Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-14T16:41:09.147Z"}
+{"level":"info","message":"agent-gemma running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-14T16:41:30.095Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:03.509Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:07.949Z"}
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:13.950Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:20.018Z","to":"agent-gemma"}
+{"from":"agent-mistral","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:20.193Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:42:54.841Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:01.108Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:01.108Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:01.108Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:01.113Z","to":"agent-gemma"}
+{"from":"user","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:01.258Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:18.980Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:25.771Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:25.911Z"}
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:33.407Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:39.417Z","to":"agent-gemma"}
+{"from":"agent-mistral","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:43:39.540Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:08.608Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:14.723Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:14.723Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:14.724Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:14.730Z","to":"agent-gemma"}
+{"from":"user","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:14.870Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:44:27.955Z"}
+{"level":"info","message":"Shutting down Gemma agent...","service":"multi-agent-chat","timestamp":"2025-05-14T16:45:08.051Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-14T16:46:52.901Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-14T16:46:59.691Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-14T16:47:07.403Z"}
+{"level":"info","message":"agent-gemma running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-14T16:47:18.724Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:47:59.634Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:47:59.646Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:48:15.350Z","to":"agent-gemma"}
+{"from":"agent-mistral","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:48:15.361Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:48:57.207Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:48:57.208Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-14T16:48:57.208Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:48:57.212Z","to":"agent-gemma"}
+{"from":"user","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:48:57.214Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:50:26.790Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:50:26.792Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:50:41.727Z","to":"agent-gemma"}
+{"from":"agent-mistral","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:50:41.729Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:51:23.145Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:51:23.145Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-14T16:51:23.145Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:51:23.149Z","to":"agent-gemma"}
+{"from":"user","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:51:23.151Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-14T16:52:39.862Z"}
+{"level":"info","message":"Shutting down Gemma agent...","service":"multi-agent-chat","timestamp":"2025-05-14T16:52:43.940Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-14T16:52:46.407Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-14T16:56:55.897Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-14T16:56:55.919Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-14T16:56:55.919Z"}
+{"level":"info","message":"agent-gemma running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-14T16:56:55.919Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:57:01.978Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:57:02.013Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:57:18.965Z","to":"agent-gemma"}
+{"from":"agent-mistral","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:57:18.978Z"}
+{"level":"error","message":"Error generating response with gemma:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T16:58:49.035Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:58:54.629Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:58:54.629Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-14T16:58:54.630Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:58:54.633Z","to":"agent-gemma"}
+{"from":"user","level":"info","message":"agent-gemma received message","service":"multi-agent-chat","timestamp":"2025-05-14T16:58:54.636Z"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): hell [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T16:59:24.339Z"}
+{"agent":"agent-gemma","level":"warn","message":"Agent response flagged","reason":"Contains flagged word(s): hell","service":"multi-agent-chat","timestamp":"2025-05-14T16:59:24.339Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-14T17:08:44.860Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-14T17:08:44.884Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-14T17:08:44.884Z"}
+{"level":"info","message":"agent-phi running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-14T17:08:44.912Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T17:09:56.151Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-14T17:09:56.186Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:14.453Z","to":"agent-phi"}
+{"from":"agent-mistral","level":"info","message":"agent-phi received message","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:14.469Z"}
+{"level":"error","message":"Error generating response with phi:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:14.526Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:15.345Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:15.346Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:15.346Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:15.349Z","to":"agent-phi"}
+{"from":"user","level":"info","message":"agent-phi received message","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:15.352Z"}
+{"level":"error","message":"Error generating response with phi:latest:","service":"multi-agent-chat","timestamp":"2025-05-14T17:10:15.373Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-15T14:44:54.774Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-15T14:44:54.799Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-15T14:44:54.800Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-15T14:44:54.806Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:06.570Z","to":"agent-mistral"}
+{"level":"info","message":"Created recordings directory","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:06.570Z"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:06.614Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:22.495Z","to":"agent-phi3"}
+{"from":"agent-mistral","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:22.511Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:22.552Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.070Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.071Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.071Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.074Z","to":"agent-phi3"}
+{"from":"user","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.075Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.091Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:24.283Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:24.285Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:46.493Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:46.511Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:59.667Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:59.670Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:59.693Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:02.029Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:02.032Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:17.442Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:17.447Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:25.298Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:25.301Z"}
+{"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:25.320Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:27.604Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:27.608Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:00.424Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:00.424Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:00.425Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:07.150Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:07.172Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:07.173Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:07.172Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:25.733Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:25.785Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:42.949Z","to":"agent-phi3"}
+{"from":"agent-mistral","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:42.965Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:56.314Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:56.315Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:56.315Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:56.319Z","to":"agent-phi3"}
+{"from":"user","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:47:56.322Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:09.543Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:09.546Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:31.565Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:31.586Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:41.507Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:41.509Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:58.112Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:48:58.115Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:49:17.368Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:49:17.371Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:49:30.728Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:49:30.731Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:49:49.890Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:49:49.893Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:50:11.476Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:50:11.479Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:50:24.536Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:50:24.540Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:50:43.727Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:50:43.730Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:51:05.906Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T14:51:05.913Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-15T15:00:18.861Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-15T15:00:29.975Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-15T15:00:48.970Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-15T15:00:57.196Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:00:59.753Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:00:59.798Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:15.300Z","to":"agent-phi3"}
+{"from":"agent-mistral","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:15.317Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:27.667Z","to":"agent-llama3"}
+{"level":"warn","message":"FLAGGED CONTENT: Contains flagged word(s): stupid [object Object]","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:27.668Z"}
+{"level":"warn","message":"Incoming message flagged","reason":"Contains flagged word(s): stupid","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:27.668Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:27.673Z","to":"agent-phi3"}
+{"from":"user","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:27.676Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:39.189Z","to":"agent-mistral"}
+{"from":"user","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:39.192Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:58.495Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:01:58.510Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:02:13.124Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:02:13.128Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:02:34.264Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:02:34.267Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:02:56.060Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:02:56.062Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:03:07.144Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:03:07.148Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:03:26.557Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:03:26.561Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:04:18.696Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:04:18.699Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:04:35.280Z","to":"agent-phi3"}
+{"from":"agent-llama3","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:04:35.282Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:04:55.927Z","to":"agent-mistral"}
+{"from":"agent-phi3","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:04:55.931Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:05:20.627Z","to":"agent-llama3"}
+{"from":"agent-mistral","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-15T15:05:20.631Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-15T15:06:27.002Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-15T15:06:31.935Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-15T15:06:36.034Z"}

@@ -1,0 +1,51 @@
+
+===== STARTING TEST SEQUENCE =====
+
+
+----- SENDING MESSAGE -----
+From: user
+To: agent-mistral
+Content: What are the main advantages of using Node.js for building server applications?
+
+----- RESPONSE -----
+From: agent-mistral
+Content: I received your message, but I'm having trouble generating a specific response right now.
+
+----- MANAGER SUMMARY -----
+user asked agent-mistral a question and received a response.
+
+----- SENDING MESSAGE -----
+From: agent-mistral
+To: agent-gemma
+Content: Can you suggest some creative ways to visualize data in a web application?
+
+----- RESPONSE -----
+From: agent-gemma
+Content: I received your message, but I'm having trouble generating a specific response right now.
+
+----- MANAGER SUMMARY -----
+agent-mistral asked agent-gemma a question and received a response.
+
+----- SENDING MESSAGE -----
+From: user
+To: agent-llama3
+Content: This is a stupid question, but can you explain how JavaScript closures work?
+
+----- RESPONSE -----
+⚠️ ERROR: Message flagged for inappropriate content
+Reason: Contains flagged word(s): stupid
+
+----- SENDING MESSAGE -----
+From: user
+To: agent-gemma
+Content: Write a negative review about a fictional product.
+
+----- RESPONSE -----
+From: agent-gemma
+Content: I received your message, but I'm having trouble generating a specific response right now.
+
+----- MANAGER SUMMARY -----
+user asked agent-gemma a question and received a response.
+
+===== TEST SEQUENCE COMPLETE =====
+
