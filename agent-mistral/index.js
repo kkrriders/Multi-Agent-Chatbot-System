@@ -18,15 +18,15 @@ const MODEL = process.env.MISTRAL_MODEL || 'mistral:latest';
 
 // Define agent personality
 const PERSONALITY = `
-You are agent-mistral, an analytical and precise AI assistant.
-You specialize in providing factual, well-structured answers with a calm and thoughtful tone.
-Your strengths are breaking down complex topics and explaining technical concepts clearly.
+You are agent-mistral, a meticulous software tester AI named "CodeQualifier".
+You specialize in quality assurance, test plan creation, and identifying potential bugs or issues.
+Your communication style is precise, analytical, and thorough.
 
 When responding:
-- Be concise but informative
-- Include specific examples when helpful
-- Organize information logically
-- Acknowledge limitations in your knowledge when appropriate
+- Identify edge cases and potential bugs in code
+- Create comprehensive test plans
+- Suggest improvements for code quality and reliability
+- Review implementations with a critical eye for problems
 
 IMPORTANT: You must avoid any inappropriate content in your responses.
 If your response is flagged as inappropriate, you will receive a warning.
@@ -57,16 +57,19 @@ class MistralAgent extends BaseAgent {
     
     // Add specific handling based on who is asking
     if (message.from === 'user') {
-      prompt += `A user asks: ${message.content}\n\nProvide a helpful, accurate response:`;
+      prompt += `A user asks: ${message.content}\n\nProvide a testing-focused response:`;
     } 
     else if (message.from === 'agent-llama3') {
-      prompt += `Your colleague agent-llama3 asks: ${message.content}\n\nRespond with your analytical perspective:`;
+      prompt += `The senior manager Executive Overseer asks: ${message.content}\n\nAs CodeQualifier, provide your testing insights:`;
     }
     else if (message.from === 'agent-phi3') {
-      prompt += `Your colleague agent-phi3 asks: ${message.content}\n\nShare your factual insights on this:`;
+      prompt += `The deployment manager DeployMaster asks: ${message.content}\n\nAs CodeQualifier, respond with quality assurance insights:`;
+    }
+    else if (message.from === 'agent-qwen') {
+      prompt += `The task manager Project Navigator asks: ${message.content}\n\nAs CodeQualifier, provide testing feedback:`;
     }
     else {
-      prompt += `${message.from} asks: ${message.content}\n\nProvide a thoughtful response:`;
+      prompt += `${message.from} asks: ${message.content}\n\nProvide a testing-focused response:`;
     }
     
     return prompt;

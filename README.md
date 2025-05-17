@@ -63,6 +63,9 @@ npm run start-agent-llama3
 
 # Terminal 4 - Phi-3 Agent
 npm run start-agent-phi3
+
+# Terminal 5 - Qwen Agent
+npm run start-agent-qwen
 ```
 
 Alternatively, start all services at once (may be harder to read logs):
@@ -74,8 +77,24 @@ npm run start-all
 2. Run the test client to see the system in action:
 
 ```
-node test-client.js
+npm test
 ```
+
+3. Run the AI Development Team Demo:
+
+```
+npm run test-scenario
+```
+
+This will demonstrate a full conversation scenario showing how the AI team collaborates on a web application development project.
+
+4. To run the demo and record the output to a file:
+
+```
+npm run run-demo
+```
+
+This will execute the demo and save the entire conversation to a timestamped log file in the `logs` directory. You can view the recorded demo using `cat logs/team-demo-[timestamp].log`.
 
 ## Warning System
 
@@ -192,4 +211,33 @@ multi-agent-chat/
 
 ## License
 
-MIT 
+MIT
+
+## AI Development Team Structure
+
+This system features a specialized AI development team with the following roles:
+
+1. **Executive Overseer (Llama 3.3)** - Senior Manager
+   - Provides high-level direction and feedback
+   - Makes executive decisions on project scope
+   - Reviews progress and quality of work
+
+2. **CodeCrafter (Llama3)** - Software Developer
+   - Creates clean, efficient code solutions
+   - Implements features and functionality
+   - Adheres to best practices and patterns
+
+3. **CodeQualifier (Mistral)** - Software Tester
+   - Develops comprehensive test strategies
+   - Identifies bugs and edge cases
+   - Ensures code quality and reliability
+
+4. **DeployMaster (Phi3)** - Deployment Manager
+   - Manages CI/CD pipelines and infrastructure
+   - Optimizes deployment strategies
+   - Handles scalability and performance concerns
+
+5. **Project Navigator (Qwen 2.5coder:3b)** - Task Manager
+   - Coordinates team activities and communication
+   - Assigns tasks and tracks progress
+   - Reports to senior management 

@@ -11,3 +11,8 @@
 {"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:23.091Z"}
 {"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:45:59.693Z"}
 {"level":"error","message":"Error generating response with phi3:latest:","service":"multi-agent-chat","timestamp":"2025-05-15T14:46:25.320Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:26.156Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:57.134Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:20.189Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:42.600Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:57.883Z"}

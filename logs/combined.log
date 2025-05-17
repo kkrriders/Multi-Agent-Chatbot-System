@@ -231,3 +231,67 @@
 {"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-15T15:06:27.002Z"}
 {"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-15T15:06:31.935Z"}
 {"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-15T15:06:36.034Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:24.360Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:24.382Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:24.382Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:24.382Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:24.383Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:26.044Z","to":"agent-qwen"}
+{"from":"user","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:26.086Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:26.156Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:32.900Z","to":"agent-llama3"}
+{"from":"agent-qwen","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:32.914Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:57.092Z","to":"agent-qwen"}
+{"from":"agent-llama3","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:57.095Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:57.134Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:58.196Z","to":"agent-mistral"}
+{"from":"agent-qwen","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:50:58.209Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:20.144Z","to":"agent-qwen"}
+{"from":"agent-mistral","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:20.148Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:20.189Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:21.557Z","to":"agent-phi3"}
+{"from":"agent-qwen","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:21.570Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:42.552Z","to":"agent-qwen"}
+{"from":"agent-phi3","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:42.557Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:42.600Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:44.099Z","to":"agent-llama3"}
+{"from":"agent-qwen","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:44.102Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:57.845Z","to":"agent-qwen"}
+{"from":"agent-llama3","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:57.847Z"}
+{"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:57.883Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:52:49.228Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:52:49.228Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:52:49.228Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:52:49.229Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:14.298Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:14.318Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:14.318Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:14.363Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:14.391Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:16.714Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:16.712Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:16.713Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-17T15:58:16.713Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-17T15:59:40.369Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-17T15:59:40.393Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-17T15:59:40.393Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-17T15:59:40.410Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-17T15:59:40.446Z"}
+{"from":"user","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:00:17.802Z","to":"agent-qwen"}
+{"from":"user","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:00:17.844Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:00:37.881Z","to":"agent-llama3"}
+{"from":"agent-qwen","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:00:37.899Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:00:54.529Z","to":"agent-qwen"}
+{"from":"agent-llama3","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:00:54.535Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:01:08.749Z","to":"agent-mistral"}
+{"from":"agent-qwen","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:01:08.764Z"}
+{"from":"agent-mistral","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:01:34.876Z","to":"agent-qwen"}
+{"from":"agent-mistral","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:01:34.882Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:01:53.863Z","to":"agent-phi3"}
+{"from":"agent-qwen","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:01:53.878Z"}
+{"from":"agent-phi3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:02:14.569Z","to":"agent-qwen"}
+{"from":"agent-phi3","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:02:14.572Z"}
+{"from":"agent-qwen","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:02:37.875Z","to":"agent-llama3"}
+{"from":"agent-qwen","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:02:37.880Z"}
+{"from":"agent-llama3","level":"info","message":"Received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:02:52.810Z","to":"agent-qwen"}
+{"from":"agent-llama3","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-17T16:02:52.813Z"}
