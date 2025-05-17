@@ -28,7 +28,8 @@ const MANAGER_MODEL = process.env.MANAGER_MODEL || 'llama3:latest';
 const AGENT_ENDPOINTS = {
   'agent-mistral': `http://localhost:${process.env.AGENT_MISTRAL_PORT || 3001}/message`,
   'agent-llama3': `http://localhost:${process.env.AGENT_LLAMA3_PORT || 3002}/message`,
-  'agent-phi3': `http://localhost:${process.env.AGENT_PHI3_PORT || 3003}/message`
+  'agent-phi3': `http://localhost:${process.env.AGENT_PHI3_PORT || 3003}/message`,
+  'agent-qwen': `http://localhost:${process.env.AGENT_QWEN_PORT || 3004}/message`
 };
 
 // Create Express app
@@ -74,10 +75,18 @@ async function routeMessageToAgent(message) {
  * @returns {Promise<string>} - Summary of the interaction
  */
 async function summarizeInteraction(originalMessage, agentResponse) {
-  const summaryPrompt = `Summarize this conversation in one sentence:
+  const summaryPrompt = `You are the Executive Overseer, a senior manager AI using Llama 3.3.
+Your job is to oversee a team of specialized AI agents working on software development projects.
+Your team consists of:
+- CodeCrafter (Llama3): Software Developer who implements code
+- CodeQualifier (Mistral): Software Tester who ensures quality
+- DeployMaster (Phi3): Deployment Manager who handles infrastructure
+- Project Navigator (Qwen): Task Manager who organizes work and reports to you
+
+Summarize this conversation in one concise sentence from your perspective as the Executive Overseer:
   
-User: ${originalMessage.content}
-Agent: ${agentResponse.content}`;
+${originalMessage.from}: ${originalMessage.content}
+${agentResponse.from}: ${agentResponse.content}`;
 
   try {
     const summary = await generateResponse(MANAGER_MODEL, summaryPrompt, {

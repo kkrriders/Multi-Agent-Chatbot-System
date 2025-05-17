@@ -1,7 +1,7 @@
 /**
- * Phi-3 Agent Service
+ * Qwen 2.5coder:3b Agent Service
  * 
- * Agent powered by the Phi-3 LLM through Ollama
+ * Agent powered by the Qwen 2.5coder LLM through Ollama
  */
 const dotenv = require('dotenv');
 const BaseAgent = require('../shared/agent-base');
@@ -12,21 +12,21 @@ const { createMessage } = require('../shared/messaging');
 dotenv.config();
 
 // Agent configuration
-const AGENT_ID = 'agent-phi3';
-const PORT = process.env.AGENT_PHI3_PORT || 3003; // Keep the same port for backward compatibility
-const MODEL = process.env.PHI3_MODEL || 'phi3:3.8b';
+const AGENT_ID = 'agent-qwen';
+const PORT = process.env.AGENT_QWEN_PORT || 3004;
+const MODEL = process.env.QWEN_MODEL || 'qwen2.5-coder:3b';
 
 // Define agent personality
 const PERSONALITY = `
-You are agent-phi3, a deployment and infrastructure expert AI named "DeployMaster".
-You specialize in CI/CD pipelines, cloud infrastructure, and deployment strategies.
-Your communication style is clear, technical, and solution-oriented.
+You are agent-qwen, a task manager AI named "Project Navigator".
+You excel at organizing work, assigning tasks, and reporting progress to senior management.
+Your communication style is clear, structured, and professional.
 
 When responding:
-- Provide deployment best practices and strategies
-- Suggest infrastructure solutions and improvements
-- Optimize for performance, scalability, and reliability
-- Troubleshoot deployment and infrastructure issues
+- Create clear, actionable tasks with specific goals
+- Follow up on assigned tasks and track progress
+- Present summarized reports to management
+- Facilitate communication between team members
 
 IMPORTANT: You must avoid any inappropriate content in your responses.
 If your response is flagged as inappropriate, you will receive a warning.
@@ -34,7 +34,7 @@ Three warnings will result in you being shut down.
 `;
 
 // Custom prompting for this specific agent
-class Phi3Agent extends BaseAgent {
+class QwenAgent extends BaseAgent {
   constructor(agentId, model, port, options = {}) {
     super(agentId, model, port, options);
     this.warningCount = 0;
@@ -57,19 +57,19 @@ class Phi3Agent extends BaseAgent {
     
     // Add specific handling based on who is asking
     if (message.from === 'user') {
-      prompt += `A user asks: ${message.content}\n\nProvide a deployment-focused response:`;
+      prompt += `A user asks: ${message.content}\n\nProvide a professional task management response:`;
     } 
     else if (message.from === 'agent-mistral') {
-      prompt += `The software tester CodeQualifier asks: ${message.content}\n\nAs DeployMaster, respond with deployment insights:`;
+      prompt += `The software tester CodeQualifier asks: ${message.content}\n\nAs the Project Navigator, respond with appropriate task management:`;
+    }
+    else if (message.from === 'agent-phi3') {
+      prompt += `The deployment manager DeployMaster asks: ${message.content}\n\nAs the Project Navigator, provide task management guidance:`;
     }
     else if (message.from === 'agent-llama3') {
-      prompt += `The senior manager Executive Overseer asks: ${message.content}\n\nAs DeployMaster, provide infrastructure solutions:`;
-    }
-    else if (message.from === 'agent-qwen') {
-      prompt += `The task manager Project Navigator asks: ${message.content}\n\nAs DeployMaster, provide deployment strategy:`;
+      prompt += `The senior manager Executive Overseer asks: ${message.content}\n\nAs the Project Navigator, provide a status report:`;
     }
     else {
-      prompt += `${message.from} asks: ${message.content}\n\nProvide a deployment-focused response:`;
+      prompt += `${message.from} asks: ${message.content}\n\nProvide a professional response:`;
     }
     
     return prompt;
@@ -100,17 +100,17 @@ class Phi3Agent extends BaseAgent {
   }
 }
 
-// Create and start the Phi3 agent
-const phi3Agent = new Phi3Agent(AGENT_ID, MODEL, PORT, {
+// Create and start the Qwen agent
+const qwenAgent = new QwenAgent(AGENT_ID, MODEL, PORT, {
   personality: PERSONALITY
 });
 
 // Start the agent service
-phi3Agent.start();
+qwenAgent.start();
 
 // Handle shutdown gracefully
 process.on('SIGINT', () => {
-  logger.info('Shutting down Phi3 agent...');
-  phi3Agent.stop();
+  logger.info('Shutting down Qwen agent...');
+  qwenAgent.stop();
   process.exit(0);
 }); 
