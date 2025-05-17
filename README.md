@@ -94,7 +94,23 @@ This will demonstrate a full conversation scenario showing how the AI team colla
 npm run run-demo
 ```
 
-This will execute the demo and save the entire conversation to a timestamped log file in the `logs` directory. You can view the recorded demo using `cat logs/team-demo-[timestamp].log`.
+This will execute the demo and save the entire conversation to a timestamped log file in the `logs` directory. You can view the recorded demo using `type logs/team-demo-[timestamp].log`.
+
+5. To create a custom project where you define what the AI team should build:
+
+```
+npm run custom-project
+```
+
+This interactive tool lets you enter a prompt describing what you want the team to build. The agents will then take on their roles and generate a conversation about implementing your project idea. Each conversation is saved as a separate, uniquely named file in the `recordings/custom-projects` directory.
+
+6. To run a custom project with a predefined prompt (non-interactive):
+
+```
+node run-custom-project.js
+```
+
+This script runs a predefined hiking app project and saves the conversation to a uniquely named file in the `recordings/custom-projects` directory. Each run generates a new file to keep conversations organized and separate.
 
 ## Warning System
 

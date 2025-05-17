@@ -16,6 +16,8 @@
     "test-scenario": "node test-chat-scenario.js",
     "run-demo": "node run-demo.js",
     "structured-record": "node structured-record.js",
+    "custom-project": "node custom-project.js",
+    "separate-records": "node separate-records.js",
     "stop": "node stop-services.js",
     "setup": "npm install && npm run download-models",
     "view-logs": "node view-conversations.js"
