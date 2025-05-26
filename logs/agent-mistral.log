@@ -1,0 +1,798 @@
+[2025-05-24T07:30:00.040Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:00.043Z] Process exited with code 1
+[2025-05-24T07:30:01.104Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:01.123Z] Process exited with code 1
+[2025-05-24T07:30:02.175Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:02.189Z] Process exited with code 1
+[2025-05-24T07:30:03.263Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:03.264Z] Process exited with code 1
+[2025-05-24T07:30:04.335Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:04.335Z] Process exited with code 1
+[2025-05-24T07:30:05.405Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:05.418Z] Process exited with code 1
+[2025-05-24T07:30:06.474Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:06.502Z] Process exited with code 1
+[2025-05-24T07:30:07.576Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:07.576Z] Process exited with code 1
+[2025-05-24T07:30:08.660Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:08.660Z] Process exited with code 1
+[2025-05-24T07:30:09.718Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:09.718Z] Process exited with code 1
+[2025-05-24T07:30:10.776Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:10.803Z] Process exited with code 1
+[2025-05-24T07:30:11.888Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:11.889Z] Process exited with code 1
+[2025-05-24T07:30:12.939Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:12.955Z] Process exited with code 1
+[2025-05-24T07:30:14.040Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:14.041Z] Process exited with code 1
+[2025-05-24T07:30:15.098Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:15.121Z] Process exited with code 1
+[2025-05-24T07:30:16.186Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:16.202Z] Process exited with code 1
+[2025-05-24T07:30:17.277Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:17.277Z] Process exited with code 1
+[2025-05-24T07:30:18.340Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:18.341Z] Process exited with code 1
+[2025-05-24T07:30:19.399Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:19.399Z] Process exited with code 1
+[2025-05-24T07:30:20.443Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:20.464Z] Process exited with code 1
+[2025-05-24T07:30:21.529Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:21.529Z] Process exited with code 1
+[2025-05-24T07:30:22.582Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:22.596Z] Process exited with code 1
+[2025-05-24T07:30:23.653Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:23.665Z] Process exited with code 1
+[2025-05-24T07:30:24.727Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:24.728Z] Process exited with code 1
+[2025-05-24T07:30:25.783Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:25.797Z] Process exited with code 1
+[2025-05-24T07:30:26.878Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:26.879Z] Process exited with code 1
+[2025-05-24T07:30:27.945Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:27.945Z] Process exited with code 1
+[2025-05-24T07:30:29.022Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:29.023Z] Process exited with code 1
+[2025-05-24T07:30:30.095Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:30.095Z] Process exited with code 1
+[2025-05-24T07:30:31.172Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:31.173Z] Process exited with code 1
+[2025-05-24T07:30:32.219Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:32.242Z] Process exited with code 1
+[2025-05-24T07:30:33.314Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:33.314Z] Process exited with code 1
+[2025-05-24T07:30:34.371Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:34.385Z] Process exited with code 1
+[2025-05-24T07:30:35.450Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:35.464Z] Process exited with code 1
+[2025-05-24T07:30:36.542Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:36.543Z] Process exited with code 1
+[2025-05-24T07:30:37.594Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:37.618Z] Process exited with code 1
+[2025-05-24T07:30:38.682Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\mistral\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:38.694Z] Process exited with code 1
+[2025-05-24T07:51:46.245Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.243Z"}
+[2025-05-24T07:53:47.266Z] [STDOUT] [0mGET /status [32m200[0m 2.493 ms - 68[0m
+[2025-05-24T07:57:07.038Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+[2025-05-24T07:57:07.044Z] Process exited with code null
+[2025-05-24T07:57:40.856Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.855Z"}
+[2025-05-24T07:57:54.209Z] [STDOUT] [0mGET /status [32m200[0m 1.415 ms - 68[0m
+[2025-05-24T08:01:40.032Z] [STDOUT] [0mGET /status [32m200[0m 0.385 ms - 68[0m
+[2025-05-24T08:02:37.205Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.202Z"}
+[2025-05-24T08:02:37.212Z] Process exited with code null
+[2025-05-24T08:04:53.441Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.440Z"}
+[2025-05-24T08:04:59.653Z] [STDOUT] [0mGET /status [32m200[0m 1.227 ms - 68[0m
+[2025-05-24T08:05:01.586Z] [STDOUT] [0mGET /status [32m200[0m 0.236 ms - 68[0m
+[2025-05-24T08:05:38.077Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:05:38.076Z"}
+[2025-05-24T08:05:38.089Z] Process exited with code null
+[2025-05-24T08:08:38.835Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.833Z"}
+[2025-05-24T08:08:44.917Z] [STDOUT] [0mGET /status [32m200[0m 1.474 ms - 68[0m
+[2025-05-24T08:11:00.766Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+[2025-05-24T08:11:00.780Z] Process exited with code null
+[2025-05-24T08:15:14.748Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.745Z"}
+[2025-05-24T08:15:18.394Z] [STDOUT] [0mGET /status [32m200[0m 1.403 ms - 68[0m
+[2025-05-24T08:15:37.549Z] [STDOUT] [0mGET /status [32m200[0m 0.440 ms - 68[0m
+[2025-05-24T08:17:35.521Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.519Z"}
+[2025-05-24T08:17:35.529Z] Process exited with code null
+[2025-05-24T08:22:56.960Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.958Z"}
+[2025-05-24T08:23:02.168Z] [STDOUT] [0mGET /status [32m200[0m 1.358 ms - 68[0m
+[2025-05-24T08:24:03.347Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.346Z"}
+[2025-05-24T08:24:03.348Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-24T08:24:29.563Z] [STDOUT] [31merror[39m: Error generating response with mistral:latest: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.558Z"}
+[2025-05-24T08:24:29.563Z] [STDOUT] [31merror[39m: agent-mistral error: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.559Z"}
+[0mPOST /message [31m500[0m 26213.909 ms - 160[0m
+[2025-05-24T08:25:23.886Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.885Z"}
+[2025-05-24T08:25:23.886Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-24T08:25:35.294Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+[2025-05-24T08:25:35.304Z] Process exited with code null
+[2025-05-25T15:30:00.468Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.466Z"}
+[2025-05-25T15:30:29.285Z] [STDOUT] [0mGET /status [32m200[0m 2.232 ms - 68[0m
+[2025-05-25T15:30:30.906Z] [STDOUT] [0mGET /status [32m200[0m 0.591 ms - 68[0m
+[2025-05-25T15:30:32.203Z] [STDOUT] [0mGET /status [32m200[0m 0.758 ms - 68[0m
+[2025-05-25T15:30:33.607Z] [STDOUT] [0mGET /status [32m200[0m 0.268 ms - 68[0m
+[2025-05-25T15:31:14.044Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.044Z"}
+[2025-05-25T15:31:14.045Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-25T15:31:23.772Z] [STDOUT] [0mPOST /message [32m200[0m 9729.792 ms - 1286[0m
+[2025-05-25T15:33:12.200Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:12.200Z"}
+[2025-05-25T15:33:12.200Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-25T15:33:24.554Z] [STDOUT] [0mPOST /message [32m200[0m 12353.999 ms - 1817[0m
+[2025-05-25T15:53:31.635Z] [STDOUT] [0mGET /status [32m200[0m 0.397 ms - 68[0m
+[2025-05-25T16:05:33.028Z] Process exited with code 3221225786
+[2025-05-26T05:07:13.805Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.804Z"}
+[2025-05-26T05:07:21.445Z] [STDOUT] [0mGET /status [32m200[0m 1.400 ms - 68[0m
+[2025-05-26T05:07:22.861Z] [STDOUT] [0mGET /status [32m200[0m 0.454 ms - 68[0m
+[2025-05-26T05:07:24.095Z] [STDOUT] [0mGET /status [32m200[0m 0.387 ms - 68[0m
+[2025-05-26T05:07:57.856Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.855Z"}
+[2025-05-26T05:07:57.858Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-26T05:08:11.598Z] [STDOUT] [0mPOST /message [32m200[0m 13742.426 ms - 2264[0m
+[2025-05-26T05:09:29.202Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:29.201Z"}
+[2025-05-26T05:09:29.202Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-26T05:09:43.041Z] [STDOUT] [0mPOST /message [32m200[0m 13838.924 ms - 2160[0m
+[2025-05-26T05:16:10.997Z] [STDOUT] [0mGET /status [32m200[0m 0.318 ms - 68[0m
+[2025-05-26T05:16:20.641Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.639Z"}
+[2025-05-26T05:16:20.652Z] Process exited with code null
+[2025-05-26T05:24:28.689Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.687Z"}
+[2025-05-26T05:24:36.533Z] [STDOUT] [0mGET /status [32m200[0m 1.419 ms - 68[0m
+[2025-05-26T05:24:37.921Z] [STDOUT] [0mGET /status [32m200[0m 0.261 ms - 68[0m
+[2025-05-26T05:25:22.795Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.794Z"}
+[2025-05-26T05:25:22.797Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-26T05:25:52.860Z] [STDERR] Error generating response with model mistral:latest: timeout of 30000ms exceeded
+[2025-05-26T05:25:52.861Z] [STDOUT] Retrying... (1 attempts left)
+Generating response with model: mistral:latest
+[2025-05-26T05:26:19.391Z] [STDOUT] [0mPOST /message [32m200[0m 56595.253 ms - 2206[0m
+[2025-05-26T05:28:00.523Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:28:00.522Z"}
+[2025-05-26T05:28:00.523Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-26T05:28:30.529Z] [STDERR] Error generating response with model mistral:latest: timeout of 30000ms exceeded
+[2025-05-26T05:28:30.530Z] [STDOUT] Retrying... (1 attempts left)
+Generating response with model: mistral:latest
+[2025-05-26T05:29:00.535Z] [STDERR] Error generating response with model mistral:latest: timeout of 30000ms exceeded
+[2025-05-26T05:29:00.535Z] [STDOUT] Retrying... (0 attempts left)
+Generating response with model: mistral:latest
+[2025-05-26T05:29:30.548Z] [STDERR] Error generating response with model mistral:latest: timeout of 30000ms exceeded
+[2025-05-26T05:29:30.548Z] [STDOUT] [31merror[39m: Error generating response with mistral:latest: {"service":"multi-agent-chat","timestamp":"2025-05-26T05:29:30.548Z"}
+[2025-05-26T05:29:30.549Z] [STDOUT] [0mPOST /message [32m200[0m 90026.527 ms - 288[0m
+[2025-05-26T05:32:55.594Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:32:55.593Z"}
+[2025-05-26T05:32:55.600Z] Process exited with code null
+[2025-05-26T15:20:57.146Z] [STDOUT] [32minfo[39m: agent-mistral running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.145Z"}
+[2025-05-26T15:21:04.668Z] [STDOUT] [0mGET /status [32m200[0m 1.582 ms - 68[0m
+[2025-05-26T15:21:53.840Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.840Z"}
+[2025-05-26T15:21:53.842Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-26T15:22:03.127Z] [STDOUT] [0mPOST /message [32m200[0m 9286.852 ms - 1603[0m
+[2025-05-26T15:23:00.661Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:00.661Z"}
+[2025-05-26T15:23:00.661Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-26T15:23:14.535Z] [STDOUT] [0mPOST /message [32m200[0m 13872.364 ms - 2559[0m
+[2025-05-26T15:24:08.051Z] [STDOUT] [32minfo[39m: agent-mistral received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:08.050Z"}
+[2025-05-26T15:24:08.051Z] [STDOUT] Generating response with model: mistral:latest
+[2025-05-26T15:24:20.391Z] [STDOUT] [0mPOST /message [32m200[0m 12340.051 ms - 2401[0m
+[2025-05-26T15:30:04.986Z] [STDOUT] [32minfo[39m: Shutting down Mistral agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+[2025-05-26T15:30:04.994Z] Process exited with code null

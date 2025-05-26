@@ -350,3 +350,364 @@
 {"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-17T16:42:54.992Z"}
 {"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-17T16:42:54.992Z"}
 {"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-17T16:42:54.992Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-20T05:21:19.128Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-20T05:21:19.153Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-20T05:21:19.157Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-20T05:21:19.156Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-20T05:21:19.157Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-20T05:22:08.870Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-20T05:22:08.870Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-20T05:22:08.869Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-20T05:22:08.870Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T07:26:11.014Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T07:30:00.193Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-24T07:46:15.463Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-24T07:46:15.463Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-24T07:46:15.463Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-24T07:46:15.463Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-24T07:46:15.463Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T07:46:15.467Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:47:58.442Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:47:58.442Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:47:58.442Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:47:58.442Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:47:58.443Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T07:49:48.575Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.243Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.255Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.264Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.265Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.292Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.298Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.855Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.861Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.864Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.882Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.900Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.909Z"}
+{"level":"error","message":"Error generating PDF summary:","service":"multi-agent-chat","timestamp":"2025-05-24T07:58:36.970Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.089Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.089Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 4: Manager Synthesis","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.092Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.092Z"}
+{"level":"error","message":"Error generating discussion summary:","service":"multi-agent-chat","timestamp":"2025-05-24T08:02:02.108Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.203Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.202Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.202Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.203Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.203Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.440Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.440Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.440Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.441Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.441Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.451Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:05:38.075Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:05:38.076Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:05:38.076Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.833Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.842Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.843Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.862Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.874Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.880Z"}
+{"level":"info","message":"PDF uploaded: Multiple business idea 2.1.pdf, ID: 8847571c-b77e-4d0e-b46e-db49f018365c","service":"multi-agent-chat","timestamp":"2025-05-24T08:08:58.913Z"}
+{"level":"info","message":"PDF uploaded: Multiple business idea 2.1.pdf, ID: 442e1377-99be-42dd-bf2d-c119c257785c","service":"multi-agent-chat","timestamp":"2025-05-24T08:09:07.935Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: 8847571c-b77e-4d0e-b46e-db49f018365c","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.037Z"}
+{"level":"info","message":"Extracting text from PDF: Multiple business idea 2.1.pdf","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.039Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.102Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.104Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.104Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.105Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.105Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 4: Manager Synthesis","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.107Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.107Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.745Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.771Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.772Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.793Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.792Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.807Z"}
+{"level":"info","message":"PDF uploaded: Multiple business idea 2.1.pdf, ID: 5ed854b2-68bd-4c4c-b595-04096e9e1e62","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:34.071Z"}
+{"level":"info","message":"PDF uploaded: Multiple business idea 2.1.pdf, ID: f164f99c-6e43-4c43-bd0b-285f3333042f","service":"multi-agent-chat","timestamp":"2025-05-24T08:15:41.542Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: f164f99c-6e43-4c43-bd0b-285f3333042f","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.310Z"}
+{"level":"info","message":"Extracting text from PDF: Multiple business idea 2.1.pdf","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.310Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.431Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.433Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.433Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 4: Manager Synthesis","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: f164f99c-6e43-4c43-bd0b-285f3333042f","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.522Z"}
+{"level":"info","message":"Extracting text from PDF: Multiple business idea 2.1.pdf","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.522Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 4: Manager Synthesis","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.518Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.518Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.519Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.519Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.519Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.954Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.953Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.956Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.957Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.958Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.968Z"}
+{"level":"info","message":"PDF uploaded: Multiple business idea 2.1.pdf, ID: 53cdcef1-3bf0-4a62-bed9-26006a984f8c","service":"multi-agent-chat","timestamp":"2025-05-24T08:23:08.968Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: 53cdcef1-3bf0-4a62-bed9-26006a984f8c","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.253Z"}
+{"level":"info","message":"Extracting text from PDF: Multiple business idea 2.1.pdf","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.253Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.330Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.331Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.332Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.346Z"}
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.558Z"}
+{"level":"error","message":"agent-mistral error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.559Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-mistral: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:24:29.564Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.565Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.565Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.584Z"}
+{"level":"error","message":"Error generating response with llama3:latest:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.770Z"}
+{"level":"error","message":"agent-llama3 error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.770Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-llama3: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:24:45.772Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.772Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.772Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.780Z"}
+{"level":"error","message":"Error generating response with phi3:3.8b:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.656Z"}
+{"level":"error","message":"agent-phi3 error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.656Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-phi3: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:07.658Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.658Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.658Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.667Z"}
+{"level":"error","message":"Error generating response with qwen2.5-coder:3b:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.826Z"}
+{"level":"error","message":"agent-qwen error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.827Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-qwen: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:23.828Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.828Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.828Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.828Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.836Z"}
+{"level":"error","message":"Error generating response with llama3.3:latest:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.881Z"}
+{"level":"error","message":"agent-llama33 error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.881Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-llama33: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:23.883Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.883Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.883Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.883Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.885Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.290Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.463Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.465Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.464Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.464Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.466Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.466Z"}
+{"level":"info","message":"PDF uploaded: Multiple business idea 2.1.pdf, ID: 57cc5047-e925-442e-8b7c-c08488f44fbf","service":"multi-agent-chat","timestamp":"2025-05-25T15:30:43.000Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: 57cc5047-e925-442e-8b7c-c08488f44fbf","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:13.902Z"}
+{"level":"info","message":"Extracting text from PDF: Multiple business idea 2.1.pdf","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:13.902Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.010Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.010Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.011Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.044Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:23.821Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:23.851Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:47.588Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:47.612Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:32:30.593Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:32:30.602Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-25T15:32:43.256Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:32:43.256Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:32:43.264Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:12.197Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:12.197Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:12.200Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:24.555Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:24.558Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:41.291Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:41.293Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:56.209Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:56.211Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 4: Manager Synthesis","service":"multi-agent-chat","timestamp":"2025-05-25T15:34:11.738Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-25T15:34:11.739Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-25T15:34:11.741Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.795Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.803Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.804Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.804Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.804Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.804Z"}
+{"level":"info","message":"PDF uploaded: Security Business 3.1.pdf, ID: b4a692b3-dad1-468f-9def-8fc6b1874d0c","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:34.144Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: b4a692b3-dad1-468f-9def-8fc6b1874d0c","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.738Z"}
+{"level":"info","message":"Extracting text from PDF: Security Business 3.1.pdf","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.739Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.829Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.830Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.831Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.855Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:11.737Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:11.761Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:29.960Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:29.987Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:51.192Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:51.221Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:00.635Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:00.635Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:00.656Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:29.199Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:29.200Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:29.201Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:43.042Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:43.044Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:58.282Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:58.284Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:10:13.813Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:10:13.815Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 4: Manager Synthesis","service":"multi-agent-chat","timestamp":"2025-05-26T05:10:25.964Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:10:25.965Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:10:25.974Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.638Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.639Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.639Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.639Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.638Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.687Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.697Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.706Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.715Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.725Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.737Z"}
+{"level":"info","message":"PDF uploaded: Security Business 3.1.pdf, ID: 7ab76992-831c-4a71-aef0-412675eab9df","service":"multi-agent-chat","timestamp":"2025-05-26T05:24:46.337Z"}
+{"level":"error","message":"Error generating PDF summary:","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:16.671Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: 7ab76992-831c-4a71-aef0-412675eab9df","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.672Z"}
+{"level":"info","message":"Extracting text from PDF: Security Business 3.1.pdf","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.684Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.774Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.775Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.776Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.794Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:26:19.429Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:26:19.437Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:26:38.487Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:26:38.495Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:27:06.547Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:27:06.560Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-26T05:27:16.685Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:27:16.685Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:27:16.701Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-26T05:28:00.519Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:28:00.520Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:28:00.522Z"}
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-26T05:29:30.548Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:29:30.550Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:29:30.552Z"}
+{"level":"error","message":"Error generating response with llama3:latest:","service":"multi-agent-chat","timestamp":"2025-05-26T05:31:00.568Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:31:00.571Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:31:00.574Z"}
+{"level":"error","message":"Error generating response with phi3:3.8b:","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.620Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.623Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.625Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:55.592Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:55.592Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:55.592Z"}
+{"level":"info","message":"Manager Agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.133Z"}
+{"level":"info","message":"agent-qwen running on port 3004","service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.145Z"}
+{"level":"info","message":"agent-mistral running on port 3001","service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.145Z"}
+{"level":"info","message":"agent-phi3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.145Z"}
+{"level":"info","message":"agent-llama3 running on port 3002","service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.145Z"}
+{"level":"info","message":"agent-llama33 running on port 3005","service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.146Z"}
+{"level":"info","message":"PDF uploaded: Security Business 3.2.pdf, ID: 35f3094b-409f-49c5-ba1f-ebea5d023cb0","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:16.842Z"}
+{"level":"info","message":"Brainstorming request for PDF ID: 35f3094b-409f-49c5-ba1f-ebea5d023cb0","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.685Z"}
+{"level":"info","message":"Extracting text from PDF: Security Business 3.2.pdf","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.685Z"}
+{"level":"info","message":"Starting brainstorming with 4 custom roles","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.815Z"}
+{"level":"info","message":"Starting brainstorming discussion - Phase 1: Initial Ideas","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.817Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.818Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.840Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:03.166Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:03.176Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:19.215Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:19.225Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:27.061Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:27.070Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 2: Manager Review","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.969Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.970Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.979Z"}
+{"level":"info","message":"agent-llama33: Long prompt detected (12164 chars). Reducing output length.","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.979Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 3: Cross-evaluation","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:00.659Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:00.659Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:00.661Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:14.535Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:14.537Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:31.554Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:31.555Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:43.083Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:43.086Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 4: Manager Synthesis","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:52.039Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:52.040Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:52.044Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 5: Implementation Planning","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:08.048Z"}
+{"level":"info","message":"Sending message to agent-mistral with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:08.049Z"}
+{"from":"manager","level":"info","message":"agent-mistral received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:08.050Z"}
+{"level":"info","message":"Sending message to agent-llama3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:20.391Z"}
+{"from":"manager","level":"info","message":"agent-llama3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:20.393Z"}
+{"level":"info","message":"Sending message to agent-phi3 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:30.252Z"}
+{"from":"manager","level":"info","message":"agent-phi3 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:30.254Z"}
+{"level":"info","message":"Sending message to agent-qwen with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:40.595Z"}
+{"from":"manager","level":"info","message":"agent-qwen received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:40.597Z"}
+{"level":"info","message":"Brainstorming discussion - Phase 6: Final Implementation Roadmap","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:49.298Z"}
+{"level":"info","message":"Sending message to agent-llama33 with performative: request","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:49.299Z"}
+{"from":"manager","level":"info","message":"agent-llama33 received message","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:49.302Z"}
+{"level":"info","message":"PDF export request for active discussion of PDF ID: 35f3094b-409f-49c5-ba1f-ebea5d023cb0","service":"multi-agent-chat","timestamp":"2025-05-26T15:25:40.206Z"}
+{"level":"info","message":"Shutting down LLaMA 3.3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+{"level":"info","message":"Shutting down Mistral agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+{"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+{"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+{"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}

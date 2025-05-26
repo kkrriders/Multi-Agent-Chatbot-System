@@ -9,8 +9,9 @@
     "start-agent-llama3": "node agent-llama3/index.js",
     "start-agent-phi3": "node agent-phi3/index.js",
     "start-agent-qwen": "node agent-qwen/index.js",
-    "start": "concurrently --names \"MANAGER,MISTRAL,LLAMA3,PHI3,QWEN\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold\" \"npm run start-manager\" \"npm run start-agent-mistral\" \"npm run start-agent-llama3\" \"npm run start-agent-phi3\" \"npm run start-agent-qwen\"",
-    "start-all": "concurrently --names \"MANAGER,MISTRAL,LLAMA3,PHI3,QWEN\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold\" \"npm run start-manager\" \"npm run start-agent-mistral\" \"npm run start-agent-llama3\" \"npm run start-agent-phi3\" \"npm run start-agent-qwen\"",
+    "start-agent-llama33": "node agent-llama33/index.js",
+    "start": "concurrently --names \"MANAGER,MISTRAL,LLAMA3,PHI3,QWEN,LLAMA33\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold,bgRed.bold\" \"npm run start-manager\" \"npm run start-agent-mistral\" \"npm run start-agent-llama3\" \"npm run start-agent-phi3\" \"npm run start-agent-qwen\" \"npm run start-agent-llama33\"",
+    "start-all": "concurrently --names \"MANAGER,MISTRAL,LLAMA3,PHI3,QWEN,LLAMA33\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold,bgRed.bold\" \"npm run start-manager\" \"npm run start-agent-mistral\" \"npm run start-agent-llama3\" \"npm run start-agent-phi3\" \"npm run start-agent-qwen\" \"npm run start-agent-llama33\"",
     "download-models": "node download-models.js",
     "test": "node test-client.js",
     "test-scenario": "node test-chat-scenario.js",
@@ -35,7 +36,11 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "html-pdf": "^3.0.1",
     "morgan": "^1.10.0",
+    "multer": "^2.0.0",
+    "pdf-parse": "^1.1.1",
+    "uuid": "^11.1.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {

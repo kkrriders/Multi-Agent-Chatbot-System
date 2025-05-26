@@ -1,0 +1,303 @@
+[2025-05-24T07:30:00.194Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:30:00.193Z"}
+[2025-05-24T07:30:38.414Z] Process exited with code 3221225786
+[2025-05-24T07:51:46.257Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.255Z"}
+[2025-05-24T07:52:51.110Z] [STDOUT] [0mGET / [33m404[0m 2.791 ms - 139[0m
+[2025-05-24T07:53:02.912Z] [STDOUT] [0mGET /api/health [33m404[0m 0.419 ms - 149[0m
+[2025-05-24T07:53:13.773Z] [STDOUT] [0mGET / [33m404[0m 0.190 ms - 139[0m
+[2025-05-24T07:53:47.296Z] [STDOUT] [0mGET /status [32m200[0m 57.144 ms - 474[0m
+[2025-05-24T07:53:59.609Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.520 ms - 11[0m
+[2025-05-24T07:54:10.743Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.152 ms - 11[0m
+[2025-05-24T07:54:10.778Z] [STDOUT] [0mGET /favicon.ico [33m404[0m 0.251 ms - 150[0m
+[2025-05-24T07:57:07.045Z] Process exited with code null
+[2025-05-24T07:57:40.862Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.861Z"}
+[2025-05-24T07:57:54.156Z] [STDOUT] [0mGET / [32m200[0m 3.161 ms - 23371[0m
+[2025-05-24T07:57:54.237Z] [STDOUT] [0mGET /status [32m200[0m 50.392 ms - 474[0m
+[2025-05-24T07:57:57.708Z] [STDOUT] [0mGET /pdfs [36m304[0m 1.698 ms - -[0m
+[2025-05-24T07:58:06.960Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-24T07:58:36.970Z] [STDERR] Error generating response with model llama3:latest: timeout of 30000ms exceeded
+[2025-05-24T07:58:36.970Z] [STDOUT] [31merror[39m: Error generating PDF summary: {"service":"multi-agent-chat","timestamp":"2025-05-24T07:58:36.970Z"}
+[2025-05-24T07:58:36.971Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 30307.264 ms - 232[0m
+[2025-05-24T07:58:43.621Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.508 ms - 230[0m
+[2025-05-24T08:01:32.090Z] [STDOUT] [32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.089Z"}
+[2025-05-24T08:01:32.090Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.089Z"}
+[2025-05-24T08:01:32.091Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+[2025-05-24T08:01:32.091Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+[31merror[39m: Error getting initial ideas from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+[32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+[2025-05-24T08:01:32.091Z] [STDOUT] [31merror[39m: Error getting manager review: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+[2025-05-24T08:01:32.094Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+[31merror[39m: Error getting cross-evaluation from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+[2025-05-24T08:01:32.094Z] [STDOUT] [31merror[39m: Error getting cross-evaluation from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+[31merror[39m: Error getting cross-evaluation from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+[31merror[39m: Error getting cross-evaluation from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+[32minfo[39m: Brainstorming discussion - Phase 4: Manager Synthesis {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.092Z"}
+[31merror[39m: Error getting manager synthesis: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.092Z"}
+Generating response with model: llama3:latest
+[2025-05-24T08:01:40.047Z] [STDOUT] [0mGET /status [36m304[0m 18.801 ms - -[0m
+[2025-05-24T08:02:02.109Z] [STDERR] Error generating response with model llama3:latest: timeout of 30000ms exceeded
+[2025-05-24T08:02:02.109Z] [STDOUT] [31merror[39m: Error generating discussion summary: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:02:02.108Z"}
+[2025-05-24T08:02:02.110Z] [STDOUT] [0mPOST /brainstorm/b3c63961-277b-4664-b6a0-392de0217501-Multiple%20business%20idea%202.1 [32m200[0m 30104.174 ms - 2920[0m
+[2025-05-24T08:02:37.213Z] Process exited with code null
+[2025-05-24T08:04:53.452Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.451Z"}
+[2025-05-24T08:04:59.679Z] [STDOUT] [0mGET /status [36m304[0m 49.598 ms - -[0m
+[2025-05-24T08:05:01.594Z] [STDOUT] [0mGET /status [36m304[0m 10.258 ms - -[0m
+[2025-05-24T08:05:05.716Z] [STDOUT] [0mPOST /brainstorm/b3c63961-277b-4664-b6a0-392de0217501-Multiple%20business%20idea%202.1 [33m404[0m 0.408 ms - 25[0m
+[2025-05-24T08:05:08.775Z] [STDOUT] [0mPOST /brainstorm/b3c63961-277b-4664-b6a0-392de0217501-Multiple%20business%20idea%202.1 [33m404[0m 0.281 ms - 25[0m
+[2025-05-24T08:05:22.851Z] [STDOUT] [0mGET /.well-known/appspecific/com.chrome.devtools.json [33m404[0m 0.967 ms - 187[0m
+[2025-05-24T08:05:38.089Z] Process exited with code null
+[2025-05-24T08:08:38.843Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.842Z"}
+[2025-05-24T08:08:44.864Z] [STDOUT] [0mGET / [32m200[0m 2.306 ms - 26110[0m
+[2025-05-24T08:08:44.889Z] [STDOUT] [0mGET /.well-known/appspecific/com.chrome.devtools.json [33m404[0m 1.499 ms - 187[0m
+[2025-05-24T08:08:44.952Z] [STDOUT] [0mGET /status [36m304[0m 59.007 ms - -[0m
+[2025-05-24T08:08:52.480Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.703 ms - 11[0m
+[2025-05-24T08:08:58.917Z] [STDOUT] [32minfo[39m: PDF uploaded: Multiple business idea 2.1.pdf, ID: 8847571c-b77e-4d0e-b46e-db49f018365c {"service":"multi-agent-chat","timestamp":"2025-05-24T08:08:58.913Z"}
+[2025-05-24T08:08:59.131Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-24T08:09:05.520Z] [STDOUT] [0mGET /pdfs [36m304[0m 0.651 ms - -[0m
+[2025-05-24T08:09:07.936Z] [STDOUT] [32minfo[39m: PDF uploaded: Multiple business idea 2.1.pdf, ID: 442e1377-99be-42dd-bf2d-c119c257785c {"service":"multi-agent-chat","timestamp":"2025-05-24T08:09:07.935Z"}
+[2025-05-24T08:09:08.009Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-24T08:09:16.069Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 17159.646 ms - 1666[0m
+[2025-05-24T08:09:18.117Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 10183.731 ms - 1385[0m
+[2025-05-24T08:09:19.211Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.724 ms - 3037[0m
+[2025-05-24T08:09:20.798Z] [STDOUT] [0mGET /pdfs [36m304[0m 0.699 ms - -[0m
+[2025-05-24T08:10:12.039Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: 8847571c-b77e-4d0e-b46e-db49f018365c {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.037Z"}
+[2025-05-24T08:10:12.040Z] [STDOUT] [32minfo[39m: Extracting text from PDF: Multiple business idea 2.1.pdf {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.039Z"}
+[2025-05-24T08:10:12.104Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.102Z"}
+[2025-05-24T08:10:12.105Z] [STDOUT] [32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.104Z"}
+[2025-05-24T08:10:12.106Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.104Z"}
+[2025-05-24T08:10:12.106Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.105Z"}
+[2025-05-24T08:10:12.106Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.105Z"}
+[31merror[39m: Error getting initial ideas from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[2025-05-24T08:10:12.106Z] [STDOUT] [31merror[39m: Error getting manager review: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[2025-05-24T08:10:12.107Z] [STDOUT] [31merror[39m: Error getting cross-evaluation from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[2025-05-24T08:10:12.107Z] [STDOUT] [31merror[39m: Error getting cross-evaluation from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[31merror[39m: Error getting cross-evaluation from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[31merror[39m: Error getting cross-evaluation from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+[2025-05-24T08:10:12.108Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 4: Manager Synthesis {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.107Z"}
+[2025-05-24T08:10:12.109Z] [STDOUT] [31merror[39m: Error getting manager synthesis: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.107Z"}
+Generating response with model: llama3:latest
+[2025-05-24T08:10:13.963Z] [STDOUT] [0mPOST /brainstorm/8847571c-b77e-4d0e-b46e-db49f018365c [32m200[0m 1925.228 ms - 4505[0m
+[2025-05-24T08:10:32.239Z] [STDOUT] [0mGET /.well-known/appspecific/com.chrome.devtools.json [33m404[0m 0.599 ms - 187[0m
+[2025-05-24T08:11:00.782Z] Process exited with code null
+[2025-05-24T08:15:14.774Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.772Z"}
+[2025-05-24T08:15:18.347Z] [STDOUT] [0mGET / [32m200[0m 2.180 ms - 28992[0m
+[2025-05-24T08:15:18.422Z] [STDOUT] [0mGET /status [36m304[0m 56.453 ms - -[0m
+[2025-05-24T08:15:19.641Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.528 ms - 11[0m
+[2025-05-24T08:15:23.785Z] [STDOUT] [0mGET /pdfs [36m304[0m 1.085 ms - -[0m
+[2025-05-24T08:15:27.509Z] [STDOUT] [0mGET /pdfs [36m304[0m 1.308 ms - -[0m
+[2025-05-24T08:15:34.072Z] [STDOUT] [32minfo[39m: PDF uploaded: Multiple business idea 2.1.pdf, ID: 5ed854b2-68bd-4c4c-b595-04096e9e1e62 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:15:34.071Z"}
+[2025-05-24T08:15:34.267Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-24T08:15:37.571Z] [STDOUT] [0mGET /status [36m304[0m 27.722 ms - -[0m
+[2025-05-24T08:15:39.192Z] [STDOUT] [0mGET /pdfs [36m304[0m 0.787 ms - -[0m
+[2025-05-24T08:15:41.548Z] [STDOUT] [32minfo[39m: PDF uploaded: Multiple business idea 2.1.pdf, ID: f164f99c-6e43-4c43-bd0b-285f3333042f {"service":"multi-agent-chat","timestamp":"2025-05-24T08:15:41.542Z"}
+[2025-05-24T08:15:41.625Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-24T08:15:50.442Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 16378.160 ms - 1505[0m
+[2025-05-24T08:15:50.800Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 9259.868 ms - 1219[0m
+[2025-05-24T08:15:54.250Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.580 ms - 2710[0m
+[2025-05-24T08:15:55.001Z] [STDOUT] [0mGET /pdfs [36m304[0m 0.717 ms - -[0m
+[2025-05-24T08:16:50.310Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: f164f99c-6e43-4c43-bd0b-285f3333042f {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.310Z"}
+[2025-05-24T08:16:50.310Z] [STDOUT] [32minfo[39m: Extracting text from PDF: Multiple business idea 2.1.pdf {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.310Z"}
+[2025-05-24T08:16:50.432Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.431Z"}
+[2025-05-24T08:16:50.433Z] [STDOUT] [32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.433Z"}
+[2025-05-24T08:16:50.435Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.433Z"}
+[2025-05-24T08:16:50.436Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+[31merror[39m: Error getting initial ideas from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+[31merror[39m: Error getting initial ideas from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+[32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+[31merror[39m: Error getting manager review: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+[32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+[31merror[39m: Error getting cross-evaluation from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+[31merror[39m: Error getting cross-evaluation from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+[2025-05-24T08:16:50.442Z] [STDOUT] [31merror[39m: Error getting cross-evaluation from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+[31merror[39m: Error getting cross-evaluation from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+[32minfo[39m: Brainstorming discussion - Phase 4: Manager Synthesis {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+[31merror[39m: Error getting manager synthesis: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+Generating response with model: llama3:latest
+[2025-05-24T08:16:52.783Z] [STDOUT] [0mPOST /brainstorm/f164f99c-6e43-4c43-bd0b-285f3333042f [32m200[0m 2472.719 ms - 4147[0m
+[2025-05-24T08:17:09.522Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: f164f99c-6e43-4c43-bd0b-285f3333042f {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.522Z"}
+[32minfo[39m: Extracting text from PDF: Multiple business idea 2.1.pdf {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.522Z"}
+[2025-05-24T08:17:09.571Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+[32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+[2025-05-24T08:17:09.571Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+[31merror[39m: Error getting initial ideas from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+[31merror[39m: Error getting initial ideas from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+[31merror[39m: Error getting initial ideas from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+[2025-05-24T08:17:09.571Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+[2025-05-24T08:17:09.572Z] [STDOUT] [31merror[39m: Error getting manager review: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+[2025-05-24T08:17:09.572Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+[31merror[39m: Error getting cross-evaluation from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+[2025-05-24T08:17:09.572Z] [STDOUT] [31merror[39m: Error getting cross-evaluation from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+[31merror[39m: Error getting cross-evaluation from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+[2025-05-24T08:17:09.573Z] [STDOUT] [31merror[39m: Error getting cross-evaluation from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+[2025-05-24T08:17:09.573Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 4: Manager Synthesis {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+[2025-05-24T08:17:09.573Z] [STDOUT] [31merror[39m: Error getting manager synthesis: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+[2025-05-24T08:17:09.574Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-24T08:17:11.325Z] [STDOUT] [0mPOST /brainstorm/f164f99c-6e43-4c43-bd0b-285f3333042f [32m200[0m 1802.920 ms - 4099[0m
+[2025-05-24T08:17:20.155Z] [STDOUT] [0mGET /.well-known/appspecific/com.chrome.devtools.json [33m404[0m 0.870 ms - 187[0m
+[2025-05-24T08:17:35.528Z] Process exited with code null
+[2025-05-24T08:22:56.969Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.968Z"}
+[2025-05-24T08:23:02.123Z] [STDOUT] [0mGET / [36m304[0m 2.853 ms - -[0m
+[2025-05-24T08:23:02.198Z] [STDOUT] [0mGET /status [36m304[0m 56.765 ms - -[0m
+[2025-05-24T08:23:03.217Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.877 ms - 11[0m
+[2025-05-24T08:23:08.970Z] [STDOUT] [32minfo[39m: PDF uploaded: Multiple business idea 2.1.pdf, ID: 53cdcef1-3bf0-4a62-bed9-26006a984f8c {"service":"multi-agent-chat","timestamp":"2025-05-24T08:23:08.968Z"}
+[2025-05-24T08:23:09.198Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-24T08:23:21.431Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 12468.130 ms - 1487[0m
+[2025-05-24T08:23:24.127Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.933 ms - 1485[0m
+[2025-05-24T08:24:03.257Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: 53cdcef1-3bf0-4a62-bed9-26006a984f8c {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.253Z"}
+[2025-05-24T08:24:03.257Z] [STDOUT] [32minfo[39m: Extracting text from PDF: Multiple business idea 2.1.pdf {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.253Z"}
+[2025-05-24T08:24:03.331Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.330Z"}
+[2025-05-24T08:24:03.332Z] [STDOUT] [32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.331Z"}
+[2025-05-24T08:24:03.332Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:03.332Z"}
+[2025-05-24T08:24:29.567Z] [STDOUT] [31merror[39m: Error routing message to agent-mistral: Request failed with status code 500 {"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:24:29.564Z"}
+[2025-05-24T08:24:29.570Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-mistral: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.565Z"}
+[32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.565Z"}
+[2025-05-24T08:24:45.773Z] [STDOUT] [31merror[39m: Error routing message to agent-llama3: Request failed with status code 500 {"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:24:45.772Z"}
+[2025-05-24T08:24:45.773Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-llama3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.772Z"}
+[32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.772Z"}
+[2025-05-24T08:25:07.659Z] [STDOUT] [31merror[39m: Error routing message to agent-phi3: Request failed with status code 500 {"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:07.658Z"}
+[2025-05-24T08:25:07.659Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-phi3: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.658Z"}
+[32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.658Z"}
+[2025-05-24T08:25:23.828Z] [STDOUT] [31merror[39m: Error routing message to agent-qwen: Request failed with status code 500 {"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:23.828Z"}
+[2025-05-24T08:25:23.829Z] [STDOUT] [31merror[39m: Error getting initial ideas from agent-qwen: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.828Z"}
+[2025-05-24T08:25:23.829Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.828Z"}
+[32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.828Z"}
+[2025-05-24T08:25:23.883Z] [STDOUT] [31merror[39m: Error routing message to agent-llama33: Request failed with status code 500 {"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:23.883Z"}
+[2025-05-24T08:25:23.883Z] [STDOUT] [31merror[39m: Error getting manager review: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.883Z"}
+[32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.883Z"}
+[2025-05-24T08:25:23.884Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.883Z"}
+[2025-05-24T08:25:35.310Z] Process exited with code null
+[2025-05-25T15:30:00.465Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.463Z"}
+[2025-05-25T15:30:07.372Z] [STDOUT] [0mGET /pdfs [32m200[0m 2.925 ms - 11[0m
+[2025-05-25T15:30:07.438Z] [STDOUT] [0mGET /favicon.ico [33m404[0m 1.069 ms - 150[0m
+[2025-05-25T15:30:29.214Z] [STDOUT] [0mGET / [32m200[0m 2.568 ms - 28992[0m
+[2025-05-25T15:30:29.332Z] [STDOUT] [0mGET /status [32m200[0m 96.363 ms - 472[0m
+[2025-05-25T15:30:30.923Z] [STDOUT] [0mGET /status [36m304[0m 20.103 ms - -[0m
+[2025-05-25T15:30:32.213Z] [STDOUT] [0mGET /status [36m304[0m 15.304 ms - -[0m
+[2025-05-25T15:30:33.585Z] [STDOUT] [0mGET / [36m304[0m 0.676 ms - -[0m
+[2025-05-25T15:30:33.632Z] [STDOUT] [0mGET /status [36m304[0m 27.007 ms - -[0m
+[2025-05-25T15:30:36.610Z] [STDOUT] [0mGET /pdfs [32m200[0m 1.507 ms - 11[0m
+[2025-05-25T15:30:43.001Z] [STDOUT] [32minfo[39m: PDF uploaded: Multiple business idea 2.1.pdf, ID: 57cc5047-e925-442e-8b7c-c08488f44fbf {"service":"multi-agent-chat","timestamp":"2025-05-25T15:30:43.000Z"}
+[2025-05-25T15:30:43.384Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-25T15:30:56.596Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 13609.355 ms - 1586[0m
+[2025-05-25T15:30:59.733Z] [STDOUT] [0mGET /pdfs [32m200[0m 1.214 ms - 1584[0m
+[2025-05-25T15:31:13.902Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: 57cc5047-e925-442e-8b7c-c08488f44fbf {"service":"multi-agent-chat","timestamp":"2025-05-25T15:31:13.902Z"}
+[2025-05-25T15:31:13.902Z] [STDOUT] [32minfo[39m: Extracting text from PDF: Multiple business idea 2.1.pdf {"service":"multi-agent-chat","timestamp":"2025-05-25T15:31:13.902Z"}
+[2025-05-25T15:31:14.011Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.010Z"}
+[32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.010Z"}
+[32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:31:14.011Z"}
+[2025-05-25T15:31:23.820Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:31:23.821Z"}
+[2025-05-25T15:31:47.588Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:31:47.588Z"}
+[2025-05-25T15:32:30.593Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:32:30.593Z"}
+[2025-05-25T15:32:43.256Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-25T15:32:43.256Z"}
+[2025-05-25T15:32:43.256Z] [STDOUT] [32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:32:43.256Z"}
+[2025-05-25T15:33:12.197Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-25T15:33:12.197Z"}
+[2025-05-25T15:33:12.197Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:33:12.197Z"}
+[2025-05-25T15:33:24.555Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:33:24.555Z"}
+[2025-05-25T15:33:41.291Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:33:41.291Z"}
+[2025-05-25T15:33:56.209Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:33:56.209Z"}
+[2025-05-25T15:34:11.738Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 4: Manager Synthesis {"service":"multi-agent-chat","timestamp":"2025-05-25T15:34:11.738Z"}
+[2025-05-25T15:34:11.739Z] [STDOUT] [32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-25T15:34:11.739Z"}
+[2025-05-25T15:34:29.609Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-25T15:34:31.884Z] [STDOUT] [0mPOST /brainstorm/57cc5047-e925-442e-8b7c-c08488f44fbf [32m200[0m 197982.159 ms - 37571[0m
+[2025-05-25T15:53:31.652Z] [STDOUT] [0mGET /status [36m304[0m 27.843 ms - -[0m
+[2025-05-25T15:53:35.692Z] [STDOUT] [0mGET /pdfs [36m304[0m 4.573 ms - -[0m
+[2025-05-26T05:07:13.797Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.795Z"}
+[2025-05-26T05:07:21.397Z] [STDOUT] [0mGET / [32m200[0m 2.192 ms - 28992[0m
+[2025-05-26T05:07:21.448Z] [STDOUT] [0mGET /favicon.ico [33m404[0m 3.410 ms - 150[0m
+[2025-05-26T05:07:21.472Z] [STDOUT] [0mGET /status [36m304[0m 52.187 ms - -[0m
+[2025-05-26T05:07:22.874Z] [STDOUT] [0mGET /status [36m304[0m 17.793 ms - -[0m
+[2025-05-26T05:07:24.110Z] [STDOUT] [0mGET /status [36m304[0m 18.956 ms - -[0m
+[2025-05-26T05:07:27.012Z] [STDOUT] [0mGET /pdfs [32m200[0m 0.615 ms - 11[0m
+[2025-05-26T05:07:34.145Z] [STDOUT] [32minfo[39m: PDF uploaded: Security Business 3.1.pdf, ID: b4a692b3-dad1-468f-9def-8fc6b1874d0c {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:34.144Z"}
+[2025-05-26T05:07:34.377Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T05:07:46.517Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 12384.035 ms - 1509[0m
+[2025-05-26T05:07:46.564Z] [STDOUT] [0mGET /pdfs [32m200[0m 1.646 ms - 1507[0m
+[2025-05-26T05:07:57.739Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: b4a692b3-dad1-468f-9def-8fc6b1874d0c {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.738Z"}
+[2025-05-26T05:07:57.740Z] [STDOUT] [32minfo[39m: Extracting text from PDF: Security Business 3.1.pdf {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.739Z"}
+[2025-05-26T05:07:57.831Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.829Z"}
+[2025-05-26T05:07:57.832Z] [STDOUT] [32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.830Z"}
+[2025-05-26T05:07:57.832Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:57.831Z"}
+[2025-05-26T05:08:11.738Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:08:11.737Z"}
+[2025-05-26T05:08:29.961Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:08:29.960Z"}
+[2025-05-26T05:08:51.198Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:08:51.192Z"}
+[2025-05-26T05:09:00.636Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-26T05:09:00.635Z"}
+[32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:09:00.635Z"}
+[2025-05-26T05:09:29.199Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-26T05:09:29.199Z"}
+[2025-05-26T05:09:29.200Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:09:29.200Z"}
+[2025-05-26T05:09:43.042Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:09:43.042Z"}
+[2025-05-26T05:09:58.282Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:09:58.282Z"}
+[2025-05-26T05:10:13.814Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:10:13.813Z"}
+[2025-05-26T05:10:25.965Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 4: Manager Synthesis {"service":"multi-agent-chat","timestamp":"2025-05-26T05:10:25.964Z"}
+[2025-05-26T05:10:25.965Z] [STDOUT] [32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:10:25.965Z"}
+[2025-05-26T05:10:46.275Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T05:10:48.475Z] [STDOUT] [0mPOST /brainstorm/b4a692b3-dad1-468f-9def-8fc6b1874d0c [32m200[0m 170737.455 ms - 39153[0m
+[2025-05-26T05:16:10.978Z] [STDOUT] [0mGET / [36m304[0m 2.626 ms - -[0m
+[2025-05-26T05:16:11.015Z] [STDOUT] [0mGET /status [36m304[0m 23.003 ms - -[0m
+[2025-05-26T05:16:20.652Z] Process exited with code null
+[2025-05-26T05:24:28.707Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.706Z"}
+[2025-05-26T05:24:36.490Z] [STDOUT] [0mGET / [32m200[0m 2.276 ms - 31892[0m
+[2025-05-26T05:24:36.560Z] [STDOUT] [0mGET /status [36m304[0m 49.417 ms - -[0m
+[2025-05-26T05:24:37.929Z] [STDOUT] [0mGET /status [36m304[0m 9.997 ms - -[0m
+[2025-05-26T05:24:39.494Z] [STDOUT] [0mGET /pdfs [32m200[0m 1.421 ms - 11[0m
+[2025-05-26T05:24:46.342Z] [STDOUT] [32minfo[39m: PDF uploaded: Security Business 3.1.pdf, ID: 7ab76992-831c-4a71-aef0-412675eab9df {"service":"multi-agent-chat","timestamp":"2025-05-26T05:24:46.337Z"}
+[2025-05-26T05:24:46.647Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T05:25:15.273Z] [STDOUT] [0mGET /pdfs [36m304[0m 0.475 ms - -[0m
+[2025-05-26T05:25:16.671Z] [STDERR] Error generating response with model llama3:latest: timeout of 30000ms exceeded
+[2025-05-26T05:25:16.671Z] [STDOUT] [31merror[39m: Error generating PDF summary: {"service":"multi-agent-chat","timestamp":"2025-05-26T05:25:16.671Z"}
+[2025-05-26T05:25:16.671Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 30342.106 ms - 200[0m
+[2025-05-26T05:25:18.081Z] [STDOUT] [0mGET /pdfs [32m200[0m 1.049 ms - 198[0m
+[2025-05-26T05:25:22.673Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: 7ab76992-831c-4a71-aef0-412675eab9df {"service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.672Z"}
+[2025-05-26T05:25:22.685Z] [STDOUT] [32minfo[39m: Extracting text from PDF: Security Business 3.1.pdf {"service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.684Z"}
+[2025-05-26T05:25:22.775Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.774Z"}
+[2025-05-26T05:25:22.776Z] [STDOUT] [32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.775Z"}
+[2025-05-26T05:25:22.776Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:25:22.776Z"}
+[2025-05-26T05:26:19.430Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:26:19.429Z"}
+[2025-05-26T05:26:38.487Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:26:38.487Z"}
+[2025-05-26T05:27:06.548Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:27:06.547Z"}
+[2025-05-26T05:27:16.686Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-26T05:27:16.685Z"}
+[2025-05-26T05:27:16.687Z] [STDOUT] [32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:27:16.685Z"}
+[2025-05-26T05:28:00.520Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-26T05:28:00.519Z"}
+[2025-05-26T05:28:00.520Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:28:00.520Z"}
+[2025-05-26T05:29:30.550Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:29:30.550Z"}
+[2025-05-26T05:31:00.571Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:31:00.571Z"}
+[2025-05-26T05:32:30.623Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.623Z"}
+[2025-05-26T05:32:55.601Z] Process exited with code null
+[2025-05-26T15:20:57.135Z] [STDOUT] [32minfo[39m: Manager Agent running on port 3000 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.133Z"}
+[2025-05-26T15:21:04.619Z] [STDOUT] [0mGET / [36m304[0m 1.408 ms - -[0m
+[2025-05-26T15:21:04.668Z] [STDOUT] [0mGET /favicon.ico [33m404[0m 0.999 ms - 150[0m
+[2025-05-26T15:21:04.694Z] [STDOUT] [0mGET /status [36m304[0m 47.999 ms - -[0m
+[2025-05-26T15:21:06.398Z] [STDOUT] [0mGET /pdfs [32m200[0m 1.189 ms - 11[0m
+[2025-05-26T15:21:16.843Z] [STDOUT] [32minfo[39m: PDF uploaded: Security Business 3.2.pdf, ID: 35f3094b-409f-49c5-ba1f-ebea5d023cb0 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:21:16.842Z"}
+[2025-05-26T15:21:17.238Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T15:21:43.693Z] [STDOUT] [0mPOST /upload/pdf [32m200[0m 26859.583 ms - 1701[0m
+[2025-05-26T15:21:46.683Z] [STDOUT] [0mGET /pdfs [32m200[0m 1.085 ms - 1699[0m
+[2025-05-26T15:21:53.685Z] [STDOUT] [32minfo[39m: Brainstorming request for PDF ID: 35f3094b-409f-49c5-ba1f-ebea5d023cb0 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.685Z"}
+[2025-05-26T15:21:53.686Z] [STDOUT] [32minfo[39m: Extracting text from PDF: Security Business 3.2.pdf {"service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.685Z"}
+[2025-05-26T15:21:53.816Z] [STDOUT] [32minfo[39m: Starting brainstorming with 4 custom roles {"service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.815Z"}
+[2025-05-26T15:21:53.817Z] [STDOUT] [32minfo[39m: Starting brainstorming discussion - Phase 1: Initial Ideas {"service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.817Z"}
+[2025-05-26T15:21:53.818Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:21:53.818Z"}
+[2025-05-26T15:22:03.166Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:22:03.166Z"}
+[2025-05-26T15:22:19.215Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:22:19.215Z"}
+[2025-05-26T15:22:27.061Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:22:27.061Z"}
+[2025-05-26T15:22:34.969Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 2: Manager Review {"service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.969Z"}
+[2025-05-26T15:22:34.969Z] [STDOUT] [32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.970Z"}
+[2025-05-26T15:23:00.659Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 3: Cross-evaluation {"service":"multi-agent-chat","timestamp":"2025-05-26T15:23:00.659Z"}
+[2025-05-26T15:23:00.659Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:23:00.659Z"}
+[2025-05-26T15:23:14.536Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:23:14.535Z"}
+[2025-05-26T15:23:31.554Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:23:31.554Z"}
+[2025-05-26T15:23:43.084Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:23:43.083Z"}
+[2025-05-26T15:23:52.040Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 4: Manager Synthesis {"service":"multi-agent-chat","timestamp":"2025-05-26T15:23:52.039Z"}
+[2025-05-26T15:23:52.040Z] [STDOUT] [32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:23:52.040Z"}
+[2025-05-26T15:24:08.049Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 5: Implementation Planning {"service":"multi-agent-chat","timestamp":"2025-05-26T15:24:08.048Z"}
+[2025-05-26T15:24:08.049Z] [STDOUT] [32minfo[39m: Sending message to agent-mistral with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:24:08.049Z"}
+[2025-05-26T15:24:20.392Z] [STDOUT] [32minfo[39m: Sending message to agent-llama3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:24:20.391Z"}
+[2025-05-26T15:24:30.253Z] [STDOUT] [32minfo[39m: Sending message to agent-phi3 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:24:30.252Z"}
+[2025-05-26T15:24:40.595Z] [STDOUT] [32minfo[39m: Sending message to agent-qwen with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:24:40.595Z"}
+[2025-05-26T15:24:49.299Z] [STDOUT] [32minfo[39m: Brainstorming discussion - Phase 6: Final Implementation Roadmap {"service":"multi-agent-chat","timestamp":"2025-05-26T15:24:49.298Z"}
+[2025-05-26T15:24:49.299Z] [STDOUT] [32minfo[39m: Sending message to agent-llama33 with performative: request {"service":"multi-agent-chat","timestamp":"2025-05-26T15:24:49.299Z"}
+[2025-05-26T15:25:03.302Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T15:25:05.070Z] [STDOUT] [0mPOST /brainstorm/35f3094b-409f-49c5-ba1f-ebea5d023cb0 [32m200[0m 191384.577 ms - 47443[0m
+[2025-05-26T15:25:40.207Z] [STDOUT] [32minfo[39m: PDF export request for active discussion of PDF ID: 35f3094b-409f-49c5-ba1f-ebea5d023cb0 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:25:40.206Z"}
+[2025-05-26T15:25:45.634Z] [STDOUT] [0mPOST /export-discussion-pdf [32m200[0m 5427.338 ms - 88872[0m
+[2025-05-26T15:30:04.993Z] Process exited with code null

@@ -16,3 +16,69 @@
 {"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:20.189Z"}
 {"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:42.600Z"}
 {"level":"error","message":"Error generating response with qwen:3b:","service":"multi-agent-chat","timestamp":"2025-05-17T15:51:57.883Z"}
+{"level":"error","message":"Error generating PDF summary:","service":"multi-agent-chat","timestamp":"2025-05-24T07:58:36.970Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.089Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.090Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.091Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:01:32.092Z"}
+{"level":"error","message":"Error generating discussion summary:","service":"multi-agent-chat","timestamp":"2025-05-24T08:02:02.108Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.104Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.105Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.105Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.106Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:10:12.107Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.433Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.434Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.435Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:16:50.436Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.571Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.572Z"}
+{"level":"error","message":"Error getting cross-evaluation from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+{"level":"error","message":"Error getting manager synthesis:","service":"multi-agent-chat","timestamp":"2025-05-24T08:17:09.573Z"}
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.558Z"}
+{"level":"error","message":"agent-mistral error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.559Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-mistral: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:24:29.564Z"}
+{"level":"error","message":"Error getting initial ideas from agent-mistral:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:29.565Z"}
+{"level":"error","message":"Error generating response with llama3:latest:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.770Z"}
+{"level":"error","message":"agent-llama3 error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.770Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-llama3: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:24:45.772Z"}
+{"level":"error","message":"Error getting initial ideas from agent-llama3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.772Z"}
+{"level":"error","message":"Error generating response with phi3:3.8b:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.656Z"}
+{"level":"error","message":"agent-phi3 error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.656Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-phi3: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:07.658Z"}
+{"level":"error","message":"Error getting initial ideas from agent-phi3:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.658Z"}
+{"level":"error","message":"Error generating response with qwen2.5-coder:3b:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.826Z"}
+{"level":"error","message":"agent-qwen error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.827Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-qwen: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:23.828Z"}
+{"level":"error","message":"Error getting initial ideas from agent-qwen:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.828Z"}
+{"level":"error","message":"Error generating response with llama3.3:latest:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.881Z"}
+{"level":"error","message":"agent-llama33 error:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.881Z"}
+{"data":{"error":"Error processing message: Invalid message: Invalid performative. Must be one of: inform, request, query, respond, propose, accept, reject, apologize"},"level":"error","message":"Error routing message to agent-llama33: Request failed with status code 500","service":"multi-agent-chat","status":500,"timestamp":"2025-05-24T08:25:23.883Z"}
+{"level":"error","message":"Error getting manager review:","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.883Z"}
+{"level":"error","message":"Error generating PDF summary:","service":"multi-agent-chat","timestamp":"2025-05-26T05:25:16.671Z"}
+{"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-26T05:29:30.548Z"}
+{"level":"error","message":"Error generating response with llama3:latest:","service":"multi-agent-chat","timestamp":"2025-05-26T05:31:00.568Z"}
+{"level":"error","message":"Error generating response with phi3:3.8b:","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.620Z"}

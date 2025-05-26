@@ -1,0 +1,796 @@
+[2025-05-24T07:30:00.090Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:00.097Z] Process exited with code 1
+[2025-05-24T07:30:01.154Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:01.165Z] Process exited with code 1
+[2025-05-24T07:30:02.217Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:02.227Z] Process exited with code 1
+[2025-05-24T07:30:03.331Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:03.338Z] Process exited with code 1
+[2025-05-24T07:30:04.404Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:04.409Z] Process exited with code 1
+[2025-05-24T07:30:05.466Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:05.472Z] Process exited with code 1
+[2025-05-24T07:30:06.537Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:06.543Z] Process exited with code 1
+[2025-05-24T07:30:07.606Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:07.612Z] Process exited with code 1
+[2025-05-24T07:30:08.690Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:08.701Z] Process exited with code 1
+[2025-05-24T07:30:09.767Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:09.776Z] Process exited with code 1
+[2025-05-24T07:30:10.832Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:10.840Z] Process exited with code 1
+[2025-05-24T07:30:11.922Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:11.930Z] Process exited with code 1
+[2025-05-24T07:30:12.986Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:12.992Z] Process exited with code 1
+[2025-05-24T07:30:14.071Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:14.080Z] Process exited with code 1
+[2025-05-24T07:30:15.154Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:15.162Z] Process exited with code 1
+[2025-05-24T07:30:16.234Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:16.244Z] Process exited with code 1
+[2025-05-24T07:30:17.326Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:17.335Z] Process exited with code 1
+[2025-05-24T07:30:18.385Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:18.393Z] Process exited with code 1
+[2025-05-24T07:30:19.445Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:19.453Z] Process exited with code 1
+[2025-05-24T07:30:20.510Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:20.515Z] Process exited with code 1
+[2025-05-24T07:30:21.577Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:21.583Z] Process exited with code 1
+[2025-05-24T07:30:22.647Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:22.655Z] Process exited with code 1
+[2025-05-24T07:30:23.713Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:23.720Z] Process exited with code 1
+[2025-05-24T07:30:24.776Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:24.784Z] Process exited with code 1
+[2025-05-24T07:30:25.844Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:25.852Z] Process exited with code 1
+[2025-05-24T07:30:26.926Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:26.938Z] Process exited with code 1
+[2025-05-24T07:30:28.003Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:28.009Z] Process exited with code 1
+[2025-05-24T07:30:29.099Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:29.109Z] Process exited with code 1
+[2025-05-24T07:30:30.169Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:30.177Z] Process exited with code 1
+[2025-05-24T07:30:31.246Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:31.252Z] Process exited with code 1
+[2025-05-24T07:30:32.306Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:32.313Z] Process exited with code 1
+[2025-05-24T07:30:33.375Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:33.381Z] Process exited with code 1
+[2025-05-24T07:30:34.440Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:34.447Z] Process exited with code 1
+[2025-05-24T07:30:35.497Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:35.510Z] Process exited with code 1
+[2025-05-24T07:30:36.579Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:36.587Z] Process exited with code 1
+[2025-05-24T07:30:37.653Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:37.661Z] Process exited with code 1
+[2025-05-24T07:30:38.725Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\llama33\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:38.733Z] Process exited with code 1
+[2025-05-24T07:51:46.298Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.298Z"}
+[2025-05-24T07:53:47.295Z] [STDOUT] [0mGET /status [32m200[0m 1.438 ms - 69[0m
+[2025-05-24T07:57:07.038Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+[2025-05-24T07:57:07.047Z] Process exited with code null
+[2025-05-24T07:57:40.910Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.909Z"}
+[2025-05-24T07:57:54.237Z] [STDOUT] [0mGET /status [32m200[0m 1.375 ms - 69[0m
+[2025-05-24T08:01:40.047Z] [STDOUT] [0mGET /status [32m200[0m 0.433 ms - 69[0m
+[2025-05-24T08:02:37.205Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.203Z"}
+[2025-05-24T08:02:37.212Z] Process exited with code null
+[2025-05-24T08:04:53.444Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.441Z"}
+[2025-05-24T08:04:59.678Z] [STDOUT] [0mGET /status [32m200[0m 1.187 ms - 69[0m
+[2025-05-24T08:05:01.593Z] [STDOUT] [0mGET /status [32m200[0m 0.258 ms - 69[0m
+[2025-05-24T08:05:38.077Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:05:38.075Z"}
+[2025-05-24T08:05:38.089Z] Process exited with code null
+[2025-05-24T08:08:38.881Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.880Z"}
+[2025-05-24T08:08:44.951Z] [STDOUT] [0mGET /status [32m200[0m 1.794 ms - 69[0m
+[2025-05-24T08:11:00.766Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+[2025-05-24T08:11:00.781Z] Process exited with code null
+[2025-05-24T08:15:14.808Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.807Z"}
+[2025-05-24T08:15:18.421Z] [STDOUT] [0mGET /status [32m200[0m 2.139 ms - 69[0m
+[2025-05-24T08:15:37.570Z] [STDOUT] [0mGET /status [32m200[0m 0.564 ms - 69[0m
+[2025-05-24T08:17:35.520Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.518Z"}
+[2025-05-24T08:17:35.535Z] Process exited with code null
+[2025-05-24T08:22:56.955Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.954Z"}
+[2025-05-24T08:23:02.197Z] [STDOUT] [0mGET /status [32m200[0m 1.516 ms - 69[0m
+[2025-05-24T08:25:23.837Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.836Z"}
+[2025-05-24T08:25:23.837Z] [STDOUT] Generating response with model: llama3.3:latest
+[2025-05-24T08:25:23.869Z] [STDERR] Error generating response with model llama3.3:latest: Request failed with status code 404
+[2025-05-24T08:25:23.869Z] [STDOUT] Retrying... (1 attempts left)
+Generating response with model: llama3.3:latest
+[2025-05-24T08:25:23.869Z] [STDERR] Response data: { error: "model 'llama3.3:latest' not found" }
+[2025-05-24T08:25:23.875Z] [STDERR] Error generating response with model llama3.3:latest: Request failed with status code 404
+[2025-05-24T08:25:23.875Z] [STDOUT] Retrying... (0 attempts left)
+Generating response with model: llama3.3:latest
+[2025-05-24T08:25:23.876Z] [STDERR] Response data: { error: "model 'llama3.3:latest' not found" }
+[2025-05-24T08:25:23.881Z] [STDERR] Error generating response with model llama3.3:latest: Request failed with status code 404
+[2025-05-24T08:25:23.881Z] [STDOUT] [31merror[39m: Error generating response with llama3.3:latest: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.881Z"}
+[2025-05-24T08:25:23.882Z] [STDERR] Response data: { error: "model 'llama3.3:latest' not found" }
+[2025-05-24T08:25:23.882Z] [STDOUT] [31merror[39m: agent-llama33 error: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.881Z"}
+[2025-05-24T08:25:23.883Z] [STDOUT] [0mPOST /message [31m500[0m 46.017 ms - 160[0m
+[2025-05-24T08:25:35.290Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+[2025-05-24T08:25:35.307Z] Process exited with code null
+[2025-05-25T15:30:00.466Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.465Z"}
+[2025-05-25T15:30:29.331Z] [STDOUT] [0mGET /status [32m200[0m 2.707 ms - 67[0m
+[2025-05-25T15:30:30.921Z] [STDOUT] [0mGET /status [32m200[0m 0.750 ms - 67[0m
+[2025-05-25T15:30:32.212Z] [STDOUT] [0mGET /status [32m200[0m 0.325 ms - 67[0m
+[2025-05-25T15:30:33.630Z] [STDOUT] [0mGET /status [32m200[0m 0.500 ms - 67[0m
+[2025-05-25T15:32:43.264Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:32:43.264Z"}
+[2025-05-25T15:32:43.264Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-25T15:33:12.196Z] [STDOUT] [0mPOST /message [32m200[0m 28932.353 ms - 5236[0m
+[2025-05-25T15:34:11.742Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:34:11.741Z"}
+[2025-05-25T15:34:11.742Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-25T15:34:29.608Z] [STDOUT] [0mPOST /message [32m200[0m 17866.438 ms - 2549[0m
+[2025-05-25T15:53:31.651Z] [STDOUT] [0mGET /status [32m200[0m 0.290 ms - 67[0m
+[2025-05-25T16:05:32.992Z] Process exited with code 3221225786
+[2025-05-26T05:07:13.805Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.803Z"}
+[2025-05-26T05:07:21.471Z] [STDOUT] [0mGET /status [32m200[0m 1.198 ms - 67[0m
+[2025-05-26T05:07:22.873Z] [STDOUT] [0mGET /status [32m200[0m 0.406 ms - 67[0m
+[2025-05-26T05:07:24.109Z] [STDOUT] [0mGET /status [32m200[0m 0.507 ms - 67[0m
+[2025-05-26T05:09:00.656Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:00.656Z"}
+[2025-05-26T05:09:00.658Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T05:09:29.197Z] [STDOUT] [0mPOST /message [32m200[0m 28541.191 ms - 5750[0m
+[2025-05-26T05:10:25.977Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:10:25.974Z"}
+[2025-05-26T05:10:25.977Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T05:10:46.273Z] [STDOUT] [0mPOST /message [32m200[0m 20298.392 ms - 3342[0m
+[2025-05-26T05:16:11.014Z] [STDOUT] [0mGET /status [32m200[0m 0.416 ms - 67[0m
+[2025-05-26T05:16:20.642Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.639Z"}
+[2025-05-26T05:16:20.658Z] Process exited with code null
+[2025-05-26T05:24:28.737Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.737Z"}
+[2025-05-26T05:24:36.559Z] [STDOUT] [0mGET /status [32m200[0m 1.410 ms - 67[0m
+[2025-05-26T05:24:37.928Z] [STDOUT] [0mGET /status [32m200[0m 0.251 ms - 67[0m
+[2025-05-26T05:27:16.702Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:27:16.701Z"}
+[2025-05-26T05:27:16.703Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T05:27:46.722Z] [STDERR] Error generating response with model llama3:latest: timeout of 30000ms exceeded
+[2025-05-26T05:27:46.722Z] [STDOUT] Retrying... (1 attempts left)
+Generating response with model: llama3:latest
+[2025-05-26T05:28:00.519Z] [STDOUT] [0mPOST /message [32m200[0m 43817.170 ms - 3179[0m
+[2025-05-26T05:32:55.594Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:32:55.592Z"}
+[2025-05-26T05:32:55.602Z] Process exited with code null
+[2025-05-26T15:20:57.147Z] [STDOUT] [32minfo[39m: agent-llama33 running on port 3005 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.146Z"}
+[2025-05-26T15:21:04.693Z] [STDOUT] [0mGET /status [32m200[0m 1.374 ms - 67[0m
+[2025-05-26T15:22:34.979Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.979Z"}
+[2025-05-26T15:22:34.979Z] [STDOUT] [32minfo[39m: agent-llama33: Long prompt detected (12164 chars). Reducing output length. {"service":"multi-agent-chat","timestamp":"2025-05-26T15:22:34.979Z"}
+[2025-05-26T15:22:34.979Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T15:23:00.658Z] [STDOUT] [0mPOST /message [32m200[0m 25679.132 ms - 5104[0m
+[2025-05-26T15:23:52.046Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:52.044Z"}
+[2025-05-26T15:23:52.046Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T15:24:08.048Z] [STDOUT] [0mPOST /message [32m200[0m 16002.665 ms - 2863[0m
+[2025-05-26T15:24:49.303Z] [STDOUT] [32minfo[39m: agent-llama33 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:49.302Z"}
+[2025-05-26T15:24:49.303Z] [STDOUT] Generating response with model: llama3:latest
+[2025-05-26T15:25:03.300Z] [STDOUT] [0mPOST /message [32m200[0m 13998.311 ms - 2343[0m
+[2025-05-26T15:30:04.986Z] [STDOUT] [32minfo[39m: Shutting down LLaMA 3.3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+[2025-05-26T15:30:04.995Z] Process exited with code null

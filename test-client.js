@@ -82,16 +82,16 @@ async function simulateConversation(turns = 5) {
   // Start with a message from user to kick off the conversation
   let message = createMessage(
     'user',
-    'agent-mistral',
+    'agent-llama33',
     PERFORMATIVES.QUERY,
-    'What are the most exciting developments in AI in recent years? Please discuss this with the other agents.'
+    'What are the most exciting developments in AI in recent years? Please discuss this with the other agents as the Executive Overseer.'
   );
   
   let response = await sendMessage(message);
   let lastResponse = displayResponse(response);
   
-  // Create conversation chain: Mistral -> LLaMA 3 -> Phi 3 -> Mistral -> ...
-  const agents = ['agent-mistral', 'agent-llama3', 'agent-phi3'];
+  // Create conversation chain: Llama3.3 -> Mistral -> LLaMA 3 -> Phi 3 -> Qwen -> Llama3.3 -> ...
+  const agents = ['agent-llama33', 'agent-mistral', 'agent-llama3', 'agent-phi3', 'agent-qwen'];
   let currentAgentIndex = 0;
   
   for (let i = 0; i < turns; i++) {
@@ -150,28 +150,38 @@ async function runTestMessages() {
     );
     const response2 = await sendMessage(message2);
     displayResponse(response2);
-    
-    // Test 3: Message that should trigger word-based flagging
+
+    // Test 3: Message from user to Llama 3.3
     const message3 = createMessage(
+      'user',
+      'agent-llama33',
+      PERFORMATIVES.QUERY,
+      'As the Executive Overseer, how would you manage a team of AI agents to develop a complex software project?'
+    );
+    const response3 = await sendMessage(message3);
+    displayResponse(response3);
+    
+    // Test 4: Message that should trigger word-based flagging
+    const message4 = createMessage(
       'user',
       'agent-llama3',
       PERFORMATIVES.QUERY,
       'This is a stupid question, but can you explain how JavaScript closures work?'
     );
-    const response3 = await sendMessage(message3);
-    displayResponse(response3);
+    const response4 = await sendMessage(message4);
+    displayResponse(response4);
     
-    // Test 4: Message to potentially trigger LLM-based moderation
-    const message4 = createMessage(
+    // Test 5: Message to potentially trigger LLM-based moderation
+    const message5 = createMessage(
       'user',
       'agent-phi3',
       PERFORMATIVES.REQUEST,
       'Write a negative review about a fictional product.'
     );
-    const response4 = await sendMessage(message4);
-    displayResponse(response4);
+    const response5 = await sendMessage(message5);
+    displayResponse(response5);
     
-    // Test 5: Simulate a longer conversation between agents
+    // Test 6: Simulate a longer conversation between agents
     await simulateConversation(10);
     
     console.log('\n===== TEST SEQUENCE COMPLETE =====\n');

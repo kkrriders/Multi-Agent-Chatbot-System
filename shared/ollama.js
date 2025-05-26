@@ -43,7 +43,7 @@ async function generateResponse(model, prompt, options = {}) {
       stream: false,
       ...finalOptions
     }, {
-      timeout: 30000 // 30-second timeout
+      timeout: 120000 // Increased from 30s to 120s (2 minutes) to accommodate larger contexts
     });
 
     // Basic response validation
@@ -62,7 +62,13 @@ async function generateResponse(model, prompt, options = {}) {
 
     return text;
   } catch (error) {
-    console.error(`Error generating response with model ${model}:`, error.message);
+    // Provide more specific error messaging for timeouts
+    if (error.code === 'ECONNABORTED') {
+      console.error(`TIMEOUT ERROR: Model ${model} timed out after 120 seconds. Try reducing prompt size or complexity.`);
+    } else {
+      console.error(`Error generating response with model ${model}:`, error.message);
+    }
+    
     if (error.response) {
       console.error('Response data:', error.response.data);
     }

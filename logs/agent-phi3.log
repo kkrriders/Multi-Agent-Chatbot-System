@@ -1,0 +1,796 @@
+[2025-05-24T07:30:00.047Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:00.064Z] Process exited with code 1
+[2025-05-24T07:30:01.127Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:01.137Z] Process exited with code 1
+[2025-05-24T07:30:02.195Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:02.201Z] Process exited with code 1
+[2025-05-24T07:30:03.299Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:03.306Z] Process exited with code 1
+[2025-05-24T07:30:04.371Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:04.371Z] Process exited with code 1
+[2025-05-24T07:30:05.434Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:05.435Z] Process exited with code 1
+[2025-05-24T07:30:06.505Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:06.513Z] Process exited with code 1
+[2025-05-24T07:30:07.579Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:07.585Z] Process exited with code 1
+[2025-05-24T07:30:08.666Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:08.675Z] Process exited with code 1
+[2025-05-24T07:30:09.740Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:09.748Z] Process exited with code 1
+[2025-05-24T07:30:10.806Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:10.812Z] Process exited with code 1
+[2025-05-24T07:30:11.893Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:11.904Z] Process exited with code 1
+[2025-05-24T07:30:12.960Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:12.969Z] Process exited with code 1
+[2025-05-24T07:30:14.045Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:14.054Z] Process exited with code 1
+[2025-05-24T07:30:15.124Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:15.128Z] Process exited with code 1
+[2025-05-24T07:30:16.205Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:16.215Z] Process exited with code 1
+[2025-05-24T07:30:17.294Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:17.295Z] Process exited with code 1
+[2025-05-24T07:30:18.357Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:18.363Z] Process exited with code 1
+[2025-05-24T07:30:19.416Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:19.419Z] Process exited with code 1
+[2025-05-24T07:30:20.478Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:20.479Z] Process exited with code 1
+[2025-05-24T07:30:21.546Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:21.557Z] Process exited with code 1
+[2025-05-24T07:30:22.622Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:22.631Z] Process exited with code 1
+[2025-05-24T07:30:23.682Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:23.693Z] Process exited with code 1
+[2025-05-24T07:30:24.748Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:24.754Z] Process exited with code 1
+[2025-05-24T07:30:25.819Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:25.829Z] Process exited with code 1
+[2025-05-24T07:30:26.904Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:26.912Z] Process exited with code 1
+[2025-05-24T07:30:27.975Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:27.978Z] Process exited with code 1
+[2025-05-24T07:30:29.071Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:29.080Z] Process exited with code 1
+[2025-05-24T07:30:30.137Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:30.142Z] Process exited with code 1
+[2025-05-24T07:30:31.211Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:31.215Z] Process exited with code 1
+[2025-05-24T07:30:32.278Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:32.281Z] Process exited with code 1
+[2025-05-24T07:30:33.349Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:33.356Z] Process exited with code 1
+[2025-05-24T07:30:34.408Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:34.417Z] Process exited with code 1
+[2025-05-24T07:30:35.474Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:35.484Z] Process exited with code 1
+[2025-05-24T07:30:36.550Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:36.559Z] Process exited with code 1
+[2025-05-24T07:30:37.626Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:37.636Z] Process exited with code 1
+[2025-05-24T07:30:38.702Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\phi3\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:38.711Z] Process exited with code 1
+[2025-05-24T07:51:46.265Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.264Z"}
+[2025-05-24T07:53:47.282Z] [STDOUT] [0mGET /status [32m200[0m 1.407 ms - 60[0m
+[2025-05-24T07:57:07.038Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+[2025-05-24T07:57:07.047Z] Process exited with code null
+[2025-05-24T07:57:40.883Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.882Z"}
+[2025-05-24T07:57:54.223Z] [STDOUT] [0mGET /status [32m200[0m 1.501 ms - 60[0m
+[2025-05-24T08:01:40.038Z] [STDOUT] [0mGET /status [32m200[0m 0.399 ms - 60[0m
+[2025-05-24T08:02:37.204Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.202Z"}
+[2025-05-24T08:02:37.212Z] Process exited with code null
+[2025-05-24T08:04:53.444Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.441Z"}
+[2025-05-24T08:04:59.666Z] [STDOUT] [0mGET /status [32m200[0m 1.255 ms - 60[0m
+[2025-05-24T08:05:01.589Z] [STDOUT] [0mGET /status [32m200[0m 0.239 ms - 60[0m
+[2025-05-24T08:05:38.077Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:05:38.076Z"}
+[2025-05-24T08:05:38.089Z] Process exited with code null
+[2025-05-24T08:08:38.863Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.862Z"}
+[2025-05-24T08:08:44.934Z] [STDOUT] [0mGET /status [32m200[0m 1.983 ms - 60[0m
+[2025-05-24T08:11:00.766Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+[2025-05-24T08:11:00.780Z] Process exited with code null
+[2025-05-24T08:15:14.794Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.792Z"}
+[2025-05-24T08:15:18.408Z] [STDOUT] [0mGET /status [32m200[0m 1.480 ms - 60[0m
+[2025-05-24T08:15:37.562Z] [STDOUT] [0mGET /status [32m200[0m 0.451 ms - 60[0m
+[2025-05-24T08:17:35.520Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.518Z"}
+[2025-05-24T08:17:35.535Z] Process exited with code null
+[2025-05-24T08:22:56.959Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.957Z"}
+[2025-05-24T08:23:02.183Z] [STDOUT] [0mGET /status [32m200[0m 1.241 ms - 60[0m
+[2025-05-24T08:24:45.782Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-24T08:24:45.780Z"}
+[2025-05-24T08:24:45.782Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-24T08:25:07.657Z] [STDOUT] [31merror[39m: Error generating response with phi3:3.8b: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.656Z"}
+[2025-05-24T08:25:07.657Z] [STDOUT] [31merror[39m: agent-phi3 error: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.656Z"}
+[2025-05-24T08:25:07.658Z] [STDOUT] [0mPOST /message [31m500[0m 21876.394 ms - 160[0m
+[2025-05-24T08:25:35.294Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+[2025-05-24T08:25:35.308Z] Process exited with code null
+[2025-05-25T15:30:00.468Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.466Z"}
+[2025-05-25T15:30:29.309Z] [STDOUT] [0mGET /status [32m200[0m 2.194 ms - 60[0m
+[2025-05-25T15:30:30.913Z] [STDOUT] [0mGET /status [32m200[0m 0.380 ms - 60[0m
+[2025-05-25T15:30:32.208Z] [STDOUT] [0mGET /status [32m200[0m 0.336 ms - 60[0m
+[2025-05-25T15:30:33.619Z] [STDOUT] [0mGET /status [32m200[0m 0.470 ms - 60[0m
+[2025-05-25T15:31:47.613Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:31:47.612Z"}
+[2025-05-25T15:31:47.615Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-25T15:32:17.677Z] [STDERR] Error generating response with model phi3:3.8b: timeout of 30000ms exceeded
+[2025-05-25T15:32:17.677Z] [STDOUT] Retrying... (1 attempts left)
+Generating response with model: phi3:3.8b
+[2025-05-25T15:32:30.592Z] [STDOUT] [0mPOST /message [32m200[0m 42980.793 ms - 3536[0m
+[2025-05-25T15:33:41.294Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:41.293Z"}
+[2025-05-25T15:33:41.294Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-25T15:33:56.208Z] [STDOUT] [0mPOST /message [32m200[0m 14913.261 ms - 3095[0m
+[2025-05-25T15:53:31.643Z] [STDOUT] [0mGET /status [32m200[0m 0.340 ms - 60[0m
+[2025-05-25T16:05:33.016Z] Process exited with code 3221225786
+[2025-05-26T05:07:13.806Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.804Z"}
+[2025-05-26T05:07:21.460Z] [STDOUT] [0mGET /status [32m200[0m 1.221 ms - 60[0m
+[2025-05-26T05:07:22.866Z] [STDOUT] [0mGET /status [32m200[0m 0.428 ms - 60[0m
+[2025-05-26T05:07:24.102Z] [STDOUT] [0mGET /status [32m200[0m 0.486 ms - 60[0m
+[2025-05-26T05:08:29.988Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:29.987Z"}
+[2025-05-26T05:08:29.990Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-26T05:08:51.198Z] [STDOUT] [0mPOST /message [32m200[0m 21201.986 ms - 5267[0m
+[2025-05-26T05:09:58.284Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:09:58.284Z"}
+[2025-05-26T05:09:58.285Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-26T05:10:13.813Z] [STDOUT] [0mPOST /message [32m200[0m 15527.980 ms - 3541[0m
+[2025-05-26T05:16:11.005Z] [STDOUT] [0mGET /status [32m200[0m 0.291 ms - 60[0m
+[2025-05-26T05:16:20.648Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.639Z"}
+[2025-05-26T05:16:20.656Z] Process exited with code null
+[2025-05-26T05:24:28.716Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.715Z"}
+[2025-05-26T05:24:36.547Z] [STDOUT] [0mGET /status [32m200[0m 1.384 ms - 60[0m
+[2025-05-26T05:24:37.924Z] [STDOUT] [0mGET /status [32m200[0m 0.299 ms - 60[0m
+[2025-05-26T05:26:38.496Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:26:38.495Z"}
+[2025-05-26T05:26:38.496Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-26T05:27:06.547Z] [STDOUT] [0mPOST /message [32m200[0m 28050.532 ms - 7593[0m
+[2025-05-26T05:31:00.574Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:31:00.574Z"}
+[2025-05-26T05:31:00.574Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-26T05:31:30.591Z] [STDERR] Error generating response with model phi3:3.8b: timeout of 30000ms exceeded
+[2025-05-26T05:31:30.592Z] [STDOUT] Retrying... (1 attempts left)
+Generating response with model: phi3:3.8b
+[2025-05-26T05:32:00.607Z] [STDERR] Error generating response with model phi3:3.8b: timeout of 30000ms exceeded
+[2025-05-26T05:32:00.607Z] [STDOUT] Retrying... (0 attempts left)
+Generating response with model: phi3:3.8b
+[2025-05-26T05:32:30.620Z] [STDERR] Error generating response with model phi3:3.8b: timeout of 30000ms exceeded
+[2025-05-26T05:32:30.621Z] [STDOUT] [31merror[39m: Error generating response with phi3:3.8b: {"service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.620Z"}
+[2025-05-26T05:32:30.622Z] [STDOUT] [0mPOST /message [32m200[0m 90046.771 ms - 280[0m
+[2025-05-26T05:32:55.594Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:32:55.592Z"}
+[2025-05-26T05:32:55.601Z] Process exited with code null
+[2025-05-26T15:20:57.147Z] [STDOUT] [32minfo[39m: agent-phi3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.145Z"}
+[2025-05-26T15:21:04.682Z] [STDOUT] [0mGET /status [32m200[0m 1.264 ms - 60[0m
+[2025-05-26T15:22:19.226Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:19.225Z"}
+[2025-05-26T15:22:19.227Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-26T15:22:27.059Z] [STDOUT] [0mPOST /message [32m200[0m 7833.055 ms - 2288[0m
+[2025-05-26T15:23:31.557Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:31.555Z"}
+[2025-05-26T15:23:31.557Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-26T15:23:43.082Z] [STDOUT] [0mPOST /message [32m200[0m 11525.673 ms - 3403[0m
+[2025-05-26T15:24:30.255Z] [STDOUT] [32minfo[39m: agent-phi3 received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:30.254Z"}
+[2025-05-26T15:24:30.255Z] [STDOUT] Generating response with model: phi3:3.8b
+[2025-05-26T15:24:40.594Z] [STDOUT] [0mPOST /message [32m200[0m 10339.286 ms - 3117[0m
+[2025-05-26T15:30:04.987Z] [STDOUT] [32minfo[39m: Shutting down Phi3 agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+[2025-05-26T15:30:04.996Z] Process exited with code null

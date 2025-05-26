@@ -1,0 +1,783 @@
+[2025-05-24T07:30:00.068Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:00.075Z] Process exited with code 1
+[2025-05-24T07:30:01.140Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:01.145Z] Process exited with code 1
+[2025-05-24T07:30:02.205Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:02.211Z] Process exited with code 1
+[2025-05-24T07:30:03.313Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:03.321Z] Process exited with code 1
+[2025-05-24T07:30:04.389Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:04.398Z] Process exited with code 1
+[2025-05-24T07:30:05.454Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:05.465Z] Process exited with code 1
+[2025-05-24T07:30:06.517Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:06.527Z] Process exited with code 1
+[2025-05-24T07:30:07.595Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:07.604Z] Process exited with code 1
+[2025-05-24T07:30:08.677Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:08.682Z] Process exited with code 1
+[2025-05-24T07:30:09.750Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:09.757Z] Process exited with code 1
+[2025-05-24T07:30:10.820Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:10.829Z] Process exited with code 1
+[2025-05-24T07:30:11.911Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:11.917Z] Process exited with code 1
+[2025-05-24T07:30:12.971Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:12.976Z] Process exited with code 1
+[2025-05-24T07:30:14.059Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:14.066Z] Process exited with code 1
+[2025-05-24T07:30:15.129Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:15.135Z] Process exited with code 1
+[2025-05-24T07:30:16.221Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:16.229Z] Process exited with code 1
+[2025-05-24T07:30:17.308Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:17.318Z] Process exited with code 1
+[2025-05-24T07:30:18.370Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:18.381Z] Process exited with code 1
+[2025-05-24T07:30:19.428Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:19.440Z] Process exited with code 1
+[2025-05-24T07:30:20.495Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:20.507Z] Process exited with code 1
+[2025-05-24T07:30:21.562Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:21.572Z] Process exited with code 1
+[2025-05-24T07:30:22.635Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:22.641Z] Process exited with code 1
+[2025-05-24T07:30:23.698Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:23.708Z] Process exited with code 1
+[2025-05-24T07:30:24.759Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:24.767Z] Process exited with code 1
+[2025-05-24T07:30:25.830Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:25.834Z] Process exited with code 1
+[2025-05-24T07:30:26.910Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:26.915Z] Process exited with code 1
+[2025-05-24T07:30:27.981Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:27.986Z] Process exited with code 1
+[2025-05-24T07:30:29.086Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:29.095Z] Process exited with code 1
+[2025-05-24T07:30:30.154Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:30.162Z] Process exited with code 1
+[2025-05-24T07:30:31.233Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:31.241Z] Process exited with code 1
+[2025-05-24T07:30:32.299Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:32.304Z] Process exited with code 1
+[2025-05-24T07:30:33.360Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:33.367Z] Process exited with code 1
+[2025-05-24T07:30:34.425Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:34.435Z] Process exited with code 1
+[2025-05-24T07:30:35.488Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:35.498Z] Process exited with code 1
+[2025-05-24T07:30:36.562Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+[2025-05-24T07:30:36.562Z] [STDERR] Node.js v22.16.0
+[2025-05-24T07:30:36.574Z] Process exited with code 1
+[2025-05-24T07:30:37.640Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:37.646Z] Process exited with code 1
+[2025-05-24T07:30:38.713Z] [STDERR] node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\karti\Multi-Agent Chatbot System\agents\qwen\index.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.16.0
+[2025-05-24T07:30:38.719Z] Process exited with code 1
+[2025-05-24T07:51:46.294Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:51:46.292Z"}
+[2025-05-24T07:53:47.288Z] [STDOUT] [0mGET /status [32m200[0m 1.401 ms - 67[0m
+[2025-05-24T07:57:07.038Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:07.035Z"}
+[2025-05-24T07:57:07.046Z] Process exited with code null
+[2025-05-24T07:57:40.902Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-24T07:57:40.900Z"}
+[2025-05-24T07:57:54.230Z] [STDOUT] [0mGET /status [32m200[0m 1.304 ms - 67[0m
+[2025-05-24T08:01:40.045Z] [STDOUT] [0mGET /status [32m200[0m 0.420 ms - 67[0m
+[2025-05-24T08:02:37.204Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:02:37.203Z"}
+[2025-05-24T08:02:37.213Z] Process exited with code null
+[2025-05-24T08:04:53.442Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:04:53.440Z"}
+[2025-05-24T08:04:59.672Z] [STDOUT] [0mGET /status [32m200[0m 1.305 ms - 67[0m
+[2025-05-24T08:05:01.591Z] [STDOUT] [0mGET /status [32m200[0m 0.235 ms - 67[0m
+[2025-05-24T08:05:38.077Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:05:38.076Z"}
+[2025-05-24T08:05:38.090Z] Process exited with code null
+[2025-05-24T08:08:38.875Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:08:38.874Z"}
+[2025-05-24T08:08:44.943Z] [STDOUT] [0mGET /status [32m200[0m 1.463 ms - 67[0m
+[2025-05-24T08:11:00.766Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:11:00.763Z"}
+[2025-05-24T08:11:00.781Z] Process exited with code null
+[2025-05-24T08:15:14.795Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:15:14.793Z"}
+[2025-05-24T08:15:18.414Z] [STDOUT] [0mGET /status [32m200[0m 1.295 ms - 67[0m
+[2025-05-24T08:15:37.567Z] [STDOUT] [0mGET /status [32m200[0m 0.410 ms - 67[0m
+[2025-05-24T08:17:35.520Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:17:35.519Z"}
+[2025-05-24T08:17:35.532Z] Process exited with code null
+[2025-05-24T08:22:56.955Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-24T08:22:56.953Z"}
+[2025-05-24T08:23:02.189Z] [STDOUT] [0mGET /status [32m200[0m 1.646 ms - 67[0m
+[2025-05-24T08:25:07.667Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-24T08:25:07.667Z"}
+[2025-05-24T08:25:07.668Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-24T08:25:23.827Z] [STDOUT] [31merror[39m: Error generating response with qwen2.5-coder:3b: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.826Z"}
+[2025-05-24T08:25:23.827Z] [STDOUT] [31merror[39m: agent-qwen error: {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:23.827Z"}
+[2025-05-24T08:25:23.828Z] [STDOUT] [0mPOST /message [31m500[0m 16160.657 ms - 160[0m
+[2025-05-24T08:25:35.290Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-24T08:25:35.289Z"}
+[2025-05-24T08:25:35.306Z] Process exited with code null
+[2025-05-25T15:30:00.466Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-25T15:30:00.464Z"}
+[2025-05-25T15:30:29.319Z] [STDOUT] [0mGET /status [32m200[0m 2.293 ms - 67[0m
+[2025-05-25T15:30:30.916Z] [STDOUT] [0mGET /status [32m200[0m 0.364 ms - 67[0m
+[2025-05-25T15:30:32.210Z] [STDOUT] [0mGET /status [32m200[0m 0.327 ms - 67[0m
+[2025-05-25T15:30:33.627Z] [STDOUT] [0mGET /status [32m200[0m 1.062 ms - 67[0m
+[2025-05-25T15:32:30.603Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:32:30.602Z"}
+[2025-05-25T15:32:30.603Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-25T15:32:43.255Z] [STDOUT] [0mPOST /message [32m200[0m 12652.177 ms - 4265[0m
+[2025-05-25T15:33:56.211Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-25T15:33:56.211Z"}
+[2025-05-25T15:33:56.211Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-25T15:34:11.737Z] [STDOUT] [0mPOST /message [32m200[0m 15525.801 ms - 4612[0m
+[2025-05-25T15:53:31.647Z] [STDOUT] [0mGET /status [32m200[0m 0.304 ms - 67[0m
+[2025-05-25T16:05:33.003Z] Process exited with code 3221225786
+[2025-05-26T05:07:13.806Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:07:13.804Z"}
+[2025-05-26T05:07:21.466Z] [STDOUT] [0mGET /status [32m200[0m 1.285 ms - 67[0m
+[2025-05-26T05:07:22.870Z] [STDOUT] [0mGET /status [32m200[0m 0.564 ms - 67[0m
+[2025-05-26T05:07:24.106Z] [STDOUT] [0mGET /status [32m200[0m 0.754 ms - 67[0m
+[2025-05-26T05:08:51.222Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:08:51.221Z"}
+[2025-05-26T05:08:51.224Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-26T05:09:00.636Z] [STDOUT] [0mPOST /message [32m200[0m 9411.867 ms - 2794[0m
+[2025-05-26T05:10:13.816Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:10:13.815Z"}
+[2025-05-26T05:10:13.816Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-26T05:10:25.965Z] [STDOUT] [0mPOST /message [32m200[0m 12144.775 ms - 3536[0m
+[2025-05-26T05:16:11.009Z] [STDOUT] [0mGET /status [32m200[0m 0.234 ms - 67[0m
+[2025-05-26T05:16:20.649Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:16:20.638Z"}
+[2025-05-26T05:16:20.659Z] Process exited with code null
+[2025-05-26T05:24:28.725Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-26T05:24:28.725Z"}
+[2025-05-26T05:24:36.553Z] [STDOUT] [0mGET /status [32m200[0m 1.298 ms - 67[0m
+[2025-05-26T05:24:37.926Z] [STDOUT] [0mGET /status [32m200[0m 0.250 ms - 67[0m
+[2025-05-26T05:27:06.561Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:27:06.560Z"}
+[2025-05-26T05:27:06.561Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-26T05:27:16.685Z] [STDOUT] [0mPOST /message [32m200[0m 10122.783 ms - 3030[0m
+[2025-05-26T05:32:30.625Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.625Z"}
+[2025-05-26T05:32:30.626Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-26T05:32:55.594Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T05:32:55.592Z"}
+[2025-05-26T05:32:55.603Z] Process exited with code null
+[2025-05-26T15:20:57.147Z] [STDOUT] [32minfo[39m: agent-qwen running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-05-26T15:20:57.145Z"}
+[2025-05-26T15:21:04.687Z] [STDOUT] [0mGET /status [32m200[0m 1.373 ms - 67[0m
+[2025-05-26T15:22:27.070Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:22:27.070Z"}
+[2025-05-26T15:22:27.070Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-26T15:22:34.968Z] [STDOUT] [0mPOST /message [32m200[0m 7898.246 ms - 2418[0m
+[2025-05-26T15:23:43.086Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:23:43.086Z"}
+[2025-05-26T15:23:43.086Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-26T15:23:52.037Z] [STDOUT] [0mPOST /message [32m200[0m 8950.516 ms - 2635[0m
+[2025-05-26T15:24:40.597Z] [STDOUT] [32minfo[39m: agent-qwen received message {"from":"manager","service":"multi-agent-chat","timestamp":"2025-05-26T15:24:40.597Z"}
+[2025-05-26T15:24:40.597Z] [STDOUT] Generating response with model: qwen2.5-coder:3b
+[2025-05-26T15:24:49.298Z] [STDOUT] [0mPOST /message [32m200[0m 8700.519 ms - 2840[0m
+[2025-05-26T15:30:04.986Z] [STDOUT] [32minfo[39m: Shutting down Qwen agent... {"service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+[2025-05-26T15:30:04.997Z] Process exited with code null
