@@ -1,4 +1,4 @@
-/** * Download all required Ollama models *  * This script pulls the Ollama models needed for the multi-agent system: * - Mistral * - LLaMA 3  * - Phi-3 * - Qwen 2.5coder:3b */
+/** * Download all required Ollama models *  * This script pulls the Ollama models needed for the multi-agent system: * - Mistral * - LLaMA 3  * - Phi-3 * - Qwen 2.5coder:3b * - LLaMA 3.3 (Executive Overseer) */
 const dotenv = require('dotenv');
 const { pullModel } = require('./shared/ollama');
 const { logger } = require('./shared/logger');
@@ -11,7 +11,8 @@ const models = [
   process.env.LLAMA3_MODEL || 'llama3:latest',
   process.env.PHI3_MODEL || 'phi3:3.8b',
   process.env.QWEN_MODEL || 'qwen2.5-coder:3b',
-  process.env.MANAGER_MODEL || 'llama3:latest'
+  process.env.LLAMA33_MODEL || 'llama3.3:latest',
+  process.env.MANAGER_MODEL || 'llama3.3:latest'
 ];
 
 /**

@@ -24,11 +24,12 @@ function validateMessage(message) {
     };
   }
 
-  // Performative validation
-  if (!Object.values(PERFORMATIVES).includes(message.performative)) {
+  // Performative validation - make case insensitive
+  const validPerformatives = Object.values(PERFORMATIVES).map(p => p.toLowerCase());
+  if (!validPerformatives.includes(message.performative.toLowerCase())) {
     return {
       isValid: false,
-      error: `Invalid performative. Must be one of: ${Object.values(PERFORMATIVES).join(', ')}`
+      error: `Invalid performative. Must be one of: ${validPerformatives.join(', ')}`
     };
   }
 
@@ -36,11 +37,26 @@ function validateMessage(message) {
 }
 
 // Create a structured A2A message
-function createMessage(from, to, performative, content, metadata = {}) {
+function createMessage(from, to, content, performative, metadata = {}) {
+  // Normalize the performative - handle both strings and constants
+  let normalizedPerformative;
+  
+  if (typeof performative === 'string') {
+    // Direct string value - ensure it's lowercase for consistency
+    normalizedPerformative = performative.toLowerCase();
+  } else if (performative && Object.values(PERFORMATIVES).includes(performative)) {
+    // It's already a valid performative value
+    normalizedPerformative = performative;
+  } else {
+    // Default to request if invalid
+    console.warn(`Invalid performative '${performative}', defaulting to 'request'`);
+    normalizedPerformative = PERFORMATIVES.REQUEST;
+  }
+  
   const message = {
     from,
     to,
-    performative,
+    performative: normalizedPerformative,
     content,
     timestamp: new Date().toISOString(),
     metadata
@@ -59,8 +75,8 @@ function createApologyMessage(from, to, originalContent) {
   return createMessage(
     from,
     to,
-    PERFORMATIVES.APOLOGIZE,
     "I apologize, but my previous message contained content that was flagged as potentially inappropriate.",
+    PERFORMATIVES.APOLOGIZE,
     { originalRequest: originalContent }
   );
 }

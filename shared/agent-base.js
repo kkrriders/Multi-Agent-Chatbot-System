@@ -117,45 +117,77 @@ Keep your response clear, helpful, and concise.`;
     const prompt = this.createPrompt(message);
     
     try {
+      // Adjust generation parameters based on prompt length
+      const promptLength = prompt.length;
+      let numPredict = 300; // Default length limit
+      
+      // For very long prompts, reduce the expected output length to help avoid timeouts
+      if (promptLength > 8000) {
+        numPredict = 200;
+        logger.info(`${this.agentId}: Long prompt detected (${promptLength} chars). Reducing output length.`);
+      } else if (promptLength > 4000) {
+        numPredict = 250;
+      }
+      
       // Generate response using Ollama with timeout and retry
       let content;
       let retries = 2;
       
       while (retries >= 0) {
         try {
+          // Log attempt for debugging
+          if (retries < 2) {
+            logger.info(`${this.agentId}: Retry attempt ${2-retries} for message from ${message.from}`);
+          }
+          
           content = await generateResponse(this.model, prompt, { 
             temperature: 0.7,
-            num_predict: 300  // Limit response length
+            num_predict: numPredict
           });
           break; // Exit loop if successful
         } catch (err) {
-          if (retries === 0) throw err;
+          if (retries === 0) {
+            // On final failure, log detailed error
+            logger.error(`${this.agentId}: All retries failed for message from ${message.from}. Error: ${err.message}`);
+            throw err;
+          }
           retries--;
-          console.log(`Retrying... (${retries} attempts left)`);
+          logger.warn(`${this.agentId}: Generation failed. Retrying... (${retries} attempts left)`);
+          
+          // Wait a moment before retrying to allow system resources to recover
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
       
       // If content is still undefined or null, use a fallback message
       if (!content) {
+        logger.warn(`${this.agentId}: Empty response received after successful API call`);
         content = "I received your message, but I'm having trouble generating a specific response right now.";
       }
       
-      // Create structured response message
+      // Create structured response message with correct parameter order: from, to, content, performative
       return createMessage(
-        this.agentId,
-        message.from,
-        PERFORMATIVES.RESPOND,
-        content
+        this.agentId,                 // from
+        message.from,                 // to
+        content,                      // content
+        PERFORMATIVES.RESPOND         // performative
       );
     } catch (error) {
       logger.error(`Error generating response with ${this.model}:`, error.message);
       
+      // Provide a more helpful error message for timeouts
+      let errorMessage = "I apologize, but I'm having trouble generating a response at the moment.";
+      
+      if (error.message.includes('timeout')) {
+        errorMessage = "I apologize, but your request is too complex for me to process right now. Please try a shorter or simpler request.";
+      }
+      
       // Return error message if LLM fails
       return createMessage(
-        this.agentId,
-        message.from,
-        PERFORMATIVES.RESPOND,
-        `I apologize, but I'm having trouble generating a response at the moment. (Error: ${error.message})`
+        this.agentId,                 // from
+        message.from,                 // to
+        errorMessage,                 // content
+        PERFORMATIVES.RESPOND         // performative
       );
     }
   }
