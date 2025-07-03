@@ -1,9 +1,0 @@
-
-=== MULTI-AGENT CUSTOM PROJECT GENERATOR ===
-
-This tool will create a conversation between AI agents about a project of your choice.
-
-Checking if all services are running...
-Services are running!
-
-What would you like the AI team to build? Describe your project: 

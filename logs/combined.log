@@ -711,3 +711,25 @@
 {"level":"info","message":"Shutting down LLaMA 3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
 {"level":"info","message":"Shutting down Qwen agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
 {"level":"info","message":"Shutting down Phi3 agent...","service":"multi-agent-chat","timestamp":"2025-05-26T15:30:04.985Z"}
+{"level":"info","message":"Manager agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-07-03T04:06:03.908Z"}
+{"level":"info","message":"agent-1 running on port 3001","service":"multi-agent-chat","timestamp":"2025-07-03T04:06:03.951Z"}
+{"level":"info","message":"agent-4 running on port 3004","service":"multi-agent-chat","timestamp":"2025-07-03T04:06:03.952Z"}
+{"level":"info","message":"agent-3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-07-03T04:06:03.951Z"}
+{"level":"info","message":"agent-2 running on port 3002","service":"multi-agent-chat","timestamp":"2025-07-03T04:06:03.953Z"}
+{"level":"info","message":"Sending message to agent-1","service":"multi-agent-chat","timestamp":"2025-07-03T04:06:40.627Z"}
+{"from":"user","level":"info","message":"agent-1 received message","service":"multi-agent-chat","timestamp":"2025-07-03T04:06:40.642Z"}
+{"level":"error","message":"Error routing message to agent-1:","service":"multi-agent-chat","timestamp":"2025-07-03T04:07:40.645Z"}
+{"level":"error","message":"Error in single message route:","service":"multi-agent-chat","timestamp":"2025-07-03T04:07:40.646Z"}
+{"level":"info","message":"Sending message to agent-1","service":"multi-agent-chat","timestamp":"2025-07-03T04:07:50.166Z"}
+{"from":"user","level":"info","message":"agent-1 received message","service":"multi-agent-chat","timestamp":"2025-07-03T04:07:50.169Z"}
+{"level":"info","message":"Sending message to agent-2","service":"multi-agent-chat","timestamp":"2025-07-03T04:08:39.153Z"}
+{"from":"user","level":"info","message":"agent-2 received message","service":"multi-agent-chat","timestamp":"2025-07-03T04:08:39.175Z"}
+{"level":"warn","message":"agent-1: Generation failed. Retrying... (1 attempts left)","service":"multi-agent-chat","timestamp":"2025-07-03T04:08:40.695Z"}
+{"level":"info","message":"agent-1: Retry attempt 1 for message from user","service":"multi-agent-chat","timestamp":"2025-07-03T04:08:41.698Z"}
+{"level":"info","message":"Sending message to agent-3","service":"multi-agent-chat","timestamp":"2025-07-03T04:09:15.009Z"}
+{"from":"user","level":"info","message":"agent-3 received message","service":"multi-agent-chat","timestamp":"2025-07-03T04:09:15.027Z"}
+{"level":"info","message":"Shutting down manager agent...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.423Z"}
+{"level":"info","message":"agent-3 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.423Z"}
+{"level":"info","message":"agent-4 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.424Z"}
+{"level":"info","message":"agent-1 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.424Z"}
+{"level":"info","message":"agent-2 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.424Z"}

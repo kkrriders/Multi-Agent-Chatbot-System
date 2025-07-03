@@ -82,3 +82,5 @@
 {"level":"error","message":"Error generating response with mistral:latest:","service":"multi-agent-chat","timestamp":"2025-05-26T05:29:30.548Z"}
 {"level":"error","message":"Error generating response with llama3:latest:","service":"multi-agent-chat","timestamp":"2025-05-26T05:31:00.568Z"}
 {"level":"error","message":"Error generating response with phi3:3.8b:","service":"multi-agent-chat","timestamp":"2025-05-26T05:32:30.620Z"}
+{"level":"error","message":"Error routing message to agent-1:","service":"multi-agent-chat","timestamp":"2025-07-03T04:07:40.645Z"}
+{"level":"error","message":"Error in single message route:","service":"multi-agent-chat","timestamp":"2025-07-03T04:07:40.646Z"}
