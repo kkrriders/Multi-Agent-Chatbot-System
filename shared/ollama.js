@@ -8,6 +8,22 @@ dotenv.config();
 
 // Configure Ollama API URL
 const OLLAMA_API_BASE = process.env.OLLAMA_API_BASE || 'http://localhost:11434/api';
+const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT) || 120000; // 2 minutes default
+
+/**
+ * Check if Ollama service is available
+ * 
+ * @returns {Promise<boolean>} - True if Ollama is available, false otherwise
+ */
+async function checkOllamaAvailability() {
+  try {
+    await axios.get(`${OLLAMA_API_BASE}/version`, { timeout: 5000 });
+    return true;
+  } catch (error) {
+    console.error('Ollama service unavailable:', error.message);
+    return false;
+  }
+}
 
 /**
  * Generate a response from Ollama LLM model
@@ -19,6 +35,12 @@ const OLLAMA_API_BASE = process.env.OLLAMA_API_BASE || 'http://localhost:11434/a
  */
 async function generateResponse(model, prompt, options = {}) {
   try {
+    // Check if Ollama service is available first
+    const isAvailable = await checkOllamaAvailability();
+    if (!isAvailable) {
+      return "I'm unable to connect to the Ollama service at the moment. Please check if Ollama is running properly.";
+    }
+
     // Set default options
     const defaultOptions = {
       temperature: 0.7,
@@ -43,7 +65,7 @@ async function generateResponse(model, prompt, options = {}) {
       stream: false,
       ...finalOptions
     }, {
-      timeout: 120000 // Increased from 30s to 120s (2 minutes) to accommodate larger contexts
+      timeout: REQUEST_TIMEOUT
     });
 
     // Basic response validation
@@ -62,17 +84,31 @@ async function generateResponse(model, prompt, options = {}) {
 
     return text;
   } catch (error) {
-    // Provide more specific error messaging for timeouts
+    // Enhanced error handling with more specific messages
+    let errorMessage = `Failed to generate response with ${model}: ${error.message}`;
+    
+    // Provide more specific error messaging based on error type
     if (error.code === 'ECONNABORTED') {
-      console.error(`TIMEOUT ERROR: Model ${model} timed out after 120 seconds. Try reducing prompt size or complexity.`);
+      errorMessage = `TIMEOUT ERROR: Model ${model} timed out after ${REQUEST_TIMEOUT/1000} seconds. Try reducing prompt size or complexity.`;
+      console.error(errorMessage);
+    } else if (error.code === 'ECONNREFUSED') {
+      errorMessage = `CONNECTION ERROR: Could not connect to Ollama service. Please ensure Ollama is running at ${OLLAMA_API_BASE}.`;
+      console.error(errorMessage);
+    } else if (error.response && error.response.status === 404) {
+      errorMessage = `MODEL ERROR: Model ${model} not found. Please ensure it's downloaded or use a different model.`;
+      console.error(errorMessage);
+    } else if (error.response && error.response.status === 400) {
+      errorMessage = `REQUEST ERROR: Bad request to Ollama API. This may be due to invalid parameters or prompt format.`;
+      console.error(errorMessage);
     } else {
       console.error(`Error generating response with model ${model}:`, error.message);
     }
     
-    if (error.response) {
+    if (error.response && error.response.data) {
       console.error('Response data:', error.response.data);
     }
-    throw new Error(`Failed to generate response with ${model}: ${error.message}`);
+    
+    throw new Error(errorMessage);
   }
 }
 
