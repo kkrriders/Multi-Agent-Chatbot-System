@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexible Multi-Agent Work System</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .setup-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .chat-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .agent-setup {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        .agent-setup.active {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+        .agent-setup h3 {
+            margin-top: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .agent-checkbox {
+            margin-right: 10px;
+        }
+        .agent-setup input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .agent-setup textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            resize: vertical;
+        }
+        .task-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .manager-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+        .start-btn {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .start-btn:hover {
+            background: #218838;
+        }
+        .start-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .template-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .template-btn {
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .template-btn:hover {
+            background: #0056b3;
+        }
+        .chat-messages {
+            height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        .agent-message {
+            background: #28a745;
+            color: white;
+        }
+        .manager-message {
+            background: #ffc107;
+            color: #333;
+            font-weight: bold;
+        }
+        .error-message {
+            background: #dc3545;
+            color: white;
+        }
+        .message-header {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timestamp {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        .status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.working {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .example-templates {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        .conversation-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .conversation-controls input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .conversation-controls button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .progress-indicator {
+            display: none;
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .working-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Flexible Multi-Agent Work System</h1>
+        <p>Define custom prompts for each agent and watch them collaborate in real-time!</p>
+    </div>
+
+    <div class="main-container">
+        <div class="setup-section">
+            <h2>🛠️ Setup Your Team</h2>
+            
+            <div class="conversation-controls">
+                <input type="text" id="conversation-id" placeholder="Conversation ID (auto-generated if empty)">
+                <button onclick="joinConversation()">Join Conversation</button>
+            </div>
+            
+            <div id="connection-status" class="status disconnected">
+                Disconnected from server
+            </div>
+            
+            <div class="template-buttons">
+                <button class="template-btn" onclick="loadTemplate('coding')">💻 Coding Team</button>
+                <button class="template-btn" onclick="loadTemplate('research')">🔬 Research Team</button>
+                <button class="template-btn" onclick="loadTemplate('business')">📊 Business Team</button>
+                <button class="template-btn" onclick="loadTemplate('creative')">🎨 Creative Team</button>
+                <button class="template-btn" onclick="clearAll()">🗑️ Clear All</button>
+            </div>
+            
+            <div class="example-templates">
+                <strong>💡 Quick Start:</strong> Click a template above to get started, or create your own custom team setup!
+            </div>
+            
+            <textarea id="task-input" class="task-input" placeholder="📝 Describe your task or project (e.g., 'Create a React web app for task management', 'Research the impact of AI on healthcare', 'Develop a marketing strategy for a new product')"></textarea>
+            
+            <textarea id="manager-role" class="manager-input" placeholder="👨‍💼 Manager's role (e.g., 'Senior project manager who reviews all work and provides strategic guidance')">Senior project manager who reviews all work and provides strategic guidance and final recommendations</textarea>
+            
+            <div id="agents-setup">
+                <div class="agent-setup active" id="agent-1-setup">
+                    <h3>
+                        <input type="checkbox" class="agent-checkbox" id="agent-1-enabled" checked>
+                        🤖 Agent 1
+                    </h3>
+                    <input type="text" id="agent-1-name" placeholder="Agent Name (e.g., 'Frontend Developer')" value="Team Member 1">
+                    <textarea id="agent-1-prompt" placeholder="Custom prompt defining this agent's role, expertise, and behavior...">You are a helpful AI assistant. Provide detailed and accurate responses to help accomplish the given task.</textarea>
+                </div>
+                
+                <div class="agent-setup" id="agent-2-setup">
+                    <h3>
+                        <input type="checkbox" class="agent-checkbox" id="agent-2-enabled" checked>
+                        🤖 Agent 2
+                    </h3>
+                    <input type="text" id="agent-2-name" placeholder="Agent Name (e.g., 'Backend Developer')" value="Team Member 2">
+                    <textarea id="agent-2-prompt" placeholder="Custom prompt defining this agent's role, expertise, and behavior...">You are a knowledgeable AI assistant. Analyze the task from your unique perspective and provide valuable insights.</textarea>
+                </div>
+                
+                <div class="agent-setup" id="agent-3-setup">
+                    <h3>
+                        <input type="checkbox" class="agent-checkbox" id="agent-3-enabled">
+                        🤖 Agent 3
+                    </h3>
+                    <input type="text" id="agent-3-name" placeholder="Agent Name (e.g., 'UX Designer')" value="Team Member 3">
+                    <textarea id="agent-3-prompt" placeholder="Custom prompt defining this agent's role, expertise, and behavior...">You are a creative AI assistant. Think outside the box and provide innovative solutions and alternative approaches.</textarea>
+                </div>
+                
+                <div class="agent-setup" id="agent-4-setup">
+                    <h3>
+                        <input type="checkbox" class="agent-checkbox" id="agent-4-enabled">
+                        🤖 Agent 4
+                    </h3>
+                    <input type="text" id="agent-4-name" placeholder="Agent Name (e.g., 'QA Tester')" value="Team Member 4">
+                    <textarea id="agent-4-prompt" placeholder="Custom prompt defining this agent's role, expertise, and behavior...">You are a detail-oriented AI assistant. Focus on quality, testing, and ensuring the final result meets high standards.</textarea>
+                </div>
+            </div>
+            
+            <div class="progress-indicator" id="progress-indicator">
+                <div class="working-indicator"></div>
+                <span id="progress-text">Setting up team...</span>
+            </div>
+            
+            <button class="start-btn" id="start-btn" onclick="startFlexibleWork()">
+                🚀 Start Collaborative Work Session
+            </button>
+        </div>
+        
+        <div class="chat-section">
+            <h2>💬 Live Collaboration</h2>
+            <div id="chat-messages" class="chat-messages"></div>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let currentConversationId = '';
+        let workInProgress = false;
+        
+        // Template configurations
+        const templates = {
+            coding: {
+                task: "Create a React web application for task management with user authentication, task CRUD operations, and a responsive design",
+                manager: "Senior software architect who reviews code architecture, ensures best practices, and provides technical guidance",
+                agents: [
+                    {
+                        name: "Frontend Developer",
+                        prompt: "You are a senior frontend developer specializing in React, JavaScript, and modern web technologies. Focus on creating user-friendly interfaces, responsive designs, and efficient frontend code. Provide detailed code examples and explain your architectural decisions."
+                    },
+                    {
+                        name: "Backend Developer", 
+                        prompt: "You are a senior backend developer specializing in API design, database architecture, and server-side logic. Focus on creating scalable, secure backend systems with proper authentication and data handling. Provide API specifications and database schema suggestions."
+                    },
+                    {
+                        name: "UI/UX Designer",
+                        prompt: "You are a UI/UX designer focused on creating intuitive, accessible, and visually appealing user interfaces. Analyze user needs, suggest design patterns, wireframes, and ensure the application provides excellent user experience. Consider accessibility and usability principles."
+                    },
+                    {
+                        name: "QA Engineer",
+                        prompt: "You are a quality assurance engineer focused on testing strategies, identifying potential bugs, and ensuring code quality. Suggest testing approaches, identify edge cases, and recommend validation methods for both frontend and backend components."
+                    }
+                ]
+            },
+            research: {
+                task: "Conduct comprehensive research on the impact of artificial intelligence on healthcare, including current applications, benefits, challenges, and future prospects",
+                manager: "Senior research coordinator who synthesizes findings, identifies key insights, and provides strategic recommendations for further investigation",
+                agents: [
+                    {
+                        name: "Medical Research Analyst",
+                        prompt: "You are a medical research analyst with expertise in healthcare systems and medical technology. Focus on current AI applications in medical diagnosis, treatment, and patient care. Provide evidence-based analysis with references to recent medical studies and real-world implementations."
+                    },
+                    {
+                        name: "Technology Researcher",
+                        prompt: "You are a technology researcher specializing in AI and machine learning applications. Analyze the technical aspects of AI in healthcare, including algorithms, data processing, and emerging technologies. Focus on technical feasibility and innovation trends."
+                    },
+                    {
+                        name: "Ethics & Policy Analyst",
+                        prompt: "You are an ethics and policy analyst focused on the societal implications of AI in healthcare. Examine privacy concerns, regulatory challenges, ethical considerations, and policy recommendations. Consider patient rights, data protection, and equitable access to AI-powered healthcare."
+                    },
+                    {
+                        name: "Market Research Analyst",
+                        prompt: "You are a market research analyst specializing in healthcare technology markets. Analyze market trends, investment patterns, major companies, and economic impacts of AI in healthcare. Provide insights on market opportunities and competitive landscape."
+                    }
+                ]
+            },
+            business: {
+                task: "Develop a comprehensive business strategy for launching a new eco-friendly product line, including market analysis, pricing strategy, and marketing approach",
+                manager: "Senior business strategist who evaluates all recommendations, identifies synergies, and provides executive-level strategic guidance",
+                agents: [
+                    {
+                        name: "Market Analyst",
+                        prompt: "You are a market research analyst specializing in consumer behavior and market trends. Analyze target demographics, market size, competition, and consumer preferences for eco-friendly products. Provide data-driven insights and market positioning recommendations."
+                    },
+                    {
+                        name: "Marketing Strategist",
+                        prompt: "You are a marketing strategist with expertise in brand positioning and campaign development. Create comprehensive marketing strategies, identify key messaging, suggest promotional channels, and develop brand positioning for eco-friendly products. Focus on sustainability messaging and consumer engagement."
+                    },
+                    {
+                        name: "Financial Analyst",
+                        prompt: "You are a financial analyst focused on business economics and profitability. Analyze pricing strategies, cost structures, profit margins, and financial projections. Provide recommendations on pricing models, investment requirements, and revenue forecasts for the eco-friendly product line."
+                    },
+                    {
+                        name: "Operations Manager",
+                        prompt: "You are an operations manager specializing in supply chain and production management. Focus on sustainable sourcing, manufacturing processes, distribution channels, and operational efficiency. Provide recommendations for eco-friendly supply chain management and operational scalability."
+                    }
+                ]
+            },
+            creative: {
+                task: "Create a compelling brand story and visual identity for a new sustainable fashion startup targeting young professionals",
+                manager: "Creative director who guides the overall creative vision, ensures brand consistency, and provides artistic direction",
+                agents: [
+                    {
+                        name: "Brand Storyteller",
+                        prompt: "You are a brand storyteller and content strategist specializing in narrative development. Create compelling brand stories that connect with target audiences emotionally. Focus on sustainability messaging, brand values, and narrative consistency across all touchpoints."
+                    },
+                    {
+                        name: "Visual Designer",
+                        prompt: "You are a visual designer with expertise in brand identity and graphic design. Create visual concepts, color palettes, typography suggestions, and overall aesthetic direction. Focus on modern, sustainable design principles that appeal to young professionals."
+                    },
+                    {
+                        name: "Marketing Creative",
+                        prompt: "You are a marketing creative specializing in campaign development and advertising. Develop creative concepts for marketing campaigns, social media content, and promotional materials. Focus on engaging young professionals with authentic, sustainability-focused messaging."
+                    },
+                    {
+                        name: "User Experience Designer",
+                        prompt: "You are a UX designer focused on customer journey and digital experiences. Design the customer experience across digital touchpoints, from website to mobile app. Consider user behavior, accessibility, and sustainable design principles in digital experiences."
+                    }
+                ]
+            }
+        };
+        
+        // Initialize Socket.IO connection
+        function initializeSocket() {
+            socket = io('http://localhost:3000');
+            
+            socket.on('connect', () => {
+                document.getElementById('connection-status').textContent = 'Connected to server';
+                document.getElementById('connection-status').className = 'status connected';
+            });
+            
+            socket.on('disconnect', () => {
+                document.getElementById('connection-status').textContent = 'Disconnected from server';
+                document.getElementById('connection-status').className = 'status disconnected';
+            });
+            
+            socket.on('conversation-update', (data) => {
+                displayMessage(data.message);
+                
+                // Update progress if working
+                if (workInProgress) {
+                    if (data.message.type === 'manager-conclusion') {
+                        workInProgress = false;
+                        document.getElementById('progress-indicator').style.display = 'none';
+                        document.getElementById('start-btn').disabled = false;
+                        document.getElementById('start-btn').textContent = '🚀 Start Collaborative Work Session';
+                    } else if (data.message.from !== 'Manager' || data.message.type === 'manager-start') {
+                        document.getElementById('progress-text').textContent = `${data.message.from} is working...`;
+                    }
+                }
+            });
+        }
+        
+        // Join conversation
+        function joinConversation() {
+            const conversationId = document.getElementById('conversation-id').value || `work-${Date.now()}`;
+            
+            if (currentConversationId) {
+                socket.emit('leave-conversation', currentConversationId);
+            }
+            
+            currentConversationId = conversationId;
+            document.getElementById('conversation-id').value = conversationId;
+            socket.emit('join-conversation', conversationId);
+            
+            // Clear chat messages
+            document.getElementById('chat-messages').innerHTML = '';
+        }
+        
+        // Load template
+        function loadTemplate(templateName) {
+            const template = templates[templateName];
+            if (!template) return;
+            
+            document.getElementById('task-input').value = template.task;
+            document.getElementById('manager-role').value = template.manager;
+            
+            // Reset all agents
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`agent-${i}-enabled`).checked = false;
+                document.getElementById(`agent-${i}-name`).value = '';
+                document.getElementById(`agent-${i}-prompt`).value = '';
+                document.getElementById(`agent-${i}-setup`).classList.remove('active');
+            }
+            
+            // Set up agents from template
+            template.agents.forEach((agent, index) => {
+                const agentNum = index + 1;
+                document.getElementById(`agent-${agentNum}-enabled`).checked = true;
+                document.getElementById(`agent-${agentNum}-name`).value = agent.name;
+                document.getElementById(`agent-${agentNum}-prompt`).value = agent.prompt;
+                document.getElementById(`agent-${agentNum}-setup`).classList.add('active');
+            });
+            
+            updateAgentStates();
+        }
+        
+        // Clear all inputs
+        function clearAll() {
+            document.getElementById('task-input').value = '';
+            document.getElementById('manager-role').value = 'Senior project manager who reviews all work and provides strategic guidance and final recommendations';
+            
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`agent-${i}-enabled`).checked = i <= 2;
+                document.getElementById(`agent-${i}-name`).value = `Team Member ${i}`;
+                document.getElementById(`agent-${i}-prompt`).value = '';
+                document.getElementById(`agent-${i}-setup`).classList.toggle('active', i <= 2);
+            }
+            
+            updateAgentStates();
+        }
+        
+        // Update agent visual states
+        function updateAgentStates() {
+            for (let i = 1; i <= 4; i++) {
+                const checkbox = document.getElementById(`agent-${i}-enabled`);
+                const setup = document.getElementById(`agent-${i}-setup`);
+                
+                if (checkbox.checked) {
+                    setup.classList.add('active');
+                } else {
+                    setup.classList.remove('active');
+                }
+            }
+        }
+        
+        // Start flexible work session
+        function startFlexibleWork() {
+            const task = document.getElementById('task-input').value.trim();
+            const managerRole = document.getElementById('manager-role').value.trim();
+            
+            if (!task) {
+                alert('Please enter a task description');
+                return;
+            }
+            
+            if (!currentConversationId) {
+                alert('Please join a conversation first');
+                return;
+            }
+            
+            // Get enabled agents
+            const agents = [];
+            for (let i = 1; i <= 4; i++) {
+                const enabled = document.getElementById(`agent-${i}-enabled`).checked;
+                if (enabled) {
+                    const name = document.getElementById(`agent-${i}-name`).value.trim();
+                    const prompt = document.getElementById(`agent-${i}-prompt`).value.trim();
+                    
+                    if (!name || !prompt) {
+                        alert(`Please fill in name and prompt for Agent ${i}`);
+                        return;
+                    }
+                    
+                    agents.push({
+                        agentId: `agent-${i}`,
+                        agentName: name,
+                        customPrompt: prompt
+                    });
+                }
+            }
+            
+            if (agents.length === 0) {
+                alert('Please enable at least one agent');
+                return;
+            }
+            
+            // Start work session
+            workInProgress = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('start-btn').textContent = '⏳ Starting Work Session...';
+            document.getElementById('progress-indicator').style.display = 'block';
+            document.getElementById('progress-text').textContent = 'Setting up team...';
+            
+            fetch('http://localhost:3000/flexible-work-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    task: task,
+                    agents: agents,
+                    conversationId: currentConversationId,
+                    managerRole: managerRole
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayMessage({
+                        from: 'System',
+                        content: `🎯 Work session started with ${agents.length} agents`,
+                        timestamp: Date.now()
+                    });
+                } else {
+                    alert('Error starting work session: ' + data.error);
+                    workInProgress = false;
+                    document.getElementById('progress-indicator').style.display = 'none';
+                    document.getElementById('start-btn').disabled = false;
+                    document.getElementById('start-btn').textContent = '🚀 Start Collaborative Work Session';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start work session');
+                workInProgress = false;
+                document.getElementById('progress-indicator').style.display = 'none';
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('start-btn').textContent = '🚀 Start Collaborative Work Session';
+            });
+        }
+        
+        // Display message in chat
+        function displayMessage(message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            
+            let messageClass = 'message ';
+            if (message.from === 'user') {
+                messageClass += 'user-message';
+            } else if (message.from === 'Manager' || message.type === 'manager-start' || message.type === 'manager-conclusion') {
+                messageClass += 'manager-message';
+            } else if (message.error) {
+                messageClass += 'error-message';
+            } else {
+                messageClass += 'agent-message';
+            }
+            
+            messageDiv.className = messageClass;
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span>${message.from}</span>
+                    <span class="timestamp">${new Date(message.timestamp).toLocaleTimeString()}</span>
+                </div>
+                <div>${message.content.replace(/\n/g, '<br>')}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize socket
+            initializeSocket();
+            
+            // Auto-join conversation
+            joinConversation();
+            
+            // Add checkbox listeners
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`agent-${i}-enabled`).addEventListener('change', updateAgentStates);
+            }
+            
+            // Initialize states
+            updateAgentStates();
+        });
+    </script>
+</body>
+</html>

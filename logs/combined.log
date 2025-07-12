@@ -733,3 +733,62 @@
 {"level":"info","message":"agent-4 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.424Z"}
 {"level":"info","message":"agent-1 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.424Z"}
 {"level":"info","message":"agent-2 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-03T04:48:47.424Z"}
+{"level":"info","message":"Manager agent running on port 3000","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:24.924Z"}
+{"level":"info","message":"agent-4 running on port 3004","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:24.949Z"}
+{"level":"info","message":"agent-2 running on port 3002","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:24.950Z"}
+{"level":"info","message":"agent-3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:24.950Z"}
+{"level":"info","message":"agent-1 running on port 3001","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:24.950Z"}
+{"level":"info","message":"agent-4 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:33.580Z"}
+{"level":"info","message":"agent-3 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:33.580Z"}
+{"level":"info","message":"agent-1 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:33.580Z"}
+{"level":"info","message":"agent-2 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:33.581Z"}
+{"level":"info","message":"Shutting down manager agent...","service":"multi-agent-chat","timestamp":"2025-07-04T14:45:33.580Z"}
+{"level":"info","message":"Logger test successful","service":"multi-agent-chat","timestamp":"2025-07-11T16:02:15.179Z"}
+{"level":"info","message":"Agent configurations saved successfully","service":"multi-agent-chat","timestamp":"2025-07-11T16:04:21.068Z"}
+{"level":"info","message":"Agent configurations saved successfully","service":"multi-agent-chat","timestamp":"2025-07-11T16:04:21.093Z"}
+{"level":"info","message":"Agent configurations saved successfully","service":"multi-agent-chat","timestamp":"2025-07-11T16:04:54.539Z"}
+{"level":"info","message":"agent-1 running on port 3001","service":"multi-agent-chat","timestamp":"2025-07-11T16:05:52.746Z"}
+{"level":"info","message":"agent-2 running on port 3002","service":"multi-agent-chat","timestamp":"2025-07-11T16:05:52.748Z"}
+{"level":"info","message":"agent-3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-07-11T16:05:52.748Z"}
+{"level":"info","message":"agent-4 running on port 3004","service":"multi-agent-chat","timestamp":"2025-07-11T16:05:52.748Z"}
+{"level":"info","message":"Created recordings directory","service":"multi-agent-chat","timestamp":"2025-07-11T16:09:05.197Z"}
+{"level":"info","message":"agent-3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-07-12T01:54:38.168Z"}
+{"level":"info","message":"agent-2 running on port 3002","service":"multi-agent-chat","timestamp":"2025-07-12T01:54:38.169Z"}
+{"level":"info","message":"agent-1 running on port 3001","service":"multi-agent-chat","timestamp":"2025-07-12T01:54:41.929Z"}
+{"level":"info","message":"agent-4 running on port 3004","service":"multi-agent-chat","timestamp":"2025-07-12T01:54:42.888Z"}
+{"level":"info","message":"Manager agent running on port 3000 with WebSocket support","service":"multi-agent-chat","timestamp":"2025-07-12T01:54:46.996Z"}
+{"level":"info","message":"agent-3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-07-12T02:00:28.514Z"}
+{"level":"info","message":"agent-2 running on port 3002","service":"multi-agent-chat","timestamp":"2025-07-12T02:00:28.515Z"}
+{"level":"info","message":"agent-4 running on port 3004","service":"multi-agent-chat","timestamp":"2025-07-12T02:00:29.764Z"}
+{"level":"info","message":"agent-1 running on port 3001","service":"multi-agent-chat","timestamp":"2025-07-12T02:00:29.764Z"}
+{"level":"info","message":"Manager agent running on port 3000 with WebSocket support","service":"multi-agent-chat","timestamp":"2025-07-12T02:00:35.583Z"}
+{"level":"info","message":"Client connected: yIW5XrZ4RKLd6Z-kAAAB","service":"multi-agent-chat","timestamp":"2025-07-12T02:00:46.097Z"}
+{"level":"info","message":"Client yIW5XrZ4RKLd6Z-kAAAB joined conversation: conv-1752285738172","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:17.836Z"}
+{"level":"info","message":"Client yIW5XrZ4RKLd6Z-kAAAB left conversation: conv-1752285738172","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:19.305Z"}
+{"level":"info","message":"Client yIW5XrZ4RKLd6Z-kAAAB joined conversation: conv-1752285738172","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:19.306Z"}
+{"level":"info","message":"Sending message to agent-1","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:20.905Z"}
+{"from":"user","level":"info","message":"agent-1 received message","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:21.651Z"}
+{"level":"info","message":"Sending message to agent-2","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:21.732Z"}
+{"from":"user","level":"info","message":"agent-2 received message","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:21.985Z"}
+{"level":"info","message":"Sending message to agent-3","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:22.009Z"}
+{"from":"user","level":"info","message":"agent-3 received message","service":"multi-agent-chat","timestamp":"2025-07-12T02:02:22.211Z"}
+{"level":"info","message":"agent-2 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T02:03:50.259Z"}
+{"level":"info","message":"agent-3 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T02:03:50.259Z"}
+{"level":"info","message":"agent-1 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T02:03:50.259Z"}
+{"level":"info","message":"agent-4 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T02:03:50.259Z"}
+{"level":"info","message":"Shutting down manager agent...","service":"multi-agent-chat","timestamp":"2025-07-12T02:03:50.261Z"}
+{"level":"info","message":"agent-3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-07-12T12:24:21.425Z"}
+{"level":"info","message":"agent-4 running on port 3004","service":"multi-agent-chat","timestamp":"2025-07-12T12:24:21.425Z"}
+{"level":"info","message":"agent-1 running on port 3001","service":"multi-agent-chat","timestamp":"2025-07-12T12:24:21.427Z"}
+{"level":"info","message":"agent-2 running on port 3002","service":"multi-agent-chat","timestamp":"2025-07-12T12:24:22.140Z"}
+{"level":"info","message":"Manager agent running on port 3000 with WebSocket support","service":"multi-agent-chat","timestamp":"2025-07-12T12:24:26.923Z"}
+{"level":"info","message":"Client connected: 2oaDITYNE3hH29HbAAAB","service":"multi-agent-chat","timestamp":"2025-07-12T12:24:27.290Z"}
+{"level":"info","message":"Client disconnected: 2oaDITYNE3hH29HbAAAB","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:24.356Z"}
+{"level":"info","message":"Client connected: S7O9AvD6jaBcct4aAAAD","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:24.410Z"}
+{"level":"info","message":"Client disconnected: S7O9AvD6jaBcct4aAAAD","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:25.761Z"}
+{"level":"info","message":"Client connected: hK6x6a_dn0dEl46NAAAF","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:25.836Z"}
+{"level":"info","message":"Shutting down manager agent...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.071Z"}
+{"level":"info","message":"agent-2 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.072Z"}
+{"level":"info","message":"agent-4 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.072Z"}
+{"level":"info","message":"agent-1 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.073Z"}
+{"level":"info","message":"agent-3 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.073Z"}

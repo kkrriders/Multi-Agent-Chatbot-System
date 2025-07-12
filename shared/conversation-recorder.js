@@ -59,8 +59,12 @@ function recordMessage(message, moderationResult = null) {
     
     entry += '\n'; // Add blank line between entries
     
-    // Append to file
-    fs.appendFileSync(filePath, entry);
+    // Append to file asynchronously
+    fs.appendFile(filePath, entry, (err) => {
+      if (err) {
+        logger.error('Error writing to conversation file:', err.message);
+      }
+    });
   } catch (error) {
     logger.error('Error recording message:', error.message);
   }

@@ -1,0 +1,9 @@
+[4:09:05 PM] user → agent-1 (undefined):
+"Hello world"
+
+[4:09:05 PM] agent-1 → user (undefined):
+"Hello! How can I help you?"
+
+[4:09:47 PM] user → agent-1 (request):
+"Hello world"
+

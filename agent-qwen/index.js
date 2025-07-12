@@ -6,6 +6,7 @@
 const dotenv = require('dotenv');
 const BaseAgent = require('../shared/agent-base');
 const { logger } = require('../shared/logger');
+const { getAgentConfig, buildSystemPrompt } = require('../shared/agent-config');
 
 // Load environment variables
 dotenv.config();
@@ -22,10 +23,35 @@ class FlexibleAgent extends BaseAgent {
   }
 
   createPrompt(message) {
-    let prompt = '';
+    // Check if there's a custom prompt for this specific conversation
+    if (message.customPrompt) {
+      // Use custom prompt defined by user
+      let prompt = message.customPrompt;
+      
+      // Add agent name context
+      const agentName = message.agentName || 'Assistant';
+      prompt += `\n\nYou are ${agentName}. `;
+      
+      // Check if there's conversation history
+      if (message.conversationHistory && message.conversationHistory.length > 0) {
+        prompt += `\n\nConversation history:\n`;
+        message.conversationHistory.forEach(msg => {
+          prompt += `${msg.from}: ${msg.content}\n`;
+        });
+        prompt += `\nNow respond as ${agentName} according to your role.`;
+      }
+      
+      return prompt;
+    }
+    
+    // Fallback to default configuration
+    const config = getAgentConfig(AGENT_ID);
     
     // Check if this agent has been given a name for this conversation
-    const agentName = message.agentName || 'Assistant';
+    const agentName = message.agentName || config.name || 'Assistant';
+    
+    // Build system prompt with configuration
+    let prompt = buildSystemPrompt(config, `You are ${agentName}.`);
     
     // Check if there's conversation history
     if (message.conversationHistory && message.conversationHistory.length > 0) {
@@ -65,7 +91,9 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-// Start the agent
-agent.start();
+// Start the agent (only if not being imported)
+if (require.main === module) {
+  agent.start();
+}
 
 module.exports = agent; 
