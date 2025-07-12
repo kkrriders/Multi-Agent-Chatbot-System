@@ -114,12 +114,14 @@ async function issueWarningToAgent(agentId) {
  */
 function getAgentPort(agentId) {
   switch (agentId) {
-    case 'agent-mistral':
-      return process.env.AGENT_MISTRAL_PORT || 3001;
-    case 'agent-llama3':
-      return process.env.AGENT_LLAMA3_PORT || 3002;
-    case 'agent-phi3':
-      return process.env.AGENT_PHI3_PORT || 3003;
+    case 'agent-1':
+      return process.env.AGENT_1_PORT || 3001;
+    case 'agent-2':
+      return process.env.AGENT_2_PORT || 3002;
+    case 'agent-3':
+      return process.env.AGENT_3_PORT || 3003;
+    case 'agent-4':
+      return process.env.AGENT_4_PORT || 3004;
     default:
       return null;
   }
