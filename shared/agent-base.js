@@ -15,6 +15,7 @@ const dotenv = require('dotenv');
 const { logger } = require('./logger');
 const { generateResponse } = require('./ollama');
 const { PERFORMATIVES, createMessage, validateMessage } = require('./messaging');
+const { AgentMemory, MEMORY_TYPES } = require('./memory');
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +39,10 @@ class BaseAgent {
     this.options = options;
     this.personality = options.personality || '';
 
+    // Initialize memory system
+    this.memory = null;
+    this.memoryInitialized = false;
+
     // Create Express app
     this.app = express();
     
@@ -51,6 +56,18 @@ class BaseAgent {
   }
 
   /**
+   * Initialize memory system for a specific user
+   */
+  async initializeMemory(userId = 'default') {
+    if (!this.memoryInitialized || (this.memory && this.memory.userId !== userId)) {
+      this.memory = new AgentMemory(this.agentId, userId);
+      await this.memory.initialize();
+      this.memoryInitialized = true;
+      logger.info(`Memory initialized for ${this.agentId} (user: ${userId})`);
+    }
+  }
+
+  /**
    * Set up Express routes
    */
   setupRoutes() {
@@ -58,7 +75,12 @@ class BaseAgent {
     this.app.post('/message', async (req, res) => {
       try {
         const message = req.body;
-        logger.info(`${this.agentId} received message`, { from: message.from });
+        const userId = message.userId || 'default';
+        
+        logger.info(`${this.agentId} received message`, { from: message.from, userId });
+        
+        // Initialize memory for this user
+        await this.initializeMemory(userId);
         
         // Validate incoming message
         const validation = validateMessage(message);
@@ -66,7 +88,7 @@ class BaseAgent {
           return res.status(400).json({ error: validation.error });
         }
         
-        // Generate response using the LLM
+        // Generate response using the LLM with memory
         const response = await this.generateAgentResponse(message);
         
         res.json(response);
@@ -80,11 +102,34 @@ class BaseAgent {
     
     // Status endpoint
     this.app.get('/status', async (req, res) => {
+      const memoryStats = this.memory ? this.memory.getMemoryStats() : null;
       res.json({
         status: 'online',
         agent: this.agentId,
-        model: this.model
+        model: this.model,
+        memory: memoryStats
       });
+    });
+
+    // Memory endpoint
+    this.app.get('/memory/:userId?', async (req, res) => {
+      try {
+        const userId = req.params.userId || 'default';
+        await this.initializeMemory(userId);
+        
+        const stats = this.memory.getMemoryStats();
+        const recentContext = await this.memory.getRecentContext(5);
+        const preferences = await this.memory.getUserPreferences();
+        
+        res.json({
+          stats,
+          recentContext,
+          preferences
+        });
+      } catch (error) {
+        logger.error(`Error retrieving memory: ${error.message}`);
+        res.status(500).json({ error: 'Failed to retrieve memory' });
+      }
     });
   }
 
@@ -92,17 +137,62 @@ class BaseAgent {
    * Generate a prompt for the LLM based on the incoming message
    * 
    * @param {Object} message - Incoming message
-   * @returns {string} - Prompt for the LLM
+   * @returns {Promise<string>} - Prompt for the LLM
    */
-  createPrompt(message) {
+  async createPrompt(message) {
     // Base prompt with personality if specified
     let prompt = this.personality ? `${this.personality}\n\n` : '';
     
-    prompt += `You are ${this.agentId}, an AI assistant.
+    prompt += `You are ${this.agentId}, an AI assistant.`;
 
-${message.from} asks: ${message.content}
+    // Add memory context if available
+    if (this.memory) {
+      try {
+        // Get relevant memories
+        const relevantMemories = await this.memory.searchMemories(message.content, 3);
+        const recentContext = await this.memory.getRecentContext(2);
+        const preferences = await this.memory.getUserPreferences();
 
-Keep your response clear, helpful, and concise.`;
+        // Add memory context to prompt
+        if (relevantMemories.length > 0) {
+          prompt += `\n\nRelevant memories:`;
+          relevantMemories.forEach(memory => {
+            prompt += `\n- ${memory.content}`;
+          });
+        }
+
+        if (recentContext.length > 0) {
+          prompt += `\n\nRecent conversation context:`;
+          recentContext.forEach(context => {
+            try {
+              const contextData = JSON.parse(context.content);
+              prompt += `\n- User: ${contextData.userMessage}`;
+              prompt += `\n- You: ${contextData.agentResponse}`;
+            } catch (e) {
+              // Skip malformed context
+            }
+          });
+        }
+
+        if (preferences.length > 0) {
+          prompt += `\n\nUser preferences:`;
+          preferences.forEach(pref => {
+            try {
+              const prefData = JSON.parse(pref.content);
+              prompt += `\n- ${prefData.preference}: ${prefData.value}`;
+            } catch (e) {
+              // Skip malformed preferences
+            }
+          });
+        }
+      } catch (error) {
+        logger.warn(`Error retrieving memory context: ${error.message}`);
+      }
+    }
+
+    prompt += `\n\n${message.from} asks: ${message.content}
+
+Keep your response clear, helpful, and concise. Use your memory to provide personalized and contextually relevant responses.`;
 
     return prompt;
   }
@@ -114,7 +204,7 @@ Keep your response clear, helpful, and concise.`;
    * @returns {Promise<Object>} - Structured response message
    */
   async generateAgentResponse(message) {
-    const prompt = this.createPrompt(message);
+    const prompt = await this.createPrompt(message);
     
     try {
       // Adjust generation parameters based on prompt length
@@ -165,6 +255,26 @@ Keep your response clear, helpful, and concise.`;
         content = "I received your message, but I'm having trouble generating a specific response right now.";
       }
       
+      // Store conversation in memory
+      if (this.memory) {
+        try {
+          await this.memory.storeConversation(
+            message.content,
+            content,
+            {
+              conversationId: message.conversationId || 'unknown',
+              messageId: message.id,
+              timestamp: new Date().toISOString()
+            }
+          );
+
+          // Extract and store potential preferences from the conversation
+          await this.extractAndStorePreferences(message.content, content);
+        } catch (error) {
+          logger.warn(`Error storing conversation memory: ${error.message}`);
+        }
+      }
+      
       // Create structured response message with correct parameter order: from, to, content, performative
       return createMessage(
         this.agentId,                 // from
@@ -193,12 +303,72 @@ Keep your response clear, helpful, and concise.`;
   }
 
   /**
+   * Extract and store user preferences from conversation
+   */
+  async extractAndStorePreferences(userMessage, agentResponse) {
+    if (!this.memory) return;
+
+    try {
+      // Simple heuristic-based preference extraction
+      const userLower = userMessage.toLowerCase();
+      
+      // Language preferences
+      if (userLower.includes('speak in') || userLower.includes('language')) {
+        const languageMatch = userLower.match(/speak in (\w+)|language.*?(\w+)/);
+        if (languageMatch) {
+          const language = languageMatch[1] || languageMatch[2];
+          await this.memory.storePreference('language', language, 0.7);
+        }
+      }
+      
+      // Communication style preferences
+      if (userLower.includes('brief') || userLower.includes('short')) {
+        await this.memory.storePreference('responseStyle', 'brief', 0.6);
+      }
+      if (userLower.includes('detailed') || userLower.includes('explain')) {
+        await this.memory.storePreference('responseStyle', 'detailed', 0.6);
+      }
+      
+      // Topic interests
+      if (userLower.includes('interested in') || userLower.includes('like')) {
+        const interestMatch = userLower.match(/interested in (.+?)[.!?]|like (.+?)[.!?]/);
+        if (interestMatch) {
+          const interest = interestMatch[1] || interestMatch[2];
+          await this.memory.storePreference('interests', interest, 0.5);
+        }
+      }
+      
+      // Professional context
+      if (userLower.includes('work') || userLower.includes('job') || userLower.includes('profession')) {
+        const workMatch = userLower.match(/work.+?as.+?(\w+)|job.+?(\w+)|profession.+?(\w+)/);
+        if (workMatch) {
+          const profession = workMatch[1] || workMatch[2] || workMatch[3];
+          await this.memory.storePreference('profession', profession, 0.8);
+        }
+      }
+    } catch (error) {
+      logger.warn(`Error extracting preferences: ${error.message}`);
+    }
+  }
+
+  /**
    * Start the agent's HTTP server
    */
   start() {
     this.server = this.app.listen(this.port, () => {
       logger.info(`${this.agentId} running on port ${this.port}`);
     });
+
+    // Set up periodic memory cleanup
+    this.memoryCleanupInterval = setInterval(async () => {
+      if (this.memory) {
+        try {
+          await this.memory.cleanupMemories();
+        } catch (error) {
+          logger.warn(`Memory cleanup failed: ${error.message}`);
+        }
+      }
+    }, 24 * 60 * 60 * 1000); // Daily cleanup
   }
 
   /**
@@ -207,6 +377,11 @@ Keep your response clear, helpful, and concise.`;
   stop() {
     if (this.server) {
       this.server.close();
+    }
+    
+    // Clear memory cleanup interval
+    if (this.memoryCleanupInterval) {
+      clearInterval(this.memoryCleanupInterval);
     }
   }
 }
