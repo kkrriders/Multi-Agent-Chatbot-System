@@ -792,3 +792,35 @@
 {"level":"info","message":"agent-4 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.072Z"}
 {"level":"info","message":"agent-1 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.073Z"}
 {"level":"info","message":"agent-3 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:25:33.073Z"}
+{"level":"info","message":"agent-1 running on port 3001","service":"multi-agent-chat","timestamp":"2025-07-12T12:30:20.225Z"}
+{"level":"info","message":"agent-2 running on port 3002","service":"multi-agent-chat","timestamp":"2025-07-12T12:30:20.225Z"}
+{"level":"info","message":"agent-3 running on port 3003","service":"multi-agent-chat","timestamp":"2025-07-12T12:30:20.245Z"}
+{"level":"info","message":"agent-4 running on port 3004","service":"multi-agent-chat","timestamp":"2025-07-12T12:30:20.264Z"}
+{"level":"info","message":"Manager agent running on port 3000 with WebSocket support","service":"multi-agent-chat","timestamp":"2025-07-12T12:30:20.265Z"}
+{"level":"info","message":"Client connected: PNZBImtbxv59id60AAAB","service":"multi-agent-chat","timestamp":"2025-07-12T12:30:27.910Z"}
+{"level":"info","message":"Client PNZBImtbxv59id60AAAB joined conversation: conv-1752323433414","service":"multi-agent-chat","timestamp":"2025-07-12T12:30:33.418Z"}
+{"level":"info","message":"Sending message to agent-1","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:25.065Z"}
+{"from":"user","level":"info","message":"agent-1 received message","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:25.189Z"}
+{"level":"info","message":"Sending message to agent-2","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:36.882Z"}
+{"from":"user","level":"info","message":"agent-2 received message","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:36.940Z"}
+{"level":"info","message":"Agent configurations saved successfully","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:37.170Z"}
+{"level":"info","message":"Client disconnected: PNZBImtbxv59id60AAAB","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:39.349Z"}
+{"level":"info","message":"Client connected: _qfm2NNElrK5cFnkAAAD","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:39.384Z"}
+{"level":"info","message":"Client _qfm2NNElrK5cFnkAAAD joined conversation: conv-1752323501672","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:41.672Z"}
+{"level":"info","message":"Sending message to agent-3","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:58.311Z"}
+{"from":"user","level":"info","message":"agent-3 received message","service":"multi-agent-chat","timestamp":"2025-07-12T12:31:58.369Z"}
+{"level":"info","message":"Sending message to agent-1","service":"multi-agent-chat","timestamp":"2025-07-12T12:32:24.728Z"}
+{"from":"user","level":"info","message":"agent-1 received message","service":"multi-agent-chat","timestamp":"2025-07-12T12:32:24.739Z"}
+{"level":"info","message":"Sending message to agent-2","service":"multi-agent-chat","timestamp":"2025-07-12T12:32:35.766Z"}
+{"from":"user","level":"info","message":"agent-2 received message","service":"multi-agent-chat","timestamp":"2025-07-12T12:32:35.770Z"}
+{"level":"info","message":"Sending message to agent-3","service":"multi-agent-chat","timestamp":"2025-07-12T12:32:50.655Z"}
+{"from":"user","level":"info","message":"agent-3 received message","service":"multi-agent-chat","timestamp":"2025-07-12T12:32:50.659Z"}
+{"level":"error","message":"Error routing message to agent-3:","service":"multi-agent-chat","timestamp":"2025-07-12T12:33:50.673Z"}
+{"level":"error","message":"Error getting response from agent-3:","service":"multi-agent-chat","timestamp":"2025-07-12T12:33:50.673Z"}
+{"level":"info","message":"Shutting down manager agent...","service":"multi-agent-chat","timestamp":"2025-07-12T12:34:19.720Z"}
+{"level":"info","message":"agent-3 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:34:19.720Z"}
+{"level":"info","message":"agent-2 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:34:19.720Z"}
+{"level":"info","message":"agent-1 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:34:19.720Z"}
+{"level":"info","message":"agent-4 shutting down...","service":"multi-agent-chat","timestamp":"2025-07-12T12:34:19.720Z"}
+{"level":"info","message":"Memory system initialized for test-agent (user: test-user)","service":"multi-agent-chat","timestamp":"2025-07-14T15:49:33.568Z"}
+{"level":"info","message":"Memory cleanup completed for test-agent","service":"multi-agent-chat","timestamp":"2025-07-14T15:49:33.626Z"}
