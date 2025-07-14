@@ -1,6 +1,6 @@
 # Multi-Agent Chatbot System
 
-A simplified, API-based multi-agent chatbot system with 4 flexible agents powered by Ollama LLMs. Features sequential conversation handling, dynamic agent naming, and PDF export capabilities.
+A sophisticated, API-based multi-agent chatbot system with 4 flexible agents powered by Ollama LLMs. Features intelligent memory system, sequential conversation handling, dynamic agent naming, and PDF export capabilities.
 
 ## System Architecture
 
@@ -19,11 +19,12 @@ The system consists of:
    - Provides system status and health monitoring
 
 3. **Key Features**:
-   - Dynamic agent naming per conversation
-   - Sequential conversation flow (agents respond in order)
-   - Conversation history maintenance
-   - PDF export of chat sessions
-   - REST API interface (no web UI)
+   - **Intelligent Memory System**: Cross-conversation persistence and user preference learning
+   - **Dynamic Agent Naming**: Flexible agent roles per conversation
+   - **Sequential Conversation Flow**: Agents respond in order with full context
+   - **Conversation History**: Persistent storage and retrieval
+   - **PDF Export**: Professional document generation
+   - **REST API Interface**: No web UI dependencies
 
 ## Prerequisites
 
@@ -85,8 +86,9 @@ npm run stop
 
 ### Individual Agents (ports 3001-3004)
 
-- `POST /message` - Send message directly to this agent
-- `GET /status` - Get agent status
+- `POST /message` - Send message directly to this agent (supports `userId` for memory)
+- `GET /status` - Get agent status (includes memory statistics)
+- `GET /memory/:userId` - Get memory statistics, context, and preferences
 
 ## Usage Examples
 
@@ -98,7 +100,8 @@ curl -X POST http://localhost:3000/message \
   -d '{
     "content": "Hello, can you help me with a coding problem?",
     "agentId": "agent-1",
-    "agentName": "CodeHelper"
+    "agentName": "CodeHelper",
+    "userId": "john-doe"
   }'
 ```
 
@@ -125,23 +128,41 @@ curl -X GET http://localhost:3000/export-chat/conv-1234567890 \
   --output conversation.pdf
 ```
 
+### Memory Management
+
+```bash
+# Get agent memory status
+curl -X GET http://localhost:3001/memory/john-doe
+
+# Check agent status with memory stats
+curl -X GET http://localhost:3001/status
+```
+
 ## Features
 
-### Flexible Agent System
+### 🧠 Intelligent Memory System
+
+- **Cross-Conversation Persistence**: Agents remember users between sessions
+- **User Preference Learning**: Automatic detection of communication styles, interests, and context
+- **Contextual Response Generation**: Responses enhanced with relevant memories
+- **Memory Management**: Automatic cleanup, statistics, and monitoring
+- **Privacy-Focused**: User-specific memory isolation and secure storage
+
+### 🤖 Flexible Agent System
 
 - **No Predefined Roles**: Agents can be assigned any name and task per conversation
 - **Dynamic Naming**: Assign meaningful names to agents based on the conversation context
 - **Sequential Processing**: Agents respond in order, seeing previous responses
-- **Conversation Memory**: Each agent receives the full conversation history
+- **Memory-Enhanced Conversations**: Each agent accesses conversation history and user preferences
 
-### PDF Export
+### 📄 PDF Export
 
 - Export complete conversation history as formatted PDF documents
 - Includes participant information, timestamps, and full message content
 - Files saved to `/exports` directory
 - Clean, professional formatting suitable for documentation
 
-### API-First Design
+### 🔧 API-First Design
 
 - No web UI dependencies for better reliability
 - RESTful API design for easy integration
@@ -158,6 +179,20 @@ multi-agent-chat/
 ├── agent-qwen/           # Agent-4 (flexible)
 ├── manager/              # Central manager service
 ├── shared/               # Shared utilities
+│   ├── memory.js         # Memory system implementation
+│   ├── agent-base.js     # Enhanced base agent class
+│   └── ...               # Other shared utilities
+├── docs/                 # Documentation
+│   ├── MEMORY-SYSTEM.md  # Memory system documentation
+│   ├── IMPROVEMENTS.md   # System improvements log
+│   └── ...               # Other documentation
+├── tests/                # Test scripts
+│   ├── test-memory.js    # Memory system tests
+│   ├── demo-memory.js    # Memory system demo
+│   └── ...               # Other tests
+├── memory/               # Memory storage (auto-created)
+│   ├── users/            # User-specific memories
+│   └── global/           # Global agent memories
 ├── exports/              # PDF export directory
 ├── logs/                 # System logs
 ├── setup-env.js          # Environment setup script
@@ -198,6 +233,26 @@ OLLAMA_TIMEOUT=60000
 AGENT_TIMEOUT=60000
 ```
 
+## Testing
+
+### Memory System Tests
+```bash
+# Test memory functionality
+node tests/test-memory.js
+
+# Demo memory system
+node tests/demo-memory.js
+```
+
+### System Tests
+```bash
+# Test service startup
+node tests/test-startup.js
+
+# Comprehensive system tests
+node tests/test-system.js
+```
+
 ## Troubleshooting
 
 1. **Connection Problems**: Ensure Ollama is running:
@@ -212,19 +267,35 @@ AGENT_TIMEOUT=60000
 
 3. **Port Conflicts**: Edit `.env` file to change port numbers
 
-4. **Check System Status**: 
+4. **Memory Issues**: Check memory directory permissions:
+   ```bash
+   ls -la memory/
+   ```
+
+5. **Check System Status**: 
    ```bash
    curl http://localhost:3000/status
    ```
 
-## Changes from Previous Version
+## Recent Enhancements
 
-- **Simplified Architecture**: Reduced from 5 specialized agents to 4 flexible agents
-- **Removed Web UI**: API-only interface for better reliability
-- **Dynamic Agent Naming**: Agents can be named per conversation
-- **Sequential Conversations**: Agents respond in order with conversation context
-- **PDF Export**: Export conversations as formatted PDF documents
-- **Cleaner Codebase**: Removed unnecessary scripts and dependencies
+### 🧠 Memory System (NEW)
+- **Cross-Conversation Persistence**: Agents remember users between sessions
+- **User Preference Learning**: Automatic detection and storage of user preferences
+- **Contextual Response Generation**: Memory-enhanced responses
+- **Memory Management**: Automatic cleanup and optimization
+
+### 🗂️ Improved Organization
+- **Documentation**: Moved to dedicated `docs/` folder
+- **Testing**: Consolidated test scripts in `tests/` folder
+- **Memory Storage**: Organized user and global memory storage
+- **Cleaner Structure**: Better project organization and maintainability
+
+### 🚀 Enhanced Features
+- **Memory-Enhanced Conversations**: Agents provide personalized responses
+- **User Context Awareness**: Agents remember communication styles and preferences
+- **Improved API**: Memory endpoints and enhanced status information
+- **Better Testing**: Comprehensive test suite for all features
 
 ## License
 
