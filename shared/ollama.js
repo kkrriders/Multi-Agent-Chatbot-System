@@ -26,6 +26,66 @@ async function checkOllamaAvailability() {
 }
 
 /**
+ * Get list of available models
+ * 
+ * @returns {Promise<Array>} - List of available model names
+ */
+async function getAvailableModels() {
+  try {
+    const response = await axios.get(`${OLLAMA_API_BASE}/tags`, { timeout: 5000 });
+    return response.data.models ? response.data.models.map(m => m.name) : [];
+  } catch (error) {
+    console.error('Failed to get available models:', error.message);
+    return [];
+  }
+}
+
+/**
+ * Find a fallback model if the requested model is not available
+ * 
+ * @param {string} requestedModel - The model that was requested
+ * @returns {Promise<string>} - Available model to use instead
+ */
+async function findFallbackModel(requestedModel) {
+  try {
+    const availableModels = await getAvailableModels();
+    
+    if (availableModels.includes(requestedModel)) {
+      return requestedModel;
+    }
+    
+    // Common fallback models in order of preference
+    const fallbackModels = [
+      'llama3:latest',
+      'llama2:latest', 
+      'phi3:latest',
+      'mistral:latest',
+      'qwen:latest'
+    ];
+    
+    for (const fallback of fallbackModels) {
+      if (availableModels.includes(fallback)) {
+        console.warn(`Model ${requestedModel} not available, using fallback: ${fallback}`);
+        return fallback;
+      }
+    }
+    
+    // If no fallback found, return the first available model
+    if (availableModels.length > 0) {
+      console.warn(`Model ${requestedModel} not available, using first available: ${availableModels[0]}`);
+      return availableModels[0];
+    }
+    
+    // No models available - just return the requested model and let it fail gracefully
+    console.warn(`No models available. Will try to use requested model: ${requestedModel}`);
+    return requestedModel;
+  } catch (error) {
+    console.warn(`Error finding fallback model, using requested: ${requestedModel}`);
+    return requestedModel;
+  }
+}
+
+/**
  * Generate a response from Ollama LLM model
  * 
  * @param {string} model - Ollama model name
@@ -41,6 +101,9 @@ async function generateResponse(model, prompt, options = {}) {
       return "I'm unable to connect to the Ollama service at the moment. Please check if Ollama is running properly.";
     }
 
+    // Use fallback model if requested model is not available
+    const availableModel = await findFallbackModel(model);
+    
     // Set default options
     const defaultOptions = {
       temperature: 0.7,
@@ -56,11 +119,11 @@ async function generateResponse(model, prompt, options = {}) {
     // Enhance prompt for better formatting
     const enhancedPrompt = `${prompt}\n\n<answer>`;
 
-    console.log(`Generating response with model: ${model}`);
+    console.log(`Generating response with model: ${availableModel}`);
     
     // Call Ollama API
     const response = await axios.post(`${OLLAMA_API_BASE}/generate`, {
-      model,
+      model: availableModel,
       prompt: enhancedPrompt,
       stream: false,
       ...finalOptions
@@ -70,7 +133,7 @@ async function generateResponse(model, prompt, options = {}) {
 
     // Basic response validation
     if (!response.data || !response.data.response) {
-      console.warn(`Empty response from Ollama for model ${model}`);
+      console.warn(`Empty response from Ollama for model ${availableModel}`);
       return "I processed your request but couldn't generate a specific response at this time.";
     }
 
@@ -85,23 +148,23 @@ async function generateResponse(model, prompt, options = {}) {
     return text;
   } catch (error) {
     // Enhanced error handling with more specific messages
-    let errorMessage = `Failed to generate response with ${model}: ${error.message}`;
+    let errorMessage = `Failed to generate response: ${error.message}`;
     
     // Provide more specific error messaging based on error type
     if (error.code === 'ECONNABORTED') {
-      errorMessage = `TIMEOUT ERROR: Model ${model} timed out after ${REQUEST_TIMEOUT/1000} seconds. Try reducing prompt size or complexity.`;
+      errorMessage = `TIMEOUT ERROR: Model timed out after ${REQUEST_TIMEOUT/1000} seconds. Try reducing prompt size or complexity.`;
       console.error(errorMessage);
     } else if (error.code === 'ECONNREFUSED') {
       errorMessage = `CONNECTION ERROR: Could not connect to Ollama service. Please ensure Ollama is running at ${OLLAMA_API_BASE}.`;
       console.error(errorMessage);
     } else if (error.response && error.response.status === 404) {
-      errorMessage = `MODEL ERROR: Model ${model} not found. Please ensure it's downloaded or use a different model.`;
+      errorMessage = `MODEL ERROR: Model not found. Please ensure it's downloaded or use a different model.`;
       console.error(errorMessage);
     } else if (error.response && error.response.status === 400) {
       errorMessage = `REQUEST ERROR: Bad request to Ollama API. This may be due to invalid parameters or prompt format.`;
       console.error(errorMessage);
     } else {
-      console.error(`Error generating response with model ${model}:`, error.message);
+      console.error(`Error generating response:`, error.message);
     }
     
     if (error.response && error.response.data) {
@@ -191,5 +254,8 @@ async function pullModel(modelName) {
 module.exports = {
   generateResponse,
   moderateWithLLM,
-  pullModel
+  pullModel,
+  checkOllamaAvailability,
+  getAvailableModels,
+  findFallbackModel
 }; 

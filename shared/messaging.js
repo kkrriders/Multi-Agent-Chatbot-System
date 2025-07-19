@@ -48,9 +48,16 @@ function createMessage(from, to, content, performative, metadata = {}) {
     // It's already a valid performative value
     normalizedPerformative = performative;
   } else {
-    // Default to request if invalid
-    console.warn(`Invalid performative '${performative}', defaulting to 'request'`);
-    normalizedPerformative = PERFORMATIVES.REQUEST;
+    // Default to inform if invalid
+    console.warn(`Invalid performative '${performative}', defaulting to 'inform'`);
+    normalizedPerformative = PERFORMATIVES.INFORM;
+  }
+  
+  // Double-check the performative is valid
+  const validPerformatives = Object.values(PERFORMATIVES).map(p => p.toLowerCase());
+  if (!validPerformatives.includes(normalizedPerformative.toLowerCase())) {
+    console.warn(`Performative '${normalizedPerformative}' not in valid list, using 'inform'`);
+    normalizedPerformative = PERFORMATIVES.INFORM;
   }
   
   const message = {
@@ -64,6 +71,8 @@ function createMessage(from, to, content, performative, metadata = {}) {
 
   const validation = validateMessage(message);
   if (!validation.isValid) {
+    console.error(`Message validation failed:`, validation.error);
+    console.error(`Message:`, message);
     throw new Error(`Invalid message: ${validation.error}`);
   }
 

@@ -1,0 +1,47 @@
+[1m🚀 Starting Multi-Agent Chatbot System...[0m
+
+[34m[Manager][0m Starting on port 3000...
+[32m[Agent-1][0m Starting on port 3001...
+[33m[Agent-2][0m Starting on port 3002...
+[35m[Agent-3][0m Starting on port 3003...
+[36m[Agent-4][0m Starting on port 3004...
+
+[1m📡 System Status:[0m
+Manager API: http://localhost:3000
+Agent-1: http://localhost:3001
+Agent-2: http://localhost:3002
+Agent-3: http://localhost:3003
+Agent-4: http://localhost:3004
+
+[1m💡 API Endpoints:[0m
+POST /message - Send message to single agent
+POST /team-conversation - Start team conversation
+GET /conversation/:id - Get conversation history
+GET /export-chat/:id - Export conversation as PDF
+GET /status - System status
+
+[32m✅ All services started successfully![0m
+[33m⚠️  Press Ctrl+C to stop all services[0m
+
+[32m[Agent-1][0m [32minfo[39m: agent-1 running on port 3001 {"service":"multi-agent-chat","timestamp":"2025-07-15T14:47:33.135Z"}
+[35m[Agent-3][0m [32minfo[39m: agent-3 running on port 3003 {"service":"multi-agent-chat","timestamp":"2025-07-15T14:47:33.135Z"}
+[33m[Agent-2][0m [32minfo[39m: agent-2 running on port 3002 {"service":"multi-agent-chat","timestamp":"2025-07-15T14:47:34.897Z"}
+[36m[Agent-4][0m [32minfo[39m: agent-4 running on port 3004 {"service":"multi-agent-chat","timestamp":"2025-07-15T14:47:36.764Z"}
+[34m[Manager][0m [32minfo[39m: Manager agent running on port 3000 with WebSocket support {"service":"multi-agent-chat","timestamp":"2025-07-15T14:47:39.773Z"}
+
+[1m🛑 Shutting down all services...[0m
+Stopping Manager...
+Stopping Agent-1...
+Stopping Agent-2...
+Stopping Agent-3...
+Stopping Agent-4...
+[32m[Agent-1][0m [32minfo[39m: agent-1 shutting down... {"service":"multi-agent-chat","timestamp":"2025-07-15T14:48:54.404Z"}
+[35m[Agent-3][0m [32minfo[39m: agent-3 shutting down... {"service":"multi-agent-chat","timestamp":"2025-07-15T14:48:54.404Z"}
+[34m[Manager][0m [32minfo[39m: Shutting down manager agent... {"service":"multi-agent-chat","timestamp":"2025-07-15T14:48:54.404Z"}
+[36m[Agent-4][0m [32minfo[39m: agent-4 shutting down... {"service":"multi-agent-chat","timestamp":"2025-07-15T14:48:54.404Z"}
+[33m[Agent-2][0m [32minfo[39m: agent-2 shutting down... {"service":"multi-agent-chat","timestamp":"2025-07-15T14:48:54.404Z"}
+[33m[Agent-2][0m Process exited normally
+[36m[Agent-4][0m Process exited normally
+[34m[Manager][0m Process exited normally
+[35m[Agent-3][0m Process exited normally
+[32m[Agent-1][0m Process exited normally
