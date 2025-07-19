@@ -82,14 +82,29 @@ class BaseAgent {
         // Initialize memory for this user
         await this.initializeMemory(userId);
         
-        // Validate incoming message
-        const validation = validateMessage(message);
-        if (!validation.isValid) {
-          return res.status(400).json({ error: validation.error });
+        // Validate incoming message structure
+        if (!message.from || !message.content) {
+          return res.status(400).json({ 
+            error: 'Message must contain from and content fields' 
+          });
         }
         
+        // Ensure message has valid performative
+        if (!message.performative || !Object.values(PERFORMATIVES).includes(message.performative)) {
+          message.performative = PERFORMATIVES.INFORM;
+        }
+        
+        // Create proper message structure
+        const structuredMessage = createMessage(
+          message.from,
+          this.agentId,
+          message.content,
+          message.performative,
+          message.metadata || {}
+        );
+        
         // Generate response using the LLM with memory
-        const response = await this.generateAgentResponse(message);
+        const response = await this.generateAgentResponse(structuredMessage);
         
         res.json(response);
       } catch (error) {
@@ -221,20 +236,26 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
       
       // Generate response using Ollama with timeout and retry
       let content;
-      let retries = 2;
+      let retries = 3;
       
       while (retries >= 0) {
         try {
           // Log attempt for debugging
-          if (retries < 2) {
-            logger.info(`${this.agentId}: Retry attempt ${2-retries} for message from ${message.from}`);
+          if (retries < 3) {
+            logger.info(`${this.agentId}: Retry attempt ${3-retries} for message from ${message.from}`);
           }
           
           content = await generateResponse(this.model, prompt, { 
             temperature: 0.7,
             num_predict: numPredict
           });
-          break; // Exit loop if successful
+          
+          // Validate content before proceeding
+          if (content && content.trim().length > 0) {
+            break; // Exit loop if successful and content is valid
+          } else {
+            throw new Error('Empty response received');
+          }
         } catch (err) {
           if (retries === 0) {
             // On final failure, log detailed error
@@ -242,10 +263,10 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
             throw err;
           }
           retries--;
-          logger.warn(`${this.agentId}: Generation failed. Retrying... (${retries} attempts left)`);
+          logger.warn(`${this.agentId}: Generation failed. Retrying... (${retries} attempts left). Error: ${err.message}`);
           
-          // Wait a moment before retrying to allow system resources to recover
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Wait progressively longer before retrying
+          await new Promise(resolve => setTimeout(resolve, (4-retries) * 1000));
         }
       }
       

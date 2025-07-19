@@ -86,3 +86,11 @@
 {"level":"error","message":"Error in single message route:","service":"multi-agent-chat","timestamp":"2025-07-03T04:07:40.646Z"}
 {"level":"error","message":"Error routing message to agent-3:","service":"multi-agent-chat","timestamp":"2025-07-12T12:33:50.673Z"}
 {"level":"error","message":"Error getting response from agent-3:","service":"multi-agent-chat","timestamp":"2025-07-12T12:33:50.673Z"}
+{"level":"error","message":"Error routing message to agent-3:","service":"multi-agent-chat","timestamp":"2025-07-15T05:40:18.271Z"}
+{"level":"error","message":"Error getting response from agent-3:","service":"multi-agent-chat","timestamp":"2025-07-15T05:40:18.272Z"}
+{"level":"error","message":"agent-4: All retries failed for message from user. Error: MODEL ERROR: Model qwen:latest not found. Please ensure it's downloaded or use a different model.","service":"multi-agent-chat","timestamp":"2025-07-15T05:42:25.234Z"}
+{"level":"error","message":"Error generating response with qwen:latest:","service":"multi-agent-chat","timestamp":"2025-07-15T05:42:25.235Z"}
+{"level":"error","message":"Error routing message to agent-1:","service":"multi-agent-chat","timestamp":"2025-07-15T14:53:31.015Z"}
+{"level":"error","message":"Error in single message route:","service":"multi-agent-chat","timestamp":"2025-07-15T14:53:31.018Z"}
+{"level":"error","message":"Error routing message to agent-1:","service":"multi-agent-chat","timestamp":"2025-07-15T15:00:57.862Z"}
+{"level":"error","message":"Error in single message route:","service":"multi-agent-chat","timestamp":"2025-07-15T15:00:57.863Z"}
