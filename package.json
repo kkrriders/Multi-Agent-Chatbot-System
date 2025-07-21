@@ -1,27 +1,51 @@
 {
-  "name": "multi-agent-chat",
-  "version": "2.0.0",
-  "description": "Simplified Multi-Agent Chatbot System with 4 flexible agents",
-  "main": "index.js",
+  "name": "multi-agent-chatbot-system",
+  "version": "3.0.0",
+  "description": "Production-ready multi-agent AI system with intelligent GPU memory management, real-time monitoring, and breakthrough agent-to-agent communication protocols",
+  "main": "start-stable.js",
   "scripts": {
+    "start": "node start-stable.js",
+    "start-dev": "concurrently --names \"MANAGER,AGENT-1,AGENT-2,AGENT-3,AGENT-4\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold\" \"npm run start-manager\" \"npm run start-agent-1\" \"npm run start-agent-2\" \"npm run start-agent-3\" \"npm run start-agent-4\"",
     "start-manager": "node manager/index.js",
     "start-agent-1": "node agent-llama3/index.js",
     "start-agent-2": "node agent-mistral/index.js",
     "start-agent-3": "node agent-phi3/index.js",
     "start-agent-4": "node agent-qwen/index.js",
-    "start": "concurrently --names \"MANAGER,AGENT-1,AGENT-2,AGENT-3,AGENT-4\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold\" \"npm run start-manager\" \"npm run start-agent-1\" \"npm run start-agent-2\" \"npm run start-agent-3\" \"npm run start-agent-4\"",
+    "monitor": "node performance-monitor.js",
+    "warm-models": "node warm-models.js",
     "download-models": "node download-models.js",
     "stop": "node stop-services.js",
+    "test": "cd tests && node test-system.js",
     "setup": "npm install && npm run download-models"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/multi-agent-chatbot-system.git"
+  },
   "keywords": [
+    "multi-agent",
     "chatbot",
+    "ai",
     "llm",
     "ollama",
-    "multi-agent"
+    "gpu-optimization",
+    "agent-communication",
+    "model-management",
+    "websocket",
+    "real-time",
+    "performance-monitoring",
+    "nodejs"
   ],
-  "author": "",
+  "author": "Your Name <your.email@domain.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/your-username/multi-agent-chatbot-system/issues"
+  },
+  "homepage": "https://github.com/your-username/multi-agent-chatbot-system#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
   "dependencies": {
     "axios": "^1.6.2",
     "cors": "^2.8.5",

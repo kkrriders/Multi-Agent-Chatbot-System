@@ -16,9 +16,23 @@ const { logger } = require('./logger');
 const { generateResponse } = require('./ollama');
 const { PERFORMATIVES, createMessage, validateMessage } = require('./messaging');
 const { AgentMemory, MEMORY_TYPES } = require('./memory');
+const { ModelManager } = require('./model-manager');
 
 // Load environment variables
 dotenv.config();
+
+// Global Model Manager instance (singleton)
+let globalModelManager = null;
+
+function getModelManager() {
+  if (!globalModelManager) {
+    globalModelManager = new ModelManager({
+      ollamaBase: process.env.OLLAMA_API_BASE || 'http://172.18.224.1:11434/api',
+      maxGPUMemory: 7 * 1024 * 1024 * 1024 // 7GB for RTX 4070
+    });
+  }
+  return globalModelManager;
+}
 
 /**
  * Base Agent class with shared functionality
@@ -245,9 +259,14 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
             logger.info(`${this.agentId}: Retry attempt ${3-retries} for message from ${message.from}`);
           }
           
-          content = await generateResponse(this.model, prompt, { 
-            temperature: 0.7,
-            num_predict: numPredict
+          // Use ModelManager for intelligent model handling
+          const modelManager = getModelManager();
+          content = await modelManager.queueRequest(this.agentId, {
+            prompt: prompt,
+            options: {
+              temperature: 0.7,
+              num_predict: numPredict
+            }
           });
           
           // Validate content before proceeding
@@ -407,4 +426,4 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
   }
 }
 
-module.exports = BaseAgent; 
+module.exports = { BaseAgent, getModelManager }; 

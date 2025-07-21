@@ -86,14 +86,15 @@ async function findFallbackModel(requestedModel) {
 }
 
 /**
- * Generate a response from Ollama LLM model
+ * Generate a response from Ollama LLM model with retry logic
  * 
  * @param {string} model - Ollama model name
  * @param {string} prompt - Text prompt for the model
  * @param {Object} options - Additional options for the model
+ * @param {number} retries - Number of retries (internal use)
  * @returns {Promise<string>} - Model's generated response
  */
-async function generateResponse(model, prompt, options = {}) {
+async function generateResponse(model, prompt, options = {}, retries = 0) {
   try {
     // Check if Ollama service is available first
     const isAvailable = await checkOllamaAvailability();
@@ -121,14 +122,24 @@ async function generateResponse(model, prompt, options = {}) {
 
     console.log(`Generating response with model: ${availableModel}`);
     
-    // Call Ollama API
+    // Call Ollama API with improved connection handling
     const response = await axios.post(`${OLLAMA_API_BASE}/generate`, {
       model: availableModel,
       prompt: enhancedPrompt,
       stream: false,
       ...finalOptions
     }, {
-      timeout: REQUEST_TIMEOUT
+      timeout: REQUEST_TIMEOUT,
+      maxRedirects: 5,
+      headers: {
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/json'
+      },
+      httpAgent: new (require('http')).Agent({ 
+        keepAlive: true,
+        keepAliveMsecs: 30000,
+        maxSockets: 10
+      })
     });
 
     // Basic response validation
@@ -147,6 +158,16 @@ async function generateResponse(model, prompt, options = {}) {
 
     return text;
   } catch (error) {
+    // Retry logic for connection issues
+    const maxRetries = 2;
+    const retryableErrors = ['ECONNRESET', 'ECONNREFUSED', 'ECONNABORTED', 'ETIMEDOUT'];
+    
+    if (retries < maxRetries && retryableErrors.includes(error.code)) {
+      console.warn(`Connection error (${error.code}), retrying... (${retries + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retries + 1))); // Exponential backoff
+      return generateResponse(model, prompt, options, retries + 1);
+    }
+    
     // Enhanced error handling with more specific messages
     let errorMessage = `Failed to generate response: ${error.message}`;
     

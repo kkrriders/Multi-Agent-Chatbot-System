@@ -335,8 +335,22 @@
     </div>
 
     <script>
+        // Initialize persistent connection on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded - starting persistent session connection');
+            setTimeout(() => {
+                ensureSessionConnection().then(() => {
+                    console.log('Persistent session connection ready');
+                }).catch((error) => {
+                    console.error('Failed to establish session connection on load:', error);
+                });
+            }, 500);
+        });
+
         let socket;
+        let isConnecting = false;
         let currentConversationId = '';
+        let connectionInitialized = false;
         let workInProgress = false;
         
         // Template configurations
@@ -431,18 +445,80 @@
             }
         };
         
-        // Initialize Socket.IO connection
+        // Initialize Socket.IO connection - called only once per session
         function initializeSocket() {
-            socket = io('http://localhost:3000');
+            if (connectionInitialized) {
+                console.log('Socket already initialized for this session');
+                return;
+            }
+            
+            if (isConnecting) {
+                console.log('Socket connection already in progress');
+                return;
+            }
+            
+            isConnecting = true;
+            connectionInitialized = true;
+            console.log('Initializing persistent socket connection for session...');
+            
+            socket = io('http://localhost:3000', {
+                transports: ['websocket', 'polling'],
+                timeout: 45000,
+                forceNew: false,
+                reconnection: true,
+                reconnectionDelay: 2000,
+                reconnectionAttempts: 10,
+                maxReconnectionAttempts: 10,
+                randomizationFactor: 0.5
+            });
             
             socket.on('connect', () => {
+                isConnecting = false;
                 document.getElementById('connection-status').textContent = 'Connected to server';
+                document.getElementById('connection-status').className = 'status connected';
+                console.log('Socket connected successfully');
+            });
+            
+            socket.on('connection-confirmed', (data) => {
+                console.log('Connection confirmed by server:', data);
+            });
+            
+            socket.on('disconnect', (reason) => {
+                isConnecting = false;
+                document.getElementById('connection-status').textContent = `Disconnected: ${reason}`;
+                document.getElementById('connection-status').className = 'status disconnected';
+                console.log('Socket disconnected:', reason);
+                
+                // Only reset connection state on manual disconnect
+                if (reason === 'io client disconnect') {
+                    console.log('Manual disconnect - resetting session connection state');
+                    connectionInitialized = false;
+                    return;
+                }
+                
+                // For unexpected disconnects, maintain session state for auto-reconnect
+                console.log('Unexpected disconnect - session will auto-reconnect');
+            });
+            
+            socket.on('connect_error', (error) => {
+                isConnecting = false;
+                console.error('Connection error:', error);
+                document.getElementById('connection-status').textContent = `Connection error: ${error.message}`;
+                document.getElementById('connection-status').className = 'status disconnected';
+            });
+            
+            socket.on('reconnect', (attemptNumber) => {
+                console.log('Reconnected after', attemptNumber, 'attempts');
+                document.getElementById('connection-status').textContent = 'Reconnected to server';
                 document.getElementById('connection-status').className = 'status connected';
             });
             
-            socket.on('disconnect', () => {
-                document.getElementById('connection-status').textContent = 'Disconnected from server';
-                document.getElementById('connection-status').className = 'status disconnected';
+            socket.on('reconnect_error', (error) => {
+                console.error('Reconnection error:', error);
+            });
+            
+            socket.on('error', (error) => {
+                console.error('Socket error:', error);
             });
             
             socket.on('conversation-update', (data) => {
@@ -464,18 +540,67 @@
         
         // Join conversation
         function joinConversation() {
-            const conversationId = document.getElementById('conversation-id').value || `work-${Date.now()}`;
+            ensureSessionConnection().then(() => {
+                console.log('Joining conversation with persistent session connection...');
             
-            if (currentConversationId) {
-                socket.emit('leave-conversation', currentConversationId);
+            // Use existing conversation ID if already set, otherwise create new one
+            let conversationId = document.getElementById('conversation-id').value;
+            if (!conversationId || conversationId.trim() === '') {
+                conversationId = currentConversationId || `work-${Date.now()}`;
+                document.getElementById('conversation-id').value = conversationId;
             }
             
-            currentConversationId = conversationId;
-            document.getElementById('conversation-id').value = conversationId;
-            socket.emit('join-conversation', conversationId);
+            // Only join if not already in this conversation
+            if (currentConversationId === conversationId) {
+                return; // Already in this conversation
+            }
             
-            // Clear chat messages
-            document.getElementById('chat-messages').innerHTML = '';
+            if (currentConversationId && currentConversationId !== conversationId) {
+                socket.emit('leave-conversation', currentConversationId);
+                // Clear chat messages when switching conversations
+                document.getElementById('chat-messages').innerHTML = '';
+            }
+            
+                currentConversationId = conversationId;
+                socket.emit('join-conversation', conversationId);
+                
+                // Save to sessionStorage
+                sessionStorage.setItem('currentConversationId', conversationId);
+            }).catch((error) => {
+                console.error('Session connection failed:', error);
+                alert('Unable to establish connection. Please refresh the page.');
+            });
+        }
+        
+        // Ensure persistent session connection is available
+        function ensureSessionConnection() {
+            if (!socket) {
+                console.log('Initializing session connection...');
+                initializeSocket();
+            }
+            
+            return new Promise((resolve, reject) => {
+                if (socket && socket.connected) {
+                    console.log('Session connection already active');
+                    resolve();
+                    return;
+                }
+                
+                let attempts = 0;
+                const checkConnection = () => {
+                    if (socket && socket.connected) {
+                        console.log('Session connection established');
+                        resolve();
+                    } else if (attempts < 20) {
+                        attempts++;
+                        setTimeout(checkConnection, 500);
+                    } else {
+                        reject(new Error('Failed to establish persistent session connection'));
+                    }
+                };
+                
+                setTimeout(checkConnection, 100);
+            });
         }
         
         // Load template
@@ -652,8 +777,15 @@
         
         // Add event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize socket
-            initializeSocket();
+            // Restore conversation ID from sessionStorage
+            const savedConversationId = sessionStorage.getItem('currentConversationId');
+            if (savedConversationId) {
+                currentConversationId = savedConversationId;
+                document.getElementById('conversation-id').value = savedConversationId;
+            }
+            
+            // Use persistent session connection
+            console.log('Work session using persistent connection');
             
             // Auto-join conversation
             joinConversation();

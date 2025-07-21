@@ -67,6 +67,19 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
+  },
+  pingTimeout: 180000,
+  pingInterval: 25000,
+  transports: ['websocket', 'polling'],
+  connectTimeout: 60000,
+  allowEIO3: true,
+  maxHttpBufferSize: 1e8,
+  allowUpgrades: true,
+  upgradeTimeout: 30000,
+  perMessageDeflate: {
+    threshold: 1024,
+    concurrencyLimit: 20,
+    serverMaxWindowBits: 15
   }
 });
 
@@ -116,18 +129,44 @@ setInterval(() => {
 io.on('connection', (socket) => {
   logger.info(`Client connected: ${socket.id}`);
   
+  // Send connection confirmation
+  socket.emit('connection-confirmed', { 
+    id: socket.id, 
+    timestamp: Date.now() 
+  });
+  
   socket.on('join-conversation', (conversationId) => {
-    socket.join(conversationId);
-    logger.info(`Client ${socket.id} joined conversation: ${conversationId}`);
+    if (conversationId && typeof conversationId === 'string') {
+      socket.join(conversationId);
+      logger.info(`Client ${socket.id} joined conversation: ${conversationId}`);
+      socket.emit('joined-conversation', { conversationId });
+    } else {
+      socket.emit('error', { message: 'Invalid conversation ID' });
+    }
   });
   
   socket.on('leave-conversation', (conversationId) => {
-    socket.leave(conversationId);
-    logger.info(`Client ${socket.id} left conversation: ${conversationId}`);
+    if (conversationId && typeof conversationId === 'string') {
+      socket.leave(conversationId);
+      logger.info(`Client ${socket.id} left conversation: ${conversationId}`);
+      socket.emit('left-conversation', { conversationId });
+    }
   });
   
-  socket.on('disconnect', () => {
-    logger.info(`Client disconnected: ${socket.id}`);
+  socket.on('ping', () => {
+    socket.emit('pong', { timestamp: Date.now() });
+  });
+  
+  socket.on('disconnect', (reason) => {
+    logger.info(`Client disconnected: ${socket.id}, reason: ${reason}`);
+  });
+  
+  socket.on('error', (error) => {
+    logger.error(`Socket error for ${socket.id}:`, error);
+  });
+  
+  socket.on('connect_error', (error) => {
+    logger.error(`Connection error for ${socket.id}:`, error);
   });
 });
 
@@ -919,7 +958,7 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
     managerMessage.isManagerResponse = true;
     
     // Get manager response using the manager's model
-    const managerResponse = await generateResponse(managerMessage.content, process.env.MANAGER_MODEL || 'llama3:latest');
+    const managerResponse = await generateResponse(process.env.MANAGER_MODEL || 'llama3:latest', managerMessage.content);
     
     const finalMessage = {
       from: 'Manager',

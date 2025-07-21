@@ -5,7 +5,7 @@
  */
 
 const axios = require('axios');
-const { logger } = require('./shared/logger');
+const { logger } = require('../shared/logger');
 
 const MANAGER_URL = 'http://localhost:3000';
 const AGENT_URLS = {

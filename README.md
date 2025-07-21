@@ -1,302 +1,326 @@
-# Multi-Agent Chatbot System
+# 🚀 Multi-Agent Chatbot System
 
-A sophisticated, API-based multi-agent chatbot system with 4 flexible agents powered by Ollama LLMs. Features intelligent memory system, sequential conversation handling, dynamic agent naming, and PDF export capabilities.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D%2016.0.0-brightgreen)](https://nodejs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-## System Architecture
+A **production-ready multi-agent AI system** featuring intelligent GPU memory management, real-time performance monitoring, and breakthrough agent-to-agent communication protocols.
 
-The system consists of:
+## ✨ Key Features
 
-1. **4 Flexible Agents**: Each running as a separate microservice without predefined roles:
-   - Agent-1 (Llama3) - Flexible AI assistant
-   - Agent-2 (Mistral) - Flexible AI assistant  
-   - Agent-3 (Phi-3) - Flexible AI assistant
-   - Agent-4 (Qwen) - Flexible AI assistant
+### 🧠 **Intelligent Model Management**
+- **Smart GPU Memory Optimization**: Prevents model thrashing on resource-constrained systems
+- **Request Queuing System**: Eliminates client disconnections during model loading
+- **Usage Analytics**: Learns patterns and optimizes model persistence automatically
+- **Automatic Fallback**: Seamless model switching with error recovery
 
-2. **Manager Agent**: Coordinates conversations between agents:
-   - Routes messages to individual agents
-   - Manages sequential team conversations
-   - Exports conversations as PDF documents
-   - Provides system status and health monitoring
+### 🎯 **Real-Time Monitoring**
+- **Live Performance Dashboard**: Monitor system health, queue status, and model statistics
+- **Analytics & Recommendations**: AI-driven optimization suggestions
+- **WebSocket Health Monitoring**: Real-time connection status and error tracking
 
-3. **Key Features**:
-   - **Intelligent Memory System**: Cross-conversation persistence and user preference learning
-   - **Dynamic Agent Naming**: Flexible agent roles per conversation
-   - **Sequential Conversation Flow**: Agents respond in order with full context
-   - **Conversation History**: Persistent storage and retrieval
-   - **PDF Export**: Professional document generation
-   - **REST API Interface**: No web UI dependencies
+### 🤖 **Multi-Agent Architecture**
+- **4 Specialized AI Agents**: llama3, mistral, phi3, qwen2.5-coder
+- **Memory Persistence**: Agents remember context across conversations
+- **Flexible Communication**: Advanced agent-to-agent protocols
+- **Modular Design**: Easy to extend with new models and capabilities
 
-## Prerequisites
+### 🔒 **Production Ready**
+- **Cross-Platform Support**: Optimized for WSL2/Windows, Linux, and macOS
+- **Comprehensive Logging**: Structured logging with winston
+- **Error Recovery**: Automatic retries and graceful failure handling
+- **Security**: Content moderation and input validation
 
-- [Node.js](https://nodejs.org/) (v14 or higher)
-- [Ollama](https://ollama.ai/) installed and running locally
-- Required LLMs: Llama3, Mistral, Phi-3, Qwen (can be downloaded using the provided script)
+## 🏗️ System Architecture
 
-## Setup
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Performance Monitor                      │
+│                   http://localhost:3099                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                    Manager Agent                            │
+│                   http://localhost:3000                    │
+│              WebSocket + REST API                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+    │   Agent-1   │ │   Agent-2   │ │   Agent-3   │ │   Agent-4   │
+    │   llama3    │ │   mistral   │ │    phi3     │ │    qwen     │
+    │    :3001    │ │    :3002    │ │    :3003    │ │    :3004    │
+    └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
+                              │
+    ┌─────────────────────────────────────────────────────────────┐
+    │                 Ollama GPU Backend                          │
+    │            Intelligent Model Manager                        │
+    └─────────────────────────────────────────────────────────────┘
+```
 
-1. Clone the repository
+## 🚀 Quick Start
 
-2. Install dependencies:
+### Prerequisites
+
+- **Node.js** 16+ 
+- **Ollama** with GPU support
+- **4-8GB GPU VRAM** (RTX 4060 or better recommended)
+- **8GB+ System RAM**
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/your-username/multi-agent-chatbot-system.git
+cd multi-agent-chatbot-system
+```
+
+2. **Install dependencies**
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+3. **Set up Ollama models**
 ```bash
-node setup-env.js
-```
-This creates a `.env` file with default configuration for all 4 agents and the manager.
-
-4. Download the required Ollama models:
-```bash
-npm run download-models
+# Install required models
+ollama pull llama3:latest
+ollama pull mistral:latest  
+ollama pull phi3:latest
+ollama pull qwen2.5-coder:latest
 ```
 
-## Running the System
-
-Start all services:
+4. **Configure environment**
 ```bash
-npm start
+cp .env.example .env
+# Edit .env with your Ollama API endpoint
 ```
 
-This launches:
-- Manager service on port 3000
-- Agent-1 on port 3001
-- Agent-2 on port 3002  
-- Agent-3 on port 3003
-- Agent-4 on port 3004
-
-To stop all services:
+5. **Start the system**
 ```bash
-npm run stop
+node start-stable.js
 ```
 
-## API Endpoints
+### 🖥️ **For WSL2 Users**
 
-### Manager Agent (port 3000)
+If running on WSL2 with Windows Ollama:
 
-- `GET /` - API information and endpoint list
-- `GET /api/health` - Health check endpoint
-- `POST /message` - Send message to a single agent
-- `POST /team-conversation` - Start a team conversation with multiple agents
-- `GET /conversation/:id` - Get conversation history
-- `DELETE /conversation/:id` - Clear conversation history
-- `GET /export-chat/:id` - Export conversation as PDF
-- `GET /status` - Get system status
+1. **Start Ollama on Windows with network binding:**
+```cmd
+set OLLAMA_HOST=0.0.0.0:11434
+set OLLAMA_MODELS=D:\your\models\path
+ollama serve
+```
 
-### Individual Agents (ports 3001-3004)
+2. **Update .env in WSL:**
+```bash
+OLLAMA_API_BASE=http://172.18.224.1:11434/api
+```
 
-- `POST /message` - Send message directly to this agent (supports `userId` for memory)
-- `GET /status` - Get agent status (includes memory statistics)
-- `GET /memory/:userId` - Get memory statistics, context, and preferences
+## 📊 Performance Dashboard
 
-## Usage Examples
+Access the real-time monitoring dashboard at **http://localhost:3099**
 
-### Single Agent Conversation
+Features:
+- **System Health**: Ollama connectivity and version info
+- **Active Models**: Currently loaded model status  
+- **Queue Monitoring**: Real-time request queue lengths
+- **Usage Statistics**: Model load/use counts and performance metrics
+- **Recommendations**: AI-driven optimization suggestions
+
+## 🔧 Configuration
+
+### Environment Variables
 
 ```bash
-curl -X POST http://localhost:3000/message \
-  -H "Content-Type: application/json" \
-  -d '{
-    "content": "Hello, can you help me with a coding problem?",
-    "agentId": "agent-1",
-    "agentName": "CodeHelper",
-    "userId": "john-doe"
-  }'
-```
-
-### Team Conversation
-
-```bash
-curl -X POST http://localhost:3000/team-conversation \
-  -H "Content-Type: application/json" \
-  -d '{
-    "content": "Let's brainstorm ideas for a new mobile app",
-    "participants": [
-      {"agentId": "agent-1", "agentName": "Designer"},
-      {"agentId": "agent-2", "agentName": "Developer"},
-      {"agentId": "agent-3", "agentName": "Tester"},
-      {"agentId": "agent-4", "agentName": "ProjectManager"}
-    ]
-  }'
-```
-
-### Export Conversation as PDF
-
-```bash
-curl -X GET http://localhost:3000/export-chat/conv-1234567890 \
-  --output conversation.pdf
-```
-
-### Memory Management
-
-```bash
-# Get agent memory status
-curl -X GET http://localhost:3001/memory/john-doe
-
-# Check agent status with memory stats
-curl -X GET http://localhost:3001/status
-```
-
-## Features
-
-### 🧠 Intelligent Memory System
-
-- **Cross-Conversation Persistence**: Agents remember users between sessions
-- **User Preference Learning**: Automatic detection of communication styles, interests, and context
-- **Contextual Response Generation**: Responses enhanced with relevant memories
-- **Memory Management**: Automatic cleanup, statistics, and monitoring
-- **Privacy-Focused**: User-specific memory isolation and secure storage
-
-### 🤖 Flexible Agent System
-
-- **No Predefined Roles**: Agents can be assigned any name and task per conversation
-- **Dynamic Naming**: Assign meaningful names to agents based on the conversation context
-- **Sequential Processing**: Agents respond in order, seeing previous responses
-- **Memory-Enhanced Conversations**: Each agent accesses conversation history and user preferences
-
-### 📄 PDF Export
-
-- Export complete conversation history as formatted PDF documents
-- Includes participant information, timestamps, and full message content
-- Files saved to `/exports` directory
-- Clean, professional formatting suitable for documentation
-
-### 🔧 API-First Design
-
-- No web UI dependencies for better reliability
-- RESTful API design for easy integration
-- JSON-based communication
-- Comprehensive error handling and logging
-
-## Project Structure
-
-```
-multi-agent-chat/
-├── agent-llama3/         # Agent-1 (flexible)
-├── agent-mistral/        # Agent-2 (flexible)  
-├── agent-phi3/           # Agent-3 (flexible)
-├── agent-qwen/           # Agent-4 (flexible)
-├── manager/              # Central manager service
-├── shared/               # Shared utilities
-│   ├── memory.js         # Memory system implementation
-│   ├── agent-base.js     # Enhanced base agent class
-│   └── ...               # Other shared utilities
-├── docs/                 # Documentation
-│   ├── MEMORY-SYSTEM.md  # Memory system documentation
-│   ├── IMPROVEMENTS.md   # System improvements log
-│   └── ...               # Other documentation
-├── tests/                # Test scripts
-│   ├── test-memory.js    # Memory system tests
-│   ├── demo-memory.js    # Memory system demo
-│   └── ...               # Other tests
-├── memory/               # Memory storage (auto-created)
-│   ├── users/            # User-specific memories
-│   └── global/           # Global agent memories
-├── exports/              # PDF export directory
-├── logs/                 # System logs
-├── setup-env.js          # Environment setup script
-├── start-all.js          # Start all services script
-├── stop-services.js      # Stop all services script
-├── download-models.js    # Download Ollama models script
-├── .env                  # Environment configuration
-├── package.json
-└── README.md
-```
-
-## Configuration
-
-The `.env` file contains all configuration options:
-
-```env
-# Manager Configuration
+# Agent Configuration
 MANAGER_PORT=3000
-MANAGER_MODEL=llama3:latest
-
-# Agent Ports
 AGENT_1_PORT=3001
-AGENT_2_PORT=3002
+AGENT_2_PORT=3002  
 AGENT_3_PORT=3003
 AGENT_4_PORT=3004
 
-# Agent Models
+# Model Assignment
+MANAGER_MODEL=llama3:latest
 AGENT_1_MODEL=llama3:latest
 AGENT_2_MODEL=mistral:latest
 AGENT_3_MODEL=phi3:latest
-AGENT_4_MODEL=qwen:latest
+AGENT_4_MODEL=qwen2.5-coder:latest
 
 # Ollama Configuration
-OLLAMA_API_URL=http://localhost:11434
+OLLAMA_API_BASE=http://localhost:11434/api
 
-# Timeout Settings
-OLLAMA_TIMEOUT=60000
-AGENT_TIMEOUT=60000
+# Performance Tuning
+OLLAMA_TIMEOUT=180000
+AGENT_TIMEOUT=180000
+REQUEST_TIMEOUT=180000
 ```
 
-## Testing
+### Advanced Configuration
 
-### Memory System Tests
+Modify `config/agent-configs.json` to customize agent personalities, capabilities, and behavior patterns.
+
+## 📚 API Documentation
+
+### Manager Endpoints
+
+```http
+POST /message
+Content-Type: application/json
+
+{
+  "content": "Your message here",
+  "agent": "agent-1"  // Optional: specific agent
+}
+```
+
+```http
+POST /team-conversation
+Content-Type: application/json
+
+{
+  "message": "Collaborate on this task",
+  "agents": ["agent-1", "agent-2", "agent-3"]
+}
+```
+
+```http
+GET /conversation/{id}
+# Retrieve conversation history
+
+GET /export-chat/{id}
+# Export conversation as PDF
+
+GET /status
+# System health check
+```
+
+### WebSocket Events
+
+```javascript
+// Connect to WebSocket
+const socket = io('http://localhost:3000');
+
+// Join conversation
+socket.emit('join-conversation', conversationId);
+
+// Listen for updates
+socket.on('conversation-update', (data) => {
+  console.log('New message:', data);
+});
+```
+
+## 🧪 Development
+
+### Project Structure
+
+```
+├── agent-llama3/           # Agent 1 implementation
+├── agent-mistral/          # Agent 2 implementation  
+├── agent-phi3/             # Agent 3 implementation
+├── agent-qwen/             # Agent 4 implementation
+├── manager/                # Central coordination service
+├── shared/                 # Shared utilities and libraries
+│   ├── agent-base.js       # Base agent class
+│   ├── model-manager.js    # Intelligent GPU management
+│   ├── ollama.js           # Ollama API integration
+│   ├── memory.js           # Conversation memory system
+│   └── logger.js           # Structured logging
+├── config/                 # Agent configurations
+├── tests/                  # Test suites
+├── start-stable.js         # Production startup script
+├── warm-models.js          # Model pre-warming utility
+└── performance-monitor.js  # Real-time dashboard
+```
+
+### Running Tests
+
 ```bash
-# Test memory functionality
-node tests/test-memory.js
-
-# Demo memory system
-node tests/demo-memory.js
+npm test
 ```
 
-### System Tests
-```bash
-# Test service startup
-node tests/test-startup.js
+### Adding New Agents
 
-# Comprehensive system tests
-node tests/test-system.js
-```
+1. Create new agent directory following the pattern
+2. Extend `BaseAgent` class
+3. Add model configuration to `.env`
+4. Update `start-stable.js` services array
 
-## Troubleshooting
+## 🔬 Advanced Features
 
-1. **Connection Problems**: Ensure Ollama is running:
-   ```bash
-   curl http://localhost:11434/api/version
-   ```
+### Intelligent Model Management
 
-2. **Missing Models**: Run the download script:
-   ```bash
-   npm run download-models
-   ```
+The system includes a sophisticated **ModelManager** that:
 
-3. **Port Conflicts**: Edit `.env` file to change port numbers
+- **Predicts usage patterns** and keeps frequently-used models in GPU memory
+- **Queues requests** during model loading to prevent client timeouts  
+- **Automatically optimizes** model switching based on real usage
+- **Provides analytics** for system tuning and capacity planning
 
-4. **Memory Issues**: Check memory directory permissions:
-   ```bash
-   ls -la memory/
-   ```
+### Memory System
 
-5. **Check System Status**: 
-   ```bash
-   curl http://localhost:3000/status
-   ```
+Each agent maintains:
+- **Conversation context** across sessions
+- **User preferences** and interaction patterns
+- **Learning capabilities** that improve over time
+- **Secure isolation** between different users/sessions
 
-## Recent Enhancements
+### Content Moderation
 
-### 🧠 Memory System (NEW)
-- **Cross-Conversation Persistence**: Agents remember users between sessions
-- **User Preference Learning**: Automatic detection and storage of user preferences
-- **Contextual Response Generation**: Memory-enhanced responses
-- **Memory Management**: Automatic cleanup and optimization
+Built-in safety features:
+- **Real-time content filtering** using LLM-based moderation
+- **Badword filtering** with customizable dictionaries
+- **Request rate limiting** to prevent abuse
+- **Comprehensive audit logging** for compliance
 
-### 🗂️ Improved Organization
-- **Documentation**: Moved to dedicated `docs/` folder
-- **Testing**: Consolidated test scripts in `tests/` folder
-- **Memory Storage**: Organized user and global memory storage
-- **Cleaner Structure**: Better project organization and maintainability
+## 🎯 Use Cases
 
-### 🚀 Enhanced Features
-- **Memory-Enhanced Conversations**: Agents provide personalized responses
-- **User Context Awareness**: Agents remember communication styles and preferences
-- **Improved API**: Memory endpoints and enhanced status information
-- **Better Testing**: Comprehensive test suite for all features
+### Enterprise Applications
+- **Customer Support**: Multi-agent teams handling complex queries
+- **Content Generation**: Specialized agents for different content types
+- **Code Review**: Automated code analysis with multiple AI perspectives
+- **Research Assistance**: Collaborative AI research teams
 
-## License
+### Development & Research
+- **Multi-model Comparisons**: Test different LLMs simultaneously
+- **Agent Communication Studies**: Research inter-agent protocols
+- **Performance Benchmarking**: Optimize model deployment strategies
+- **GPU Resource Management**: Efficient multi-model serving
 
-MIT 
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Ollama** for the excellent local LLM serving platform
+- **Meta AI** for Llama models
+- **Mistral AI** for Mistral models  
+- **Microsoft** for Phi-3 models
+- **Alibaba** for Qwen models
+
+## 📞 Support
+
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/your-username/multi-agent-chatbot-system/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-username/multi-agent-chatbot-system/discussions)
+- 📧 **Email**: your.email@domain.com
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=your-username/multi-agent-chatbot-system&type=Date)](https://star-history.com/#your-username/multi-agent-chatbot-system&Date)
+
+---
+
+**Built with ❤️ for the AI community**
+
+*Pioneering the future of multi-agent AI systems*
