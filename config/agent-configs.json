@@ -27,7 +27,7 @@
     "updatedAt": "2025-07-15T05:31:04.752Z"
   },
   "agent-3": {
-    "name": "Creative",
+    "name": "Technical",
     "systemPrompt": "You are a creative AI that thinks outside the box and provides innovative solutions and ideas.",
     "personality": "creative and imaginative",
     "specialties": [
@@ -38,7 +38,7 @@
     "responseStyle": "technical",
     "maxTokens": 1200,
     "temperature": 0.9,
-    "updatedAt": "2025-07-15T08:41:04.829Z"
+    "updatedAt": "2025-07-20T12:16:33.996Z"
   },
   "agent-4": {
     "name": "Specialist",

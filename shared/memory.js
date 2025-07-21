@@ -107,10 +107,14 @@ class AgentMemory {
       // Load user-specific memories
       try {
         const userMemoryData = await fs.readFile(this.userMemoryFile, 'utf-8');
-        const userMemories = JSON.parse(userMemoryData);
-        userMemories.forEach(memory => {
-          this.memoryCache.user.set(memory.id, memory);
-        });
+        try {
+          const userMemories = JSON.parse(userMemoryData);
+          userMemories.forEach(memory => {
+            this.memoryCache.user.set(memory.id, memory);
+          });
+        } catch (parseError) {
+          logger.warn(`Invalid JSON in user memory file: ${parseError.message}`);
+        }
       } catch (error) {
         // File doesn't exist yet, that's okay
         if (error.code !== 'ENOENT') {
@@ -121,10 +125,14 @@ class AgentMemory {
       // Load global memories
       try {
         const globalMemoryData = await fs.readFile(this.globalMemoryFile, 'utf-8');
-        const globalMemories = JSON.parse(globalMemoryData);
-        globalMemories.forEach(memory => {
-          this.memoryCache.global.set(memory.id, memory);
-        });
+        try {
+          const globalMemories = JSON.parse(globalMemoryData);
+          globalMemories.forEach(memory => {
+            this.memoryCache.global.set(memory.id, memory);
+          });
+        } catch (parseError) {
+          logger.warn(`Invalid JSON in global memory file: ${parseError.message}`);
+        }
       } catch (error) {
         // File doesn't exist yet, that's okay
         if (error.code !== 'ENOENT') {

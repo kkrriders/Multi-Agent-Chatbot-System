@@ -1,4 +1,13 @@
-/** * Download all required Ollama models *  * This script pulls the Ollama models needed for the multi-agent system: * - Mistral * - LLaMA 3  * - Phi-3 * - Qwen 2.5coder:3b * - LLaMA 3.3 (Executive Overseer) */
+/**
+ * Download all required Ollama models
+ * 
+ * This script pulls the Ollama models needed for the multi-agent system:
+ * - Mistral
+ * - LLaMA 3
+ * - Phi-3
+ * - Qwen 2.5coder:3b
+ * - LLaMA 3.3 (Executive Overseer)
+ */
 const dotenv = require('dotenv');
 const { pullModel } = require('./shared/ollama');
 const { logger } = require('./shared/logger');
