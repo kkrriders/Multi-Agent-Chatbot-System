@@ -14,20 +14,23 @@ A **production-ready multi-agent AI system** featuring intelligent GPU memory ma
 - **Usage Analytics**: Learns patterns and optimizes model persistence automatically
 - **Automatic Fallback**: Seamless model switching with error recovery
 
-### 🎯 **Real-Time Monitoring**
-- **Live Performance Dashboard**: Monitor system health, queue status, and model statistics
-- **Analytics & Recommendations**: AI-driven optimization suggestions
-- **WebSocket Health Monitoring**: Real-time connection status and error tracking
+### 📊 **Enhanced Performance Monitoring**
+- **Real-Time Dashboard**: Comprehensive CPU, GPU, memory, and storage monitoring
+- **Multi-GPU Support**: NVIDIA, AMD, and Intel GPU detection and monitoring
+- **System Analytics**: Live performance metrics with beautiful web interface
+- **Resource Optimization**: Intelligent resource usage tracking and recommendations
 
 ### 🤖 **Multi-Agent Architecture**
-- **4 Specialized AI Agents**: llama3, mistral, phi3, qwen2.5-coder
-- **Memory Persistence**: Agents remember context across conversations
-- **Flexible Communication**: Advanced agent-to-agent protocols
-- **Modular Design**: Easy to extend with new models and capabilities
+- **4 Specialized AI Agents**: LLaMA3, Mistral, Phi3, Qwen2.5-Coder
+- **Memory Persistence**: Advanced conversation memory with relevance scoring
+- **Agent Coordination**: Sophisticated multi-agent conversation management
+- **Modular Design**: Clean architecture with organized source structure
 
 ### 🔒 **Production Ready**
-- **Cross-Platform Support**: Optimized for WSL2/Windows, Linux, and macOS
-- **Comprehensive Logging**: Structured logging with winston
+- **Optimized Structure**: Clean, maintainable codebase organization
+- **Cross-Platform Support**: WSL2/Windows, Linux, and macOS compatibility
+- **Comprehensive Logging**: Structured logging with automatic log management
+- **Development Tools**: Complete setup, testing, and deployment scripts
 - **Error Recovery**: Automatic retries and graceful failure handling
 - **Security**: Content moderation and input validation
 
@@ -76,14 +79,16 @@ git clone https://github.com/your-username/multi-agent-chatbot-system.git
 cd multi-agent-chatbot-system
 ```
 
-2. **Install dependencies**
+2. **Automated setup (recommended)**
 ```bash
-npm install
+npm run setup                   # Install deps, setup env, download models
 ```
 
-3. **Set up Ollama models**
+**Or manual setup:**
 ```bash
-# Install required models
+npm install                     # Install dependencies
+npm run setup-env               # Setup environment configuration
+npm run download-models         # Download required models
 ollama pull llama3:latest
 ollama pull mistral:latest  
 ollama pull phi3:latest

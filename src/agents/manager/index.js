@@ -68,19 +68,20 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"]
   },
-  pingTimeout: 180000,
-  pingInterval: 25000,
+  pingTimeout: parseInt(process.env.WEBSOCKET_PING_TIMEOUT) || 600000,  // 10 minutes
+  pingInterval: parseInt(process.env.WEBSOCKET_PING_INTERVAL) || 30000,  // 30 seconds  
   transports: ['websocket', 'polling'],
-  connectTimeout: 60000,
+  connectTimeout: 120000,
   allowEIO3: true,
   maxHttpBufferSize: 1e8,
-  allowUpgrades: true,
-  upgradeTimeout: 30000,
-  perMessageDeflate: {
-    threshold: 1024,
-    concurrencyLimit: 20,
-    serverMaxWindowBits: 15
-  }
+  allowUpgrades: false,  // Prevent transport upgrades that cause disconnects
+  upgradeTimeout: 60000,
+  cookie: {
+    name: 'multi-agent-session',
+    httpOnly: false,
+    sameSite: 'lax'
+  },
+  perMessageDeflate: false  // Disable compression to prevent issues
 });
 
 // Middleware

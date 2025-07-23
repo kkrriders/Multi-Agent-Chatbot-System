@@ -16,6 +16,11 @@ logs/
 *.log
 startup.log
 manager.log
+combined.log
+error.log
+flagged.log
+agent-*.log
+team-*.log
 
 # Memory and conversation data (contains user data)
 memory/
@@ -84,7 +89,19 @@ temp/
 # Personal development files
 demo-*.js
 test-*.js
-*.pdf
 
-# Runtime configuration
-package-lock.json
+# Generated files and documentation
+*.pdf
+*.html
+conversation-logs*.md
+complete-conversation-logs*
+markdown-to-pdf.js
+performance-monitoring-guide.md
+profile-README.md
+
+# Temporary monitoring files
+enhanced-performance-monitor.js.backup
+gpu-monitor.js.backup
+
+# Runtime configuration (comment out if you want to track package-lock.json)
+# package-lock.json
