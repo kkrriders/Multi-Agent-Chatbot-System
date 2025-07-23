@@ -463,13 +463,15 @@
             
             socket = io('http://localhost:3000', {
                 transports: ['websocket', 'polling'],
-                timeout: 45000,
+                timeout: 180000,
                 forceNew: false,
                 reconnection: true,
-                reconnectionDelay: 2000,
-                reconnectionAttempts: 10,
-                maxReconnectionAttempts: 10,
-                randomizationFactor: 0.5
+                reconnectionDelay: 5000,
+                reconnectionAttempts: 5,
+                maxReconnectionAttempts: 5,
+                randomizationFactor: 0.5,
+                pingTimeout: 180000,
+                pingInterval: 25000
             });
             
             socket.on('connect', () => {
@@ -477,6 +479,15 @@
                 document.getElementById('connection-status').textContent = 'Connected to server';
                 document.getElementById('connection-status').className = 'status connected';
                 console.log('Socket connected successfully');
+                
+                // Prevent page refresh during active sessions
+                window.addEventListener('beforeunload', function(e) {
+                    if (socket && socket.connected) {
+                        e.preventDefault();
+                        e.returnValue = 'Work session in progress. Are you sure you want to leave?';
+                        return e.returnValue;
+                    }
+                });
             });
             
             socket.on('connection-confirmed', (data) => {

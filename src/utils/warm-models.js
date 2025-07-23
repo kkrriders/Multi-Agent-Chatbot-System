@@ -47,6 +47,7 @@ async function warmModel(modelName) {
       timeout: 60000
     });
     
+    
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`${colors.green}✅ ${modelName} warmed in ${duration}s${colors.reset}`);
     return true;

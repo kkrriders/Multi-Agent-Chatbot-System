@@ -3,12 +3,25 @@
  */
 const axios = require('axios');
 const dotenv = require('dotenv');
+const { getDynamicOllamaURL } = require('./wsl-network');
 
 dotenv.config();
 
-// Configure Ollama API URL
-const OLLAMA_API_BASE = process.env.OLLAMA_API_BASE || 'http://localhost:11434/api';
+// Configure Ollama API URL with dynamic detection
+let OLLAMA_API_BASE = null;
 const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT) || 120000; // 2 minutes default
+
+/**
+ * Get Ollama API base URL with dynamic detection
+ * 
+ * @returns {Promise<string>} - Ollama API base URL
+ */
+async function getOllamaAPIBase() {
+  if (!OLLAMA_API_BASE) {
+    OLLAMA_API_BASE = await getDynamicOllamaURL();
+  }
+  return OLLAMA_API_BASE;
+}
 
 /**
  * Check if Ollama service is available
@@ -17,10 +30,13 @@ const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT) || 120000; // 2 mi
  */
 async function checkOllamaAvailability() {
   try {
-    await axios.get(`${OLLAMA_API_BASE}/version`, { timeout: 5000 });
+    const apiBase = await getOllamaAPIBase();
+    await axios.get(`${apiBase}/version`, { timeout: 5000 });
     return true;
   } catch (error) {
     console.error('Ollama service unavailable:', error.message);
+    // Reset cached URL on failure to force re-detection
+    OLLAMA_API_BASE = null;
     return false;
   }
 }
@@ -32,7 +48,8 @@ async function checkOllamaAvailability() {
  */
 async function getAvailableModels() {
   try {
-    const response = await axios.get(`${OLLAMA_API_BASE}/tags`, { timeout: 5000 });
+    const apiBase = await getOllamaAPIBase();
+    const response = await axios.get(`${apiBase}/tags`, { timeout: 5000 });
     return response.data.models ? response.data.models.map(m => m.name) : [];
   } catch (error) {
     console.error('Failed to get available models:', error.message);
@@ -123,7 +140,8 @@ async function generateResponse(model, prompt, options = {}, retries = 0) {
     console.log(`Generating response with model: ${availableModel}`);
     
     // Call Ollama API with improved connection handling
-    const response = await axios.post(`${OLLAMA_API_BASE}/generate`, {
+    const apiBase = await getOllamaAPIBase();
+    const response = await axios.post(`${apiBase}/generate`, {
       model: availableModel,
       prompt: enhancedPrompt,
       stream: false,
@@ -176,7 +194,8 @@ async function generateResponse(model, prompt, options = {}, retries = 0) {
       errorMessage = `TIMEOUT ERROR: Model timed out after ${REQUEST_TIMEOUT/1000} seconds. Try reducing prompt size or complexity.`;
       console.error(errorMessage);
     } else if (error.code === 'ECONNREFUSED') {
-      errorMessage = `CONNECTION ERROR: Could not connect to Ollama service. Please ensure Ollama is running at ${OLLAMA_API_BASE}.`;
+      const apiBase = await getOllamaAPIBase().catch(() => 'unknown');
+      errorMessage = `CONNECTION ERROR: Could not connect to Ollama service. Please ensure Ollama is running at ${apiBase}.`;
       console.error(errorMessage);
     } else if (error.response && error.response.status === 404) {
       errorMessage = `MODEL ERROR: Model not found. Please ensure it's downloaded or use a different model.`;
@@ -260,7 +279,8 @@ Respond ONLY with the word "FLAG" if it does, or "OK" if it's safe and appropria
 async function pullModel(modelName) {
   try {
     console.log(`Pulling model ${modelName}...`);
-    const response = await axios.post(`${OLLAMA_API_BASE}/pull`, {
+    const apiBase = await getOllamaAPIBase();
+    const response = await axios.post(`${apiBase}/pull`, {
       name: modelName,
     });
     
@@ -278,5 +298,6 @@ module.exports = {
   pullModel,
   checkOllamaAvailability,
   getAvailableModels,
-  findFallbackModel
+  findFallbackModel,
+  getOllamaAPIBase
 }; 
