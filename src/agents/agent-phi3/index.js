@@ -4,9 +4,9 @@
  * A flexible AI agent that can handle any kind of work assigned to it
  */
 const dotenv = require('dotenv');
-const { BaseAgent } = require('../shared/agent-base');
-const { logger } = require('../shared/logger');
-const { getAgentConfig, buildSystemPrompt } = require('../shared/agent-config');
+const { BaseAgent } = require('../../shared/agent-base');
+const { logger } = require('../../shared/logger');
+const { getAgentConfig, buildSystemPrompt } = require('../../shared/agent-config');
 
 // Load environment variables
 dotenv.config();
