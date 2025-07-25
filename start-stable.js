@@ -127,34 +127,34 @@ async function startServices() {
   services.forEach(service => {
     console.log(`${service.color}[${service.name}]${colors.reset} Starting...`);
     
-    const process = spawn('node', [service.script], {
+    const childProcess = spawn('node', [service.script], {
       cwd: __dirname,
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env, FORCE_COLOR: '1' }
     });
     
     // Handle process output
-    process.stdout.on('data', (data) => {
+    childProcess.stdout.on('data', (data) => {
       const lines = data.toString().split('\n').filter(line => line.trim());
       lines.forEach(line => {
         console.log(`${service.color}[${service.name}]${colors.reset} ${line}`);
       });
     });
     
-    process.stderr.on('data', (data) => {
+    childProcess.stderr.on('data', (data) => {
       const lines = data.toString().split('\n').filter(line => line.trim());
       lines.forEach(line => {
         console.log(`${service.color}[${service.name}]${colors.reset} ${colors.red}${line}${colors.reset}`);
       });
     });
     
-    process.on('close', (code, signal) => {
+    childProcess.on('close', (code, signal) => {
       if (code !== 0) {
         console.log(`${service.color}[${service.name}]${colors.reset} ${colors.red}exited unexpectedly (code: ${code}, signal: ${signal})${colors.reset}`);
       }
     });
     
-    processes.push({ name: service.name, process, color: service.color });
+    processes.push({ name: service.name, process: childProcess, color: service.color });
   });
   
   // Wait a moment for services to start

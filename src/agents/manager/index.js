@@ -16,9 +16,9 @@ const { Server } = require('socket.io');
 const http = require('http');
 
 // Import shared utilities
-const { logger } = require('../shared/logger');
-const { generateResponse } = require('../shared/ollama');
-const { PERFORMATIVES, createMessage } = require('../shared/messaging');
+const { logger } = require('../../shared/logger');
+const { generateResponse } = require('../../shared/ollama');
+const { PERFORMATIVES, createMessage } = require('../../shared/messaging');
 const { 
   getAgentConfig, 
   updateAgentConfig, 
@@ -26,7 +26,7 @@ const {
   getAllAgentConfigs, 
   validateAgentConfig,
   buildSystemPrompt 
-} = require('../shared/agent-config');
+} = require('../../shared/agent-config');
 
 // HTML escape function to prevent XSS
 function escapeHtml(text) {
