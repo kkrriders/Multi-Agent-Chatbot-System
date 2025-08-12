@@ -1,9 +1,4 @@
-/**
- * Manager Agent
- * 
- * Coordinates communication between agents, handles message routing,
- * and manages sequential conversations with dynamic agent naming.
- */
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -54,10 +49,10 @@ if (!fs.existsSync(EXPORTS_DIR)) {
 
 // Agent service endpoints - Updated to only 4 agents
 const AGENT_ENDPOINTS = {
-  'agent-1': `http://localhost:${process.env.AGENT_1_PORT || 3001}/message`,
-  'agent-2': `http://localhost:${process.env.AGENT_2_PORT || 3002}/message`,
-  'agent-3': `http://localhost:${process.env.AGENT_3_PORT || 3003}/message`,
-  'agent-4': `http://localhost:${process.env.AGENT_4_PORT || 3004}/message`
+  'agent-1': `http://localhost:${process.env.AGENT_1_PORT || 3005}/message`,
+  'agent-2': `http://localhost:${process.env.AGENT_2_PORT || 3006}/message`,
+  'agent-3': `http://localhost:${process.env.AGENT_3_PORT || 3007}/message`,
+  'agent-4': `http://localhost:${process.env.AGENT_4_PORT || 3008}/message`
 };
 
 // Create Express app and HTTP server
@@ -241,7 +236,7 @@ async function routeMessageToAgent(message) {
  */
 app.post('/message', async (req, res) => {
   try {
-    const { content, agentId, agentName } = req.body;
+    const { content, agentId, agentName, conversationId } = req.body;
     
     // Input validation
     if (!content || !agentId) {
@@ -273,8 +268,47 @@ app.post('/message', async (req, res) => {
       message.agentName = agentName;
     }
 
+    // Add conversation context if provided
+    if (conversationId) {
+      const conversation = conversations.get(conversationId);
+      if (conversation) {
+        message.conversationHistory = [...conversation.history];
+        message.isFollowUp = true;
+      }
+    }
+
     // Route to agent
     const response = await routeMessageToAgent(message);
+
+    // If this is part of a conversation, add to history and broadcast
+    if (conversationId) {
+      const conversation = conversations.get(conversationId);
+      if (conversation) {
+        // Add user message to history
+        const userMessage = {
+          from: 'user',
+          content: content,
+          timestamp: Date.now(),
+          type: 'direct-message'
+        };
+        conversation.history.push(userMessage);
+        
+        // Add agent response to history
+        const agentMessage = {
+          from: agentName || `Agent ${agentId.slice(-1)}`,
+          content: response.content,
+          timestamp: Date.now(),
+          agentId: agentId,
+          type: 'direct-response'
+        };
+        conversation.history.push(agentMessage);
+        conversation.lastActivity = Date.now();
+        
+        // Broadcast both messages
+        broadcastConversationUpdate(conversationId, userMessage);
+        broadcastConversationUpdate(conversationId, agentMessage);
+      }
+    }
     
     res.json({
       success: true,
@@ -919,7 +953,8 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
         content: response.content,
         timestamp: Date.now(),
         agentId: agent.agentId,
-        customRole: agent.customPrompt.substring(0, 100) + '...'
+        customRole: agent.customPrompt.substring(0, 100) + '...',
+        messageId: `work-${Date.now()}-${agent.agentId}-${Math.random().toString(36).substr(2, 9)}`
       };
       
       conversation.history.push(responseMessage);
@@ -987,6 +1022,121 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
     broadcastConversationUpdate(conversationId, managerErrorMessage);
   }
 }
+
+/**
+ * Continue an existing conversation with follow-up messages
+ */
+app.post('/continue-conversation', async (req, res) => {
+  try {
+    const { 
+      conversationId, 
+      message, 
+      participants 
+    } = req.body;
+    
+    if (!conversationId || !message || !participants || !Array.isArray(participants)) {
+      return res.status(400).json({ 
+        error: 'ConversationId, message, and participants array are required' 
+      });
+    }
+
+    // Get existing conversation
+    const conversation = conversations.get(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ 
+        error: 'Conversation not found' 
+      });
+    }
+    
+    // Add user follow-up message to history
+    const userFollowUpMessage = {
+      from: 'user',
+      content: message,
+      timestamp: Date.now(),
+      type: 'follow-up'
+    };
+    conversation.history.push(userFollowUpMessage);
+    conversation.lastActivity = Date.now();
+    
+    // Broadcast user message to connected clients
+    broadcastConversationUpdate(conversationId, userFollowUpMessage);
+    
+    // Get responses from each participant in sequence
+    const responses = [];
+    
+    for (let i = 0; i < participants.length; i++) {
+      const participant = participants[i];
+      
+      try {
+        // Create message with conversation history and follow-up context
+        const agentMessage = createMessage(
+          'user',
+          participant.agentId,
+          message,
+          PERFORMATIVES.REQUEST
+        );
+        
+        // Add context about this being a follow-up
+        agentMessage.agentName = participant.agentName || `Agent ${participant.agentId.slice(-1)}`;
+        agentMessage.conversationHistory = [...conversation.history];
+        agentMessage.isFollowUp = true;
+        agentMessage.followUpContext = `This is a follow-up message in an ongoing conversation. Please respond appropriately based on the conversation history and this new input: "${message}"`;
+        
+        // Get response from agent
+        const response = await routeMessageToAgent(agentMessage);
+        
+        // Add response to conversation history
+        const responseMessage = {
+          from: agentMessage.agentName,
+          content: response.content,
+          timestamp: Date.now(),
+          agentId: participant.agentId,
+          type: 'follow-up-response',
+          messageId: `follow-up-${Date.now()}-${participant.agentId}-${Math.random().toString(36).substr(2, 9)}`
+        };
+        conversation.history.push(responseMessage);
+        conversation.lastActivity = Date.now();
+        responses.push(responseMessage);
+        
+        // Broadcast agent response to connected clients in real-time
+        broadcastConversationUpdate(conversationId, responseMessage);
+        
+        // Small delay between agents for better real-time experience
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+      } catch (error) {
+        logger.error(`Error getting follow-up response from ${participant.agentId}:`, error.message);
+        const errorMessage = {
+          from: participant.agentName || `Agent ${participant.agentId.slice(-1)}`,
+          content: `I'm having trouble responding to your follow-up: ${error.message}`,
+          timestamp: Date.now(),
+          agentId: participant.agentId,
+          error: true,
+          type: 'follow-up-error'
+        };
+        conversation.history.push(errorMessage);
+        conversation.lastActivity = Date.now();
+        responses.push(errorMessage);
+        
+        // Broadcast error message to connected clients
+        broadcastConversationUpdate(conversationId, errorMessage);
+      }
+    }
+
+    res.json({
+      success: true,
+      conversationId: conversationId,
+      responses: responses,
+      message: 'Follow-up message processed'
+    });
+
+  } catch (error) {
+    logger.error('Error in continue conversation route:', error.message);
+    res.status(500).json({ 
+      error: `Error processing follow-up message: ${error.message}` 
+    });
+  }
+});
 
 /**
  * Get suggested agent templates for different task types
