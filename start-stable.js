@@ -35,7 +35,7 @@ async function checkOllamaConnection() {
     const ollamaURL = await getDynamicOllamaURL();
     console.log(`${colors.blue}🔍 Checking Ollama connectivity at ${ollamaURL}...${colors.reset}`);
     
-    const response = await fetch(`${ollamaURL.replace('/api', '')}/api/version`);
+    const response = await fetch(`${ollamaURL}/version`);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -46,7 +46,7 @@ async function checkOllamaConnection() {
     
     // Check available models
     try {
-      const modelsResponse = await fetch(`${ollamaURL.replace('/api', '')}/api/tags`);
+      const modelsResponse = await fetch(`${ollamaURL}/tags`);
       if (modelsResponse.ok) {
         const modelsData = await modelsResponse.json();
         const modelNames = modelsData.models.map(m => m.name).join(', ');
@@ -85,7 +85,7 @@ async function warmModels(models) {
         console.log(`${colors.blue}  Warming ${modelName}...${colors.reset}`);
         const ollamaURL = await getDynamicOllamaURL();
         
-        const response = await fetch(`${ollamaURL.replace('/api', '')}/api/generate`, {
+        const response = await fetch(`${ollamaURL}/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -160,12 +160,13 @@ async function startServices() {
   // Wait a moment for services to start
   setTimeout(() => {
     console.log(`${colors.bright}\n📊 System Status:${colors.reset}`);
-    console.log(`🎯 Performance Monitor: ${colors.cyan}http://localhost:3099${colors.reset}`);
-    console.log(`🎛️  Manager API: ${colors.green}http://localhost:3000${colors.reset}`);
-    console.log(`🤖 Agent-1 (llama3): ${colors.green}http://localhost:3001${colors.reset}`);
-    console.log(`🤖 Agent-2 (mistral): ${colors.green}http://localhost:3002${colors.reset}`);
-    console.log(`🤖 Agent-3 (phi3): ${colors.green}http://localhost:3003${colors.reset}`);
-    console.log(`🤖 Agent-4 (qwen2.5-coder): ${colors.green}http://localhost:3004${colors.reset}`);
+    console.log(`🎯 Performance Monitor: ${colors.cyan}http://localhost:${process.env.PERFORMANCE_MONITOR_PORT || 3099}${colors.reset}`);
+    console.log(`🎛️  Manager API: ${colors.green}http://localhost:${process.env.MANAGER_PORT || 3000}${colors.reset}`);
+    console.log(`🤖 Agent-1 (llama3): ${colors.green}http://localhost:${process.env.AGENT_1_PORT || 3005}${colors.reset}`);
+    console.log(`🤖 Agent-2 (mistral): ${colors.green}http://localhost:${process.env.AGENT_2_PORT || 3006}${colors.reset}`);
+    console.log(`🤖 Agent-3 (phi3): ${colors.green}http://localhost:${process.env.AGENT_3_PORT || 3007}${colors.reset}`);
+    console.log(`🤖 Agent-4 (qwen2.5-coder): ${colors.green}http://localhost:${process.env.AGENT_4_PORT || 3008}${colors.reset}`);
+    console.log(`${colors.yellow}🎨 Frontend (if running): http://localhost:3001${colors.reset}`);
     
     console.log(`${colors.bright}\n💡 API Endpoints:${colors.reset}`);
     console.log(`POST /message - Send message to single agent`);

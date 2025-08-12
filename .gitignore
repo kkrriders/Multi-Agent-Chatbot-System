@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # Environment variables and sensitive config
 .env
@@ -29,8 +30,6 @@ exports/
 
 # Development and debugging files
 uploads/
-custom-projects.js
-fix-agents.js
 /uploads
 /-p
 
@@ -72,9 +71,6 @@ build/
 # Optional eslint cache
 .eslintcache
 
-# Output of 'npm pack'
-*.tgz
-
 # Yarn Integrity file
 .yarn-integrity
 
@@ -82,26 +78,46 @@ build/
 .cache
 .parcel-cache
 
+# Next.js specific
+.next/
+out/
+next-env.d.ts
+
 # Temporary files
 tmp/
 temp/
 
-# Personal development files
-demo-*.js
-test-*.js
-
-# Generated files and documentation
+# Generated PDFs and exports
 *.pdf
-*.html
-conversation-logs*.md
-complete-conversation-logs*
+task_management_chat.pdf
+
+# Development and testing scripts (keep in repo but can be ignored if needed)
+debug-frontend.js
+test-agent-response.js
+verify-config.js
+
+# Generated/duplicated files
 markdown-to-pdf.js
 performance-monitoring-guide.md
 profile-README.md
 
-# Temporary monitoring files
+# Backup files
+*.backup
 enhanced-performance-monitor.js.backup
 gpu-monitor.js.backup
 
-# Runtime configuration (comment out if you want to track package-lock.json)
-# package-lock.json
+# Demo HTML files (should be removed, keeping docs/*.html for now)
+docs/*.html
+
+# Duplicate tools (keeping main directory clean)
+tools/deployment/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Frontend specific
+multi-agent-chatbot/.next/
+multi-agent-chatbot/out/
+multi-agent-chatbot/dist/
+multi-agent-chatbot/.env*
+!multi-agent-chatbot/.env.example
