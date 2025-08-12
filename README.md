@@ -4,7 +4,25 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D%2016.0.0-brightgreen)](https://nodejs.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-A **production-ready multi-agent AI system** featuring intelligent GPU memory management, real-time performance monitoring, and breakthrough agent-to-agent communication protocols.
+A **production-ready multi-agent AI system v3.0.0** featuring intelligent GPU memory management, modern Next.js frontend, real-time performance monitoring, and breakthrough agent-to-agent communication protocols.
+
+## 🆕 What's New in v3.0.0
+
+### Modern Frontend Interface
+- **Next.js 15 + React 19**: Complete TypeScript frontend with Tailwind CSS and Radix UI
+- **Real-Time Chat**: Live agent responses via Socket.IO integration  
+- **Interactive Configuration**: Team templates and custom agent role assignment
+- **Responsive Design**: Dark/light themes with mobile-optimized interface
+
+### Enhanced Architecture  
+- **Updated Port Structure**: Frontend (3001), Backend (3000), Agents (3005-3008)
+- **Integrated Startup**: Single command launches both frontend and backend services
+- **Improved Documentation**: Comprehensive guides for frontend integration and development
+
+### Advanced Monitoring
+- **Dedicated GPU Monitor**: Real-time GPU utilization, memory, and temperature tracking
+- **Enhanced Performance Dashboard**: Extended metrics with hardware-specific monitoring
+- **System Health Checks**: Quick verification commands for all services
 
 ## ✨ Key Features
 
@@ -14,11 +32,19 @@ A **production-ready multi-agent AI system** featuring intelligent GPU memory ma
 - **Usage Analytics**: Learns patterns and optimizes model persistence automatically
 - **Automatic Fallback**: Seamless model switching with error recovery
 
+### 🎨 **Modern Frontend Interface**
+- **Next.js 15 + React 19**: Production-ready TypeScript frontend with Tailwind CSS
+- **Real-Time Chat**: Live agent responses via Socket.IO integration
+- **Agent Configuration**: Interactive team templates and custom role assignment
+- **Dark/Light Themes**: Responsive design with modern UI components
+
 ### 📊 **Enhanced Performance Monitoring**
 - **Real-Time Dashboard**: Comprehensive CPU, GPU, memory, and storage monitoring
 - **Multi-GPU Support**: NVIDIA, AMD, and Intel GPU detection and monitoring
+- **GPU Memory Tracking**: Real-time VRAM usage and allocation monitoring
 - **System Analytics**: Live performance metrics with beautiful web interface
 - **Resource Optimization**: Intelligent resource usage tracking and recommendations
+- **Enhanced Monitoring**: Dedicated GPU monitoring service with detailed metrics
 
 ### 🤖 **Multi-Agent Architecture**
 - **4 Specialized AI Agents**: LLaMA3, Mistral, Phi3, Qwen2.5-Coder
@@ -38,6 +64,11 @@ A **production-ready multi-agent AI system** featuring intelligent GPU memory ma
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
+│                 Next.js Frontend (v3.0.0)                  │
+│                   http://localhost:3001                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
 │                    Performance Monitor                      │
 │                   http://localhost:3099                    │
 └─────────────────────────────────────────────────────────────┘
@@ -53,7 +84,7 @@ A **production-ready multi-agent AI system** featuring intelligent GPU memory ma
     ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
     │   Agent-1   │ │   Agent-2   │ │   Agent-3   │ │   Agent-4   │
     │   llama3    │ │   mistral   │ │    phi3     │ │    qwen     │
-    │    :3001    │ │    :3002    │ │    :3003    │ │    :3004    │
+    │    :3005    │ │    :3006    │ │    :3007    │ │    :3008    │
     └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
                               │
     ┌─────────────────────────────────────────────────────────────┐
@@ -102,9 +133,21 @@ cp .env.example .env
 ```
 
 5. **Start the system**
+
+**Option A: Backend only**
 ```bash
 node start-stable.js
 ```
+
+**Option B: With Next.js frontend (recommended)**
+```bash
+npm run start-with-frontend     # Starts both backend + frontend
+```
+
+Access the system:
+- **Frontend UI**: http://localhost:3001 (modern React interface)
+- **Backend API**: http://localhost:3000 (REST + WebSocket)
+- **Performance Monitor**: http://localhost:3099
 
 ### 🖥️ **For WSL2 Users**
 
@@ -131,7 +174,17 @@ Features:
 - **Active Models**: Currently loaded model status  
 - **Queue Monitoring**: Real-time request queue lengths
 - **Usage Statistics**: Model load/use counts and performance metrics
+- **GPU Monitoring**: Real-time GPU utilization, memory usage, and temperature
+- **Enhanced Metrics**: Dedicated GPU monitoring with detailed hardware statistics
 - **Recommendations**: AI-driven optimization suggestions
+
+### Additional Monitoring Commands
+
+```bash
+npm run monitor         # Start enhanced performance monitor
+npm run monitor-gpu     # Start dedicated GPU monitoring
+npm run health          # Quick system health check
+```
 
 ## 🔧 Configuration
 
@@ -140,10 +193,13 @@ Features:
 ```bash
 # Agent Configuration
 MANAGER_PORT=3000
-AGENT_1_PORT=3001
-AGENT_2_PORT=3002  
-AGENT_3_PORT=3003
-AGENT_4_PORT=3004
+AGENT_1_PORT=3005
+AGENT_2_PORT=3006  
+AGENT_3_PORT=3007
+AGENT_4_PORT=3008
+
+# Frontend Configuration
+FRONTEND_PORT=3001
 
 # Model Assignment
 MANAGER_MODEL=llama3:latest
@@ -220,22 +276,32 @@ socket.on('conversation-update', (data) => {
 ### Project Structure
 
 ```
-├── agent-llama3/           # Agent 1 implementation
-├── agent-mistral/          # Agent 2 implementation  
-├── agent-phi3/             # Agent 3 implementation
-├── agent-qwen/             # Agent 4 implementation
-├── manager/                # Central coordination service
-├── shared/                 # Shared utilities and libraries
-│   ├── agent-base.js       # Base agent class
-│   ├── model-manager.js    # Intelligent GPU management
-│   ├── ollama.js           # Ollama API integration
-│   ├── memory.js           # Conversation memory system
-│   └── logger.js           # Structured logging
-├── config/                 # Agent configurations
+├── multi-agent-chatbot/    # Next.js frontend application
+│   ├── app/                # Next.js 15 app directory
+│   ├── components/         # React components and UI library
+│   └── lib/                # Frontend utilities
+├── src/
+│   ├── agents/             # Agent implementations
+│   │   ├── agent-llama3/   # LLaMA3 agent
+│   │   ├── agent-mistral/  # Mistral agent  
+│   │   ├── agent-phi3/     # Phi-3 agent
+│   │   ├── agent-qwen/     # Qwen agent
+│   │   └── manager/        # Central coordination service
+│   ├── shared/             # Shared utilities and libraries
+│   │   ├── agent-base.js   # Base agent class
+│   │   ├── model-manager.js# Intelligent GPU management
+│   │   ├── ollama.js       # Ollama API integration
+│   │   ├── memory.js       # Conversation memory system
+│   │   └── logger.js       # Structured logging
+│   ├── monitoring/         # Performance monitoring systems
+│   │   ├── enhanced-performance-monitor.js  # Main dashboard
+│   │   └── gpu-monitor.js  # Dedicated GPU monitoring
+│   └── utils/              # Utility scripts
+├── docs/                   # Comprehensive documentation
 ├── tests/                  # Test suites
 ├── start-stable.js         # Production startup script
-├── warm-models.js          # Model pre-warming utility
-└── performance-monitor.js  # Real-time dashboard
+├── start-with-frontend.js  # Integrated frontend startup
+└── logs/                   # Structured logging output
 ```
 
 ### Running Tests
