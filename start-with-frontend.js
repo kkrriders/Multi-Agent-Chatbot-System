@@ -22,7 +22,7 @@ setTimeout(() => {
   const frontend = spawn(npmCommand, ['run', 'dev'], {
     cwd: path.join(__dirname, 'multi-agent-chatbot'),
     stdio: 'inherit',
-    env: { ...process.env, PORT: '3001' },
+    env: { ...process.env, PORT: '3002' },
     shell: true // Enable shell to find npm in PATH
   });
 
@@ -46,7 +46,7 @@ setTimeout(() => {
 }, 5000);
 
 console.log('\n📖 Access the application at:');
-console.log('   Frontend: http://localhost:3001');
+console.log('   Frontend: http://localhost:3002');
 console.log('   Backend API: http://localhost:3000/api/health');
 console.log('\n🤖 Agent endpoints:');
 console.log('   Agent-1: http://localhost:3005');

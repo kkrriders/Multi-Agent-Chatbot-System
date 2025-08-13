@@ -14,7 +14,7 @@
     "start-agent-3": "node src/agents/agent-phi3/index.js",
     "start-agent-4": "node src/agents/agent-qwen/index.js",
     "start-with-frontend": "node start-with-frontend.js",
-    "start-frontend-only": "cd multi-agent-chatbot && PORT=3001 npm run dev",
+    "start-frontend-only": "cd multi-agent-chatbot && PORT=3002 npm run dev",
     "monitor": "node src/monitoring/enhanced-performance-monitor.js",
     "monitor-gpu": "node src/monitoring/gpu-monitor.js",
     "health": "curl http://localhost:3099/health && curl http://localhost:3000/status",
