@@ -1,11 +1,12 @@
 {
   "name": "multi-agent-chatbot-system",
-  "version": "3.0.0",
-  "description": "Production-ready multi-agent AI system with intelligent GPU memory management, real-time monitoring, and breakthrough agent-to-agent communication protocols",
+  "version": "3.1.0",
+  "description": "Production-ready multi-agent AI system with intelligent GPU memory management, real-time monitoring, breakthrough agent-to-agent communication protocols, rate limiting, conversation tagging, and AI voting system",
   "main": "start-stable.js",
   "scripts": {
     "start": "node start-stable.js",
-    "stop": "node stop-services.js",
+    "stop": "node stop-all.js",
+    "stop-services": "node stop-services.js",
     "restart": "npm run stop && sleep 3 && npm start",
     "dev": "concurrently --names \"MANAGER,AGENT-1,AGENT-2,AGENT-3,AGENT-4\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold\" \"npm run start-manager\" \"npm run start-agent-1\" \"npm run start-agent-2\" \"npm run start-agent-3\" \"npm run start-agent-4\"",
     "start-manager": "node src/agents/manager/index.js",
@@ -14,7 +15,7 @@
     "start-agent-3": "node src/agents/agent-phi3/index.js",
     "start-agent-4": "node src/agents/agent-qwen/index.js",
     "start-with-frontend": "node start-with-frontend.js",
-    "start-frontend-only": "cd multi-agent-chatbot && PORT=3002 npm run dev",
+    "start-frontend-only": "cd multi-agent-chatbot && npx kill-port 3002 2>/dev/null; PORT=3002 npm run dev",
     "monitor": "node src/monitoring/enhanced-performance-monitor.js",
     "monitor-gpu": "node src/monitoring/gpu-monitor.js",
     "health": "curl http://localhost:3099/health && curl http://localhost:3000/status",
@@ -26,8 +27,14 @@
     "test-memory": "cd tests && node test-memory.js",
     "test-startup": "cd tests && node test-startup.js",
     "test-agents": "node test-agent-response.js",
+    "test-new-features": "node tests/test-new-features.js",
+    "test-voting": "node tests/test-voting-session.js",
     "debug": "node debug-frontend.js",
     "verify": "node verify-config.js",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\"",
     "clean": "rm -rf logs/*.log && rm -rf memory/users/*.json && rm -rf exports/*.pdf",
     "backup": "tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz --exclude=node_modules --exclude=logs --exclude=memory ."
   },
@@ -61,16 +68,27 @@
   },
   "dependencies": {
     "axios": "^1.6.2",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "express": "^4.18.2",
-    "html-pdf": "^3.0.1",
+    "express-rate-limit": "^8.2.1",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.4",
     "morgan": "^1.10.0",
     "ollama": "^0.5.16",
+    "puppeteer": "^24.30.0",
     "socket.io": "^4.8.1",
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@eslint/js": "^9.39.1",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2"
   }
 }

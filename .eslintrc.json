@@ -1,0 +1,39 @@
+{
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": "warn",
+    "no-console": "off",
+    "no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
+    "no-undef": "error",
+    "semi": ["error", "always"],
+    "quotes": ["warn", "single", { "avoidEscape": true }],
+    "indent": ["warn", 2],
+    "comma-dangle": ["warn", "never"],
+    "arrow-spacing": "warn",
+    "space-before-blocks": "warn",
+    "keyword-spacing": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "multi-agent-chatbot/",
+    "logs/",
+    "memory/",
+    "exports/",
+    "*.min.js"
+  ]
+}

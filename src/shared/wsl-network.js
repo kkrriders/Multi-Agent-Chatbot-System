@@ -123,14 +123,19 @@ async function testIPConnectivity(ip, timeout = 3000) {
 /**
  * Get dynamic Ollama API base URL
  * Automatically detects Windows host IP and constructs the URL
- * 
+ *
  * @param {string} port - Port number (default: 11434)
  * @returns {Promise<string>} - Complete Ollama API base URL
  */
 async function getDynamicOllamaURL(port = '11434') {
+  // ALWAYS respect .env configuration first - user preference takes priority
+  if (process.env.OLLAMA_API_BASE) {
+    return process.env.OLLAMA_API_BASE;
+  }
+
   // Check if we're in WSL2 environment
   if (!isWSL2()) {
-    return process.env.OLLAMA_API_BASE || 'http://localhost:11434/api';
+    return 'http://localhost:11434/api';
   }
 
   try {
@@ -140,7 +145,7 @@ async function getDynamicOllamaURL(port = '11434') {
     return baseUrl;
   } catch (error) {
     console.error('WSL2: Failed to get dynamic URL, using fallback:', error.message);
-    return process.env.OLLAMA_API_BASE || 'http://172.18.224.1:11434/api';
+    return 'http://172.18.224.1:11434/api';
   }
 }
 

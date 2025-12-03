@@ -1,0 +1,14 @@
+node_modules/
+multi-agent-chatbot/.next/
+multi-agent-chatbot/node_modules/
+logs/
+memory/
+exports/
+*.log
+*.pdf
+package-lock.json
+pnpm-lock.yaml
+.env
+.env.local
+*.min.js
+*.md

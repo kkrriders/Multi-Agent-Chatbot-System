@@ -294,34 +294,44 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
         logger.warn(`${this.agentId}: Empty response received after successful API call`);
         content = "I received your message, but I'm having trouble generating a specific response right now.";
       }
-      
+
+      // Extract confidence score from response
+      const confidenceData = this.extractConfidenceScore(content);
+
       // Store conversation in memory
       if (this.memory) {
         try {
           await this.memory.storeConversation(
             message.content,
-            content,
+            confidenceData.cleanedContent,
             {
               conversationId: message.conversationId || 'unknown',
               messageId: message.id,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              confidence: confidenceData.confidence
             }
           );
 
           // Extract and store potential preferences from the conversation
-          await this.extractAndStorePreferences(message.content, content);
+          await this.extractAndStorePreferences(message.content, confidenceData.cleanedContent);
         } catch (error) {
           logger.warn(`Error storing conversation memory: ${error.message}`);
         }
       }
-      
+
       // Create structured response message with correct parameter order: from, to, content, performative
-      return createMessage(
+      const responseMessage = createMessage(
         this.agentId,                 // from
         message.from,                 // to
-        content,                      // content
+        confidenceData.cleanedContent, // content (without confidence markers)
         PERFORMATIVES.RESPOND         // performative
       );
+
+      // Add confidence score to response metadata
+      responseMessage.confidence = confidenceData.confidence;
+      responseMessage.uncertainties = confidenceData.uncertainties;
+
+      return responseMessage;
     } catch (error) {
       logger.error(`Error generating response with ${this.model}:`, error.message);
       
@@ -340,6 +350,77 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
         PERFORMATIVES.RESPOND         // performative
       );
     }
+  }
+
+  /**
+   * Extract confidence score from LLM response
+   * Analyzes response for uncertainty markers and hedging language
+   */
+  extractConfidenceScore(content) {
+    // Default confidence score
+    let confidence = 75; // Start at moderate confidence
+    const uncertainties = [];
+
+    // Convert to lowercase for pattern matching
+    const lowerContent = content.toLowerCase();
+
+    // Uncertainty markers that reduce confidence
+    const uncertaintyPatterns = [
+      { pattern: /i'm not sure|not certain|unclear|unsure/g, impact: -15, label: 'explicit uncertainty' },
+      { pattern: /might|may|could|possibly|perhaps|maybe/g, impact: -5, label: 'hedging language' },
+      { pattern: /i think|i believe|in my opinion|seems like/g, impact: -8, label: 'subjective statements' },
+      { pattern: /probably|likely|unlikely/g, impact: -7, label: 'probabilistic language' },
+      { pattern: /don't know|can't say|hard to say|difficult to determine/g, impact: -20, label: 'knowledge gaps' },
+      { pattern: /assumption|assume|assuming/g, impact: -10, label: 'assumptions' },
+      { pattern: /\?/g, impact: -3, label: 'questions in response' },
+    ];
+
+    // Certainty markers that increase confidence
+    const certaintyPatterns = [
+      { pattern: /definitely|certainly|absolutely|clearly|obviously/g, impact: +10, label: 'strong certainty' },
+      { pattern: /according to|based on|research shows|studies indicate/g, impact: +8, label: 'evidence-based' },
+      { pattern: /always|never|must|will/g, impact: +5, label: 'definitive statements' },
+    ];
+
+    // Check uncertainty patterns
+    uncertaintyPatterns.forEach(({ pattern, impact, label }) => {
+      const matches = lowerContent.match(pattern);
+      if (matches) {
+        const count = matches.length;
+        confidence += impact * Math.min(count, 3); // Cap impact at 3 occurrences
+        if (count > 0) {
+          uncertainties.push({ type: label, count });
+        }
+      }
+    });
+
+    // Check certainty patterns
+    certaintyPatterns.forEach(({ pattern, impact, label }) => {
+      const matches = lowerContent.match(pattern);
+      if (matches) {
+        const count = matches.length;
+        confidence += impact * Math.min(count, 2); // Cap positive impact
+      }
+    });
+
+    // Adjust based on response length (very short responses often indicate uncertainty)
+    if (content.length < 50) {
+      confidence -= 10;
+      uncertainties.push({ type: 'very short response', count: 1 });
+    }
+
+    // Ensure confidence stays within 0-100 range
+    confidence = Math.max(0, Math.min(100, confidence));
+
+    // Clean content by removing confidence markers if present
+    // (in case LLM was instructed to include them)
+    let cleanedContent = content.replace(/\[CONFIDENCE:\s*\d+%?\]/gi, '').trim();
+
+    return {
+      confidence: Math.round(confidence),
+      uncertainties,
+      cleanedContent
+    };
   }
 
   /**
