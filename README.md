@@ -4,25 +4,34 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D%2016.0.0-brightgreen)](https://nodejs.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-A **production-ready multi-agent AI system v3.0.0** featuring intelligent GPU memory management, modern Next.js frontend, real-time performance monitoring, and breakthrough agent-to-agent communication protocols.
+A **production-ready multi-agent AI system v3.1.0** featuring intelligent GPU memory management, modern Next.js frontend, real-time performance monitoring, convergence detection, cache analytics, and breakthrough agent-to-agent communication protocols.
 
-## 🆕 What's New in v3.0.0
+## 🆕 What's New in v3.1.0 (December 2025)
 
-### Modern Frontend Interface
-- **Next.js 15 + React 19**: Complete TypeScript frontend with Tailwind CSS and Radix UI
-- **Real-Time Chat**: Live agent responses via Socket.IO integration  
-- **Interactive Configuration**: Team templates and custom agent role assignment
-- **Responsive Design**: Dark/light themes with mobile-optimized interface
+### 🎯 Convergence Detection
+- **Automatic Agreement Detection**: Research sessions detect when agents reach consensus
+- **Early Termination**: Saves time and API costs by stopping when agents agree (70%+ confidence)
+- **Detailed Metrics**: Agreement/disagreement analysis with real-time feedback
+- **Smart Algorithm**: Analyzes markers, semantic similarity, and word overlap
 
-### Enhanced Architecture  
-- **Updated Port Structure**: Frontend (3001), Backend (3000), Agents (3005-3008)
-- **Integrated Startup**: Single command launches both frontend and backend services
-- **Improved Documentation**: Comprehensive guides for frontend integration and development
+### 📊 Cache Analytics & Monitoring
+- **Real-Time Monitoring**: Track cache hit rates, misses, and evictions
+- **Performance Assessment**: Automatic rating (excellent/good/fair/poor)
+- **Time Savings Tracking**: Estimates time saved from cached responses
+- **RESTful APIs**: `/api/cache/stats` and `/api/cache/clear` endpoints
+- **Integrated Dashboard**: Cache stats now included in system status
 
-### Advanced Monitoring
-- **Dedicated GPU Monitor**: Real-time GPU utilization, memory, and temperature tracking
-- **Enhanced Performance Dashboard**: Extended metrics with hardware-specific monitoring
-- **System Health Checks**: Quick verification commands for all services
+### 🐛 Critical Bug Fixes
+- **Voting Session Fix**: Fixed property access bug preventing voting from working
+- **Test Suite Added**: Comprehensive voting session integration tests
+- **Improved Reliability**: Better error handling and validation
+
+### 📖 Enhanced Documentation
+- **Organized Structure**: All docs moved to `/docs` with clear categorization
+- **Quick Reference Guide**: Fast access to new features and commands
+- **Comprehensive Reports**: Detailed bug fix and enhancement documentation
+
+See [Bug Fix & Enhancements Report](docs/reports/BUG-FIX-AND-ENHANCEMENTS-REPORT.md) for complete details.
 
 ## ✨ Key Features
 
@@ -65,7 +74,7 @@ A **production-ready multi-agent AI system v3.0.0** featuring intelligent GPU me
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                 Next.js Frontend (v3.0.0)                  │
-│                   http://localhost:3001                    │
+│                   http://localhost:3002                    │
 └─────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────┐
@@ -145,7 +154,7 @@ npm run start-with-frontend     # Starts both backend + frontend
 ```
 
 Access the system:
-- **Frontend UI**: http://localhost:3001 (modern React interface)
+- **Frontend UI**: http://localhost:3002 (modern React interface)
 - **Backend API**: http://localhost:3000 (REST + WebSocket)
 - **Performance Monitor**: http://localhost:3099
 
@@ -199,7 +208,7 @@ AGENT_3_PORT=3007
 AGENT_4_PORT=3008
 
 # Frontend Configuration
-FRONTEND_PORT=3001
+FRONTEND_PORT=3002
 
 # Model Assignment
 MANAGER_MODEL=llama3:latest
@@ -357,6 +366,41 @@ Built-in safety features:
 - **Agent Communication Studies**: Research inter-agent protocols
 - **Performance Benchmarking**: Optimize model deployment strategies
 - **GPU Resource Management**: Efficient multi-model serving
+
+## 📖 Documentation
+
+Comprehensive documentation is available in the `/docs` directory:
+
+### Getting Started
+- **[Setup Instructions](docs/guides/SETUP-INSTRUCTIONS.md)** - Detailed installation guide
+- **[Quick Reference](docs/guides/QUICK-REFERENCE-NEW-FEATURES.md)** - Common tasks and commands
+- **[Authentication Setup](docs/guides/AUTHENTICATION-SETUP.md)** - Configure JWT authentication
+
+### User Guides
+- **[UI Guide](docs/guides/UI-GUIDE.md)** - Frontend interface documentation
+- **[PDF Export Guide](docs/guides/PDF-EXPORT-GUIDE.md)** - Export conversations as PDFs
+- **[Quick Start Guide](docs/guides/QUICK-START-NEW-FEATURES.md)** - Fast track to new features
+
+### Reports & Analysis
+- **[Bug Fix & Enhancements Report](docs/reports/BUG-FIX-AND-ENHANCEMENTS-REPORT.md)** - Latest improvements (v3.1.0)
+- **[Feature Status Report](docs/reports/FEATURE-STATUS-REPORT.md)** - Current implementation status
+
+📚 **[Full Documentation Index](docs/README.md)**
+
+## 🧪 Testing
+
+Run the comprehensive test suite:
+
+```bash
+# Run all tests
+npm test
+
+# Specific test suites
+npm run test-voting          # Voting session integration tests
+npm run test-memory          # Memory system tests
+npm run test-startup         # Startup and initialization tests
+npm run test-new-features    # New features test suite
+```
 
 ## 🤝 Contributing
 

@@ -6,22 +6,38 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
-const pdf = require('html-pdf');
+const puppeteer = require('puppeteer');
 const { Server } = require('socket.io');
 const http = require('http');
+const cookieParser = require('cookie-parser');
 
 // Import shared utilities
 const { logger } = require('../../shared/logger');
 const { generateResponse } = require('../../shared/ollama');
 const { PERFORMATIVES, createMessage } = require('../../shared/messaging');
-const { 
-  getAgentConfig, 
-  updateAgentConfig, 
-  resetAgentConfig, 
-  getAllAgentConfigs, 
+const { VotingSystem, VOTING_STRATEGY, formatVotingResults } = require('../../shared/voting');
+const {
+  getAgentConfig,
+  updateAgentConfig,
+  resetAgentConfig,
+  getAllAgentConfigs,
   validateAgentConfig,
-  buildSystemPrompt 
+  buildSystemPrompt
 } = require('../../shared/agent-config');
+const { connectDB } = require('../../config/database');
+
+// Import routes
+const authRoutes = require('../../routes/auth');
+const conversationRoutes = require('../../routes/conversations');
+
+// Import rate limiters
+const {
+  generalLimiter,
+  authLimiter,
+  messageLimiter,
+  exportLimiter,
+  createConversationLimiter
+} = require('../../middleware/rateLimiter');
 
 // HTML escape function to prevent XSS
 function escapeHtml(text) {
@@ -80,9 +96,22 @@ const io = new Server(server, {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3002',
+  credentials: true,
+}));
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan('dev'));
+
+// Connect to MongoDB
+connectDB().catch(err => {
+  logger.error('Failed to connect to MongoDB:', err);
+});
+
+// API Routes with rate limiting
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/conversations', generalLimiter, conversationRoutes);
 
 // Store for active conversations
 const conversations = new Map();
@@ -202,18 +231,137 @@ app.get('/api/health', (req, res) => {
 });
 
 /**
+ * Response cache to reduce redundant LLM calls
+ */
+const responseCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 100;
+
+/**
+ * Cache analytics tracking
+ */
+const cacheAnalytics = {
+  hits: 0,
+  misses: 0,
+  evictions: 0,
+  totalRequests: 0,
+  startTime: Date.now()
+};
+
+/**
+ * Generate cache key from message content
+ */
+function generateCacheKey(agentId, content) {
+  // Simple hash function for cache key
+  const str = `${agentId}:${content.trim().toLowerCase()}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash.toString();
+}
+
+/**
+ * Get cached response if available and not expired
+ */
+function getCachedResponse(agentId, content) {
+  cacheAnalytics.totalRequests++;
+
+  const key = generateCacheKey(agentId, content);
+  const cached = responseCache.get(key);
+
+  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+    cacheAnalytics.hits++;
+    logger.info(`Cache hit for ${agentId} (hit rate: ${getCacheHitRate().toFixed(1)}%)`);
+    return cached.response;
+  }
+
+  cacheAnalytics.misses++;
+  return null;
+}
+
+/**
+ * Store response in cache
+ */
+function cacheResponse(agentId, content, response) {
+  // Limit cache size
+  if (responseCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = responseCache.keys().next().value;
+    responseCache.delete(firstKey);
+    cacheAnalytics.evictions++;
+  }
+
+  const key = generateCacheKey(agentId, content);
+  responseCache.set(key, {
+    response,
+    timestamp: Date.now()
+  });
+}
+
+/**
+ * Get cache hit rate percentage
+ */
+function getCacheHitRate() {
+  if (cacheAnalytics.totalRequests === 0) return 0;
+  return (cacheAnalytics.hits / cacheAnalytics.totalRequests) * 100;
+}
+
+/**
+ * Get detailed cache statistics
+ */
+function getCacheStats() {
+  const uptime = Date.now() - cacheAnalytics.startTime;
+  const hitRate = getCacheHitRate();
+
+  // Calculate memory savings (estimated)
+  const avgResponseTime = 2000; // 2 seconds average LLM response time
+  const timeSaved = cacheAnalytics.hits * avgResponseTime;
+
+  return {
+    size: responseCache.size,
+    maxSize: MAX_CACHE_SIZE,
+    ttl: CACHE_TTL,
+    hits: cacheAnalytics.hits,
+    misses: cacheAnalytics.misses,
+    evictions: cacheAnalytics.evictions,
+    totalRequests: cacheAnalytics.totalRequests,
+    hitRate: Math.round(hitRate * 10) / 10,
+    uptime: Math.floor(uptime / 1000), // seconds
+    estimatedTimeSaved: Math.floor(timeSaved / 1000), // seconds
+    performance: {
+      status: hitRate > 50 ? 'excellent' : hitRate > 30 ? 'good' : hitRate > 10 ? 'fair' : 'poor',
+      recommendation: hitRate < 30 ? 'Consider increasing cache TTL or size' : 'Cache performing well'
+    }
+  };
+}
+
+/**
+ * Reset cache analytics (for testing/monitoring)
+ */
+function resetCacheAnalytics() {
+  cacheAnalytics.hits = 0;
+  cacheAnalytics.misses = 0;
+  cacheAnalytics.evictions = 0;
+  cacheAnalytics.totalRequests = 0;
+  cacheAnalytics.startTime = Date.now();
+  logger.info('Cache analytics reset');
+}
+
+/**
  * Route message to an agent with conversation history
- * 
+ *
  * @param {Object} message - Message to route
  * @returns {Promise<Object>} - Agent's response
  */
 async function routeMessageToAgent(message) {
   const targetAgent = message.to;
-  
+
   if (!targetAgent || !targetAgent.startsWith('agent-')) {
     throw new Error(`Invalid agent destination: ${targetAgent}`);
   }
-  
+
   const endpoint = AGENT_ENDPOINTS[targetAgent];
   if (!endpoint) {
     throw new Error(`Unknown agent: ${targetAgent}`);
@@ -232,9 +380,47 @@ async function routeMessageToAgent(message) {
 }
 
 /**
+ * Send message to agent (simplified wrapper for voting sessions)
+ * Uses caching to avoid redundant LLM calls
+ *
+ * @param {String} agentId - Target agent ID
+ * @param {String} content - Message content
+ * @param {String} userId - Optional user ID
+ * @returns {Promise<Object>} - Agent's response
+ */
+async function sendToAgent(agentId, content, userId = null) {
+  // Check cache first for simple queries
+  const cached = getCachedResponse(agentId, content);
+  if (cached) {
+    return cached;
+  }
+
+  // Create message object
+  const message = createMessage(
+    'Manager',
+    agentId,
+    content,
+    PERFORMATIVES.REQUEST
+  );
+
+  // Add user context if provided
+  if (userId) {
+    message.userId = userId;
+  }
+
+  // Route to agent
+  const response = await routeMessageToAgent(message);
+
+  // Cache the response
+  cacheResponse(agentId, content, response);
+
+  return response;
+}
+
+/**
  * Handle single agent conversation
  */
-app.post('/message', async (req, res) => {
+app.post('/message', messageLimiter, async (req, res) => {
   try {
     const { content, agentId, agentName, conversationId } = req.body;
     
@@ -325,7 +511,7 @@ app.post('/message', async (req, res) => {
 /**
  * Handle team conversation with multiple agents
  */
-app.post('/team-conversation', async (req, res) => {
+app.post('/team-conversation', messageLimiter, async (req, res) => {
   try {
     const { 
       content, 
@@ -466,7 +652,7 @@ app.delete('/conversation/:conversationId', (req, res) => {
 /**
  * Export conversation as PDF
  */
-app.get('/export-chat/:conversationId', async (req, res) => {
+app.get('/export-chat/:conversationId', exportLimiter, async (req, res) => {
   try {
     const conversationId = req.params.conversationId;
     
@@ -547,32 +733,53 @@ app.get('/export-chat/:conversationId', async (req, res) => {
       </html>
     `;
 
-    // Generate PDF
-    const pdfPath = path.join(EXPORTS_DIR, `chat-${conversationId}-${Date.now()}.pdf`);
-    
-    await new Promise((resolve, reject) => {
-      pdf.create(htmlContent, { 
+    // Generate PDF using Puppeteer (in memory, not disk)
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    let pdfBuffer;
+    try {
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      pdfBuffer = await page.pdf({
         format: 'A4',
-        border: {
+        margin: {
           top: '0.5in',
           right: '0.5in',
           bottom: '0.5in',
           left: '0.5in'
-        }
-      }).toFile(pdfPath, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
+        },
+        printBackground: true
       });
+    } finally {
+      await browser.close();
+    }
+
+    // Save PDF to MongoDB
+    const Conversation = require('../../models/Conversation');
+    const fileName = `chat-${conversationId}-${Date.now()}.pdf`;
+
+    await Conversation.findByIdAndUpdate(conversationId, {
+      $push: {
+        pdfExports: {
+          fileName,
+          fileSize: pdfBuffer.length,
+          data: pdfBuffer,
+          mimeType: 'application/pdf',
+          createdAt: new Date()
+        }
+      }
     });
 
-    // Send the PDF file
-    res.download(pdfPath, `chat-${conversationId}.pdf`, (err) => {
-      if (err) {
-        logger.error('Error sending PDF:', err);
-      }
-      // Optionally delete the file after sending
-      // fs.unlinkSync(pdfPath);
-    });
+    logger.info(`PDF saved to MongoDB for conversation ${conversationId}`);
+
+    // Send the PDF file to user
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.send(pdfBuffer);
 
   } catch (error) {
     logger.error('Error exporting chat to PDF:', error.message);
@@ -583,11 +790,70 @@ app.get('/export-chat/:conversationId', async (req, res) => {
 });
 
 /**
+ * Get all PDF exports for a conversation
+ */
+app.get('/export/:conversationId/pdfs', async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const Conversation = require('../../models/Conversation');
+
+    const conversation = await Conversation.findById(conversationId)
+      .select('pdfExports.createdAt pdfExports.fileName pdfExports.fileSize pdfExports._id')
+      .lean();
+
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    res.json({
+      conversationId,
+      pdfs: conversation.pdfExports || []
+    });
+  } catch (error) {
+    logger.error('Error fetching PDF list:', error.message);
+    res.status(500).json({ error: 'Error fetching PDF list' });
+  }
+});
+
+/**
+ * Download a specific PDF export from MongoDB
+ */
+app.get('/export/:conversationId/pdf/:pdfId', async (req, res) => {
+  try {
+    const { conversationId, pdfId } = req.params;
+    const Conversation = require('../../models/Conversation');
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    const pdfExport = conversation.pdfExports.id(pdfId);
+
+    if (!pdfExport) {
+      return res.status(404).json({ error: 'PDF not found' });
+    }
+
+    // Send the PDF
+    res.setHeader('Content-Type', pdfExport.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${pdfExport.fileName}"`);
+    res.setHeader('Content-Length', pdfExport.fileSize);
+    res.send(pdfExport.data);
+
+    logger.info(`PDF downloaded: ${pdfExport.fileName}`);
+  } catch (error) {
+    logger.error('Error downloading PDF:', error.message);
+    res.status(500).json({ error: 'Error downloading PDF' });
+  }
+});
+
+/**
  * Get system status
  */
 app.get('/status', async (req, res) => {
   const agentStatuses = {};
-  
+
   // Check each agent's status
   for (const [agentId, endpoint] of Object.entries(AGENT_ENDPOINTS)) {
     try {
@@ -604,7 +870,7 @@ app.get('/status', async (req, res) => {
       };
     }
   }
-  
+
   res.json({
     manager: {
       status: 'online',
@@ -613,14 +879,42 @@ app.get('/status', async (req, res) => {
     },
     agents: agentStatuses,
     activeConversations: conversations.size,
-    exportsDirectory: EXPORTS_DIR
+    exportsDirectory: EXPORTS_DIR,
+    cache: getCacheStats()
+  });
+});
+
+/**
+ * Get detailed cache analytics
+ */
+app.get('/api/cache/stats', (req, res) => {
+  res.json({
+    success: true,
+    cache: getCacheStats()
+  });
+});
+
+/**
+ * Clear cache
+ */
+app.post('/api/cache/clear', (req, res) => {
+  const previousSize = responseCache.size;
+  responseCache.clear();
+  resetCacheAnalytics();
+
+  logger.info(`Cache cleared: ${previousSize} entries removed`);
+
+  res.json({
+    success: true,
+    message: 'Cache cleared successfully',
+    entriesRemoved: previousSize
   });
 });
 
 /**
  * Research Mode - Extended Multi-Round Agent Collaboration
  */
-app.post('/research-session', async (req, res) => {
+app.post('/research-session', messageLimiter, async (req, res) => {
   try {
     const { 
       topic, 
@@ -685,11 +979,83 @@ app.post('/research-session', async (req, res) => {
 });
 
 /**
- * Conduct multi-round research discussion
+ * Detect if agents have reached convergence (agreement) on the topic
+ * Uses semantic similarity and agreement markers in responses
+ */
+function detectConvergence(roundResponses, threshold = 0.75) {
+  if (roundResponses.length < 2) return { converged: false, confidence: 0 };
+
+  // Extract key phrases and agreement markers
+  const agreementMarkers = [
+    'i agree', 'agreed', 'consensus', 'aligned', 'same conclusion',
+    'similarly', 'likewise', 'as mentioned', 'building on that',
+    'exactly', 'precisely', 'correct', 'absolutely'
+  ];
+
+  const disagreementMarkers = [
+    'however', 'but', 'disagree', 'alternatively', 'on the other hand',
+    'different', 'contrary', 'oppose', 'challenge'
+  ];
+
+  let agreementScore = 0;
+  let disagreementScore = 0;
+  let totalComparisons = 0;
+
+  // Compare each pair of responses
+  for (let i = 0; i < roundResponses.length; i++) {
+    for (let j = i + 1; j < roundResponses.length; j++) {
+      const response1 = roundResponses[i].content.toLowerCase();
+      const response2 = roundResponses[j].content.toLowerCase();
+
+      totalComparisons++;
+
+      // Check for agreement markers
+      agreementMarkers.forEach(marker => {
+        if (response1.includes(marker) || response2.includes(marker)) {
+          agreementScore += 0.5;
+        }
+      });
+
+      // Check for disagreement markers
+      disagreementMarkers.forEach(marker => {
+        if (response1.includes(marker) || response2.includes(marker)) {
+          disagreementScore += 0.5;
+        }
+      });
+
+      // Check for similar key concepts (simple word overlap)
+      const words1 = response1.split(/\s+/).filter(w => w.length > 5);
+      const words2 = response2.split(/\s+/).filter(w => w.length > 5);
+      const commonWords = words1.filter(w => words2.includes(w));
+
+      if (commonWords.length > 5) {
+        agreementScore += 0.3;
+      }
+    }
+  }
+
+  // Calculate convergence confidence
+  const netAgreement = agreementScore - disagreementScore;
+  const confidence = Math.max(0, Math.min(1, netAgreement / (totalComparisons * 2)));
+
+  const converged = confidence >= threshold;
+
+  return {
+    converged,
+    confidence: Math.round(confidence * 100) / 100,
+    agreementScore,
+    disagreementScore,
+    totalComparisons
+  };
+}
+
+/**
+ * Conduct multi-round research discussion with convergence detection
  */
 async function conductResearchRounds(conversationId, topic, participants, totalRounds) {
   const conversation = conversations.get(conversationId);
-  
+  let converged = false;
+
   for (let round = 1; round <= totalRounds; round++) {
     conversation.currentRound = round;
     
@@ -764,16 +1130,48 @@ async function conductResearchRounds(conversationId, topic, participants, totalR
         broadcastConversationUpdate(conversationId, errorMessage);
       }
     }
-    
+
+    // Check for convergence after round 2 or later
+    if (round >= 2 && round < totalRounds) {
+      // Get responses from this round only
+      const roundResponses = conversation.history.filter(
+        msg => msg.round === round && msg.agentId && !msg.error
+      );
+
+      if (roundResponses.length >= 2) {
+        const convergenceResult = detectConvergence(roundResponses, 0.70); // 70% threshold
+
+        logger.info(`Round ${round} convergence: ${convergenceResult.converged}, confidence: ${convergenceResult.confidence}`);
+
+        if (convergenceResult.converged) {
+          converged = true;
+
+          const convergenceMessage = {
+            from: 'Manager',
+            content: `🎯 **Convergence Detected** (Round ${round})\n\nThe team has reached strong agreement on this topic with ${(convergenceResult.confidence * 100).toFixed(0)}% confidence.\n\nKey indicators:\n- Agreement markers: ${convergenceResult.agreementScore.toFixed(1)}\n- Disagreement markers: ${convergenceResult.disagreementScore.toFixed(1)}\n- Comparisons analyzed: ${convergenceResult.totalComparisons}\n\nSkipping remaining rounds as consensus has been achieved.`,
+            timestamp: Date.now(),
+            type: 'convergence-detected'
+          };
+
+          conversation.history.push(convergenceMessage);
+          conversation.lastActivity = Date.now();
+          broadcastConversationUpdate(conversationId, convergenceMessage);
+
+          logger.info(`Research converged at round ${round}, skipping remaining rounds`);
+          break; // Exit the loop early
+        }
+      }
+    }
+
     // Manager provides round summary
-    if (round < totalRounds) {
+    if (round < totalRounds && !converged) {
       const roundSummary = {
         from: 'Manager',
         content: `✅ **Round ${round} Complete**\n\nGreat contributions from all agents! Moving to the next round where we'll build on these insights.`,
         timestamp: Date.now(),
         type: 'round-summary'
       };
-      
+
       conversation.history.push(roundSummary);
       conversation.lastActivity = Date.now();
       broadcastConversationUpdate(conversationId, roundSummary);
@@ -838,7 +1236,7 @@ function createRoundPrompt(topic, round, totalRounds, conversationHistory) {
 /**
  * Flexible Work Session - User-Defined Agent Prompts
  */
-app.post('/flexible-work-session', async (req, res) => {
+app.post('/flexible-work-session', messageLimiter, async (req, res) => {
   try {
     const { 
       task, 
@@ -1026,7 +1424,7 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
 /**
  * Continue an existing conversation with follow-up messages
  */
-app.post('/continue-conversation', async (req, res) => {
+app.post('/continue-conversation', messageLimiter, async (req, res) => {
   try {
     const { 
       conversationId, 
@@ -1340,12 +1738,12 @@ app.put('/api/agent-configs/:agentId', (req, res) => {
 app.post('/api/agent-configs/:agentId/reset', (req, res) => {
   try {
     const { agentId } = req.params;
-    
+
     // Validate agent ID
     if (!/^agent-[1-4]$/.test(agentId)) {
       return res.status(400).json({ error: 'Invalid agent ID format' });
     }
-    
+
     const success = resetAgentConfig(agentId);
     if (success) {
       res.json({
@@ -1359,6 +1757,215 @@ app.post('/api/agent-configs/:agentId/reset', (req, res) => {
   } catch (error) {
     logger.error('Error resetting agent configuration:', error.message);
     res.status(500).json({ error: 'Failed to reset agent configuration' });
+  }
+});
+
+/**
+ * Agent Voting Session
+ * Agents propose solutions and vote on the best one
+ */
+app.post('/voting-session', messageLimiter, async (req, res) => {
+  try {
+    const {
+      problem,
+      participants = [], // Array of {agentId, agentName}
+      votingStrategy = VOTING_STRATEGY.WEIGHTED,
+      conversationId,
+      userId
+    } = req.body;
+
+    // Validation
+    if (!problem) {
+      return res.status(400).json({ error: 'Problem statement is required' });
+    }
+
+    if (!participants || participants.length < 2) {
+      return res.status(400).json({
+        error: 'At least 2 agents required for voting'
+      });
+    }
+
+    logger.info(`Starting voting session with ${participants.length} agents`);
+    logger.info(`Strategy: ${votingStrategy}`);
+
+    const finalConversationId = conversationId || `voting-${Date.now()}`;
+
+    // Initialize conversation
+    if (!conversations.has(finalConversationId)) {
+      conversations.set(finalConversationId, {
+        messages: [],
+        participants: participants.map(p => p.agentId),
+        createdAt: Date.now(),
+        lastActivity: Date.now()
+      });
+    }
+
+    const conversation = conversations.get(finalConversationId);
+
+    // Add user message
+    const userMessage = {
+      role: 'user',
+      content: problem,
+      timestamp: new Date().toISOString()
+    };
+    conversation.messages.push(userMessage);
+    conversation.lastActivity = Date.now();
+
+    // Broadcast to WebSocket clients
+    broadcastConversationUpdate(finalConversationId, userMessage);
+
+    // PHASE 1: Collect proposals from each agent
+    logger.info('Phase 1: Collecting proposals from agents...');
+
+    const proposals = [];
+
+    for (const participant of participants) {
+      const { agentId, agentName } = participant;
+
+      logger.info(`Requesting proposal from ${agentName}...`);
+
+      try {
+        const agentResponse = await sendToAgent(agentId, problem, userId);
+
+        const proposal = {
+          id: `${agentId}-${Date.now()}`,
+          agentId,
+          agentName,
+          content: agentResponse.content,
+          timestamp: new Date().toISOString()
+        };
+
+        proposals.push(proposal);
+
+        // Add to conversation
+        const proposalMessage = {
+          role: 'assistant',
+          content: `**${agentName} Proposal:**\n\n${agentResponse.content}`,
+          agentId,
+          timestamp: new Date().toISOString()
+        };
+        conversation.messages.push(proposalMessage);
+        broadcastConversationUpdate(finalConversationId, proposalMessage);
+
+        logger.info(`Received proposal from ${agentName}`);
+      } catch (error) {
+        logger.error(`Error getting proposal from ${agentName}:`, error);
+      }
+    }
+
+    if (proposals.length === 0) {
+      return res.status(500).json({
+        error: 'No proposals received from agents'
+      });
+    }
+
+    // PHASE 2: Agents vote on proposals
+    logger.info('Phase 2: Collecting votes from agents...');
+
+    const votes = [];
+
+    for (const participant of participants) {
+      const { agentId, agentName } = participant;
+
+      // Prepare voting prompt
+      let votingPrompt = `You are ${agentName}. Review these proposals for the problem:\n\n"${problem}"\n\n`;
+
+      proposals.forEach((proposal, index) => {
+        votingPrompt += `\n**Proposal ${index + 1}** (by ${proposal.agentName}):\n${proposal.content}\n`;
+      });
+
+      if (votingStrategy === VOTING_STRATEGY.RANKED_CHOICE) {
+        votingPrompt += `\nRank ALL proposals from best to worst. Reply with ONLY the proposal numbers separated by commas (e.g., "2,1,3,4").`;
+      } else {
+        votingPrompt += `\nVote for the BEST proposal. Reply with ONLY the proposal number (1-${proposals.length}).`;
+      }
+
+      try {
+        const voteResponse = await sendToAgent(agentId, votingPrompt, userId);
+
+        if (votingStrategy === VOTING_STRATEGY.RANKED_CHOICE) {
+          // Parse ranked choices
+          const rankings = voteResponse.content
+            .trim()
+            .split(',')
+            .map(n => parseInt(n.trim()) - 1)
+            .filter(i => i >= 0 && i < proposals.length)
+            .map(i => proposals[i].id);
+
+          votes.push({
+            agentId,
+            agentName,
+            rankings
+          });
+
+          logger.info(`${agentName} ranked: ${rankings.join(', ')}`);
+        } else {
+          // Parse single vote
+          const voteMatch = voteResponse.content.match(/(\d+)/);
+          if (voteMatch) {
+            const proposalIndex = parseInt(voteMatch[1]) - 1;
+
+            if (proposalIndex >= 0 && proposalIndex < proposals.length) {
+              const selectedProposal = proposals[proposalIndex];
+
+              votes.push({
+                proposalId: selectedProposal.id,
+                agentId,
+                agentName,
+                type: 'upvote',
+                weight: participant.weight || 1.0
+              });
+
+              logger.info(`${agentName} voted for Proposal ${proposalIndex + 1}`);
+            }
+          }
+        }
+      } catch (error) {
+        logger.error(`Error getting vote from ${agentName}:`, error);
+      }
+    }
+
+    if (votes.length === 0) {
+      return res.status(500).json({
+        error: 'No votes received from agents'
+      });
+    }
+
+    // PHASE 3: Calculate results
+    logger.info('Phase 3: Calculating voting results...');
+
+    const results = VotingSystem.execute(votingStrategy, proposals, votes);
+
+    logger.info(`Winner: ${results.winnerProposal ? results.winnerProposal.agentName : 'None'}`);
+    logger.info(`Confidence: ${(results.confidence * 100).toFixed(1)}%`);
+
+    // Format results message
+    const resultsText = formatVotingResults(results);
+
+    const resultsMessage = {
+      role: 'system',
+      content: resultsText,
+      timestamp: new Date().toISOString()
+    };
+    conversation.messages.push(resultsMessage);
+    broadcastConversationUpdate(finalConversationId, resultsMessage);
+
+    // Send response
+    res.json({
+      success: true,
+      conversationId: finalConversationId,
+      proposals,
+      votes,
+      results,
+      winner: results.winnerProposal,
+      summary: resultsText
+    });
+  } catch (error) {
+    logger.error('Voting session error:', error);
+    res.status(500).json({
+      error: 'Voting session failed',
+      details: error.message
+    });
   }
 });
 
