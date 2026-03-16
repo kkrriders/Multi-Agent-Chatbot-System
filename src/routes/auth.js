@@ -3,8 +3,43 @@ const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const { authenticate } = require('../middleware/auth');
 const { logger } = require('../shared/logger');
+const { auditEvent } = require('../middleware/auditLog');
 
 const router = express.Router();
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateSignupBody({ fullName, email, password, confirmPassword }) {
+  if (!fullName || !email || !password) {
+    return 'Please provide all required fields';
+  }
+  if (typeof fullName !== 'string' || fullName.trim().length < 2 || fullName.trim().length > 100) {
+    return 'Full name must be between 2 and 100 characters';
+  }
+  if (!EMAIL_REGEX.test(email) || email.length > 254) {
+    return 'Please provide a valid email address';
+  }
+  if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
+    return 'Password must be between 8 and 128 characters';
+  }
+  if (password !== confirmPassword) {
+    return 'Passwords do not match';
+  }
+  return null;
+}
+
+function validateLoginBody({ email, password }) {
+  if (!email || !password) {
+    return 'Please provide email and password';
+  }
+  if (!EMAIL_REGEX.test(email) || email.length > 254) {
+    return 'Please provide a valid email address';
+  }
+  if (typeof password !== 'string' || password.length > 128) {
+    return 'Invalid password format';
+  }
+  return null;
+}
 
 /**
  * @route   POST /api/auth/signup
@@ -16,25 +51,9 @@ router.post('/signup', async (req, res) => {
     const { fullName, email, password, confirmPassword } = req.body;
 
     // Validation
-    if (!fullName || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please provide all required fields',
-      });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        error: 'Passwords do not match',
-      });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        error: 'Password must be at least 6 characters',
-      });
+    const signupError = validateSignupBody({ fullName, email, password, confirmPassword });
+    if (signupError) {
+      return res.status(400).json({ success: false, error: signupError });
     }
 
     // Check if user already exists
@@ -57,12 +76,13 @@ router.post('/signup', async (req, res) => {
     const token = generateToken(user);
 
     logger.info(`New user registered: ${email}`);
+    auditEvent({ userId: user._id, email, action: 'signup.success', ip: req.ip, userAgent: req.headers['user-agent'] });
 
     // Set cookie and send response
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -97,17 +117,16 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     // Validation
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please provide email and password',
-      });
+    const loginError = validateLoginBody({ email, password });
+    if (loginError) {
+      return res.status(400).json({ success: false, error: loginError });
     }
 
     // Find user and include password field
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
+      auditEvent({ email, action: 'login.failure', ip: req.ip, userAgent: req.headers['user-agent'], success: false, detail: 'user not found' });
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials',
@@ -126,6 +145,7 @@ router.post('/login', async (req, res) => {
     const isPasswordMatch = await user.comparePassword(password);
 
     if (!isPasswordMatch) {
+      auditEvent({ userId: user._id, email, action: 'login.failure', ip: req.ip, userAgent: req.headers['user-agent'], success: false, detail: 'wrong password' });
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials',
@@ -140,12 +160,13 @@ router.post('/login', async (req, res) => {
     const token = generateToken(user);
 
     logger.info(`User logged in: ${email}`);
+    auditEvent({ userId: user._id, email, action: 'login.success', ip: req.ip, userAgent: req.headers['user-agent'] });
 
     // Set cookie and send response
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 

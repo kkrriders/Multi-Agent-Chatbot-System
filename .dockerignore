@@ -1,0 +1,36 @@
+# ── Dependencies (rebuilt inside the image) ───────────────────────────────────
+node_modules
+multi-agent-chatbot/node_modules
+multi-agent-chatbot/.next
+
+# ── Secrets (must never be baked into an image) ───────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Git ───────────────────────────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ── Runtime data (mounted as volumes in docker-compose) ───────────────────────
+logs/
+memory/users/
+exports/
+
+# ── Development artifacts ─────────────────────────────────────────────────────
+*.tar.gz
+backup-*.tar.gz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Tests / CI ────────────────────────────────────────────────────────────────
+tests/
+jest.config.js
+coverage/
+
+# ── Editor / OS ───────────────────────────────────────────────────────────────
+.vscode/
+.DS_Store
+Thumbs.db

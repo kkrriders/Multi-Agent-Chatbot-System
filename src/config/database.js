@@ -13,8 +13,9 @@ const connectDB = async () => {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/multi-agent-chatbot';
 
     await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      maxPoolSize: 20,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
 
     isConnected = true;
@@ -27,6 +28,11 @@ const connectDB = async () => {
     mongoose.connection.on('disconnected', () => {
       logger.warn('MongoDB disconnected');
       isConnected = false;
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      logger.info('MongoDB reconnected');
+      isConnected = true;
     });
 
   } catch (error) {

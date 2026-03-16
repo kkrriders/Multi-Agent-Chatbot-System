@@ -1,0 +1,195 @@
+# ── Multi-Agent Chatbot System ────────────────────────────────────────────────
+#
+# Quick start:
+#   cp .env.example .env          # fill in JWT_SECRET, MONGODB_URI override, etc.
+#   docker compose up --build     # build and start all services
+#
+# With distributed tracing (Jaeger UI at http://localhost:16686):
+#   docker compose --profile tracing up --build
+#
+# Ollama is NOT containerised — GPU passthrough in containers requires
+# complex configuration. It runs on the host and is reachable from containers
+# via host.docker.internal (automatic on Docker Desktop for Windows/Mac).
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── Backend agents ──────────────────────────────────────────────────────────
+  # All agents use the same image — docker-compose overrides the CMD per service.
+
+  agent-llama3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: node src/agents/agent-llama3/index.js
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
+      REDIS_URL: redis://redis:6379
+      OLLAMA_API_BASE: http://host.docker.internal:11434/api
+      AGENT_1_PORT: "3005"
+    ports:
+      - "3005:3005"
+    depends_on:
+      mongodb: { condition: service_healthy }
+      redis:   { condition: service_healthy }
+    volumes:
+      - ./logs:/app/logs
+
+  agent-mistral:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: node src/agents/agent-mistral/index.js
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
+      REDIS_URL: redis://redis:6379
+      OLLAMA_API_BASE: http://host.docker.internal:11434/api
+      AGENT_2_PORT: "3006"
+    ports:
+      - "3006:3006"
+    depends_on:
+      mongodb: { condition: service_healthy }
+      redis:   { condition: service_healthy }
+    volumes:
+      - ./logs:/app/logs
+
+  agent-phi3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: node src/agents/agent-phi3/index.js
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
+      REDIS_URL: redis://redis:6379
+      OLLAMA_API_BASE: http://host.docker.internal:11434/api
+      AGENT_3_PORT: "3007"
+    ports:
+      - "3007:3007"
+    depends_on:
+      mongodb: { condition: service_healthy }
+      redis:   { condition: service_healthy }
+    volumes:
+      - ./logs:/app/logs
+
+  agent-qwen:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: node src/agents/agent-qwen/index.js
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
+      REDIS_URL: redis://redis:6379
+      OLLAMA_API_BASE: http://host.docker.internal:11434/api
+      AGENT_4_PORT: "3008"
+    ports:
+      - "3008:3008"
+    depends_on:
+      mongodb: { condition: service_healthy }
+      redis:   { condition: service_healthy }
+    volumes:
+      - ./logs:/app/logs
+
+  manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: node src/agents/manager/index.js
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
+      REDIS_URL: redis://redis:6379
+      OLLAMA_API_BASE: http://host.docker.internal:11434/api
+      MANAGER_PORT: "3000"
+      FRONTEND_URL: http://localhost:3002
+      # Route agent calls to named containers (not localhost)
+      AGENT_1_URL: http://agent-llama3:3005
+      AGENT_2_URL: http://agent-mistral:3006
+      AGENT_3_URL: http://agent-phi3:3007
+      AGENT_4_URL: http://agent-qwen:3008
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:      { condition: service_healthy }
+      redis:        { condition: service_healthy }
+      agent-llama3: { condition: service_started }
+      agent-mistral: { condition: service_started }
+      agent-phi3:   { condition: service_started }
+      agent-qwen:   { condition: service_started }
+    volumes:
+      - ./logs:/app/logs
+
+  # ── Frontend ─────────────────────────────────────────────────────────────────
+
+  frontend:
+    build:
+      context: ./multi-agent-chatbot
+      dockerfile: Dockerfile
+      args:
+        # Baked into the Next.js client bundle — must be reachable from the browser
+        NEXT_PUBLIC_API_URL: http://localhost:3000
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3002:3002"
+    depends_on:
+      manager: { condition: service_started }
+
+  # ── Optional: Jaeger distributed tracing UI ───────────────────────────────
+  # Enable with: docker compose --profile tracing up
+  # UI: http://localhost:16686
+  # Set OTEL_ENABLED=true in .env to activate tracing in all services.
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    profiles: ["tracing"]
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "4318:4318"   # OTLP HTTP receiver (backend → Jaeger)
+      - "16686:16686" # Jaeger web UI
+
+volumes:
+  mongo_data:
+  redis_data:

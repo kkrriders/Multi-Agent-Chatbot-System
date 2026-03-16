@@ -1,0 +1,10 @@
+{"category":"factual","question":"What is the capital of France?","expected":"Paris"}
+{"category":"math","question":"What is 17 multiplied by 13?","expected":"221"}
+{"category":"technical","question":"What does REST stand for in REST API?","expected":"Representational State Transfer"}
+{"category":"technical","question":"In JavaScript, what is the difference between == and ===?","expected":"== performs type coercion before comparison while === checks both value and type without coercion"}
+{"category":"technical","question":"What does the HTTP status code 429 mean?","expected":"Too Many Requests — the client has sent too many requests in a given time window"}
+{"category":"factual","question":"What are the four pillars of object-oriented programming?","expected":"Encapsulation, abstraction, inheritance, and polymorphism"}
+{"category":"technical","question":"What is a circuit breaker pattern in distributed systems?","expected":"A design pattern that detects failures and prevents an application from repeatedly trying an operation that is likely to fail, allowing it to recover gracefully"}
+{"category":"factual","question":"What does SQL stand for?","expected":"Structured Query Language"}
+{"category":"technical","question":"What is the purpose of an index in a database?","expected":"To speed up data retrieval by creating a separate data structure that allows the database to find rows without scanning the entire table"}
+{"category":"technical","question":"Explain what a JWT token is in one sentence.","expected":"A JSON Web Token is a compact, self-contained token that encodes claims as a signed JSON payload, allowing stateless authentication between services"}

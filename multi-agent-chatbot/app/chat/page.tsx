@@ -14,6 +14,7 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  Loader2,
   Play,
   Settings,
   Zap,
@@ -26,7 +27,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { checkAuth, logout, getUser, type User } from "@/lib/auth"
+import { checkAuth, logout, getUser, getToken, type User } from "@/lib/auth"
+import { API_URL } from "@/lib/config"
 import ConversationSidebar from "@/components/ConversationSidebar"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
@@ -41,6 +43,7 @@ interface Message {
   agent?: string
   timestamp: Date
   typing?: boolean
+  streaming?: boolean
 }
 
 interface Agent {
@@ -48,7 +51,7 @@ interface Agent {
   name: string
   model: string
   port: number
-  status: "online" | "offline" | "loading" | "active"
+  status: "online" | "offline" | "loading" | "thinking" | "active"
   description: string
   color: string
   role: string
@@ -261,7 +264,7 @@ export default function MultiAgentChatbot() {
   useEffect(() => {
     const connectToBackend = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/health');
+        const response = await fetch(`${API_URL}/api/health`);
         if (response.ok) {
           setIsConnected(true);
           // Initialize Socket.IO connection when backend is available
@@ -291,9 +294,11 @@ export default function MultiAgentChatbot() {
 
   const initializeSocket = () => {
     console.log('🔌 Initializing Socket.IO connection...');
-    socketRef.current = io('http://localhost:3000', {
+    socketRef.current = io(API_URL, {
       transports: ['websocket', 'polling'],
       timeout: 60000,
+      // Server requires a valid JWT — send it in the handshake auth payload
+      auth: { token: getToken() },
     });
     
     socketRef.current.on('connect', () => {
@@ -352,7 +357,7 @@ export default function MultiAgentChatbot() {
             if (agentId && agentId.startsWith('agent-')) {
               updateAgent(agentId, {
                 status: data.message.type === 'manager-conclusion' ? 'online' : 'active',
-                messagesCount: agents.find((a) => a.id === agentId)?.messagesCount + 1 || 1,
+                messagesCount: (agents.find((a) => a.id === agentId)?.messagesCount ?? 0) + 1,
               });
               
               // Add to active agents if not already there
@@ -377,6 +382,139 @@ export default function MultiAgentChatbot() {
         console.error('Error handling conversation update:', error);
       }
     });
+
+    // ── Streaming events ───────────────────────────────────────────────────
+    //
+    // The full sequence per agent turn is:
+    //
+    //   agent-thinking → stream-start → stream-token (×N) → stream-end
+    //
+    // agent-thinking fires the moment the manager decides to call the agent,
+    // before the HTTP connection is even opened. It lets us show a "thinking"
+    // indicator immediately, filling the 200 ms – 2 s gap that would otherwise
+    // leave the UI looking frozen while Ollama loads context.
+    //
+    // stream-start replaces the thinking placeholder in-place (same list slot)
+    // so there is no flicker of a bubble disappearing and a new one appearing.
+
+    socketRef.current.on('agent-thinking', (data: { agentId: string; conversationId: string }) => {
+      // Security: only accept known agent IDs. Anything else is silently dropped
+      // so a malformed or unexpected payload cannot inject phantom UI state.
+      if (!data.agentId?.startsWith('agent-')) return
+
+      updateAgent(data.agentId, { status: 'thinking' })
+      setActiveAgents(prev => prev.includes(data.agentId) ? prev : [...prev, data.agentId])
+
+      // Use a predictable ID so stream-start can locate and replace this bubble
+      // without appending a second one.
+      const thinkingId = `thinking-${data.agentId}`
+      setMessages(prev => {
+        // Guard against duplicate thinking bubbles (e.g. rapid re-emit on reconnect).
+        if (prev.some(m => m.id === thinkingId)) return prev
+        return [...prev, {
+          id: thinkingId,
+          content: '',
+          sender: 'agent' as const,
+          agent: data.agentId,
+          timestamp: new Date(),
+          typing: true,
+        }]
+      })
+    })
+
+    // stream-start: agent has begun generating — transition the thinking bubble
+    // to a live streaming bubble. The bubble stays in its existing list position
+    // so the user does not see it jump.
+    socketRef.current.on('stream-start', (data: {
+      messageId: string
+      agentId: string
+      conversationId: string
+    }) => {
+      const streamingMessage: Message = {
+        id: data.messageId,
+        content: '',
+        sender: 'agent',
+        agent: data.agentId,
+        timestamp: new Date(),
+        streaming: true,
+      }
+
+      setMessages(prev => {
+        // Replace the thinking placeholder that arrived via agent-thinking.
+        // If it is not present (e.g. agent-thinking was missed after a reconnect)
+        // fall back to appending a new bubble so streaming always works.
+        const thinkingIndex = prev.findIndex(m => m.id === `thinking-${data.agentId}`)
+        if (thinkingIndex !== -1) {
+          const updated = [...prev]
+          updated[thinkingIndex] = streamingMessage
+          return updated
+        }
+        return [...prev, streamingMessage]
+      })
+
+      if (data.agentId.startsWith('agent-')) {
+        updateAgent(data.agentId, { status: 'active' })
+        setActiveAgents(prev => prev.includes(data.agentId) ? prev : [...prev, data.agentId])
+      }
+    })
+
+    // stream-token: append each arriving token to the placeholder
+    socketRef.current.on('stream-token', (data: { messageId: string; token: string }) => {
+      setMessages(prev => prev.map(msg =>
+        msg.id === data.messageId
+          ? { ...msg, content: msg.content + data.token }
+          : msg
+      ))
+    })
+
+    // stream-end: replace placeholder content with the final, clean version
+    socketRef.current.on('stream-end', (data: {
+      messageId: string
+      agentId: string
+      content: string
+      timestamp: number
+      type?: string
+    }) => {
+      setMessages(prev => prev.map(msg =>
+        msg.id === data.messageId
+          ? { ...msg, content: data.content, streaming: false }
+          : msg
+      ))
+
+      if (data.agentId && data.agentId.startsWith('agent-')) {
+        // Use the functional setter so messagesCount reads the live agent state
+        // rather than the stale snapshot captured when this listener was first
+        // registered. Without this, rapid back-to-back stream-end events all
+        // read the same initial count and overwrite each other's increments.
+        setAgents(prev => prev.map(a =>
+          a.id === data.agentId
+            ? { ...a, status: 'online', messagesCount: a.messagesCount + 1 }
+            : a
+        ))
+        setActiveAgents(prev => prev.filter(id => id !== data.agentId))
+      }
+
+      if (data.type === 'manager-conclusion') {
+        setIsProcessing(false)
+        setActiveAgents([])
+        setTaskProgress(100)
+      }
+    })
+
+    // stream-error: the agent call failed after agent-thinking was emitted.
+    // Replace the thinking placeholder with nothing (remove it) so the user
+    // does not see a stuck "thinking…" bubble alongside the error message that
+    // broadcastConversationUpdate will deliver separately.
+    socketRef.current.on('stream-error', (data: { agentId: string; conversationId: string }) => {
+      if (!data.agentId?.startsWith('agent-')) return
+      const thinkingId = `thinking-${data.agentId}`
+      setMessages(prev => prev.filter(m => m.id !== thinkingId))
+      setAgents(prev => prev.map(a =>
+        a.id === data.agentId ? { ...a, status: 'online' } : a
+      ))
+      setActiveAgents(prev => prev.filter(id => id !== data.agentId))
+    })
+    // ───────────────────────────────────────────────────────────────────────
 
     socketRef.current.on('connect_error', (error) => {
       console.error('Socket.IO connection error:', error);
@@ -431,7 +569,7 @@ export default function MultiAgentChatbot() {
         // Send to all enabled agents - the backend will handle broadcasting
         const enabledAgents = agents.filter(agent => agent.enabled)
         
-        const response = await fetch('http://localhost:3000/continue-conversation', {
+        const response = await fetch(`${API_URL}/continue-conversation`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -458,7 +596,7 @@ export default function MultiAgentChatbot() {
           throw new Error('Target agent not found')
         }
 
-        const response = await fetch('http://localhost:3000/message', {
+        const response = await fetch(`${API_URL}/message`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -483,7 +621,7 @@ export default function MultiAgentChatbot() {
       console.error('Error sending follow-up message:', error)
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        content: `Error sending message: ${error.message}`,
+        content: `Error sending message: ${(error as Error).message}`,
         sender: "agent",
         timestamp: new Date(),
       }
@@ -541,7 +679,7 @@ export default function MultiAgentChatbot() {
 
       // Call the flexible work session API
       console.log('📡 Calling API with agents:', agentData)
-      const response = await fetch('http://localhost:3000/flexible-work-session', {
+      const response = await fetch(`${API_URL}/flexible-work-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -565,13 +703,21 @@ export default function MultiAgentChatbot() {
         // The socket connection is already set up and listening for updates
         // Progress will be updated via the conversation-update events
         
-        // Set up a timeout to reset state if something goes wrong
+        // Safety timeout: if the task is still marked as processing after 3
+        // minutes, something went wrong server-side. Reset UI state so the
+        // user is not stuck with a frozen "Processing…" button.
+        // We use the functional setter form to read the live value of
+        // isProcessing at timeout-fire time rather than the stale closure
+        // value captured when startTask ran — which would always read `true`
+        // even if the task finished before the 3 minutes elapsed.
         setTimeout(() => {
-          if (isProcessing) {
-            console.warn('⚠️ Work session timeout, resetting state')
-            setIsProcessing(false)
-            setActiveAgents([])
-          }
+          setIsProcessing(prev => {
+            if (prev) {
+              console.warn('⚠️ Work session timeout, resetting state')
+              setActiveAgents([])
+            }
+            return prev ? false : prev
+          })
         }, 180000) // 3 minute timeout
 
       } else {
@@ -582,7 +728,7 @@ export default function MultiAgentChatbot() {
       console.error('Error starting task:', error)
       setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
-        content: `Error starting task: ${error.message}. Please make sure the backend server is running on localhost:3000.`,
+        content: `Error starting task: ${(error as Error).message}. Please make sure the backend server is running at ${API_URL}.`,
         sender: "agent",
         timestamp: new Date(),
       }])
@@ -594,6 +740,10 @@ export default function MultiAgentChatbot() {
     switch (status) {
       case "online":
         return <CheckCircle className="h-4 w-4 text-green-500" />
+      // thinking: manager has selected this agent; waiting for first token
+      case "thinking":
+        return <Loader2 className="h-4 w-4 text-amber-500 animate-spin" />
+      // active: tokens are actively arriving from the agent
       case "active":
         return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />
       case "loading":
@@ -614,9 +764,9 @@ export default function MultiAgentChatbot() {
 
   const handleSelectConversation = async (conversationId: string) => {
     try {
-      const token = localStorage.getItem('token')
+      const token = getToken()
 
-      const response = await fetch(`http://localhost:3000/api/conversations/${conversationId}`, {
+      const response = await fetch(`${API_URL}/api/conversations/${conversationId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -725,8 +875,8 @@ export default function MultiAgentChatbot() {
 
   const handleMessageFeedback = async (messageId: string, type: 'positive' | 'negative') => {
     try {
-      const token = localStorage.getItem('token')
-      await fetch(`http://localhost:3000/api/messages/${messageId}/feedback`, {
+      const token = getToken()
+      await fetch(`${API_URL}/api/messages/${messageId}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -967,6 +1117,14 @@ export default function MultiAgentChatbot() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">{agent.name}</span>
                       {getStatusIcon(agent.status)}
+                      {/* Status label: only shown during active states so idle
+                          agents keep a clean look. "thinking" = waiting for
+                          first token; "active" = tokens arriving. */}
+                      {(agent.status === 'thinking' || agent.status === 'active') && (
+                        <span className="text-xs font-medium text-amber-600 dark:text-amber-400 animate-pulse">
+                          {agent.status === 'thinking' ? 'thinking…' : 'typing…'}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="text-xs text-slate-500">Performance:</div>
@@ -1115,6 +1273,8 @@ export default function MultiAgentChatbot() {
                           className={`bg-white dark:bg-slate-800 border rounded-xl p-4 shadow-sm transition-all duration-200 ${
                             message.typing
                               ? "border-blue-300 dark:border-blue-700 animate-pulse"
+                              : message.streaming
+                              ? "border-purple-300 dark:border-purple-700 streaming-bubble"
                               : "border-slate-200 dark:border-slate-700"
                           }`}
                         >
@@ -1138,7 +1298,7 @@ export default function MultiAgentChatbot() {
                               </div>
                               <span className="text-xs text-slate-500">{message.timestamp.toLocaleTimeString()}</span>
                             </div>
-                            {!message.typing && (
+                            {!message.typing && !message.streaming && (
                               <MessageActions
                                 message={{
                                   id: message.id,
@@ -1172,6 +1332,11 @@ export default function MultiAgentChatbot() {
                                 </div>
                                 {message.content}
                               </div>
+                            ) : message.streaming ? (
+                              <span>
+                                {message.content}
+                                <span className="inline-block w-0.5 h-4 bg-purple-500 ml-0.5 animate-pulse align-text-bottom" />
+                              </span>
                             ) : (
                               message.content
                             )}

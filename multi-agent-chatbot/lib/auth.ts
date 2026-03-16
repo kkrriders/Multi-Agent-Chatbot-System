@@ -1,20 +1,30 @@
+import { API_URL } from './config'
+
 export interface User {
   id: string
   fullName: string
   email: string
   createdAt: string
+  lastLogin?: string
 }
 
+/**
+ * Token storage: sessionStorage instead of localStorage.
+ * sessionStorage is cleared when the browser tab/window closes,
+ * limiting the window for token theft compared to persistent localStorage.
+ *
+ * Note: for full XSS protection the ideal solution is HttpOnly-only cookies
+ * (requires same-origin or a Next.js API proxy to the backend).
+ */
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null
-  return localStorage.getItem('token')
+  return sessionStorage.getItem('token')
 }
 
 export function getUser(): User | null {
   if (typeof window === 'undefined') return null
-  const userStr = localStorage.getItem('user')
+  const userStr = sessionStorage.getItem('user')
   if (!userStr) return null
-
   try {
     return JSON.parse(userStr)
   } catch {
@@ -23,13 +33,13 @@ export function getUser(): User | null {
 }
 
 export function setAuth(token: string, user: User): void {
-  localStorage.setItem('token', token)
-  localStorage.setItem('user', JSON.stringify(user))
+  sessionStorage.setItem('token', token)
+  sessionStorage.setItem('user', JSON.stringify(user))
 }
 
 export function clearAuth(): void {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
+  sessionStorage.removeItem('token')
+  sessionStorage.removeItem('user')
 }
 
 export function isAuthenticated(): boolean {
@@ -39,9 +49,8 @@ export function isAuthenticated(): boolean {
 export async function logout(): Promise<void> {
   try {
     const token = getToken()
-
     if (token) {
-      await fetch('http://localhost:3000/api/auth/logout', {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -59,13 +68,10 @@ export async function logout(): Promise<void> {
 
 export async function checkAuth(): Promise<User | null> {
   const token = getToken()
-
-  if (!token) {
-    return null
-  }
+  if (!token) return null
 
   try {
-    const response = await fetch('http://localhost:3000/api/auth/me', {
+    const response = await fetch(`${API_URL}/api/auth/me`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',

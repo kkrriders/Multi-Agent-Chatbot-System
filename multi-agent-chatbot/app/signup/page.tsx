@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Bot, ArrowLeft, Eye, EyeOff, Github, Mail } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { setAuth } from "@/lib/auth"
+import { API_URL } from "@/lib/config"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -46,7 +48,7 @@ export default function SignupPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/signup', {
+      const response = await fetch(`${API_URL}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,10 +68,8 @@ export default function SignupPage() {
         throw new Error(data.error || 'Failed to create account')
       }
 
-      // Store token in localStorage
       if (data.data.token) {
-        localStorage.setItem('token', data.data.token)
-        localStorage.setItem('user', JSON.stringify(data.data.user))
+        setAuth(data.data.token, data.data.user)
       }
 
       // Redirect to chat

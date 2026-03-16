@@ -22,6 +22,11 @@ const messageSchema = new mongoose.Schema({
     responseTime: Number,
     confidence: Number,
   },
+  tokenUsage: {
+    inputTokens: { type: Number, default: 0 },
+    outputTokens: { type: Number, default: 0 },
+    totalTokens: { type: Number, default: 0 },
+  },
 });
 
 const conversationSchema = new mongoose.Schema({

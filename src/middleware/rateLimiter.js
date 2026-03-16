@@ -1,24 +1,32 @@
 const rateLimit = require('express-rate-limit');
+const { RedisStore } = require('rate-limit-redis');
+const redisClient = require('../config/redis');
+
+/**
+ * Build a RedisStore if Redis is available, otherwise return undefined
+ * so express-rate-limit uses its default in-memory store.
+ */
+function buildStore(prefix) {
+  if (!redisClient) return undefined;
+  return new RedisStore({
+    prefix: `rl:${prefix}:`,
+    // ioredis uses the 'call' method signature expected by rate-limit-redis
+    sendCommand: (...args) => redisClient.call(...args),
+  });
+}
 
 /**
  * Rate limiter for general API endpoints
  * Allows 100 requests per 15 minutes per IP
  */
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-    retryAfter: '15 minutes'
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: buildStore('general'),
   handler: (req, res) => {
-    res.status(429).json({
-      error: 'Too many requests',
-      message: 'You have exceeded the rate limit. Please try again later.',
-      retryAfter: req.rateLimit.resetTime
-    });
+    res.status(429).json({ error: 'Too many requests', message: 'You have exceeded the rate limit. Please try again later.', retryAfter: req.rateLimit.resetTime });
   }
 });
 
@@ -27,19 +35,12 @@ const generalLimiter = rateLimit({
  * Allows 5 requests per 15 minutes per IP to prevent brute force attacks
  */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login/signup requests per windowMs
-  skipSuccessfulRequests: true, // Don't count successful requests
-  message: {
-    error: 'Too many authentication attempts, please try again later.',
-    retryAfter: '15 minutes'
-  },
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  skipSuccessfulRequests: true,
+  store: buildStore('auth'),
   handler: (req, res) => {
-    res.status(429).json({
-      error: 'Too many authentication attempts',
-      message: 'Please wait before trying again.',
-      retryAfter: req.rateLimit.resetTime
-    });
+    res.status(429).json({ error: 'Too many authentication attempts', message: 'Please wait before trying again.', retryAfter: req.rateLimit.resetTime });
   }
 });
 
@@ -48,18 +49,11 @@ const authLimiter = rateLimit({
  * Allows 30 requests per minute per IP
  */
 const messageLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 30, // Limit each IP to 30 messages per minute
-  message: {
-    error: 'Too many messages sent, please slow down.',
-    retryAfter: '1 minute'
-  },
+  windowMs: 60 * 1000,
+  max: 30,
+  store: buildStore('message'),
   handler: (req, res) => {
-    res.status(429).json({
-      error: 'Message rate limit exceeded',
-      message: 'Please wait a moment before sending more messages.',
-      retryAfter: req.rateLimit.resetTime
-    });
+    res.status(429).json({ error: 'Message rate limit exceeded', message: 'Please wait a moment before sending more messages.', retryAfter: req.rateLimit.resetTime });
   }
 });
 
@@ -68,18 +62,11 @@ const messageLimiter = rateLimit({
  * Allows 5 exports per hour per IP
  */
 const exportLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 exports per hour
-  message: {
-    error: 'Too many export requests, please try again later.',
-    retryAfter: '1 hour'
-  },
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  store: buildStore('export'),
   handler: (req, res) => {
-    res.status(429).json({
-      error: 'Export rate limit exceeded',
-      message: 'You can only export 5 conversations per hour.',
-      retryAfter: req.rateLimit.resetTime
-    });
+    res.status(429).json({ error: 'Export rate limit exceeded', message: 'You can only export 5 conversations per hour.', retryAfter: req.rateLimit.resetTime });
   }
 });
 
@@ -88,18 +75,11 @@ const exportLimiter = rateLimit({
  * Allows 20 new conversations per hour per IP
  */
 const createConversationLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20, // Limit each IP to 20 new conversations per hour
-  message: {
-    error: 'Too many conversations created, please try again later.',
-    retryAfter: '1 hour'
-  },
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  store: buildStore('createConv'),
   handler: (req, res) => {
-    res.status(429).json({
-      error: 'Conversation creation rate limit exceeded',
-      message: 'You can only create 20 conversations per hour.',
-      retryAfter: req.rateLimit.resetTime
-    });
+    res.status(429).json({ error: 'Conversation creation rate limit exceeded', message: 'You can only create 20 conversations per hour.', retryAfter: req.rateLimit.resetTime });
   }
 });
 

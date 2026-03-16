@@ -121,3 +121,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /*
+   * streaming-bubble
+   *
+   * Applied to a message bubble while an agent is actively streaming tokens.
+   * The pulsing purple glow gives a clear "live generation" signal without
+   * being distracting — the period (1.8 s) is slow enough to read comfortably.
+   *
+   * We use box-shadow rather than border-color so the layout does not shift
+   * (box-shadow is painted outside the border box and does not affect flow).
+   */
+  @keyframes streaming-glow {
+    0%, 100% { box-shadow: 0 0 0 1px rgb(147 51 234 / 0.20); }
+    50%       { box-shadow: 0 0 0 3px rgb(147 51 234 / 0.45); }
+  }
+
+  .streaming-bubble {
+    animation: streaming-glow 1.8s ease-in-out infinite;
+  }
+}

@@ -1,19 +1,30 @@
 
+const dotenv = require('dotenv');
+dotenv.config();
+
+
+const validateEnv = require('../../utils/validateEnv');
+validateEnv();
+
+
+require('../../shared/tracing').initTracing('manager');
+
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const axios = require('axios');
-const dotenv = require('dotenv');
 const morgan = require('morgan');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
-const puppeteer = require('puppeteer');
+const PDFDocument = require('pdfkit');
 const { Server } = require('socket.io');
 const http = require('http');
 const cookieParser = require('cookie-parser');
 
 // Import shared utilities
 const { logger } = require('../../shared/logger');
-const { generateResponse } = require('../../shared/ollama');
+const { generateResponse, generateResponseStream } = require('../../shared/ollama');
 const { PERFORMATIVES, createMessage } = require('../../shared/messaging');
 const { VotingSystem, VOTING_STRATEGY, formatVotingResults } = require('../../shared/voting');
 const {
@@ -29,6 +40,13 @@ const { connectDB } = require('../../config/database');
 // Import routes
 const authRoutes = require('../../routes/auth');
 const conversationRoutes = require('../../routes/conversations');
+const promptRoutes = require('../../routes/prompts');
+const { authenticate } = require('../../middleware/auth');
+const { signAgentRequest } = require('../../shared/agentAuth');
+const { auditLog } = require('../../middleware/auditLog');
+const { CircuitBreaker, CircuitOpenError } = require('../../shared/circuitBreaker');
+const { withRetry } = require('../../shared/retry');
+const { register: metricsRegistry, httpMetricsMiddleware, agentMetrics, wsMetrics } = require('../../monitoring/metrics');
 
 // Import rate limiters
 const {
@@ -50,9 +68,6 @@ function escapeHtml(text) {
     .replace(/'/g, '&#39;');
 }
 
-// Load environment variables
-dotenv.config();
-
 // Constants
 const PORT = process.env.MANAGER_PORT || 3000;
 const MANAGER_MODEL = process.env.MANAGER_MODEL || 'llama3:latest';
@@ -63,20 +78,38 @@ if (!fs.existsSync(EXPORTS_DIR)) {
   fs.mkdirSync(EXPORTS_DIR, { recursive: true });
 }
 
-// Agent service endpoints - Updated to only 4 agents
+// Agent service endpoints.
+// In Docker set AGENT_{N}_URL=http://<container-name>:<port> so the manager
+// reaches agents by Docker network hostname instead of localhost.
 const AGENT_ENDPOINTS = {
-  'agent-1': `http://localhost:${process.env.AGENT_1_PORT || 3005}/message`,
-  'agent-2': `http://localhost:${process.env.AGENT_2_PORT || 3006}/message`,
-  'agent-3': `http://localhost:${process.env.AGENT_3_PORT || 3007}/message`,
-  'agent-4': `http://localhost:${process.env.AGENT_4_PORT || 3008}/message`
+  'agent-1': `${process.env.AGENT_1_URL || `http://localhost:${process.env.AGENT_1_PORT || 3005}`}/message`,
+  'agent-2': `${process.env.AGENT_2_URL || `http://localhost:${process.env.AGENT_2_PORT || 3006}`}/message`,
+  'agent-3': `${process.env.AGENT_3_URL || `http://localhost:${process.env.AGENT_3_PORT || 3007}`}/message`,
+  'agent-4': `${process.env.AGENT_4_URL || `http://localhost:${process.env.AGENT_4_PORT || 3008}`}/message`,
 };
+
+// One circuit breaker per agent — prevents thundering-herd when an agent is down
+const circuitBreakers = {};
+for (const agentId of Object.keys(AGENT_ENDPOINTS)) {
+  const cb = new CircuitBreaker(agentId, { failureThreshold: 3, recoveryTimeoutMs: 30_000 });
+  // Mirror every state change into Prometheus immediately
+  cb.on('stateChange', ({ name, to }) => {
+    agentMetrics.setCircuitState(name, to);
+    logger.warn(`Circuit breaker [${name}]: → ${to}`);
+  });
+  // Initialise metric to CLOSED (0) so Grafana has a baseline from startup
+  agentMetrics.setCircuitState(agentId, 'CLOSED');
+  circuitBreakers[agentId] = cb;
+}
 
 // Create Express app and HTTP server
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    // Locked to the configured frontend origin — never wildcard.
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
     methods: ["GET", "POST"]
   },
   pingTimeout: parseInt(process.env.WEBSOCKET_PING_TIMEOUT) || 600000,  // 10 minutes
@@ -95,7 +128,40 @@ const io = new Server(server, {
   perMessageDeflate: false  // Disable compression to prevent issues
 });
 
-// Middleware
+// ── Security middleware (must be first) ───────────────────────────────────────
+
+// Helmet sets security-critical HTTP headers. Must come before any route.
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      // Socket.IO polling transport uses XHR from the frontend origin
+      connectSrc: ["'self'", process.env.FRONTEND_URL, 'ws://localhost:*', 'wss://localhost:*'],
+      scriptSrc:  ["'self'"],
+      // Tailwind/Radix inject inline styles at runtime
+      styleSrc:   ["'self'", "'unsafe-inline'"],
+      imgSrc:     ["'self'", 'data:'],
+      frameSrc:   ["'none'"],
+      objectSrc:  ["'none'"],
+    },
+  },
+  hsts:              { maxAge: 31536000, includeSubDomains: true },
+  frameguard:        { action: 'deny' },
+  referrerPolicy:    { policy: 'strict-origin-when-cross-origin' },
+  // Must be false: Socket.IO polling uses cross-origin XHR which COEP breaks
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Redirect HTTP → HTTPS in production (handled by reverse proxy setting X-Forwarded-Proto)
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, `https://${req.hostname}${req.url}`);
+    }
+    next();
+  });
+}
+
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3002',
   credentials: true,
@@ -103,15 +169,65 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'));
+app.use(httpMetricsMiddleware);
 
 // Connect to MongoDB
 connectDB().catch(err => {
   logger.error('Failed to connect to MongoDB:', err);
 });
 
+// CSRF protection for /api routes.
+// Requests carrying a Bearer token are already bound to sessionStorage (can't be
+// stolen cross-origin), so they are exempt. Cookie-only requests must originate
+// from the expected frontend URL.
+function csrfProtection(req, res, next) {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
+
+  // All state-changing /api requests must originate from the expected frontend origin.
+  // We do NOT exempt Bearer-token requests here: an attacker can set that header to
+  // bypass this check while the browser still sends the httpOnly cookie for auth.
+  // The upstream authenticate middleware handles token verification independently.
+  const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3002';
+  let source = req.headers.origin;
+  if (!source && req.headers.referer) {
+    try { source = new URL(req.headers.referer).origin; } catch (_) { /* ignore */ }
+  }
+
+  if (!source || source !== allowedOrigin) {
+    logger.warn(`CSRF: blocked ${req.method} ${req.path} from origin="${source}"`);
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  next();
+}
+
+// ── Prometheus metrics endpoint ───────────────────────────────────────────────
+// Not behind authenticate — Prometheus scraper uses network-level access control.
+// In production, restrict this to your internal monitoring VLAN / scraper IP.
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', metricsRegistry.contentType);
+    res.end(await metricsRegistry.metrics());
+  } catch (err) {
+    res.status(500).end(err.message);
+  }
+});
+
+// ── Health endpoint ───────────────────────────────────────────────────────────
+app.get('/api/health', (req, res) => {
+  const cbStatuses = Object.values(circuitBreakers).map(cb => cb.status());
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    circuitBreakers: cbStatuses,
+  });
+});
+
 // API Routes with rate limiting
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/conversations', generalLimiter, conversationRoutes);
+// auditLog comes after authenticate so req.user is populated; auth routes
+// call auditEvent() directly inside their handlers for login/signup events.
+app.use('/api/auth', authLimiter, csrfProtection, auditLog, authRoutes);
+app.use('/api/conversations', generalLimiter, csrfProtection, authenticate, auditLog, conversationRoutes);
+app.use('/api/prompts', generalLimiter, csrfProtection, authenticate, auditLog, promptRoutes);
 
 // Store for active conversations
 const conversations = new Map();
@@ -150,14 +266,35 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000); // Run cleanup every hour
 
+// ── Socket.IO authentication middleware ───────────────────────────────────────
+// Clients must send { auth: { token } } in the io() call options.
+// Unauthenticated sockets are disconnected immediately.
+const { verifyToken } = require('../../utils/jwt');
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) {
+    logger.warn(`Socket ${socket.id} rejected — no token`);
+    return next(new Error('Authentication required'));
+  }
+  try {
+    socket.user = verifyToken(token); // { id, email, iat, exp }
+    next();
+  } catch {
+    logger.warn(`Socket ${socket.id} rejected — invalid token`);
+    next(new Error('Invalid or expired token'));
+  }
+});
+
 // WebSocket connection handling
 io.on('connection', (socket) => {
-  logger.info(`Client connected: ${socket.id}`);
-  
+  wsMetrics.increment();
+  logger.info(`Client connected: ${socket.id} (user: ${socket.user?.id})`);
+
   // Send connection confirmation
-  socket.emit('connection-confirmed', { 
-    id: socket.id, 
-    timestamp: Date.now() 
+  socket.emit('connection-confirmed', {
+    id: socket.id,
+    timestamp: Date.now()
   });
   
   socket.on('join-conversation', (conversationId) => {
@@ -183,6 +320,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', (reason) => {
+    wsMetrics.decrement();
     logger.info(`Client disconnected: ${socket.id}, reason: ${reason}`);
   });
   
@@ -367,13 +505,29 @@ async function routeMessageToAgent(message) {
     throw new Error(`Unknown agent: ${targetAgent}`);
   }
 
+  const cb = circuitBreakers[targetAgent];
+  const startMs = Date.now();
+
   try {
     logger.info(`Sending message to ${targetAgent}`);
-    const response = await axios.post(endpoint, message, {
-      timeout: 60000 // 60 second timeout for agent responses
-    });
+    const response = await cb.execute(() =>
+      withRetry(
+        () => axios.post(endpoint, message, {
+          timeout: 60_000,
+          headers: signAgentRequest(message, process.env.AGENT_SHARED_SECRET),
+        }),
+        { maxAttempts: 3, baseDelayMs: 500, maxDelayMs: 10_000 }
+      )
+    );
+    agentMetrics.recordRequest(targetAgent, 'success');
+    agentMetrics.recordDuration(targetAgent, (Date.now() - startMs) / 1000);
     return response.data;
   } catch (error) {
+    if (error.code === 'CIRCUIT_OPEN') {
+      agentMetrics.recordRequest(targetAgent, 'circuit_open');
+    } else {
+      agentMetrics.recordRequest(targetAgent, 'error');
+    }
     logger.error(`Error routing message to ${targetAgent}:`, error.message);
     throw new Error(`Failed to communicate with ${targetAgent}: ${error.message}`);
   }
@@ -415,6 +569,127 @@ async function sendToAgent(agentId, content, userId = null) {
   cacheResponse(agentId, content, response);
 
   return response;
+}
+
+/**
+ * Stream a message to an agent and forward each token as a Socket.IO event.
+ *
+ * Emits (to the conversationId room):
+ *   agent-thinking  { agentId, conversationId, timestamp }              — by callers, before this fn
+ *   stream-start    { messageId, agentId, conversationId, timestamp }
+ *   stream-token    { messageId, token, conversationId }
+ *   stream-end      { messageId, agentId, content, confidence, conversationId, timestamp, type? }
+ *   stream-error    { agentId, conversationId }                         — by callers, on catch
+ *
+ * @param {Object}  message        - Message object (same shape as routeMessageToAgent)
+ * @param {string}  conversationId - Socket.IO room to broadcast to
+ * @param {string}  [type]         - Optional message type (e.g. 'manager-conclusion')
+ * @returns {Promise<{content, agentId, messageId, confidence}>}
+ */
+async function streamMessageToAgent(message, conversationId, type) {
+  const targetAgent = message.to;
+  const endpoint = AGENT_ENDPOINTS[targetAgent];
+  if (!endpoint) throw new Error(`Unknown agent: ${targetAgent}`);
+
+  const streamEndpoint = endpoint.replace('/message', '/message/stream');
+  const messageId = `${targetAgent}-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+
+  io.to(conversationId).emit('stream-start', {
+    messageId,
+    agentId: targetAgent,
+    conversationId,
+    timestamp: Date.now()
+  });
+
+  const cb = circuitBreakers[targetAgent];
+  // Streaming holds the connection open — wrap only the initial HTTP connect in
+  // the circuit breaker, not the entire stream duration.
+  const response = await cb.execute(() =>
+    axios.post(streamEndpoint, message, {
+      responseType: 'stream',
+      timeout: 120_000,
+      headers: signAgentRequest(message, process.env.AGENT_SHARED_SECRET),
+    })
+  );
+
+  return new Promise((resolve, reject) => {
+    let fullContent = '';
+    let buffer = '';
+    let confidence = null;
+    // Guard: ensures the Promise settles exactly once regardless of how many
+    // `done` frames or `end` events the readable stream fires. Without this,
+    // the normal path emits stream-end twice (once from `data.done`, once from
+    // the Node.js `end` event that always fires after all `data` events).
+    let settled = false;
+
+    const settle = (fn) => {
+      if (settled) return;
+      settled = true;
+      fn();
+    };
+
+    response.data.on('data', (chunk) => {
+      buffer += chunk.toString();
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const data = JSON.parse(line.slice(6));
+          if (data.token) {
+            fullContent += data.token;
+            io.to(conversationId).emit('stream-token', { messageId, token: data.token, conversationId });
+          }
+          if (data.done) {
+            const finalContent = data.content || fullContent.trim();
+            confidence = data.confidence;
+            settle(() => {
+              io.to(conversationId).emit('stream-end', {
+                messageId,
+                agentId: targetAgent,
+                content: finalContent,
+                confidence,
+                conversationId,
+                timestamp: Date.now(),
+                ...(type ? { type } : {})
+              });
+              resolve({ content: finalContent, agentId: targetAgent, messageId, confidence });
+            });
+          }
+          // Only reject on error if we have not already resolved. This prevents
+          // a spurious reject when an error frame appears after a done frame in
+          // the same SSE chunk.
+          if (data.error) settle(() => reject(new Error(data.error)));
+        } catch (e) { /* skip malformed JSON lines */ }
+      }
+    });
+
+    response.data.on('end', () => {
+      // Fallback: stream closed without a `done` frame (network drop, agent
+      // crash, etc.). If we accumulated content, deliver it. If not, reject
+      // so callers can emit an error message and clean up any "thinking"
+      // placeholder — a hung Promise would leave the bubble on-screen forever.
+      settle(() => {
+        if (fullContent) {
+          const finalContent = fullContent.trim();
+          io.to(conversationId).emit('stream-end', {
+            messageId,
+            agentId: targetAgent,
+            content: finalContent,
+            conversationId,
+            timestamp: Date.now(),
+            ...(type ? { type } : {})
+          });
+          resolve({ content: finalContent, agentId: targetAgent, messageId, confidence });
+        } else {
+          reject(new Error(`Agent ${targetAgent} closed stream without producing content`));
+        }
+      });
+    });
+
+    response.data.on('error', (err) => settle(() => reject(err)));
+  });
 }
 
 /**
@@ -463,42 +738,73 @@ app.post('/message', messageLimiter, async (req, res) => {
       }
     }
 
-    // Route to agent
-    const response = await routeMessageToAgent(message);
+    let responseContent;
+    let responseMessageId;
 
-    // If this is part of a conversation, add to history and broadcast
     if (conversationId) {
+      // Streaming path: tokens flow to the frontend via Socket.IO in real-time
       const conversation = conversations.get(conversationId);
+
+      // Broadcast user message immediately so the frontend sees it right away
+      const userMessage = {
+        from: 'user',
+        content,
+        timestamp: Date.now(),
+        type: 'direct-message'
+      };
       if (conversation) {
-        // Add user message to history
-        const userMessage = {
-          from: 'user',
-          content: content,
-          timestamp: Date.now(),
-          type: 'direct-message'
-        };
         conversation.history.push(userMessage);
-        
-        // Add agent response to history
-        const agentMessage = {
-          from: agentName || `Agent ${agentId.slice(-1)}`,
-          content: response.content,
-          timestamp: Date.now(),
-          agentId: agentId,
-          type: 'direct-response'
-        };
-        conversation.history.push(agentMessage);
         conversation.lastActivity = Date.now();
-        
-        // Broadcast both messages
-        broadcastConversationUpdate(conversationId, userMessage);
-        broadcastConversationUpdate(conversationId, agentMessage);
       }
+      broadcastConversationUpdate(conversationId, userMessage);
+
+      // Emit before opening the HTTP stream to the agent. There is a latency
+      // gap of 200 ms – 2 s between this point and the first stream-start event
+      // (TCP connect + Ollama context load). agent-thinking lets the frontend
+      // show a "thinking" indicator immediately so the UI never looks frozen.
+      io.to(conversationId).emit('agent-thinking', {
+        agentId: message.to,
+        conversationId,
+        timestamp: Date.now(),
+      });
+
+      // Inner try-catch so we can emit stream-error before the outer catch
+      // sends the HTTP 500 — this removes the "thinking" bubble from the UI.
+      // conversationId is in this block's scope so we can reference it here
+      // but not in the outer catch where it would be out of scope.
+      try {
+        const streamResult = await streamMessageToAgent(message, conversationId);
+        responseContent = streamResult.content;
+        responseMessageId = streamResult.messageId;
+
+        // Persist agent response to conversation history
+        if (conversation) {
+          const agentMessage = {
+            from: agentName || `Agent ${agentId.slice(-1)}`,
+            content: responseContent,
+            timestamp: Date.now(),
+            agentId,
+            type: 'direct-response',
+            messageId: responseMessageId
+          };
+          conversation.history.push(agentMessage);
+          conversation.lastActivity = Date.now();
+        }
+      } catch (streamError) {
+        // Tell the frontend to remove the thinking placeholder — without this,
+        // the bubble stays on screen with spinning dots indefinitely.
+        io.to(conversationId).emit('stream-error', { agentId: message.to, conversationId });
+        throw streamError; // propagate so the outer catch returns HTTP 500
+      }
+    } else {
+      // Non-streaming fallback (no active Socket.IO room)
+      const response = await routeMessageToAgent(message);
+      responseContent = response.content;
     }
-    
+
     res.json({
       success: true,
-      response: response
+      response: { content: responseContent, agentId, messageId: responseMessageId }
     });
   } catch (error) {
     logger.error('Error in single message route:', error.message);
@@ -520,8 +826,14 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
     } = req.body;
     
     if (!content || !participants || !Array.isArray(participants)) {
-      return res.status(400).json({ 
-        error: 'Content and participants array are required' 
+      return res.status(400).json({
+        error: 'Content and participants array are required'
+      });
+    }
+
+    if (participants.length === 0 || participants.length > 4) {
+      return res.status(400).json({
+        error: 'participants must contain between 1 and 4 agents',
       });
     }
 
@@ -569,25 +881,34 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
         // Add agent name and conversation history
         message.agentName = participant.agentName || `Agent ${participant.agentId.slice(-1)}`;
         message.conversationHistory = [...conversation.history];
-        
-        // Get response from agent
-        const response = await routeMessageToAgent(message);
-        
-        // Add response to conversation history
+
+        // Emit before opening the HTTP stream. Covers the latency gap between
+        // agent selection and the first arriving token so the UI never looks
+        // frozen while Ollama loads the model context.
+        io.to(convId).emit('agent-thinking', {
+          agentId: participant.agentId,
+          conversationId: convId,
+          timestamp: Date.now(),
+        });
+        // Stream response — tokens appear in the frontend in real-time
+        const streamResult = await streamMessageToAgent(message, convId);
+
         const responseMessage = {
           from: message.agentName,
-          content: response.content,
-          timestamp: Date.now()
+          content: streamResult.content,
+          timestamp: Date.now(),
+          messageId: streamResult.messageId
         };
         conversation.history.push(responseMessage);
         conversation.lastActivity = Date.now();
         responses.push(responseMessage);
-        
-        // Broadcast agent response to connected clients in real-time
-        broadcastConversationUpdate(convId, responseMessage);
+        // No broadcastConversationUpdate — stream-end already delivered the message
         
       } catch (error) {
         logger.error(`Error getting response from ${participant.agentId}:`, error.message);
+        // Remove the "thinking" bubble so the frontend does not show it
+        // alongside the error message that broadcastConversationUpdate delivers.
+        io.to(convId).emit('stream-error', { agentId: participant.agentId, conversationId: convId });
         const errorMessage = {
           from: participant.agentName || `Agent ${participant.agentId.slice(-1)}`,
           content: `Sorry, I'm having trouble responding right now: ${error.message}`,
@@ -652,7 +973,7 @@ app.delete('/conversation/:conversationId', (req, res) => {
 /**
  * Export conversation as PDF
  */
-app.get('/export-chat/:conversationId', exportLimiter, async (req, res) => {
+app.get('/export-chat/:conversationId', exportLimiter, authenticate, async (req, res) => {
   try {
     const conversationId = req.params.conversationId;
     
@@ -667,117 +988,104 @@ app.get('/export-chat/:conversationId', exportLimiter, async (req, res) => {
       return res.status(404).json({ error: 'Conversation not found' });
     }
 
-    // Generate HTML content for PDF
-    let htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Chat Conversation - ${conversationId}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-          .message { margin: 15px 0; padding: 10px; border-radius: 5px; }
-          .user-message { background-color: #e7f5fe; border-left: 4px solid #2196F3; }
-          .agent-message { background-color: #f0f8ea; border-left: 4px solid #4CAF50; }
-          .message-header { font-weight: bold; margin-bottom: 5px; }
-          .timestamp { font-size: 0.8em; color: #666; margin-left: 10px; }
-          .participants { margin: 20px 0; padding: 10px; background-color: #f5f5f5; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>Multi-Agent Chat Conversation</h1>
-          <p>Conversation ID: ${conversationId}</p>
-          <p>Created: ${conversation.createdAt}</p>
-          <p>Export Date: ${new Date().toISOString()}</p>
-        </div>
-        
-        <div class="participants">
-          <h3>Participants:</h3>
-          <ul>
-            <li>User</li>
-    `;
+    // Generate PDF using pdfkit
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const chunks = [];
+    doc.on('data', chunk => chunks.push(chunk));
 
-    conversation.participants.forEach(participant => {
-      htmlContent += `<li>${participant.agentName || participant.agentId}</li>`;
-    });
+    const pdfBuffer = await new Promise((resolve, reject) => {
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
 
-    htmlContent += `
-          </ul>
-        </div>
-        
-        <div class="conversation">
-          <h3>Conversation History:</h3>
-    `;
+      // Header
+      doc.fontSize(18).font('Helvetica-Bold')
+        .text('Multi-Agent Chat Conversation', { align: 'center' });
+      doc.moveDown(0.5);
+      doc.fontSize(10).font('Helvetica')
+        .text(`Conversation ID: ${conversationId}`, { align: 'center' })
+        .text(`Created: ${conversation.createdAt}`, { align: 'center' })
+        .text(`Export Date: ${new Date().toLocaleString()}`, { align: 'center' });
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+      doc.moveDown();
 
-    conversation.history.forEach(message => {
-      const messageClass = message.from === 'user' ? 'user-message' : 'agent-message';
-      const timestamp = new Date(message.timestamp).toLocaleString();
-      const escapedFrom = escapeHtml(message.from);
-      const escapedContent = escapeHtml(message.content).replace(/\n/g, '<br>');
-      
-      htmlContent += `
-        <div class="message ${messageClass}">
-          <div class="message-header">
-            ${escapedFrom}
-            <span class="timestamp">${timestamp}</span>
-          </div>
-          <div class="content">${escapedContent}</div>
-        </div>
-      `;
-    });
-
-    htmlContent += `
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Generate PDF using Puppeteer (in memory, not disk)
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    let pdfBuffer;
-    try {
-      const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-      pdfBuffer = await page.pdf({
-        format: 'A4',
-        margin: {
-          top: '0.5in',
-          right: '0.5in',
-          bottom: '0.5in',
-          left: '0.5in'
-        },
-        printBackground: true
+      // Participants
+      doc.fontSize(12).font('Helvetica-Bold').text('Participants:');
+      doc.fontSize(10).font('Helvetica').text('• User');
+      conversation.participants.forEach(p => {
+        doc.text(`• ${p.agentName || p.agentId}`);
       });
-    } finally {
-      await browser.close();
-    }
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+      doc.moveDown();
 
-    // Save PDF to MongoDB
-    const Conversation = require('../../models/Conversation');
+      // Messages
+      doc.fontSize(12).font('Helvetica-Bold').text('Conversation History:');
+      doc.moveDown(0.5);
+
+      conversation.history.forEach((message, idx) => {
+        if (idx > 0 && doc.y > 680) doc.addPage();
+
+        const from = String(message.from || 'unknown');
+        const content = String(message.content || '');
+        const timestamp = message.timestamp
+          ? new Date(message.timestamp).toLocaleString()
+          : '';
+
+        doc.fontSize(10).font('Helvetica-Bold')
+          .text(from, { continued: true })
+          .font('Helvetica').fillColor('#666666')
+          .text(`  ${timestamp}`)
+          .fillColor('#000000');
+
+        doc.fontSize(10).font('Helvetica').text(content, { width: 495 });
+        doc.moveDown(0.5);
+
+        if (idx < conversation.history.length - 1) {
+          doc.moveTo(50, doc.y).lineTo(545, doc.y).dash(3, { space: 3 }).stroke().undash();
+          doc.moveDown(0.5);
+        }
+      });
+
+      // Footer
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+      doc.fontSize(9).fillColor('#666666')
+        .text('Generated by Multi-Agent Chatbot System', { align: 'center' });
+
+      doc.end();
+    });
+
     const fileName = `chat-${conversationId}-${Date.now()}.pdf`;
 
-    await Conversation.findByIdAndUpdate(conversationId, {
-      $push: {
-        pdfExports: {
-          fileName,
-          fileSize: pdfBuffer.length,
-          data: pdfBuffer,
-          mimeType: 'application/pdf',
-          createdAt: new Date()
-        }
+    // Only attempt the MongoDB write when conversationId is a valid ObjectId.
+    // In-memory conversations (e.g. "conv-1234567890") are not stored in MongoDB
+    // and passing them to findByIdAndUpdate throws a CastError.
+    const mongoose = require('mongoose');
+    if (/^[0-9a-fA-F]{24}$/.test(conversationId) && mongoose.Types.ObjectId.isValid(conversationId)) {
+      try {
+        const Conversation = require('../../models/Conversation');
+        await Conversation.findByIdAndUpdate(conversationId, {
+          $push: {
+            pdfExports: {
+              fileName,
+              fileSize: pdfBuffer.length,
+              data: pdfBuffer,
+              mimeType: 'application/pdf',
+              createdAt: new Date(),
+            },
+          },
+        });
+        logger.info(`PDF saved to MongoDB for conversation ${conversationId}`);
+      } catch (dbErr) {
+        logger.error(`PDF MongoDB save failed (non-fatal): ${dbErr.message}`);
       }
-    });
-
-    logger.info(`PDF saved to MongoDB for conversation ${conversationId}`);
+    }
 
     // Send the PDF file to user
+    const encodedName = encodeURIComponent(fileName);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodedName}`);
     res.setHeader('Content-Length', pdfBuffer.length);
     res.send(pdfBuffer);
 
@@ -925,8 +1233,14 @@ app.post('/research-session', messageLimiter, async (req, res) => {
     } = req.body;
     
     if (!topic || !participants || !Array.isArray(participants)) {
-      return res.status(400).json({ 
-        error: 'Topic and participants array are required' 
+      return res.status(400).json({
+        error: 'Topic and participants array are required'
+      });
+    }
+
+    if (participants.length === 0 || participants.length > 4) {
+      return res.status(400).json({
+        error: 'participants must contain between 1 and 4 agents',
       });
     }
 
@@ -1094,29 +1408,37 @@ async function conductResearchRounds(conversationId, topic, participants, totalR
           totalRounds,
           role: participant.role || 'researcher'
         };
-        
-        // Get response from agent
-        const response = await routeMessageToAgent(message);
-        
-        // Add response to conversation
+
+        // Emit before opening the HTTP stream. Covers the latency gap between
+        // agent selection and the first arriving token so the UI never looks
+        // frozen while Ollama loads the model context.
+        io.to(conversationId).emit('agent-thinking', {
+          agentId: participant.agentId,
+          conversationId,
+          timestamp: Date.now(),
+        });
+        // Stream response — tokens appear in the frontend in real-time
+        const streamResult = await streamMessageToAgent(message, conversationId);
+
+        // Add finalised response to conversation history
         const responseMessage = {
           from: participant.agentName,
-          content: response.content,
+          content: streamResult.content,
           timestamp: Date.now(),
-          round: round,
-          agentId: participant.agentId
+          round,
+          agentId: participant.agentId,
+          messageId: streamResult.messageId
         };
-        
+
         conversation.history.push(responseMessage);
         conversation.lastActivity = Date.now();
-        broadcastConversationUpdate(conversationId, responseMessage);
-        
-        // Small delay between agents for better real-time experience
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // No broadcastConversationUpdate — stream-end already delivered the message
         
       } catch (error) {
         logger.error(`Error in research round ${round} for ${participant.agentId}:`, error.message);
-        
+        // Remove the "thinking" bubble so the frontend does not show it
+        // alongside the error message that broadcastConversationUpdate delivers.
+        io.to(conversationId).emit('stream-error', { agentId: participant.agentId, conversationId });
         const errorMessage = {
           from: participant.agentName,
           content: `I'm having trouble contributing to this round: ${error.message}`,
@@ -1341,30 +1663,37 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
         teamPosition: i + 1,
         totalTeamMembers: agents.length
       };
-      
-      // Get response from agent
-      const response = await routeMessageToAgent(message);
-      
-      // Add response to conversation
+
+      // Emit before opening the HTTP stream. Covers the latency gap between
+      // agent selection and the first arriving token so the UI never looks
+      // frozen while Ollama loads the model context.
+      io.to(conversationId).emit('agent-thinking', {
+        agentId: agent.agentId,
+        conversationId,
+        timestamp: Date.now(),
+      });
+      // Stream response — tokens appear in the frontend in real-time
+      const streamResult = await streamMessageToAgent(message, conversationId);
+
+      // Add finalised response to conversation history
       const responseMessage = {
         from: agent.agentName,
-        content: response.content,
+        content: streamResult.content,
         timestamp: Date.now(),
         agentId: agent.agentId,
         customRole: agent.customPrompt.substring(0, 100) + '...',
-        messageId: `work-${Date.now()}-${agent.agentId}-${Math.random().toString(36).substr(2, 9)}`
+        messageId: streamResult.messageId
       };
-      
+
       conversation.history.push(responseMessage);
       conversation.lastActivity = Date.now();
-      broadcastConversationUpdate(conversationId, responseMessage);
-      
-      // Small delay for better real-time experience
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // No broadcastConversationUpdate here — stream-end already delivered the message
       
     } catch (error) {
       logger.error(`Error in flexible work session for ${agent.agentId}:`, error.message);
-      
+      // Remove the "thinking" bubble so the frontend does not show it
+      // alongside the error message that broadcastConversationUpdate delivers.
+      io.to(conversationId).emit('stream-error', { agentId: agent.agentId, conversationId });
       const errorMessage = {
         from: agent.agentName,
         content: `I'm having trouble contributing to this task: ${error.message}`,
@@ -1391,12 +1720,45 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
     managerMessage.conversationHistory = [...conversation.history];
     managerMessage.isManagerResponse = true;
     
-    // Get manager response using the manager's model
-    const managerResponse = await generateResponse(process.env.MANAGER_MODEL || 'llama3:latest', managerMessage.content);
-    
+    // Stream manager conclusion — tokens delivered in real-time via Socket.IO
+    const managerMessageId = `manager-${Date.now()}`;
+    io.to(conversationId).emit('stream-start', {
+      messageId: managerMessageId,
+      agentId: 'manager',
+      conversationId,
+      timestamp: Date.now()
+    });
+
+    let managerContent = '';
+    const prefix = '🎯 **Final Enhancement & Conclusion**\n\n';
+    const suffix = '\n\n---\n✅ **Work Session Complete**';
+
+    // Emit prefix tokens so the header appears immediately
+    io.to(conversationId).emit('stream-token', { messageId: managerMessageId, token: prefix, conversationId });
+
+    managerContent = await generateResponseStream(
+      process.env.MANAGER_MODEL || 'llama3:latest',
+      managerMessage.content,
+      {},
+      (token) => {
+        io.to(conversationId).emit('stream-token', { messageId: managerMessageId, token, conversationId });
+      }
+    );
+
+    const managerFinalContent = prefix + managerContent + suffix;
+
+    io.to(conversationId).emit('stream-end', {
+      messageId: managerMessageId,
+      agentId: 'manager',
+      content: managerFinalContent,
+      conversationId,
+      timestamp: Date.now(),
+      type: 'manager-conclusion'
+    });
+
     const finalMessage = {
       from: 'Manager',
-      content: `🎯 **Final Enhancement & Conclusion**\n\n${managerResponse.content}\n\n---\n✅ **Work Session Complete**`,
+      content: managerFinalContent,
       timestamp: Date.now(),
       type: 'manager-conclusion'
     };
@@ -1479,31 +1841,36 @@ app.post('/continue-conversation', messageLimiter, async (req, res) => {
         agentMessage.conversationHistory = [...conversation.history];
         agentMessage.isFollowUp = true;
         agentMessage.followUpContext = `This is a follow-up message in an ongoing conversation. Please respond appropriately based on the conversation history and this new input: "${message}"`;
-        
-        // Get response from agent
-        const response = await routeMessageToAgent(agentMessage);
-        
-        // Add response to conversation history
+
+        // Emit before opening the HTTP stream. Covers the latency gap between
+        // agent selection and the first arriving token so the UI never looks
+        // frozen while Ollama loads the model context.
+        io.to(conversationId).emit('agent-thinking', {
+          agentId: participant.agentId,
+          conversationId,
+          timestamp: Date.now(),
+        });
+        // Stream response — tokens appear in the frontend in real-time
+        const streamResult = await streamMessageToAgent(agentMessage, conversationId);
+
         const responseMessage = {
           from: agentMessage.agentName,
-          content: response.content,
+          content: streamResult.content,
           timestamp: Date.now(),
           agentId: participant.agentId,
           type: 'follow-up-response',
-          messageId: `follow-up-${Date.now()}-${participant.agentId}-${Math.random().toString(36).substr(2, 9)}`
+          messageId: streamResult.messageId
         };
         conversation.history.push(responseMessage);
         conversation.lastActivity = Date.now();
         responses.push(responseMessage);
-        
-        // Broadcast agent response to connected clients in real-time
-        broadcastConversationUpdate(conversationId, responseMessage);
-        
-        // Small delay between agents for better real-time experience
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // No broadcastConversationUpdate — stream-end already delivered the message
         
       } catch (error) {
         logger.error(`Error getting follow-up response from ${participant.agentId}:`, error.message);
+        // Remove the "thinking" bubble so the frontend does not show it
+        // alongside the error message that broadcastConversationUpdate delivers.
+        io.to(conversationId).emit('stream-error', { agentId: participant.agentId, conversationId });
         const errorMessage = {
           from: participant.agentName || `Agent ${participant.agentId.slice(-1)}`,
           content: `I'm having trouble responding to your follow-up: ${error.message}`,
@@ -1976,15 +2343,51 @@ if (require.main === module) {
   });
 }
 
-// Handle shutdown gracefully
-process.on('SIGINT', () => {
-  logger.info('Shutting down manager agent...');
-  process.exit(0);
-});
+// ── Graceful shutdown ─────────────────────────────────────────────────────────
+// OS/container sends SIGTERM before killing the process.
+// We drain in-flight connections before exiting to avoid:
+//   - Dropped HTTP responses mid-request
+//   - Socket.IO streams cut mid-token
+//   - MongoDB writes abandoned mid-operation
+const redisClient = require('../../config/redis');
+const { disconnectDB } = require('../../config/database');
 
-process.on('SIGTERM', () => {
-  logger.info('Shutting down manager agent...');
+async function gracefulShutdown(signal) {
+  logger.info(`Received ${signal} — starting graceful shutdown`);
+
+  // 1. Stop accepting new HTTP requests
+  server.close(() => logger.info('HTTP server closed'));
+
+  // 2. Close Socket.IO (waits for open connections to finish naturally)
+  io.close(() => logger.info('Socket.IO closed'));
+
+  try {
+    // 3. Disconnect MongoDB
+    await disconnectDB();
+    logger.info('MongoDB disconnected');
+
+    // 4. Quit Redis if it was initialised
+    if (redisClient) {
+      await redisClient.quit();
+      logger.info('Redis disconnected');
+    }
+  } catch (err) {
+    logger.error('Error during shutdown cleanup:', err.message);
+  }
+
+  logger.info('Graceful shutdown complete');
   process.exit(0);
-});
+}
+
+// Safety net: force exit after 15 s if draining stalls (e.g. a hung socket)
+const forceExitTimer = setTimeout(() => {
+  logger.error('Forced shutdown after 15 s timeout — some connections may have been dropped');
+  process.exit(1);
+}, 15_000);
+// Don't let this timer prevent the process from exiting earlier if everything drains cleanly
+forceExitTimer.unref();
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
 
 module.exports = { app, server }; 
