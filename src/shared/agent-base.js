@@ -13,7 +13,11 @@ const dotenv = require('dotenv');
 
 // Import shared utilities
 const { logger } = require('./logger');
-const { generateResponse } = require('./ollama');
+const { generateResponseWithMeta, generateResponseStream } = require('./ollama');
+const { tracedGenerate } = require('./llmTracer');
+const { routeModel } = require('./modelRouter');
+const { verifyAgentRequest } = require('./agentAuth');
+const { buildPromptContext } = require('./summarizer');
 const { PERFORMATIVES, createMessage, validateMessage } = require('./messaging');
 const { AgentMemory, MEMORY_TYPES } = require('./memory');
 const { ModelManager } = require('./model-manager');
@@ -61,8 +65,11 @@ class BaseAgent {
     this.app = express();
     
     // Configure middleware
-    this.app.use(cors());
-    this.app.use(express.json());
+    this.app.use(cors({ origin: false })); // agents accept no cross-origin browser requests
+    // Capture raw body so agentAuth HMAC can verify the exact bytes sent by the manager
+    this.app.use(express.json({
+      verify: (req, _res, buf) => { req.rawBody = buf; }
+    }));
     this.app.use(morgan('dev'));
     
     // Initialize routes
@@ -85,8 +92,12 @@ class BaseAgent {
    * Set up Express routes
    */
   setupRoutes() {
+    // Verify HMAC signature on all state-changing agent endpoints.
+    // /status is intentionally excluded so health checks work without signing.
+    const agentAuthMiddleware = verifyAgentRequest(process.env.AGENT_SHARED_SECRET || '');
+
     // Handle incoming messages
-    this.app.post('/message', async (req, res) => {
+    this.app.post('/message', agentAuthMiddleware, async (req, res) => {
       try {
         const message = req.body;
         const userId = message.userId || 'default';
@@ -129,6 +140,96 @@ class BaseAgent {
       }
     });
     
+    // Streaming endpoint — returns tokens via Server-Sent Events
+    this.app.post('/message/stream', agentAuthMiddleware, async (req, res) => {
+      // Set SSE headers before anything async so the client stays connected
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+      res.flushHeaders();
+
+      const writeEvent = (data) => {
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify(data)}\n\n`);
+        }
+      };
+
+      try {
+        const message = req.body;
+        const userId = message.userId || 'default';
+
+        await this.initializeMemory(userId);
+
+        if (!message.from || !message.content) {
+          writeEvent({ error: 'Message must contain from and content fields', done: true });
+          return res.end();
+        }
+
+        if (!message.performative || !Object.values(PERFORMATIVES).includes(message.performative)) {
+          message.performative = PERFORMATIVES.INFORM;
+        }
+
+        const structuredMessage = createMessage(
+          message.from,
+          this.agentId,
+          message.content,
+          message.performative,
+          message.metadata || {}
+        );
+
+        const prompt = await this.createPrompt(structuredMessage);
+
+        const promptLength = prompt.length;
+        let numPredict = 300;
+        if (promptLength > 8000) numPredict = 200;
+        else if (promptLength > 4000) numPredict = 250;
+
+        // Stream tokens directly from Ollama — bypasses model manager queue
+        // intentionally: streaming responses hold the connection open and cannot
+        // be queued the same way as fire-and-forget requests.
+        const fullContent = await generateResponseStream(this.model, prompt, {
+          temperature: 0.7,
+          num_predict: numPredict
+        }, (token) => {
+          writeEvent({ token });
+        });
+
+        const confidenceData = this.extractConfidenceScore(fullContent);
+
+        // Persist to memory
+        if (this.memory) {
+          try {
+            await this.memory.storeConversation(
+              message.content,
+              confidenceData.cleanedContent,
+              {
+                conversationId: message.conversationId || 'unknown',
+                messageId: message.id,
+                timestamp: new Date().toISOString(),
+                confidence: confidenceData.confidence
+              }
+            );
+            await this.extractAndStorePreferences(message.content, confidenceData.cleanedContent);
+          } catch (err) {
+            logger.warn(`Error storing streaming conversation memory: ${err.message}`);
+          }
+        }
+
+        writeEvent({
+          done: true,
+          content: confidenceData.cleanedContent,
+          confidence: confidenceData.confidence,
+          agentId: this.agentId
+        });
+        res.end();
+      } catch (error) {
+        logger.error(`${this.agentId} stream error:`, error.message);
+        writeEvent({ error: error.message, done: true });
+        res.end();
+      }
+    });
+
     // Status endpoint
     this.app.get('/status', async (req, res) => {
       const memoryStats = this.memory ? this.memory.getMemoryStats() : null;
@@ -191,16 +292,16 @@ class BaseAgent {
         }
 
         if (recentContext.length > 0) {
-          prompt += `\n\nRecent conversation context:`;
-          recentContext.forEach(context => {
-            try {
-              const contextData = JSON.parse(context.content);
-              prompt += `\n- User: ${contextData.userMessage}`;
-              prompt += `\n- You: ${contextData.agentResponse}`;
-            } catch (e) {
-              // Skip malformed context
-            }
-          });
+          // Use summarizer for long histories to avoid silently exceeding context window
+          const { promptContext } = await buildPromptContext(
+            recentContext.map(c => {
+              try { return JSON.parse(c.content); } catch { return { from: 'user', content: c.content }; }
+            }),
+            null // no cached summary at this layer — memory system handles caching
+          );
+          if (promptContext) {
+            prompt += `\n\nConversation context:\n${promptContext}`;
+          }
         }
 
         if (preferences.length > 0) {
@@ -248,50 +349,24 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
         numPredict = 250;
       }
       
-      // Generate response using Ollama with timeout and retry
-      let content;
-      let retries = 3;
-      
-      while (retries >= 0) {
-        try {
-          // Log attempt for debugging
-          if (retries < 3) {
-            logger.info(`${this.agentId}: Retry attempt ${3-retries} for message from ${message.from}`);
-          }
-          
-          // Use ModelManager for intelligent model handling
-          const modelManager = getModelManager();
-          content = await modelManager.queueRequest(this.agentId, {
-            prompt: prompt,
-            options: {
-              temperature: 0.7,
-              num_predict: numPredict
-            }
-          });
-          
-          // Validate content before proceeding
-          if (content && content.trim().length > 0) {
-            break; // Exit loop if successful and content is valid
-          } else {
-            throw new Error('Empty response received');
-          }
-        } catch (err) {
-          if (retries === 0) {
-            // On final failure, log detailed error
-            logger.error(`${this.agentId}: All retries failed for message from ${message.from}. Error: ${err.message}`);
-            throw err;
-          }
-          retries--;
-          logger.warn(`${this.agentId}: Generation failed. Retrying... (${retries} attempts left). Error: ${err.message}`);
-          
-          // Wait progressively longer before retrying
-          await new Promise(resolve => setTimeout(resolve, (4-retries) * 1000));
-        }
+      // Route to the best model for this message type, then call Ollama
+      // with trace logging (latency + token counts → logs/llm-traces.jsonl).
+      // generateResponseWithMeta already uses withRetry internally.
+      const { model: routedModel, reason } = routeModel(message.content);
+      if (routedModel !== this.model) {
+        logger.info(`${this.agentId}: model router → ${routedModel} (${reason})`);
       }
-      
-      // If content is still undefined or null, use a fallback message
-      if (!content) {
-        logger.warn(`${this.agentId}: Empty response received after successful API call`);
+
+      const meta = await tracedGenerate(generateResponseWithMeta, {
+        model:   routedModel,
+        prompt,
+        options: { temperature: 0.7, num_predict: numPredict },
+        agentId: this.agentId,
+      });
+
+      let content = meta.text;
+      if (!content || content.trim().length === 0) {
+        logger.warn(`${this.agentId}: Empty response received`);
         content = "I received your message, but I'm having trouble generating a specific response right now.";
       }
 
@@ -327,9 +402,15 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
         PERFORMATIVES.RESPOND         // performative
       );
 
-      // Add confidence score to response metadata
-      responseMessage.confidence = confidenceData.confidence;
+      // Add confidence score and token usage to response metadata
+      responseMessage.confidence    = confidenceData.confidence;
       responseMessage.uncertainties = confidenceData.uncertainties;
+      responseMessage.tokenUsage    = {
+        inputTokens:  meta.inputTokens,
+        outputTokens: meta.outputTokens,
+        totalTokens:  meta.inputTokens + meta.outputTokens,
+      };
+      responseMessage.routedModel = routedModel;
 
       return responseMessage;
     } catch (error) {
@@ -496,14 +577,22 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
    * Stop the agent's HTTP server
    */
   stop() {
-    if (this.server) {
-      this.server.close();
-    }
-    
-    // Clear memory cleanup interval
-    if (this.memoryCleanupInterval) {
-      clearInterval(this.memoryCleanupInterval);
-    }
+    return new Promise((resolve) => {
+      // Stop accepting new requests; wait for in-flight requests to complete
+      if (this.server) {
+        this.server.close(() => {
+          logger.info(`${this.agentId} HTTP server closed`);
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+
+      // Clear memory cleanup interval regardless of server state
+      if (this.memoryCleanupInterval) {
+        clearInterval(this.memoryCleanupInterval);
+      }
+    });
   }
 }
 

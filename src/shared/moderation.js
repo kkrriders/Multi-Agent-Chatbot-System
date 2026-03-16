@@ -73,9 +73,14 @@ async function moderateContent(content, model, useLLM = true) {
         };
       }
     } catch (error) {
-      console.error('Error in LLM moderation:', error.message);
-      // Changed to fail-open strategy: If LLM moderation fails, assume content is safe
-      console.warn('LLM moderation failed; continuing with content unflagged');
+      // Fail-closed: if the moderation check itself errors, block the content.
+      // Better to occasionally block a safe message than to silently pass
+      // unsafe content when the safety system is broken.
+      console.error('LLM moderation error — blocking content as precaution:', error.message);
+      return {
+        flagged: true,
+        reason: 'Moderation service error — content blocked as a precaution'
+      };
     }
   }
 

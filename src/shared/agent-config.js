@@ -1,12 +1,57 @@
 /**
  * Agent Configuration System
- * 
- * Manages custom prompts and configurations for agents
+ *
+ * Manages custom prompts and configurations for agents.
+ * System prompts are resolved in priority order:
+ *   1. Active PromptVersion document in MongoDB (cached 60 s)
+ *   2. JSON file on disk (agent-configs.json)
+ *   3. Hard-coded DEFAULT_CONFIGS in this module
  */
 
 const fs = require('fs');
 const path = require('path');
 const { logger } = require('./logger');
+
+// ─── Prompt version cache ─────────────────────────────────────────────────────
+// Keeps a short-lived in-process cache so every LLM call doesn't hit MongoDB.
+// The cache is busted via invalidatePromptCache() when a version is activated.
+
+const PROMPT_CACHE_TTL_MS = 60_000; // 1 minute
+const _promptCache = new Map(); // agentId → { systemPrompt, expiresAt }
+
+/**
+ * Return the active system prompt from MongoDB (if any), or null.
+ * Result is cached for PROMPT_CACHE_TTL_MS to minimise DB round-trips.
+ */
+async function getActiveSystemPrompt(agentId) {
+  const cached = _promptCache.get(agentId);
+  if (cached && Date.now() < cached.expiresAt) return cached.systemPrompt;
+
+  try {
+    // Lazy-require to avoid loading Mongoose before the DB is connected
+    const PromptVersion = require('../models/PromptVersion');
+    const active = await PromptVersion.getActive(agentId);
+    if (active) {
+      _promptCache.set(agentId, {
+        systemPrompt: active.systemPrompt,
+        expiresAt: Date.now() + PROMPT_CACHE_TTL_MS,
+      });
+      return active.systemPrompt;
+    }
+  } catch (err) {
+    logger.warn(`Prompt version DB lookup failed for ${agentId}: ${err.message}`);
+  }
+
+  return null; // Fall through to file-based / default config
+}
+
+/**
+ * Bust the in-process cache for a specific agent.
+ * Called by the prompts router after a successful activation.
+ */
+function invalidatePromptCache(agentId) {
+  _promptCache.delete(agentId);
+}
 
 // Default configuration directory
 const CONFIG_DIR = path.join(__dirname, '..', 'config');
@@ -172,10 +217,21 @@ function validateAgentConfig(config) {
 }
 
 /**
- * Build system prompt for agent based on configuration
+ * Build system prompt for agent based on configuration.
+ *
+ * Resolves the system prompt in priority order:
+ *   1. Active PromptVersion in MongoDB (cached 60 s)
+ *   2. agentConfig.systemPrompt (file or DEFAULT_CONFIGS)
+ *
+ * @param {Object} agentConfig - Agent config object (must include .name or .agentId)
+ * @param {string|null} conversationContext - Optional additional context
+ * @returns {Promise<string>}
  */
-function buildSystemPrompt(agentConfig, conversationContext = null) {
-  let prompt = agentConfig.systemPrompt;
+async function buildSystemPrompt(agentConfig, conversationContext = null) {
+  // Derive a stable agent ID to look up in the version registry
+  const agentId = agentConfig.agentId || agentConfig.name?.toLowerCase().replace(/\s+/g, '-') || null;
+  const versionedPrompt = agentId ? await getActiveSystemPrompt(agentId) : null;
+  let prompt = versionedPrompt || agentConfig.systemPrompt;
   
   // Add personality and specialties
   if (agentConfig.personality) {
@@ -223,5 +279,7 @@ module.exports = {
   getAllAgentConfigs,
   validateAgentConfig,
   buildSystemPrompt,
+  getActiveSystemPrompt,
+  invalidatePromptCache,
   DEFAULT_CONFIGS
 };

@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
+// No fallback — validateEnv() guarantees JWT_SECRET is set before this module loads.
+// If JWT_SECRET is missing here, something has bypassed startup validation.
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 
 /**

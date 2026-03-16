@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { checkAuth, type User } from '@/lib/auth';
+import { checkAuth, getToken, type User } from '@/lib/auth';
+import { API_URL } from '@/lib/config';
 import {
   User as UserIcon,
   MessageSquare,
@@ -88,10 +89,10 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
 
       // Fetch conversations
-      const conversationsRes = await fetch('http://localhost:3000/api/conversations?limit=1000', {
+      const conversationsRes = await fetch(`${API_URL}/api/conversations?limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -140,9 +141,9 @@ export default function Dashboard() {
 
   const handleUpdateProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
 
-      const response = await fetch('http://localhost:3000/api/auth/update-profile', {
+      const response = await fetch(`${API_URL}/api/auth/update-profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

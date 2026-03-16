@@ -1,39 +1,36 @@
 /**
  * Agent Memory System
- * 
- * Provides persistent memory capabilities for agents including:
- * - Cross-conversation memory storage
- * - User preference tracking
- * - Contextual information retrieval
- * - Semantic search and relevance scoring
+ *
+ * Stores agent memories in MongoDB when a real user ObjectId is available.
+ * Falls back to an in-process Map for unauthenticated / test contexts.
+ * No file I/O.
  */
 
-const fs = require('fs').promises;
-const path = require('path');
+const mongoose = require('mongoose');
 const { logger } = require('./logger');
 
-// Memory storage directory
-const MEMORY_DIR = path.join(__dirname, '../memory');
-const USER_MEMORY_DIR = path.join(MEMORY_DIR, 'users');
-const GLOBAL_MEMORY_DIR = path.join(MEMORY_DIR, 'global');
+// Lazy-load to avoid circular-require issues
+let Memory = null;
+function getMemoryModel() {
+  if (!Memory) Memory = require('../models/Memory');
+  return Memory;
+}
 
-/**
- * Memory types for different storage categories
- */
+// ─── Memory types ─────────────────────────────────────────────────────────────
+
 const MEMORY_TYPES = {
-  CONVERSATION: 'conversation',
-  PREFERENCE: 'preference',
-  FACT: 'fact',
-  SKILL: 'skill',
-  RELATIONSHIP: 'relationship'
+  CONVERSATION: 'CONVERSATION',
+  PREFERENCE: 'PREFERENCE',
+  FACT: 'FACT',
+  SKILL: 'SKILL',
+  RELATIONSHIP: 'RELATIONSHIP',
 };
 
-/**
- * Memory Entry structure
- */
+// ─── MemoryEntry (lightweight value object) ──────────────────────────────────
+
 class MemoryEntry {
   constructor(type, content, metadata = {}) {
-    this.id = this.generateId();
+    this.id = `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     this.type = type;
     this.content = content;
     this.metadata = {
@@ -41,251 +38,214 @@ class MemoryEntry {
       relevanceScore: 1.0,
       accessCount: 0,
       lastAccessed: new Date().toISOString(),
-      ...metadata
+      ...metadata,
     };
-  }
-
-  generateId() {
-    return `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   updateAccess() {
     this.metadata.accessCount++;
     this.metadata.lastAccessed = new Date().toISOString();
   }
+}
 
-  updateRelevance(score) {
-    this.metadata.relevanceScore = Math.max(0, Math.min(1, score));
-  }
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function isValidObjectId(id) {
+  return id && id !== 'default' && mongoose.Types.ObjectId.isValid(id);
+}
+
+function mongoEntryToMemoryEntry(e) {
+  return {
+    id: e._id.toString(),
+    type: e.type,
+    content: e.content,
+    embedding: e.embedding,   // may be undefined for pre-RAG entries
+    metadata: {
+      timestamp: e.timestamp instanceof Date ? e.timestamp.toISOString() : e.timestamp,
+      relevanceScore: e.importance ?? 1.0,
+      accessCount: e.accessCount ?? 0,
+      lastAccessed: e.lastAccessed instanceof Date ? e.lastAccessed.toISOString() : e.lastAccessed,
+    },
+  };
 }
 
 /**
- * Agent Memory Manager
+ * Cosine similarity between two equal-length numeric vectors.
+ * Returns a value in [0, 1] (0 = orthogonal, 1 = identical direction).
+ * Falls back to 0 when either vector is absent or lengths differ.
  */
+function cosineSimilarity(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length || a.length === 0) return 0;
+  let dot = 0, magA = 0, magB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot  += a[i] * b[i];
+    magA += a[i] * a[i];
+    magB += b[i] * b[i];
+  }
+  const denom = Math.sqrt(magA) * Math.sqrt(magB);
+  return denom === 0 ? 0 : dot / denom;
+}
+
+// ─── AgentMemory ──────────────────────────────────────────────────────────────
+
 class AgentMemory {
   constructor(agentId, userId = 'default') {
     this.agentId = agentId;
     this.userId = userId;
-    this.userMemoryFile = path.join(USER_MEMORY_DIR, `${userId}_${agentId}.json`);
-    this.globalMemoryFile = path.join(GLOBAL_MEMORY_DIR, `${agentId}.json`);
-    
-    // In-memory cache for fast access
-    this.memoryCache = {
-      user: new Map(),
-      global: new Map()
-    };
-    
+    this.useDb = isValidObjectId(userId);
+
+    // In-process fallback for unauthenticated / test scenarios
+    this.localCache = new Map();
+
     this.initialized = false;
   }
 
-  /**
-   * Initialize memory system
-   */
   async initialize() {
-    try {
-      // Create directories if they don't exist
-      await fs.mkdir(MEMORY_DIR, { recursive: true });
-      await fs.mkdir(USER_MEMORY_DIR, { recursive: true });
-      await fs.mkdir(GLOBAL_MEMORY_DIR, { recursive: true });
-
-      // Load existing memories
-      await this.loadMemories();
-      
-      this.initialized = true;
-      logger.info(`Memory system initialized for ${this.agentId} (user: ${this.userId})`);
-    } catch (error) {
-      logger.error(`Failed to initialize memory system: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Load memories from disk
-   */
-  async loadMemories() {
-    try {
-      // Load user-specific memories
-      try {
-        const userMemoryData = await fs.readFile(this.userMemoryFile, 'utf-8');
-        try {
-          const userMemories = JSON.parse(userMemoryData);
-          userMemories.forEach(memory => {
-            this.memoryCache.user.set(memory.id, memory);
-          });
-        } catch (parseError) {
-          logger.warn(`Invalid JSON in user memory file: ${parseError.message}`);
-        }
-      } catch (error) {
-        // File doesn't exist yet, that's okay
-        if (error.code !== 'ENOENT') {
-          logger.warn(`Error loading user memories: ${error.message}`);
-        }
+    if (this.useDb) {
+      // Verify the Mongoose connection is live; if not, downgrade gracefully
+      if (mongoose.connection.readyState !== 1) {
+        logger.warn(`Memory: MongoDB not connected for ${this.agentId}, using in-memory fallback`);
+        this.useDb = false;
       }
+    }
+    this.initialized = true;
+    logger.info(`Memory initialised for ${this.agentId} (user: ${this.userId}, storage: ${this.useDb ? 'mongodb' : 'in-memory'})`);
+  }
 
-      // Load global memories
+  // ── Core store/retrieve ─────────────────────────────────────────────────────
+
+  async storeMemory(type, content, metadata = {}) {
+    if (!this.initialized) await this.initialize();
+
+    if (this.useDb) {
       try {
-        const globalMemoryData = await fs.readFile(this.globalMemoryFile, 'utf-8');
-        try {
-          const globalMemories = JSON.parse(globalMemoryData);
-          globalMemories.forEach(memory => {
-            this.memoryCache.global.set(memory.id, memory);
-          });
-        } catch (parseError) {
-          logger.warn(`Invalid JSON in global memory file: ${parseError.message}`);
-        }
-      } catch (error) {
-        // File doesn't exist yet, that's okay
-        if (error.code !== 'ENOENT') {
-          logger.warn(`Error loading global memories: ${error.message}`);
-        }
+        const MemoryModel = getMemoryModel();
+        const record = await MemoryModel.getOrCreate(this.userId, this.agentId);
+        await record.addEntry(type, content, metadata.confidence ?? 0.5, metadata);
+
+        // Fire-and-forget: generate embedding and attach it to the new entry.
+        // Done after the save so the store never blocks on the embedding model.
+        const entryId = record.entries[record.entries.length - 1]._id;
+        setImmediate(async () => {
+          try {
+            const { getEmbedding } = require('./ollama');
+            const embedding = await getEmbedding(null, content);
+            if (Array.isArray(embedding) && embedding.length > 0) {
+              await MemoryModel.updateOne(
+                { _id: record._id, 'entries._id': entryId },
+                { $set: { 'entries.$.embedding': embedding } }
+              );
+            }
+          } catch (embErr) {
+            // Best-effort — never block or fail a store because of embedding errors
+          }
+        });
+        return;
+      } catch (err) {
+        // Permanently downgrade this instance to in-memory so store and fetch stay
+        // consistent — mixing DB and local cache across calls leads to lost writes.
+        logger.error(`Memory DB store error (downgrading to in-memory for this session): ${err.message}`);
+        this.useDb = false;
       }
-    } catch (error) {
-      logger.error(`Error in loadMemories: ${error.message}`);
     }
+
+    const entry = new MemoryEntry(type, content, metadata);
+    this.localCache.set(entry.id, entry);
   }
 
-  /**
-   * Save memories to disk
-   */
-  async saveMemories() {
-    try {
-      // Save user memories
-      const userMemories = Array.from(this.memoryCache.user.values());
-      await fs.writeFile(this.userMemoryFile, JSON.stringify(userMemories, null, 2));
+  async getMemoriesByType(type, _isGlobal = false, limit = 10) {
+    if (!this.initialized) await this.initialize();
 
-      // Save global memories
-      const globalMemories = Array.from(this.memoryCache.global.values());
-      await fs.writeFile(this.globalMemoryFile, JSON.stringify(globalMemories, null, 2));
-      
-      logger.debug(`Memories saved for ${this.agentId}`);
-    } catch (error) {
-      logger.error(`Error saving memories: ${error.message}`);
-    }
-  }
-
-  /**
-   * Store a new memory
-   */
-  async storeMemory(type, content, metadata = {}, isGlobal = false) {
-    if (!this.initialized) {
-      await this.initialize();
+    if (this.useDb) {
+      try {
+        const MemoryModel = getMemoryModel();
+        const record = await MemoryModel.findOne({ userId: this.userId, agentId: this.agentId });
+        if (!record) return [];
+        return record.getRecentMemories(limit, type).map(mongoEntryToMemoryEntry);
+      } catch (err) {
+        logger.error(`Memory DB fetch error (downgrading to in-memory for this session): ${err.message}`);
+        this.useDb = false;
+        // Return empty rather than stale local cache whose entries weren't synced from DB
+        return [];
+      }
     }
 
-    const memory = new MemoryEntry(type, content, metadata);
-    const cache = isGlobal ? this.memoryCache.global : this.memoryCache.user;
-    
-    cache.set(memory.id, memory);
-    
-    // Save to disk
-    await this.saveMemories();
-    
-    logger.debug(`Memory stored: ${type} - ${content.substring(0, 50)}...`);
-    return memory.id;
-  }
-
-  /**
-   * Retrieve memories by type
-   */
-  async getMemoriesByType(type, isGlobal = false, limit = 10) {
-    if (!this.initialized) {
-      await this.initialize();
-    }
-
-    const cache = isGlobal ? this.memoryCache.global : this.memoryCache.user;
-    const memories = Array.from(cache.values())
-      .filter(memory => memory.type === type)
+    return Array.from(this.localCache.values())
+      .filter(m => m.type === type)
       .sort((a, b) => new Date(b.metadata.timestamp) - new Date(a.metadata.timestamp))
       .slice(0, limit);
-
-    // Update access counts
-    memories.forEach(memory => memory.updateAccess());
-    
-    return memories;
   }
 
-  /**
-   * Search memories by content similarity
-   */
   async searchMemories(query, limit = 5) {
-    if (!this.initialized) {
-      await this.initialize();
+    if (!this.initialized) await this.initialize();
+
+    let allMemories;
+    if (this.useDb) {
+      allMemories = await this._getAllFromDb();
+    } else {
+      allMemories = Array.from(this.localCache.values());
     }
 
-    const allMemories = [
-      ...Array.from(this.memoryCache.user.values()),
-      ...Array.from(this.memoryCache.global.values())
-    ];
+    // Attempt semantic (cosine) search via embeddings; fall back to word-overlap Jaccard.
+    let queryEmbedding = null;
+    try {
+      const { getEmbedding } = require('./ollama');
+      queryEmbedding = await getEmbedding(null, query);
+      if (!Array.isArray(queryEmbedding) || queryEmbedding.length === 0) queryEmbedding = null;
+    } catch (_) {
+      // Embedding model unavailable — Jaccard fallback is used below
+    }
 
-    // Simple text similarity search (can be enhanced with semantic search)
     const queryLower = query.toLowerCase();
-    const relevantMemories = allMemories
-      .map(memory => ({
-        memory,
-        similarity: this.calculateSimilarity(queryLower, memory.content.toLowerCase())
-      }))
+
+    return allMemories
+      .map(memory => {
+        // Use cosine similarity when both query and stored embeddings exist,
+        // otherwise fall back to the original word-overlap Jaccard metric.
+        const similarity = (queryEmbedding && Array.isArray(memory.embedding) && memory.embedding.length > 0)
+          ? cosineSimilarity(queryEmbedding, memory.embedding)
+          : this.calculateSimilarity(queryLower, memory.content.toLowerCase());
+        return { memory, similarity };
+      })
       .filter(item => item.similarity > 0.1)
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, limit)
       .map(item => {
-        item.memory.updateAccess();
+        if (item.memory.updateAccess) item.memory.updateAccess();
         return item.memory;
       });
-
-    return relevantMemories;
   }
 
-  /**
-   * Calculate text similarity (basic implementation)
-   */
-  calculateSimilarity(text1, text2) {
-    const words1 = text1.split(/\s+/);
-    const words2 = text2.split(/\s+/);
-    
-    let matches = 0;
-    words1.forEach(word => {
-      if (words2.includes(word) && word.length > 2) {
-        matches++;
-      }
-    });
-    
-    return matches / Math.max(words1.length, words2.length);
+  async _getAllFromDb() {
+    try {
+      const MemoryModel = getMemoryModel();
+      const record = await MemoryModel.findOne({ userId: this.userId, agentId: this.agentId });
+      if (!record) return [];
+      return record.entries.map(mongoEntryToMemoryEntry);
+    } catch (err) {
+      logger.error(`Memory DB getAll error: ${err.message}`);
+      return [];
+    }
   }
 
-  /**
-   * Get recent conversation context
-   */
+  // ── Convenience methods ─────────────────────────────────────────────────────
+
   async getRecentContext(limit = 5) {
-    return await this.getMemoriesByType(MEMORY_TYPES.CONVERSATION, false, limit);
+    return this.getMemoriesByType(MEMORY_TYPES.CONVERSATION, false, limit);
   }
 
-  /**
-   * Get user preferences
-   */
   async getUserPreferences() {
-    return await this.getMemoriesByType(MEMORY_TYPES.PREFERENCE, false, 20);
+    return this.getMemoriesByType(MEMORY_TYPES.PREFERENCE, false, 20);
   }
 
-  /**
-   * Store conversation turn
-   */
   async storeConversation(userMessage, agentResponse, context = {}) {
-    const conversationData = {
-      userMessage,
-      agentResponse,
-      context,
-      timestamp: new Date().toISOString()
-    };
-
     await this.storeMemory(
       MEMORY_TYPES.CONVERSATION,
-      JSON.stringify(conversationData),
+      JSON.stringify({ userMessage, agentResponse, context, timestamp: new Date().toISOString() }),
       { conversationId: context.conversationId || 'unknown' }
     );
   }
 
-  /**
-   * Store user preference
-   */
   async storePreference(preference, value, confidence = 0.8) {
     await this.storeMemory(
       MEMORY_TYPES.PREFERENCE,
@@ -294,73 +254,64 @@ class AgentMemory {
     );
   }
 
-  /**
-   * Store factual information
-   */
   async storeFact(fact, source = 'conversation', confidence = 0.7) {
-    await this.storeMemory(
-      MEMORY_TYPES.FACT,
-      fact,
-      { source, confidence },
-      true // Facts are global
-    );
+    await this.storeMemory(MEMORY_TYPES.FACT, fact, { source, confidence });
   }
 
-  /**
-   * Clean up old memories based on relevance and age
-   */
+  // ── Maintenance ─────────────────────────────────────────────────────────────
+
   async cleanupMemories() {
-    const now = new Date();
-    const cutoffDate = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)); // 30 days
+    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    [this.memoryCache.user, this.memoryCache.global].forEach(cache => {
-      const toDelete = [];
-      
-      cache.forEach((memory, id) => {
-        const memoryDate = new Date(memory.metadata.timestamp);
-        const isOld = memoryDate < cutoffDate;
-        const isLowRelevance = memory.metadata.relevanceScore < 0.2;
-        const isRarelyAccessed = memory.metadata.accessCount < 2;
-
-        if (isOld && isLowRelevance && isRarelyAccessed) {
-          toDelete.push(id);
+    if (this.useDb) {
+      try {
+        const MemoryModel = getMemoryModel();
+        const record = await MemoryModel.findOne({ userId: this.userId, agentId: this.agentId });
+        if (record) {
+          record.entries = record.entries.filter(
+            e => e.timestamp > cutoff || e.importance >= 0.2
+          );
+          await record.save();
         }
-      });
+        logger.info(`Memory cleanup completed for ${this.agentId} (mongodb)`);
+        return;
+      } catch (err) {
+        logger.error(`Memory cleanup DB error: ${err.message}`);
+      }
+    }
 
-      toDelete.forEach(id => cache.delete(id));
-    });
-
-    await this.saveMemories();
-    logger.info(`Memory cleanup completed for ${this.agentId}`);
+    // Local cleanup
+    for (const [id, memory] of this.localCache) {
+      const isOld = new Date(memory.metadata.timestamp) < cutoff;
+      const isLowRelevance = memory.metadata.relevanceScore < 0.2;
+      const isRarelyAccessed = memory.metadata.accessCount < 2;
+      if (isOld && isLowRelevance && isRarelyAccessed) {
+        this.localCache.delete(id);
+      }
+    }
+    logger.info(`Memory cleanup completed for ${this.agentId} (in-memory)`);
   }
 
-  /**
-   * Get memory statistics
-   */
+  // ── Utilities ───────────────────────────────────────────────────────────────
+
+  calculateSimilarity(text1, text2) {
+    const words1 = text1.split(/\s+/);
+    const words2 = text2.split(/\s+/);
+    let matches = 0;
+    words1.forEach(word => {
+      if (word.length > 2 && words2.includes(word)) matches++;
+    });
+    return matches / Math.max(words1.length, words2.length);
+  }
+
   getMemoryStats() {
     return {
-      userMemories: this.memoryCache.user.size,
-      globalMemories: this.memoryCache.global.size,
-      total: this.memoryCache.user.size + this.memoryCache.global.size,
-      byType: {
-        conversation: this.countMemoriesByType(MEMORY_TYPES.CONVERSATION),
-        preference: this.countMemoriesByType(MEMORY_TYPES.PREFERENCE),
-        fact: this.countMemoriesByType(MEMORY_TYPES.FACT),
-        skill: this.countMemoriesByType(MEMORY_TYPES.SKILL),
-        relationship: this.countMemoriesByType(MEMORY_TYPES.RELATIONSHIP)
-      }
+      userId: this.userId,
+      agentId: this.agentId,
+      storageType: this.useDb ? 'mongodb' : 'in-memory',
+      localCacheSize: this.localCache.size,
     };
-  }
-
-  countMemoriesByType(type) {
-    const userCount = Array.from(this.memoryCache.user.values()).filter(m => m.type === type).length;
-    const globalCount = Array.from(this.memoryCache.global.values()).filter(m => m.type === type).length;
-    return { user: userCount, global: globalCount, total: userCount + globalCount };
   }
 }
 
-module.exports = {
-  AgentMemory,
-  MemoryEntry,
-  MEMORY_TYPES
-};
+module.exports = { AgentMemory, MemoryEntry, MEMORY_TYPES };

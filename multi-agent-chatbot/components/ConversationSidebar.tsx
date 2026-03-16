@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { MessageSquare, Plus, Search, Archive, Trash2, Download } from 'lucide-react';
+import { getToken } from '@/lib/auth';
+import { API_URL } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -52,7 +54,7 @@ export default function ConversationSidebar({
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = getToken();
 
       if (!token) {
         console.error('No auth token found');
@@ -60,11 +62,10 @@ export default function ConversationSidebar({
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/conversations?status=${activeTab}&limit=100`,
+        `${API_URL}/api/conversations?status=${activeTab}&limit=100`,
         {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { 'Authorization': `Bearer ${token}` },
+          credentials: 'include',
         }
       );
 
@@ -96,14 +97,15 @@ export default function ConversationSidebar({
 
   const createNewConversation = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
 
-      const response = await fetch('http://localhost:3000/api/conversations', {
+      const response = await fetch(`${API_URL}/api/conversations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
+        credentials: 'include',
         body: JSON.stringify({
           title: 'New Conversation',
           agentType: 'manager',
@@ -126,14 +128,15 @@ export default function ConversationSidebar({
     e.stopPropagation();
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
 
-      await fetch(`http://localhost:3000/api/conversations/${conversationId}`, {
+      await fetch(`${API_URL}/api/conversations/${conversationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
+        credentials: 'include',
         body: JSON.stringify({ status: 'archived' }),
       });
 
@@ -151,13 +154,14 @@ export default function ConversationSidebar({
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
 
-      await fetch(`http://localhost:3000/api/conversations/${conversationId}`, {
+      await fetch(`${API_URL}/api/conversations/${conversationId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
+        credentials: 'include',
       });
 
       fetchConversations();

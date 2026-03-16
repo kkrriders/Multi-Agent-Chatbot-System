@@ -4,12 +4,15 @@
  * A flexible AI agent that can handle any kind of work assigned to it
  */
 const dotenv = require('dotenv');
+dotenv.config();
+// ── OpenTelemetry — before BaseAgent requires Express/HTTP
+require('../../shared/tracing').initTracing('agent-phi3');
+
 const { BaseAgent } = require('../../shared/agent-base');
 const { logger } = require('../../shared/logger');
 const { getAgentConfig, buildSystemPrompt } = require('../../shared/agent-config');
 
-// Load environment variables
-dotenv.config();
+// env already loaded above
 
 // Agent configuration
 const AGENT_ID = 'agent-3';

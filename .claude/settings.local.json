@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(find \"C:\\\\Users\\\\karti\\\\Multi-Agent-Chatbot-System\\\\multi-agent-chatbot\\\\components\" -type f -name \"*.tsx\" -o -name \"*.ts\" 2>/dev/null | head -20)",
+      "Bash(node -e \"require\\('pdfkit'\\); console.log\\('pdfkit OK'\\)\" 2>&1)",
+      "Bash(node -e \"require\\('./src/shared/memory'\\); console.log\\('memory.js OK'\\)\" 2>&1)",
+      "Bash(node -e \"require\\('./src/config/database'\\); console.log\\('database.js OK'\\)\" 2>&1)",
+      "Bash(node --check src/agents/manager/index.js 2>&1 && echo \"manager OK\")",
+      "Bash(npm uninstall:*)",
+      "Bash(cd multi-agent-chatbot:*)",
+      "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System/multi-agent-chatbot\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System\" && node -e \"require\\('helmet'\\)\" 2>&1 && echo \"helmet:ok\" || echo \"helmet:missing\")",
+      "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System\" && node -e \"require\\('ioredis'\\)\" 2>&1 && echo \"ioredis:ok\" || echo \"ioredis:missing\")",
+      "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System\" && npm run test:unit 2>&1)"
     ],
     "deny": [],
     "ask": []
