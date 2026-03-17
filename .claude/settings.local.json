@@ -19,7 +19,8 @@
       "Bash(do echo:*)",
       "Read(//tmp/everything-claude-code/.agents/skills/$skill/**)",
       "Bash(done)",
-      "Bash(find /tmp/everything-claude-code -path *.claude/commands* -o -path */commands/*.md)"
+      "Bash(find /tmp/everything-claude-code -path *.claude/commands* -o -path */commands/*.md)",
+      "Bash(git:*)"
     ],
     "deny": [],
     "ask": []
