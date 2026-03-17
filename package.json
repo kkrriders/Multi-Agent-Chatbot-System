@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "test:unit": "jest tests/unit --verbose",
+    "test:e2e": "jest tests/e2e --verbose",
     "eval": "node src/scripts/evalHarness.js",
     "start": "node start-stable.js",
     "stop": "node stop-all.js",
