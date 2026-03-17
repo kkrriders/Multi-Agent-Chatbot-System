@@ -1,6 +1,33 @@
-[32minfo[39m: Manager agent running on port 3000 with WebSocket support {"service":"multi-agent-chat","timestamp":"2025-07-15T14:52:35.491Z"}
-[0mGET /status [32m200[0m 24.375 ms - 487[0m
-[32minfo[39m: Sending message to agent-1 {"service":"multi-agent-chat","timestamp":"2025-07-15T14:53:31.012Z"}
-[31merror[39m: Error routing message to agent-1: {"service":"multi-agent-chat","timestamp":"2025-07-15T14:53:31.015Z"}
-[31merror[39m: Error in single message route: {"service":"multi-agent-chat","timestamp":"2025-07-15T14:53:31.018Z"}
-[0mPOST /message [31m500[0m 7.505 ms - 109[0m
+[validateEnv] WARNING: REDIS_URL is not set — some features will be degraded
+[validateEnv] WARNING: COOKIE_SECRET is not set — some features will be degraded
+[33mwarn[39m: REDIS_URL not set — rate limiters will use in-memory storage (not suitable for multi-instance deployments) {"service":"multi-agent-chat","timestamp":"2026-03-17T05:15:03.967Z"}
+[32minfo[39m: Manager agent running on port 3000 with WebSocket support {"service":"multi-agent-chat","timestamp":"2026-03-17T05:15:04.001Z"}
+[32minfo[39m: MongoDB connected successfully {"service":"multi-agent-chat","timestamp":"2026-03-17T05:15:04.015Z"}
+[31merror[39m: Forced shutdown after 15 s timeout — some connections may have been dropped {"service":"multi-agent-chat","timestamp":"2026-03-17T05:15:19.014Z"}
+[validateEnv] WARNING: REDIS_URL is not set — some features will be degraded
+[validateEnv] WARNING: COOKIE_SECRET is not set — some features will be degraded
+[33mwarn[39m: REDIS_URL not set — rate limiters will use in-memory storage (not suitable for multi-instance deployments) {"service":"multi-agent-chat","timestamp":"2026-03-17T05:17:02.380Z"}
+[32minfo[39m: Manager agent running on port 3000 with WebSocket support {"service":"multi-agent-chat","timestamp":"2026-03-17T05:17:02.412Z"}
+[32minfo[39m: MongoDB connected successfully {"service":"multi-agent-chat","timestamp":"2026-03-17T05:17:02.425Z"}
+[0mGET /api/health [32m200[0m 4.264 ms - 334[0m
+[31merror[39m: Forced shutdown after 15 s timeout — some connections may have been dropped {"service":"multi-agent-chat","timestamp":"2026-03-17T05:17:17.414Z"}
+[validateEnv] WARNING: REDIS_URL is not set — some features will be degraded
+[validateEnv] WARNING: COOKIE_SECRET is not set — some features will be degraded
+[33mwarn[39m: REDIS_URL not set — rate limiters will use in-memory storage (not suitable for multi-instance deployments) {"service":"multi-agent-chat","timestamp":"2026-03-17T05:18:20.679Z"}
+[32minfo[39m: Manager agent running on port 3000 with WebSocket support {"service":"multi-agent-chat","timestamp":"2026-03-17T05:18:20.713Z"}
+[32minfo[39m: MongoDB connected successfully {"service":"multi-agent-chat","timestamp":"2026-03-17T05:18:20.726Z"}
+[0mGET /api/health [32m200[0m 2.494 ms - 334[0m
+[0mGET /api/health [32m200[0m 0.419 ms - 335[0m
+[0mPOST /api/auth/login [33m401[0m 9.931 ms - 47[0m
+[32minfo[39m: User logged in: kartikarora3135@gmail.com {"service":"multi-agent-chat","timestamp":"2026-03-17T05:20:36.431Z"}
+[0mPOST /api/auth/login [32m200[0m 330.390 ms - 391[0m
+[0mGET /api/health [32m200[0m 0.669 ms - 336[0m
+[0mGET /api/health [32m200[0m 0.758 ms - 336[0m
+[0mGET /api/auth/me [32m200[0m 18.936 ms - 310[0m
+[0mGET /api/auth/me [36m304[0m 6.049 ms - -[0m
+[0mGET /api/conversations?status=active&limit=100 [32m200[0m 27.529 ms - 36[0m
+[0mGET /api/conversations?status=active&limit=100 [36m304[0m 15.491 ms - -[0m
+[32minfo[39m: Client connected: q2ONx3Voztbs1wY7AAAB (user: 691940fae7ab88e18bd13e52) {"service":"multi-agent-chat","timestamp":"2026-03-17T05:20:37.197Z"}
+[0mGET /api/health [32m200[0m 14.215 ms - 336[0m
+[0mGET /api/health [32m200[0m 0.291 ms - 336[0m
+[32minfo[39m: Client disconnected: q2ONx3Voztbs1wY7AAAB, reason: transport close {"service":"multi-agent-chat","timestamp":"2026-03-17T05:21:50.279Z"}

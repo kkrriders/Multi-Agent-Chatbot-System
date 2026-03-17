@@ -2355,6 +2355,14 @@ const { disconnectDB } = require('../../config/database');
 async function gracefulShutdown(signal) {
   logger.info(`Received ${signal} — starting graceful shutdown`);
 
+  // Safety net: force exit after 15 s if draining stalls (e.g. a hung socket)
+  const forceExitTimer = setTimeout(() => {
+    logger.error('Forced shutdown after 15 s timeout — some connections may have been dropped');
+    process.exit(1);
+  }, 15_000);
+  // Don't let this timer prevent the process from exiting earlier if everything drains cleanly
+  forceExitTimer.unref();
+
   // 1. Stop accepting new HTTP requests
   server.close(() => logger.info('HTTP server closed'));
 
@@ -2378,14 +2386,6 @@ async function gracefulShutdown(signal) {
   logger.info('Graceful shutdown complete');
   process.exit(0);
 }
-
-// Safety net: force exit after 15 s if draining stalls (e.g. a hung socket)
-const forceExitTimer = setTimeout(() => {
-  logger.error('Forced shutdown after 15 s timeout — some connections may have been dropped');
-  process.exit(1);
-}, 15_000);
-// Don't let this timer prevent the process from exiting earlier if everything drains cleanly
-forceExitTimer.unref();
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT',  () => gracefulShutdown('SIGINT'));

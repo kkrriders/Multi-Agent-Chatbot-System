@@ -13,7 +13,13 @@
       "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System/multi-agent-chatbot\" && npx tsc --noEmit 2>&1)",
       "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System\" && node -e \"require\\('helmet'\\)\" 2>&1 && echo \"helmet:ok\" || echo \"helmet:missing\")",
       "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System\" && node -e \"require\\('ioredis'\\)\" 2>&1 && echo \"ioredis:ok\" || echo \"ioredis:missing\")",
-      "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System\" && npm run test:unit 2>&1)"
+      "Bash(cd \"C:/Users/karti/Multi-Agent-Chatbot-System\" && npm run test:unit 2>&1)",
+      "Bash(cd:*)",
+      "Bash(for skill:*)",
+      "Bash(do echo:*)",
+      "Read(//tmp/everything-claude-code/.agents/skills/$skill/**)",
+      "Bash(done)",
+      "Bash(find /tmp/everything-claude-code -path *.claude/commands* -o -path */commands/*.md)"
     ],
     "deny": [],
     "ask": []
