@@ -23,6 +23,7 @@ const VALID_ENV = {
   MONGODB_URI:          'mongodb://localhost:27017/test',
   FRONTEND_URL:         'http://localhost:3002',
   AGENT_SHARED_SECRET:  'b'.repeat(32),
+  GROQ_API_KEY:         'gsk_' + 'c'.repeat(50),
 };
 
 describe('validateEnv', () => {
@@ -69,6 +70,18 @@ describe('validateEnv', () => {
   test('accepts mongodb+srv:// URI scheme', () => {
     withEnv({ ...VALID_ENV, MONGODB_URI: 'mongodb+srv://user:pass@cluster.mongodb.net/db' }, () =>
       expect(() => validateEnv()).not.toThrow()
+    );
+  });
+
+  test('throws when GROQ_API_KEY is missing', () => {
+    withEnv({ ...VALID_ENV, GROQ_API_KEY: '' }, () =>
+      expect(() => validateEnv()).toThrow(/GROQ_API_KEY/)
+    );
+  });
+
+  test('throws when GROQ_API_KEY does not start with gsk_', () => {
+    withEnv({ ...VALID_ENV, GROQ_API_KEY: 'invalidkey1234567890' }, () =>
+      expect(() => validateEnv()).toThrow(/GROQ_API_KEY/)
     );
   });
 });

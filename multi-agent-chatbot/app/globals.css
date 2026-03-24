@@ -3,6 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ── shadcn/ui base tokens (light mode) ─────────────────────────────────── */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -28,7 +29,7 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -39,39 +40,40 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* ── Neural Workspace dark theme ────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --background:            #0c1323;
+  --foreground:            #dce2f9;
+  --card:                  #181f30;
+  --card-foreground:       #dce2f9;
+  --popover:               #141b2c;
+  --popover-foreground:    #dce2f9;
+  --primary:               #adc6ff;
+  --primary-foreground:    #002e6a;
+  --secondary:             #232a3b;
+  --secondary-foreground:  #dce2f9;
+  --muted:                 #141b2c;
+  --muted-foreground:      #c2c6d6;
+  --accent:                #232a3b;
+  --accent-foreground:     #dce2f9;
+  --destructive:           #93000a;
+  --destructive-foreground:#ffb4ab;
+  --border:                #424754;
+  --input:                 #232a3b;
+  --ring:                  #4edea3;
+  --chart-1:               #adc6ff;
+  --chart-2:               #4edea3;
+  --chart-3:               #d0bcff;
+  --chart-4:               #FFBF00;
+  --chart-5:               #ff8a65;
+  --sidebar:               #091328;
+  --sidebar-foreground:    #dce2f9;
+  --sidebar-primary:       #adc6ff;
+  --sidebar-primary-foreground: #002e6a;
+  --sidebar-accent:        #232a3b;
+  --sidebar-accent-foreground: #dce2f9;
+  --sidebar-border:        #424754;
+  --sidebar-ring:          #4edea3;
 }
 
 @theme inline {
@@ -111,6 +113,37 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Neural Workspace surface scale ──────────────────────────────────── */
+  --color-nw-surface-lowest:  #070e1e;
+  --color-nw-surface:         #0c1323;
+  --color-nw-surface-low:     #141b2c;
+  --color-nw-surface-mid:     #181f30;
+  --color-nw-surface-high:    #232a3b;
+  --color-nw-surface-highest: #2e3446;
+  --color-nw-surface-bright:  #32394b;
+
+  /* ── Neural Workspace semantic ───────────────────────────────────────── */
+  --color-nw-on-surface:         #dce2f9;
+  --color-nw-on-surface-variant: #c2c6d6;
+
+  /* primary (blue) */
+  --color-nw-primary:           #adc6ff;
+  --color-nw-primary-container: #4d8eff;
+  --color-nw-on-primary:        #002e6a;
+  --color-nw-on-primary-container: #00285d;
+
+  /* secondary (green) */
+  --color-nw-green:             #4edea3;
+  --color-nw-green-container:   #00a572;
+  --color-nw-on-green:          #003824;
+  --color-nw-on-green-container:#00311f;
+
+  /* other */
+  --color-nw-outline:           #8c909f;
+  --color-nw-outline-variant:   #424754;
+  --color-nw-tertiary:          #d0bcff;
+  --color-nw-amber:             #FFBF00;
 }
 
 @layer base {
@@ -119,26 +152,99 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-inter), Inter, sans-serif;
+  }
+  code, pre, kbd, samp,
+  .font-mono {
+    font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
   }
 }
 
+/* ── Neural Workspace custom utilities ───────────────────────────────────── */
 @layer utilities {
-  /*
-   * streaming-bubble
-   *
-   * Applied to a message bubble while an agent is actively streaming tokens.
-   * The pulsing purple glow gives a clear "live generation" signal without
-   * being distracting — the period (1.8 s) is slow enough to read comfortably.
-   *
-   * We use box-shadow rather than border-color so the layout does not shift
-   * (box-shadow is painted outside the border box and does not affect flow).
-   */
-  @keyframes streaming-glow {
-    0%, 100% { box-shadow: 0 0 0 1px rgb(147 51 234 / 0.20); }
-    50%       { box-shadow: 0 0 0 3px rgb(147 51 234 / 0.45); }
+  .glass-panel {
+    backdrop-filter: blur(16px);
+    background: rgba(24, 31, 48, 0.7);
+    border: 1px solid rgba(140, 144, 159, 0.1);
   }
 
+  .glass-panel-dark {
+    backdrop-filter: blur(20px);
+    background: rgba(9, 19, 40, 0.8);
+    border: 1px solid rgba(66, 71, 84, 0.3);
+  }
+
+  .biometric-glow {
+    box-shadow: 0 0 20px rgba(77, 142, 255, 0.3);
+  }
+
+  .green-glow {
+    box-shadow: 0 0 15px rgba(78, 222, 163, 0.35);
+  }
+
+  .agent-dot-active {
+    box-shadow: 0 0 8px rgba(120, 176, 255, 0.8);
+  }
+
+  .agent-dot-green {
+    box-shadow: 0 0 8px rgba(105, 246, 184, 0.8);
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(64, 72, 93, 0.1);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(64, 72, 93, 0.4);
+    border-radius: 10px;
+  }
+
+  /* Material Symbols */
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-family: 'Material Symbols Outlined', sans-serif;
+    font-style: normal;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+  }
+
+  /* scanline animation */
+  @keyframes scan {
+    0%   { top: 0; }
+    100% { top: 100%; }
+  }
+  .scanline {
+    width: 100%;
+    height: 2px;
+    background: rgba(78, 222, 163, 0.08);
+    position: absolute;
+    animation: scan 5s linear infinite;
+    pointer-events: none;
+  }
+
+  /* streaming bubble glow */
+  @keyframes streaming-glow {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(78, 222, 163, 0.15); }
+    50%       { box-shadow: 0 0 0 3px rgba(78, 222, 163, 0.35); }
+  }
   .streaming-bubble {
     animation: streaming-glow 1.8s ease-in-out infinite;
   }
+
+  /* typing dots */
+  @keyframes typing-dot {
+    0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
+    30%            { opacity: 1;   transform: translateY(-4px); }
+  }
+  .typing-dot:nth-child(1) { animation: typing-dot 1.4s ease infinite 0s; }
+  .typing-dot:nth-child(2) { animation: typing-dot 1.4s ease infinite 0.2s; }
+  .typing-dot:nth-child(3) { animation: typing-dot 1.4s ease infinite 0.4s; }
 }

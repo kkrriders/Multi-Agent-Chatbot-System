@@ -3,38 +3,11 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { io, Socket } from "socket.io-client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  Bot,
-  Users,
-  MessageSquare,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Loader2,
-  Play,
-  Settings,
-  Zap,
-  Activity,
-  Sparkles,
-  LogOut,
-  LayoutDashboard,
-} from "lucide-react"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { checkAuth, logout, getUser, getToken, type User } from "@/lib/auth"
+import { checkAuth, logout, getToken, type User } from "@/lib/auth"
 import { API_URL } from "@/lib/config"
 import ConversationSidebar from "@/components/ConversationSidebar"
-import { ThemeToggle } from "@/components/ThemeToggle"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog"
-import { MessageActions } from "@/components/MessageActions"
-import { useTheme } from "next-themes"
 
 interface Message {
   id: string
@@ -64,1353 +37,937 @@ interface Agent {
 interface TeamTemplate {
   id: string
   name: string
-  color: string
   icon: string
   agents: Partial<Agent>[]
 }
 
+// Neural Workspace agent display metadata
+const AGENT_META: Record<string, { label: string; role: string; icon: string; color: string }> = {
+  "agent-1": { label: "Llama3",    role: "General Logic",    icon: "psychology",    color: "#78b0ff" },
+  "agent-2": { label: "Mixtral",   role: "Analysis",         icon: "storm",         color: "#4edea3" },
+  "agent-3": { label: "Gemma2",    role: "Creative",         icon: "blur_on",       color: "#d0bcff" },
+  "agent-4": { label: "Llama3-70b",role: "Developer",        icon: "auto_awesome",  color: "#FFBF00" },
+  "manager": { label: "Manager",   role: "Safety Gate",      icon: "shield",        color: "#adc6ff" },
+}
+
+function getAgentMeta(agentId?: string) {
+  if (!agentId) return AGENT_META.manager
+  return AGENT_META[agentId] ?? { label: agentId, role: "Agent", icon: "smart_toy", color: "#adc6ff" }
+}
+
 export default function MultiAgentChatbot() {
   const router = useRouter()
-  const { setTheme } = useTheme()
-  const [user, setUser] = useState<User | null>(null)
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [taskDescription, setTaskDescription] = useState("")
-  const [isConnected, setIsConnected] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [taskProgress, setTaskProgress] = useState(0)
-  const [activeAgents, setActiveAgents] = useState<string[]>([])
+  const [user, setUser]                         = useState<User | null>(null)
+  const [isCheckingAuth, setIsCheckingAuth]     = useState(true)
+  const [messages, setMessages]                 = useState<Message[]>([])
+  const [taskDescription, setTaskDescription]   = useState("")
+  const [isConnected, setIsConnected]           = useState(false)
+  const [isProcessing, setIsProcessing]         = useState(false)
+  const [taskProgress, setTaskProgress]         = useState(0)
+  const [activeAgents, setActiveAgents]         = useState<string[]>([])
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
-  const [chatInput, setChatInput] = useState("")
-  const [selectedTarget, setSelectedTarget] = useState<"all" | string>("all")
+  const [chatInput, setChatInput]               = useState("")
+  const [selectedTarget, setSelectedTarget]     = useState<"all" | string>("all")
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const socketRef = useRef<Socket | null>(null)
-  const chatInputRef = useRef<HTMLInputElement>(null)
+  const [leftTab, setLeftTab]                   = useState<"threads" | "agents">("threads")
+  const messagesEndRef  = useRef<HTMLDivElement>(null)
+  const socketRef       = useRef<Socket | null>(null)
+  const chatInputRef    = useRef<HTMLTextAreaElement>(null)
 
-  // Check authentication on mount
+  // ── Auth ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     const verifyAuth = async () => {
       const authUser = await checkAuth()
-      if (!authUser) {
-        router.push('/login')
-        return
-      }
+      if (!authUser) { router.push("/login"); return }
       setUser(authUser)
       setIsCheckingAuth(false)
     }
-
     verifyAuth()
   }, [router])
 
   const [agents, setAgents] = useState<Agent[]>([
-    {
-      id: "agent-1",
-      name: "Agent 1",
-      model: "llama3:latest",
-      port: 3001,
-      status: "online",
-      description: "Team Member 1",
-      color: "bg-gradient-to-r from-blue-500 to-blue-600",
-      role: "You are a helpful AI assistant. Provide detailed and accurate responses to help accomplish the given task.",
-      enabled: true,
-      teamMember: "Team Member 1",
-      performance: 95,
-      messagesCount: 0,
-    },
-    {
-      id: "agent-2",
-      name: "Agent 2",
-      model: "mistral:latest",
-      port: 3002,
-      status: "online",
-      description: "Team Member 2",
-      color: "bg-gradient-to-r from-purple-500 to-purple-600",
-      role: "You are a knowledgeable AI assistant. Analyze the task from your unique perspective and provide valuable insights.",
-      enabled: true,
-      teamMember: "Team Member 2",
-      performance: 88,
-      messagesCount: 0,
-    },
-    {
-      id: "agent-3",
-      name: "Agent 3",
-      model: "phi3:latest",
-      port: 3003,
-      status: "online",
-      description: "Team Member 3",
-      color: "bg-gradient-to-r from-green-500 to-green-600",
-      role: "You are an efficient AI assistant focused on practical solutions and implementation details.",
-      enabled: false,
-      teamMember: "Team Member 3",
-      performance: 92,
-      messagesCount: 0,
-    },
-    {
-      id: "agent-4",
-      name: "Agent 4",
-      model: "qwen2.5-coder:latest",
-      port: 3004,
-      status: "online",
-      description: "Team Member 4",
-      color: "bg-gradient-to-r from-orange-500 to-orange-600",
-      role: "You are a specialized AI assistant with expertise in technical analysis and problem-solving.",
-      enabled: false,
-      teamMember: "Team Member 4",
-      performance: 90,
-      messagesCount: 0,
-    },
+    { id: "agent-1", name: "Agent 1", model: "llama3-8b-8192",     port: 3005, status: "online",  description: "General Logic",   color: "bg-blue-500",   role: "You are a helpful AI assistant. Provide detailed and accurate responses.",                                enabled: true,  teamMember: "Team Member 1", performance: 95, messagesCount: 0 },
+    { id: "agent-2", name: "Agent 2", model: "mixtral-8x7b-32768", port: 3006, status: "online",  description: "Analysis",        color: "bg-green-500",  role: "You are a knowledgeable AI assistant. Analyze the task from your unique perspective.",                   enabled: true,  teamMember: "Team Member 2", performance: 88, messagesCount: 0 },
+    { id: "agent-3", name: "Agent 3", model: "gemma2-9b-it",       port: 3007, status: "offline", description: "Creative",        color: "bg-purple-500", role: "You are an efficient AI assistant focused on practical solutions and implementation details.",             enabled: false, teamMember: "Team Member 3", performance: 92, messagesCount: 0 },
+    { id: "agent-4", name: "Agent 4", model: "llama3-70b-8192",    port: 3008, status: "offline", description: "Developer",       color: "bg-amber-500",  role: "You are a specialized AI assistant with expertise in technical analysis and problem-solving.",             enabled: false, teamMember: "Team Member 4", performance: 90, messagesCount: 0 },
   ])
 
   const teamTemplates: TeamTemplate[] = [
-    {
-      id: "coding",
-      name: "Coding Team",
-      color: "from-blue-500 to-cyan-500",
-      icon: "💻",
-      agents: [
-        {
-          role: "You are a senior software architect. Design system architecture and provide technical leadership.",
-          teamMember: "Senior Architect",
-        },
-        {
-          role: "You are a full-stack developer. Implement features and write clean, maintainable code.",
-          teamMember: "Full-Stack Developer",
-        },
-        {
-          role: "You are a QA engineer. Test functionality and ensure code quality and reliability.",
-          teamMember: "QA Engineer",
-        },
-        {
-          role: "You are a DevOps engineer. Handle deployment, infrastructure, and CI/CD processes.",
-          teamMember: "DevOps Engineer",
-        },
-      ],
-    },
-    {
-      id: "research",
-      name: "Research Team",
-      color: "from-purple-500 to-pink-500",
-      icon: "🔬",
-      agents: [
-        {
-          role: "You are a research lead. Coordinate research efforts and synthesize findings.",
-          teamMember: "Research Lead",
-        },
-        {
-          role: "You are a data analyst. Analyze data patterns and extract meaningful insights.",
-          teamMember: "Data Analyst",
-        },
-        {
-          role: "You are a subject matter expert. Provide deep domain knowledge and expertise.",
-          teamMember: "Domain Expert",
-        },
-        {
-          role: "You are a research assistant. Gather information and support research activities.",
-          teamMember: "Research Assistant",
-        },
-      ],
-    },
-    {
-      id: "business",
-      name: "Business Team",
-      color: "from-green-500 to-emerald-500",
-      icon: "📊",
-      agents: [
-        {
-          role: "You are a business strategist. Develop strategic plans and business solutions.",
-          teamMember: "Business Strategist",
-        },
-        {
-          role: "You are a product manager. Define requirements and manage product development.",
-          teamMember: "Product Manager",
-        },
-        {
-          role: "You are a marketing specialist. Create marketing strategies and promotional content.",
-          teamMember: "Marketing Specialist",
-        },
-        {
-          role: "You are a financial analyst. Analyze costs, ROI, and financial implications.",
-          teamMember: "Financial Analyst",
-        },
-      ],
-    },
-    {
-      id: "creative",
-      name: "Creative Team",
-      color: "from-orange-500 to-red-500",
-      icon: "🎨",
-      agents: [
-        {
-          role: "You are a creative director. Lead creative vision and artistic direction.",
-          teamMember: "Creative Director",
-        },
-        {
-          role: "You are a UX/UI designer. Design user experiences and intuitive interfaces.",
-          teamMember: "UX/UI Designer",
-        },
-        {
-          role: "You are a content creator. Develop engaging content and compelling narratives.",
-          teamMember: "Content Creator",
-        },
-        {
-          role: "You are a brand strategist. Develop brand identity and messaging strategies.",
-          teamMember: "Brand Strategist",
-        },
-      ],
-    },
+    { id: "coding",   name: "Coding Team",   icon: "code",     agents: [{ role: "You are a senior software architect.",                             teamMember: "Architect" }, { role: "You are a full-stack developer.", teamMember: "Developer" }, { role: "You are a QA engineer.", teamMember: "QA Eng" }, { role: "You are a DevOps engineer.", teamMember: "DevOps" }] },
+    { id: "research", name: "Research Team", icon: "biotech",  agents: [{ role: "You are a research lead. Coordinate research efforts.",            teamMember: "Research Lead" }, { role: "You are a data analyst.", teamMember: "Data Analyst" }, { role: "You are a subject matter expert.", teamMember: "Domain Expert" }, { role: "You are a research assistant.", teamMember: "Assistant" }] },
+    { id: "business", name: "Business Team", icon: "trending_up", agents: [{ role: "You are a business strategist.",                               teamMember: "Strategist" }, { role: "You are a product manager.", teamMember: "PM" }, { role: "You are a marketing specialist.", teamMember: "Marketing" }, { role: "You are a financial analyst.", teamMember: "Finance" }] },
+    { id: "creative", name: "Creative Team", icon: "palette",  agents: [{ role: "You are a creative director. Lead creative vision.",              teamMember: "Creative Dir" }, { role: "You are a UX/UI designer.", teamMember: "UX/UI" }, { role: "You are a content creator.", teamMember: "Content" }, { role: "You are a brand strategist.", teamMember: "Brand" }] },
   ]
 
+  // ── Backend health + Socket ───────────────────────────────────────────────
   useEffect(() => {
     const connectToBackend = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/health`);
+        const response = await fetch(`${API_URL}/api/health`)
         if (response.ok) {
-          setIsConnected(true);
-          // Initialize Socket.IO connection when backend is available
-          if (!socketRef.current) {
-            initializeSocket();
-          }
+          setIsConnected(true)
+          if (!socketRef.current) initializeSocket()
         } else {
-          setIsConnected(false);
+          setIsConnected(false)
         }
-      } catch (error) {
-        console.error('Failed to connect to backend:', error);
-        setIsConnected(false);
+      } catch {
+        setIsConnected(false)
       }
-    };
-    
-    connectToBackend();
-    const interval = setInterval(connectToBackend, 30000); // Check every 30 seconds
-    
+    }
+
+    connectToBackend()
+    const interval = setInterval(connectToBackend, 30000)
     return () => {
-      clearInterval(interval);
-      // Cleanup socket on unmount
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
+      clearInterval(interval)
+      if (socketRef.current) socketRef.current.disconnect()
+    }
   }, [])
 
   const initializeSocket = () => {
-    console.log('🔌 Initializing Socket.IO connection...');
     socketRef.current = io(API_URL, {
-      transports: ['websocket', 'polling'],
+      transports: ["websocket", "polling"],
       timeout: 60000,
-      // Server requires a valid JWT — send it in the handshake auth payload
       auth: { token: getToken() },
-    });
-    
-    socketRef.current.on('connect', () => {
-      console.log('✅ Connected to backend via Socket.IO');
-    });
+    })
 
-    socketRef.current.on('conversation-update', (data) => {
+    socketRef.current.on("connect", () => { /* connected */ })
+
+    socketRef.current.on("conversation-update", (data) => {
       try {
-        console.log('💬 Received conversation update:', data);
         if (data.message) {
-          // Create a message first to check for duplicates
           const newMessage: Message = {
             id: `${Date.now()}-${Math.random()}`,
             content: data.message.content,
-            sender: data.message.from === 'user' ? 'user' : 'agent',
-            agent: data.message.agentId || 'manager',
+            sender: data.message.from === "user" ? "user" : "agent",
+            agent: data.message.agentId || "manager",
             timestamp: new Date(data.message.timestamp),
-          };
-          
-          // Check for duplicate messages using messageId or content+agent+time
-          setMessages((prevMessages) => {
-            const messageId = data.message.messageId;
-            let isDuplicate = false;
-            
-            if (messageId) {
-              // Check by messageId if available
-              isDuplicate = prevMessages.some(existingMsg => 
-                existingMsg.id.includes(messageId)
-              );
-            } else {
-              // Fallback to content+agent+time check
-              isDuplicate = prevMessages.some(existingMsg => 
-                existingMsg.content === newMessage.content && 
-                existingMsg.agent === newMessage.agent &&
-                Math.abs(existingMsg.timestamp.getTime() - newMessage.timestamp.getTime()) < 10000
-              );
-            }
-            
-            if (isDuplicate) {
-              console.log('🚫 Duplicate message detected, skipping:', newMessage.content.substring(0, 50));
-              return prevMessages; // Return unchanged
-            }
-            
-            // Use messageId in the frontend message ID if available
-            if (messageId) {
-              newMessage.id = `${messageId}-${Date.now()}`;
-            }
-            
-            console.log('💬 Adding new message to chat:', newMessage);
-            return [...prevMessages, newMessage];
-          });
-
-          // Update progress and agent status for non-user messages
-          if (data.message.from !== 'user') {
-            const agentId = data.message.agentId;
-            if (agentId && agentId.startsWith('agent-')) {
+          }
+          setMessages((prev) => {
+            const messageId = data.message.messageId
+            const isDuplicate = messageId
+              ? prev.some((m) => m.id.includes(messageId))
+              : prev.some((m) => m.content === newMessage.content && m.agent === newMessage.agent && Math.abs(m.timestamp.getTime() - newMessage.timestamp.getTime()) < 10000)
+            if (isDuplicate) return prev
+            if (messageId) newMessage.id = `${messageId}-${Date.now()}`
+            return [...prev, newMessage]
+          })
+          if (data.message.from !== "user") {
+            const agentId = data.message.agentId
+            if (agentId?.startsWith("agent-")) {
               updateAgent(agentId, {
-                status: data.message.type === 'manager-conclusion' ? 'online' : 'active',
+                status: data.message.type === "manager-conclusion" ? "online" : "active",
                 messagesCount: (agents.find((a) => a.id === agentId)?.messagesCount ?? 0) + 1,
-              });
-              
-              // Add to active agents if not already there
-              setActiveAgents(prev => {
-                if (!prev.includes(agentId)) {
-                  return [...prev, agentId];
-                }
-                return prev;
-              });
+              })
+              setActiveAgents((prev) => (prev.includes(agentId) ? prev : [...prev, agentId]))
             }
-
-            // Check if task is complete
-            if (data.message.type === 'manager-conclusion') {
-              console.log('🎯 Task completed!');
-              setIsProcessing(false);
-              setActiveAgents([]);
-              setTaskProgress(100);
+            if (data.message.type === "manager-conclusion") {
+              setIsProcessing(false)
+              setActiveAgents([])
+              setTaskProgress(100)
             }
           }
         }
-      } catch (error) {
-        console.error('Error handling conversation update:', error);
-      }
-    });
+      } catch { /* ignore */ }
+    })
 
-    // ── Streaming events ───────────────────────────────────────────────────
-    //
-    // The full sequence per agent turn is:
-    //
-    //   agent-thinking → stream-start → stream-token (×N) → stream-end
-    //
-    // agent-thinking fires the moment the manager decides to call the agent,
-    // before the HTTP connection is even opened. It lets us show a "thinking"
-    // indicator immediately, filling the 200 ms – 2 s gap that would otherwise
-    // leave the UI looking frozen while Ollama loads context.
-    //
-    // stream-start replaces the thinking placeholder in-place (same list slot)
-    // so there is no flicker of a bubble disappearing and a new one appearing.
-
-    socketRef.current.on('agent-thinking', (data: { agentId: string; conversationId: string }) => {
-      // Security: only accept known agent IDs. Anything else is silently dropped
-      // so a malformed or unexpected payload cannot inject phantom UI state.
-      if (!data.agentId?.startsWith('agent-')) return
-
-      updateAgent(data.agentId, { status: 'thinking' })
-      setActiveAgents(prev => prev.includes(data.agentId) ? prev : [...prev, data.agentId])
-
-      // Use a predictable ID so stream-start can locate and replace this bubble
-      // without appending a second one.
+    socketRef.current.on("agent-thinking", (data: { agentId: string; conversationId: string }) => {
+      if (!data.agentId?.startsWith("agent-")) return
+      updateAgent(data.agentId, { status: "thinking" })
+      setActiveAgents((prev) => (prev.includes(data.agentId) ? prev : [...prev, data.agentId]))
       const thinkingId = `thinking-${data.agentId}`
-      setMessages(prev => {
-        // Guard against duplicate thinking bubbles (e.g. rapid re-emit on reconnect).
-        if (prev.some(m => m.id === thinkingId)) return prev
-        return [...prev, {
-          id: thinkingId,
-          content: '',
-          sender: 'agent' as const,
-          agent: data.agentId,
-          timestamp: new Date(),
-          typing: true,
-        }]
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === thinkingId)) return prev
+        return [...prev, { id: thinkingId, content: "", sender: "agent", agent: data.agentId, timestamp: new Date(), typing: true }]
       })
     })
 
-    // stream-start: agent has begun generating — transition the thinking bubble
-    // to a live streaming bubble. The bubble stays in its existing list position
-    // so the user does not see it jump.
-    socketRef.current.on('stream-start', (data: {
-      messageId: string
-      agentId: string
-      conversationId: string
-    }) => {
-      const streamingMessage: Message = {
-        id: data.messageId,
-        content: '',
-        sender: 'agent',
-        agent: data.agentId,
-        timestamp: new Date(),
-        streaming: true,
-      }
-
-      setMessages(prev => {
-        // Replace the thinking placeholder that arrived via agent-thinking.
-        // If it is not present (e.g. agent-thinking was missed after a reconnect)
-        // fall back to appending a new bubble so streaming always works.
-        const thinkingIndex = prev.findIndex(m => m.id === `thinking-${data.agentId}`)
-        if (thinkingIndex !== -1) {
-          const updated = [...prev]
-          updated[thinkingIndex] = streamingMessage
-          return updated
-        }
+    socketRef.current.on("stream-start", (data: { messageId: string; agentId: string; conversationId: string }) => {
+      const streamingMessage: Message = { id: data.messageId, content: "", sender: "agent", agent: data.agentId, timestamp: new Date(), streaming: true }
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === `thinking-${data.agentId}`)
+        if (idx !== -1) { const u = [...prev]; u[idx] = streamingMessage; return u }
         return [...prev, streamingMessage]
       })
-
-      if (data.agentId.startsWith('agent-')) {
-        updateAgent(data.agentId, { status: 'active' })
-        setActiveAgents(prev => prev.includes(data.agentId) ? prev : [...prev, data.agentId])
+      if (data.agentId.startsWith("agent-")) {
+        updateAgent(data.agentId, { status: "active" })
+        setActiveAgents((prev) => (prev.includes(data.agentId) ? prev : [...prev, data.agentId]))
       }
     })
 
-    // stream-token: append each arriving token to the placeholder
-    socketRef.current.on('stream-token', (data: { messageId: string; token: string }) => {
-      setMessages(prev => prev.map(msg =>
-        msg.id === data.messageId
-          ? { ...msg, content: msg.content + data.token }
-          : msg
-      ))
+    socketRef.current.on("stream-token", (data: { messageId: string; token: string }) => {
+      setMessages((prev) => prev.map((msg) => msg.id === data.messageId ? { ...msg, content: msg.content + data.token } : msg))
     })
 
-    // stream-end: replace placeholder content with the final, clean version
-    socketRef.current.on('stream-end', (data: {
-      messageId: string
-      agentId: string
-      content: string
-      timestamp: number
-      type?: string
-    }) => {
-      setMessages(prev => prev.map(msg =>
-        msg.id === data.messageId
-          ? { ...msg, content: data.content, streaming: false }
-          : msg
-      ))
-
-      if (data.agentId && data.agentId.startsWith('agent-')) {
-        // Use the functional setter so messagesCount reads the live agent state
-        // rather than the stale snapshot captured when this listener was first
-        // registered. Without this, rapid back-to-back stream-end events all
-        // read the same initial count and overwrite each other's increments.
-        setAgents(prev => prev.map(a =>
-          a.id === data.agentId
-            ? { ...a, status: 'online', messagesCount: a.messagesCount + 1 }
-            : a
-        ))
-        setActiveAgents(prev => prev.filter(id => id !== data.agentId))
+    socketRef.current.on("stream-end", (data: { messageId: string; agentId: string; content: string; timestamp: number; type?: string }) => {
+      setMessages((prev) => prev.map((msg) => msg.id === data.messageId ? { ...msg, content: data.content, streaming: false } : msg))
+      if (data.agentId?.startsWith("agent-")) {
+        setAgents((prev) => prev.map((a) => a.id === data.agentId ? { ...a, status: "online", messagesCount: a.messagesCount + 1 } : a))
+        setActiveAgents((prev) => prev.filter((id) => id !== data.agentId))
       }
-
-      if (data.type === 'manager-conclusion') {
+      if (data.type === "manager-conclusion") {
         setIsProcessing(false)
         setActiveAgents([])
         setTaskProgress(100)
       }
     })
 
-    // stream-error: the agent call failed after agent-thinking was emitted.
-    // Replace the thinking placeholder with nothing (remove it) so the user
-    // does not see a stuck "thinking…" bubble alongside the error message that
-    // broadcastConversationUpdate will deliver separately.
-    socketRef.current.on('stream-error', (data: { agentId: string; conversationId: string }) => {
-      if (!data.agentId?.startsWith('agent-')) return
-      const thinkingId = `thinking-${data.agentId}`
-      setMessages(prev => prev.filter(m => m.id !== thinkingId))
-      setAgents(prev => prev.map(a =>
-        a.id === data.agentId ? { ...a, status: 'online' } : a
-      ))
-      setActiveAgents(prev => prev.filter(id => id !== data.agentId))
+    socketRef.current.on("stream-error", (data: { agentId: string; conversationId: string }) => {
+      if (!data.agentId?.startsWith("agent-")) return
+      setMessages((prev) => prev.filter((m) => m.id !== `thinking-${data.agentId}`))
+      setAgents((prev) => prev.map((a) => a.id === data.agentId ? { ...a, status: "online" } : a))
+      setActiveAgents((prev) => prev.filter((id) => id !== data.agentId))
     })
-    // ───────────────────────────────────────────────────────────────────────
 
-    socketRef.current.on('connect_error', (error) => {
-      console.error('Socket.IO connection error:', error);
-    });
+    socketRef.current.on("connect_error", (error) => { console.error("Socket error:", error) })
+    socketRef.current.on("disconnect", (reason) => { console.log("Disconnected:", reason) })
+  }
 
-    socketRef.current.on('disconnect', (reason) => {
-      console.log('Disconnected from backend:', reason);
-    });
-  };
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }) }, [messages])
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
-
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const applyTeamTemplate = (template: TeamTemplate) => {
-    setAgents((prevAgents) =>
-      prevAgents.map((agent, index) => ({
-        ...agent,
-        role: template.agents[index]?.role || agent.role,
-        teamMember: template.agents[index]?.teamMember || agent.teamMember,
-        enabled: index < template.agents.length,
-        status: index < template.agents.length ? "online" : "offline",
-      })),
-    )
+    setAgents((prev) => prev.map((agent, i) => ({
+      ...agent,
+      role: template.agents[i]?.role || agent.role,
+      teamMember: template.agents[i]?.teamMember || agent.teamMember,
+      enabled: i < template.agents.length,
+      status: i < template.agents.length ? "online" : "offline",
+    })))
   }
 
   const clearAll = () => {
-    setAgents((prevAgents) =>
-      prevAgents.map((agent) => ({
-        ...agent,
-        enabled: false,
-        status: "offline",
-        role: "You are a helpful AI assistant. Provide detailed and accurate responses to help accomplish the given task.",
-        teamMember: `Team Member ${agent.id.split("-")[1]}`,
-      })),
-    )
+    setAgents((prev) => prev.map((agent) => ({
+      ...agent, enabled: false, status: "offline",
+      role: "You are a helpful AI assistant.",
+      teamMember: `Team Member ${agent.id.split("-")[1]}`,
+    })))
   }
 
   const updateAgent = (agentId: string, updates: Partial<Agent>) => {
-    setAgents((prevAgents) => prevAgents.map((agent) => (agent.id === agentId ? { ...agent, ...updates } : agent)))
+    setAgents((prev) => prev.map((a) => (a.id === agentId ? { ...a, ...updates } : a)))
   }
 
   const sendFollowUpMessage = async () => {
-    if (!chatInput.trim() || !currentConversationId || !socketRef.current) {
-      return
-    }
-
-    console.log('💬 Sending follow-up message:', chatInput)
-
+    if (!chatInput.trim() || !currentConversationId || !socketRef.current) return
     try {
       if (selectedTarget === "all") {
-        // Send to all enabled agents - the backend will handle broadcasting
-        const enabledAgents = agents.filter(agent => agent.enabled)
-        
+        const enabledAgents = agents.filter((a) => a.enabled)
         const response = await fetch(`${API_URL}/continue-conversation`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            conversationId: currentConversationId,
-            message: chatInput,
-            participants: enabledAgents.map(agent => ({
-              agentId: agent.id,
-              agentName: agent.teamMember
-            }))
-          })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversationId: currentConversationId, message: chatInput, participants: enabledAgents.map((a) => ({ agentId: a.id, agentName: a.teamMember })) }),
         })
-
         const result = await response.json()
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to continue conversation')
-        }
-        // Don't add user message here - it will come via Socket.IO
+        if (!result.success) throw new Error(result.error || "Failed to continue conversation")
       } else {
-        // Send to specific agent - the backend will handle broadcasting
-        const targetAgent = agents.find(agent => agent.id === selectedTarget)
-        if (!targetAgent) {
-          throw new Error('Target agent not found')
-        }
-
+        const targetAgent = agents.find((a) => a.id === selectedTarget)
+        if (!targetAgent) throw new Error("Target agent not found")
         const response = await fetch(`${API_URL}/message`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            content: chatInput,
-            agentId: selectedTarget,
-            agentName: targetAgent.teamMember,
-            conversationId: currentConversationId
-          })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: chatInput, agentId: selectedTarget, agentName: targetAgent.teamMember, conversationId: currentConversationId }),
         })
-
         const result = await response.json()
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to send message')
-        }
-        // Don't add messages here - they will come via Socket.IO
+        if (!result.success) throw new Error(result.error || "Failed to send message")
       }
-
       setChatInput("")
     } catch (error) {
-      console.error('Error sending follow-up message:', error)
-      const errorMessage: Message = {
-        id: `error-${Date.now()}`,
-        content: `Error sending message: ${(error as Error).message}`,
-        sender: "agent",
-        timestamp: new Date(),
-      }
-      setMessages(prev => [...prev, errorMessage])
+      setMessages((prev) => [...prev, { id: `error-${Date.now()}`, content: `Error: ${(error as Error).message}`, sender: "agent", timestamp: new Date() }])
     }
   }
 
   const clearConversation = () => {
-    setMessages([])
-    setCurrentConversationId(null)
-    setIsProcessing(false)
-    setTaskProgress(0)
-    setActiveAgents([])
-    setChatInput("")
-    console.log('🗑️ Conversation cleared')
+    setMessages([]); setCurrentConversationId(null)
+    setIsProcessing(false); setTaskProgress(0)
+    setActiveAgents([]); setChatInput("")
   }
 
   const startTask = async () => {
     if (!taskDescription.trim()) return
-
-    console.log('🚀 Starting task:', taskDescription)
-    setIsProcessing(true)
-    setMessages([])
-    setTaskProgress(0)
-    setActiveAgents([])
-
-    // Add task description as initial message
-    const taskMessage: Message = {
-      id: Date.now().toString(),
-      content: `Task: ${taskDescription}`,
-      sender: "user",
-      timestamp: new Date(),
-    }
-    setMessages([taskMessage])
-    console.log('📝 Added user message:', taskMessage)
+    setIsProcessing(true); setMessages([]); setTaskProgress(0); setActiveAgents([])
+    setMessages([{ id: Date.now().toString(), content: `Task: ${taskDescription}`, sender: "user", timestamp: new Date() }])
 
     try {
-      // Prepare enabled agents for the API call
-      const enabledAgents = agents.filter((agent) => agent.enabled)
-      const agentData = enabledAgents.map(agent => ({
-        agentId: agent.id,
-        agentName: agent.teamMember,
-        customPrompt: agent.role
-      }))
+      const enabledAgents = agents.filter((a) => a.enabled)
+      const agentData = enabledAgents.map((a) => ({ agentId: a.id, agentName: a.teamMember, customPrompt: a.role }))
 
-      if (!socketRef.current || !socketRef.current.connected) {
-        throw new Error('Socket.IO not connected. Please refresh the page and try again.')
-      }
+      if (!socketRef.current?.connected) throw new Error("Socket.IO not connected. Please refresh the page.")
 
       const conversationId = `work-${Date.now()}`
-      
-      // Join the conversation room BEFORE starting the API call
-      console.log('🔗 Joining conversation room:', conversationId)
-      socketRef.current.emit('join-conversation', conversationId)
+      socketRef.current.emit("join-conversation", conversationId)
 
-      // Call the flexible work session API
-      console.log('📡 Calling API with agents:', agentData)
       const response = await fetch(`${API_URL}/flexible-work-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          task: taskDescription,
-          agents: agentData,
-          conversationId: conversationId,
-          managerRole: "Senior project manager who reviews all work and provides strategic guidance and final recommendations"
-        })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task: taskDescription, agents: agentData, conversationId, managerRole: "Senior project manager who reviews all work and provides strategic guidance and final recommendations" }),
       })
 
-      console.log('📡 API Response status:', response.status)
       const result = await response.json()
-      console.log('📡 API Response data:', result)
-
       if (result.success) {
-        console.log('✅ Work session started successfully, waiting for real-time updates...')
         setCurrentConversationId(conversationId)
-        
-        // The socket connection is already set up and listening for updates
-        // Progress will be updated via the conversation-update events
-        
-        // Safety timeout: if the task is still marked as processing after 3
-        // minutes, something went wrong server-side. Reset UI state so the
-        // user is not stuck with a frozen "Processing…" button.
-        // We use the functional setter form to read the live value of
-        // isProcessing at timeout-fire time rather than the stale closure
-        // value captured when startTask ran — which would always read `true`
-        // even if the task finished before the 3 minutes elapsed.
         setTimeout(() => {
-          setIsProcessing(prev => {
-            if (prev) {
-              console.warn('⚠️ Work session timeout, resetting state')
-              setActiveAgents([])
-            }
-            return prev ? false : prev
-          })
-        }, 180000) // 3 minute timeout
-
+          setIsProcessing((prev) => { if (prev) setActiveAgents([]); return prev ? false : prev })
+        }, 180000)
       } else {
-        throw new Error(result.error || 'Failed to start task')
+        throw new Error(result.error || "Failed to start task")
       }
-
     } catch (error) {
-      console.error('Error starting task:', error)
-      setMessages(prev => [...prev, {
-        id: `error-${Date.now()}`,
-        content: `Error starting task: ${(error as Error).message}. Please make sure the backend server is running at ${API_URL}.`,
-        sender: "agent",
-        timestamp: new Date(),
-      }])
+      setMessages((prev) => [...prev, { id: `error-${Date.now()}`, content: `Error: ${(error as Error).message}`, sender: "agent", timestamp: new Date() }])
       setIsProcessing(false)
     }
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "online":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      // thinking: manager has selected this agent; waiting for first token
-      case "thinking":
-        return <Loader2 className="h-4 w-4 text-amber-500 animate-spin" />
-      // active: tokens are actively arriving from the agent
-      case "active":
-        return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />
-      case "loading":
-        return <Clock className="h-4 w-4 text-yellow-500 animate-spin" />
-      case "offline":
-        return <AlertCircle className="h-4 w-4 text-red-500" />
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />
-    }
-  }
-
-  const enabledAgentsCount = agents.filter((a) => a.enabled).length
-
-  const handleLogout = async () => {
-    await logout()
-    router.push('/login')
-  }
+  const handleLogout = async () => { await logout(); router.push("/login") }
 
   const handleSelectConversation = async (conversationId: string) => {
     try {
       const token = getToken()
-
-      const response = await fetch(`${API_URL}/api/conversations/${conversationId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to load conversation')
-      }
-
+      const response = await fetch(`${API_URL}/api/conversations/${conversationId}`, { headers: { Authorization: `Bearer ${token}` } })
+      if (!response.ok) throw new Error("Failed to load conversation")
       const data = await response.json()
       const conversation = data.data
-
-      // Clear current messages and load conversation messages
-      setMessages([])
-      setCurrentConversationId(conversationId)
-
-      // Convert conversation messages to Message format
-      if (conversation.messages && conversation.messages.length > 0) {
-        const loadedMessages: Message[] = conversation.messages.map((msg: any, index: number) => ({
-          id: `${conversationId}-${index}`,
-          content: msg.content,
-          sender: msg.role === 'user' ? 'user' : 'agent',
-          agent: msg.agentId || 'manager',
-          timestamp: new Date(msg.timestamp),
-        }))
-
-        setMessages(loadedMessages)
+      setMessages([]); setCurrentConversationId(conversationId)
+      if (conversation.messages?.length > 0) {
+        setMessages(conversation.messages.map((msg: any, i: number) => ({ id: `${conversationId}-${i}`, content: msg.content, sender: msg.role === "user" ? "user" : "agent", agent: msg.agentId || "manager", timestamp: new Date(msg.timestamp) })))
       }
-
-      // Join the conversation room via Socket.IO
-      if (socketRef.current) {
-        socketRef.current.emit('join-conversation', conversationId)
-      }
-    } catch (error) {
-      console.error('Error loading conversation:', error)
-    }
-  }
-
-  // Message Action Handlers
-  const handleCopyMessage = (content: string) => {
-    console.log('Message copied to clipboard')
-  }
-
-  const handleRegenerateMessage = async (messageId: string) => {
-    try {
-      const messageIndex = messages.findIndex(m => m.id === messageId)
-      if (messageIndex === -1) return
-
-      // Find the last user message before this assistant message
-      const previousMessages = messages.slice(0, messageIndex)
-      const lastUserMessage = [...previousMessages].reverse().find(m => m.sender === 'user')
-
-      if (!lastUserMessage) return
-
-      // Remove messages from this point onwards
-      setMessages(messages.slice(0, messageIndex))
-
-      // Re-send the last user message to get a new response
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        content: lastUserMessage.content,
-        sender: "user",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, newMessage])
-
-      // Emit to socket for regeneration
-      if (socketRef.current && currentConversationId) {
-        socketRef.current.emit('regenerate-message', {
-          conversationId: currentConversationId,
-          userMessage: lastUserMessage.content,
-        })
-      }
-    } catch (error) {
-      console.error('Error regenerating message:', error)
-    }
-  }
-
-  const handleEditMessage = (messageId: string) => {
-    // Find the message to edit
-    const message = messages.find(m => m.id === messageId)
-    if (message && message.sender === 'user') {
-      setChatInput(message.content)
-      // Optionally, remove messages after this point
-      const messageIndex = messages.findIndex(m => m.id === messageId)
-      setMessages(messages.slice(0, messageIndex))
-    }
+      if (socketRef.current) socketRef.current.emit("join-conversation", conversationId)
+    } catch { /* ignore */ }
   }
 
   const handleDeleteMessage = (messageId: string) => {
-    setMessages(messages.filter(m => m.id !== messageId))
+    setMessages((prev) => prev.filter((m) => m.id !== messageId))
   }
 
   const handleShareMessage = async (messageId: string) => {
-    const message = messages.find(m => m.id === messageId)
-    if (!message) return
-
-    try {
-      await navigator.clipboard.writeText(message.content)
-      console.log('Message copied for sharing')
-    } catch (error) {
-      console.error('Error sharing message:', error)
-    }
+    const message = messages.find((m) => m.id === messageId)
+    if (message) { try { await navigator.clipboard.writeText(message.content) } catch { /* ignore */ } }
   }
 
-  const handleMessageFeedback = async (messageId: string, type: 'positive' | 'negative') => {
-    try {
-      const token = getToken()
-      await fetch(`${API_URL}/api/messages/${messageId}/feedback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ feedback: type }),
-      })
-      console.log(`${type} feedback sent for message ${messageId}`)
-    } catch (error) {
-      console.error('Error sending feedback:', error)
-    }
-  }
+  const enabledCount = agents.filter((a) => a.enabled).length
 
-  // Keyboard Shortcuts
+  // ── Keyboard Shortcuts ────────────────────────────────────────────────────
   useKeyboardShortcuts([
-    {
-      key: '/',
-      ctrl: true,
-      description: 'Show keyboard shortcuts',
-      action: () => setShowShortcutsDialog(true),
-    },
-    {
-      key: 'd',
-      ctrl: true,
-      description: 'Go to dashboard',
-      action: () => router.push('/dashboard'),
-    },
-    {
-      key: 'i',
-      ctrl: true,
-      description: 'Focus message input',
-      action: () => chatInputRef.current?.focus(),
-    },
-    {
-      key: 'l',
-      ctrl: true,
-      description: 'Clear current chat',
-      action: () => {
-        if (currentConversationId) {
-          clearConversation();
-        }
-      },
-    },
-    {
-      key: 't',
-      ctrl: true,
-      description: 'Toggle theme',
-      action: () => {
-        setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-      },
-    },
+    { key: "/", ctrl: true, description: "Show keyboard shortcuts", action: () => setShowShortcutsDialog(true) },
+    { key: "d", ctrl: true, description: "Go to dashboard",        action: () => router.push("/dashboard") },
+    { key: "i", ctrl: true, description: "Focus message input",    action: () => chatInputRef.current?.focus() },
+    { key: "l", ctrl: true, description: "Clear current chat",     action: () => { if (currentConversationId) clearConversation() } },
   ])
 
-  // Show loading state while checking authentication
+  // ── Loading ───────────────────────────────────────────────────────────────
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600 dark:text-slate-400">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#060e20" }}>
+        <div className="flex flex-col items-center gap-4">
+          <span className="material-symbols-outlined animate-spin text-5xl" style={{ color: "#4edea3" }}>
+            autorenew
+          </span>
+          <p className="text-xs uppercase tracking-widest" style={{ color: "rgba(220,226,249,0.4)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+            Verifying credentials...
+          </p>
         </div>
       </div>
     )
   }
 
+  // ── UI ────────────────────────────────────────────────────────────────────
+  const inputValue  = currentConversationId ? chatInput : taskDescription
+  const setInput    = currentConversationId ? setChatInput : setTaskDescription
+  const handleSubmit = currentConversationId ? sendFollowUpMessage : startTask
+  const canSubmit   = currentConversationId
+    ? !!chatInput.trim()
+    : !!taskDescription.trim() && !isProcessing && enabledCount > 0 && isConnected
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Header */}
-      <div className="border-b bg-white/80 backdrop-blur-sm dark:bg-slate-900/80 px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="text-center flex-1">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              <Sparkles className="inline h-8 w-8 mr-2 text-blue-500" />
-              Flexible Multi-Agent Work System
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
-              Define custom prompts for each agent and watch them collaborate in real-time!
-            </p>
+    <div
+      className="overflow-hidden"
+      style={{ height: "100vh", background: "#060e20", color: "#dee5ff", fontFamily: "var(--font-inter), Inter, sans-serif" }}
+    >
+      {/* ── Top Header ─────────────────────────────────────────────────────── */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 h-16 w-full"
+        style={{ background: "#091328", boxShadow: "0 24px 24px -4px rgba(0,0,0,0.4)" }}
+      >
+        {/* Left: brand + nav */}
+        <div className="flex items-center gap-8">
+          <span className="text-xl font-bold tracking-tighter" style={{ color: "#78b0ff" }}>
+            Synthetic Architect
+          </span>
+          <nav className="hidden md:flex gap-6">
+            {["Workspaces", "Models", "Analytics"].map((item, i) => (
+              <a
+                key={item}
+                className="font-medium text-sm pb-1 transition-colors"
+                style={{
+                  color: i === 0 ? "#78b0ff" : "#40485d",
+                  borderBottom: i === 0 ? "2px solid #78b0ff" : "2px solid transparent",
+                }}
+              >
+                {item}
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        {/* Right: status + actions */}
+        <div className="flex items-center gap-4">
+          <div
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+            style={{ background: "#141f38", border: "1px solid rgba(64,72,93,0.15)" }}
+          >
+            <span className="material-symbols-outlined text-sm" style={{ color: "#4edea3" }}>dns</span>
+            <span
+              className="text-xs font-mono"
+              style={{ color: "#a3aac4", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              SYSTEM: {isConnected ? "OPTIMAL" : "OFFLINE"}
+            </span>
+            <div
+              className="w-1.5 h-1.5 rounded-full ml-1"
+              style={{ background: isConnected ? "#4edea3" : "#ff716c", boxShadow: isConnected ? "0 0 6px rgba(78,222,163,0.6)" : "none" }}
+            />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-              <span>Welcome, <strong>{user?.fullName}</strong></span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
-              <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                {isConnected ? "Connected" : "Connecting..."}
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/dashboard')}
-              className="flex items-center gap-2"
+
+          <button
+            onClick={() => setShowShortcutsDialog(true)}
+            className="material-symbols-outlined p-2 transition-colors"
+            style={{ color: "#40485d" }}
+          >
+            keyboard
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="material-symbols-outlined p-2 transition-colors"
+            style={{ color: "#40485d" }}
+          >
+            logout
+          </button>
+
+          {/* User avatar */}
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center border text-xs font-bold"
+            style={{ background: "#232a3b", borderColor: "rgba(173,198,255,0.2)", color: "#78b0ff" }}
+          >
+            {user?.fullName?.[0]?.toUpperCase() ?? "U"}
+          </div>
+        </div>
+      </header>
+
+      <main className="pt-16 h-screen flex overflow-hidden">
+        {/* ── Left Sidebar ───────────────────────────────────────────────── */}
+        <aside
+          className="fixed left-0 top-0 pt-16 h-full flex flex-col z-40"
+          style={{ width: 260, background: "#060e20", borderRight: "1px solid rgba(64,72,93,0.1)" }}
+        >
+          {/* Header */}
+          <div className="px-6 py-4">
+            <div
+              className="text-xs uppercase tracking-widest mb-4"
+              style={{ color: "#78b0ff", fontFamily: "var(--font-jetbrains-mono), monospace" }}
             >
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Button>
-            <ThemeToggle />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="flex items-center gap-2"
+              Neural Workspace
+            </div>
+            <button
+              onClick={() => { clearConversation(); setLeftTab("threads") }}
+              className="w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+              style={{ background: "#5ba2ff", color: "#002347", boxShadow: "0 4px 20px rgba(91,162,255,0.1)" }}
             >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
-            {enabledAgentsCount > 0 && (
-              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-                <Zap className="h-3 w-3 mr-1" />
-                {enabledAgentsCount} Agents Ready
-              </Badge>
+              <span className="material-symbols-outlined text-sm">add</span>
+              New Session
+            </button>
+          </div>
+
+          {/* Tab switcher */}
+          <div className="flex px-4 mb-2 gap-1">
+            {(["threads", "agents"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setLeftTab(tab)}
+                className="flex-1 py-1.5 text-xs font-bold uppercase tracking-widest rounded transition-all"
+                style={{
+                  background: leftTab === tab ? "rgba(120,176,255,0.1)" : "transparent",
+                  color: leftTab === tab ? "#78b0ff" : "#40485d",
+                  borderBottom: leftTab === tab ? "1px solid #78b0ff" : "1px solid transparent",
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content */}
+          <div className="flex-1 overflow-y-auto">
+            {leftTab === "threads" ? (
+              /* Conversation history */
+              <div className="flex flex-col h-full">
+                <ConversationSidebar
+                  onSelectConversation={handleSelectConversation}
+                  currentConversationId={currentConversationId || undefined}
+                />
+              </div>
+            ) : (
+              /* Agent configuration */
+              <div className="px-3 pb-4 space-y-3">
+                {/* Team templates */}
+                <div className="px-1 mt-2">
+                  <div
+                    className="text-[9px] uppercase tracking-widest font-bold mb-2"
+                    style={{ color: "#6d758c", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                  >
+                    Team Templates
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 mb-2">
+                    {teamTemplates.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => applyTeamTemplate(t)}
+                        className="flex items-center gap-1.5 px-2 py-1.5 rounded text-left transition-colors"
+                        style={{ background: "rgba(20,31,56,0.6)", border: "1px solid rgba(64,72,93,0.2)" }}
+                      >
+                        <span className="material-symbols-outlined text-sm" style={{ color: "#78b0ff" }}>{t.icon}</span>
+                        <span className="text-[10px] font-medium" style={{ color: "#a3aac4" }}>{t.name.split(" ")[0]}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={clearAll}
+                    className="w-full text-[10px] py-1 rounded transition-colors text-center"
+                    style={{ background: "rgba(20,31,56,0.4)", color: "#6d758c", border: "1px solid rgba(64,72,93,0.2)" }}
+                  >
+                    Reset All
+                  </button>
+                </div>
+
+                {/* Task description */}
+                <div className="px-1">
+                  <div
+                    className="text-[9px] uppercase tracking-widest font-bold mb-1.5"
+                    style={{ color: "#6d758c", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                  >
+                    Task Description
+                  </div>
+                  <textarea
+                    value={taskDescription}
+                    onChange={(e) => setTaskDescription(e.target.value)}
+                    rows={3}
+                    placeholder="Describe your task..."
+                    className="w-full resize-none text-xs rounded-lg p-2 outline-none transition-all"
+                    style={{ background: "#0f1930", border: "1px solid rgba(64,72,93,0.3)", color: "#dee5ff", fontFamily: "var(--font-inter), Inter, sans-serif" }}
+                  />
+                </div>
+
+                {/* Agents */}
+                {agents.map((agent) => {
+                  const meta = getAgentMeta(agent.id)
+                  return (
+                    <div
+                      key={agent.id}
+                      className="rounded-lg p-3 transition-all"
+                      style={{
+                        background: agent.enabled ? "rgba(20,31,56,0.8)" : "rgba(15,25,48,0.5)",
+                        border: `1px solid ${agent.enabled ? "rgba(120,176,255,0.2)" : "rgba(64,72,93,0.15)"}`,
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="checkbox"
+                          checked={agent.enabled}
+                          onChange={(e) => updateAgent(agent.id, { enabled: e.target.checked, status: e.target.checked ? "online" : "offline" })}
+                          className="w-3 h-3 cursor-pointer"
+                          style={{ accentColor: "#4edea3" }}
+                        />
+                        <span className="material-symbols-outlined text-base" style={{ color: meta.color }}>{meta.icon}</span>
+                        <span className="text-xs font-bold" style={{ color: meta.color }}>{meta.label}</span>
+                        {(agent.status === "thinking" || agent.status === "active") && (
+                          <span className="text-[9px] animate-pulse" style={{ color: "#FFBF00", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                            {agent.status === "thinking" ? "thinking…" : "active…"}
+                          </span>
+                        )}
+                      </div>
+                      <input
+                        value={agent.teamMember}
+                        onChange={(e) => updateAgent(agent.id, { teamMember: e.target.value })}
+                        className="w-full text-[11px] px-2 py-1 rounded mb-1.5 outline-none"
+                        style={{ background: "#192540", border: "1px solid rgba(64,72,93,0.3)", color: "#dee5ff" }}
+                        placeholder="Role name"
+                      />
+                      <textarea
+                        value={agent.role}
+                        onChange={(e) => updateAgent(agent.id, { role: e.target.value })}
+                        rows={2}
+                        className="w-full text-[10px] px-2 py-1 rounded resize-none outline-none"
+                        style={{ background: "#192540", border: "1px solid rgba(64,72,93,0.3)", color: "#a3aac4" }}
+                        placeholder="System prompt..."
+                      />
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
-        </div>
-      </div>
 
-      <div className="flex h-[calc(100vh-120px)]">
-        {/* Conversation History Sidebar */}
-        <div className="w-64">
-          <ConversationSidebar
-            onSelectConversation={handleSelectConversation}
-            currentConversationId={currentConversationId || undefined}
-          />
-        </div>
-
-        {/* Left Sidebar - Agent Configuration */}
-        <div className="w-1/3 border-r bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 p-4 overflow-y-auto">
-          {/* Connection Status */}
-          {!isConnected && (
-            <div className="mb-4 p-3 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950 dark:to-orange-950 border border-red-200 dark:border-red-800 rounded-xl shadow-sm">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-500" />
-                <p className="text-red-700 dark:text-red-300 text-sm font-medium">
-                  Backend server not connected. Please start the backend server on port 3000.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Team Templates */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Team Templates
-            </h3>
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {teamTemplates.map((template) => (
-                <Button
-                  key={template.id}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyTeamTemplate(template)}
-                  className={`text-xs h-auto p-3 bg-gradient-to-r ${template.color} text-white border-0 hover:scale-105 transition-all duration-200 shadow-sm`}
-                >
-                  <div className="text-center">
-                    <div className="text-lg mb-1">{template.icon}</div>
-                    <div className="font-medium">{template.name}</div>
-                  </div>
-                </Button>
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAll}
-              className="w-full text-xs bg-slate-50 hover:bg-slate-100"
-            >
-              Clear All
-            </Button>
-
-            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mt-4 shadow-sm">
-              <div className="flex items-start gap-2">
-                <div className="text-lg">💡</div>
-                <div>
-                  <p className="text-yellow-800 dark:text-yellow-200 text-sm font-medium mb-1">Quick Start</p>
-                  <p className="text-yellow-700 dark:text-yellow-300 text-xs">
-                    Click a template above to get started, or create your own custom team setup!
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Task Input */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Task Description
-            </h3>
-            <Textarea
-              placeholder="Describe your task or project (e.g., 'Create a React web app for task management', 'Research the impact of AI on healthcare', 'Develop marketing strategy for a startup')"
-              value={taskDescription}
-              onChange={(e) => setTaskDescription(e.target.value)}
-              className="min-h-[100px] text-sm bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700 rounded-xl shadow-sm"
-            />
-            <div className="mt-3 p-3 bg-slate-50/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-lg border border-slate-200 dark:border-slate-700">
-              <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Project Manager Role:</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">
-                Senior project manager who reviews all work and provides strategic guidance and final recommendations
-              </div>
-            </div>
-          </div>
-
-          {/* Agent Configuration */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              Agent Configuration
-            </h3>
-            {agents.map((agent) => (
-              <div
-                key={agent.id}
-                className={`border rounded-xl p-4 transition-all duration-200 shadow-sm ${
-                  agent.enabled
-                    ? "bg-white dark:bg-slate-800 border-blue-200 dark:border-blue-800 shadow-md"
-                    : "bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <Checkbox
-                    checked={agent.enabled}
-                    onCheckedChange={(checked) =>
-                      updateAgent(agent.id, {
-                        enabled: !!checked,
-                        status: checked ? "online" : "offline",
-                      })
-                    }
-                    className="data-[state=checked]:bg-blue-500"
-                  />
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className={`${agent.color} text-white text-xs font-bold`}>
-                      <Bot className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{agent.name}</span>
-                      {getStatusIcon(agent.status)}
-                      {/* Status label: only shown during active states so idle
-                          agents keep a clean look. "thinking" = waiting for
-                          first token; "active" = tokens arriving. */}
-                      {(agent.status === 'thinking' || agent.status === 'active') && (
-                        <span className="text-xs font-medium text-amber-600 dark:text-amber-400 animate-pulse">
-                          {agent.status === 'thinking' ? 'thinking…' : 'typing…'}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="text-xs text-slate-500">Performance:</div>
-                      <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
-                        <div
-                          className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
-                          style={{ width: `${agent.performance}%` }}
-                        />
-                      </div>
-                      <div className="text-xs font-medium text-green-600">{agent.performance}%</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <Input
-                    value={agent.teamMember}
-                    onChange={(e) => updateAgent(agent.id, { teamMember: e.target.value })}
-                    className="text-xs h-8 bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600"
-                    placeholder="Team member role"
-                  />
-                </div>
-
-                <Textarea
-                  value={agent.role}
-                  onChange={(e) => updateAgent(agent.id, { role: e.target.value })}
-                  className="text-xs min-h-[80px] resize-none bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600"
-                  placeholder="Define the agent's role and behavior..."
-                />
-
-                {agent.messagesCount > 0 && (
-                  <div className="mt-2 text-xs text-slate-500 flex items-center gap-1">
-                    <MessageSquare className="h-3 w-3" />
-                    {agent.messagesCount} messages sent
-                  </div>
-                )}
+          {/* Bottom nav */}
+          <div className="p-4" style={{ borderTop: "1px solid rgba(64,72,93,0.1)" }}>
+            {[{ icon: "dns", label: "System Status" }, { icon: "help_outline", label: "Help" }].map((item) => (
+              <div key={item.label} className="flex items-center gap-3 px-2 py-2 transition-colors cursor-pointer" style={{ color: "#40485d" }}>
+                <span className="material-symbols-outlined text-sm">{item.icon}</span>
+                <span className="text-xs">{item.label}</span>
               </div>
             ))}
           </div>
-        </div>
+        </aside>
 
-        {/* Right Side - Live Collaboration */}
-        <div className="flex-1 flex flex-col bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm">
-          {/* Task Header */}
-          <div className="border-b p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-                  <MessageSquare className="h-5 w-5 text-white" />
+        {/* ── Center Chat ─────────────────────────────────────────────────── */}
+        <section
+          className="flex flex-col relative"
+          style={{ marginLeft: 260, marginRight: 260, background: "#060e20", flex: 1 }}
+        >
+          {/* Backend offline banner */}
+          {!isConnected && (
+            <div
+              className="flex items-center gap-2 px-6 py-2 text-xs"
+              style={{ background: "rgba(159,5,25,0.15)", borderBottom: "1px solid rgba(255,113,108,0.2)", color: "#ff716c", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              <span className="material-symbols-outlined text-sm">warning</span>
+              Backend offline — start the server on port 3000
+            </div>
+          )}
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto px-8 py-10 space-y-8 pb-44">
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-6 text-center">
+                <div
+                  className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                  style={{ background: "rgba(120,176,255,0.1)", border: "1px solid rgba(120,176,255,0.2)" }}
+                >
+                  <span className="material-symbols-outlined text-5xl" style={{ color: "#78b0ff" }}>psychology_alt</span>
                 </div>
                 <div>
-                  <h2 className="font-semibold text-lg">Live Collaboration</h2>
-                  {isProcessing && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <Progress value={taskProgress} className="w-32 h-2" />
-                      <span className="text-xs text-slate-500">{Math.round(taskProgress)}%</span>
+                  <h2 className="text-2xl font-bold mb-2" style={{ color: "#dee5ff" }}>Neural Workspace Ready</h2>
+                  <p className="text-sm" style={{ color: "#6d758c" }}>
+                    {enabledCount > 0
+                      ? `${enabledCount} agent${enabledCount > 1 ? "s" : ""} active — describe your task below`
+                      : "Enable agents in the Agents tab, then describe your task below"}
+                  </p>
+                </div>
+                {isProcessing && (
+                  <div className="flex items-center gap-2" style={{ color: "#4edea3" }}>
+                    <span className="material-symbols-outlined text-sm animate-spin">autorenew</span>
+                    <span className="text-xs" style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>Initializing session...</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              messages.map((message) => {
+                const meta = getAgentMeta(message.agent)
+                if (message.sender === "user") {
+                  return (
+                    <div key={message.id} className="flex justify-end">
+                      <div
+                        className="max-w-2xl rounded-xl rounded-tr-sm p-4"
+                        style={{ background: "#141f38", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}
+                      >
+                        <p className="text-sm leading-relaxed" style={{ color: "#dee5ff" }}>{message.content}</p>
+                        <p
+                          className="text-[10px] mt-2 text-right"
+                          style={{ color: "#40485d", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                        >
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                  )
+                }
+
+                return (
+                  <div key={message.id} className="flex gap-4">
+                    {/* Agent avatar */}
+                    <div
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ background: `${meta.color}20`, border: `1px solid ${meta.color}40` }}
+                    >
+                      <span className="material-symbols-outlined text-sm" style={{ color: meta.color }}>{meta.icon}</span>
+                    </div>
+
+                    {/* Message body */}
+                    <div className="max-w-3xl space-y-2 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-tight" style={{ color: meta.color }}>{meta.label}</span>
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full"
+                          style={{ background: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}25` }}
+                        >
+                          {meta.role.toUpperCase()}
+                        </span>
+                        {(activeAgents.includes(message.agent ?? "") || message.streaming || message.typing) && (
+                          <span className="text-[10px] animate-pulse" style={{ color: "#FFBF00", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                            {message.typing ? "thinking…" : "typing…"}
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        className={`rounded-xl rounded-tl-sm p-5 ${message.streaming ? "streaming-bubble" : ""}`}
+                        style={{ background: "#091328", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}
+                      >
+                        {message.typing ? (
+                          <div className="flex items-center gap-1 py-1">
+                            {[0, 1, 2].map((i) => (
+                              <div key={i} className="typing-dot w-2 h-2 rounded-full" style={{ background: meta.color }} />
+                            ))}
+                          </div>
+                        ) : message.streaming ? (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#dee5ff" }}>
+                            {message.content}
+                            <span className="inline-block w-0.5 h-4 ml-0.5 animate-pulse align-text-bottom" style={{ background: "#4edea3" }} />
+                          </p>
+                        ) : (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#dee5ff" }}>
+                            {message.content}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* ── Chat Input ──────────────────────────────────────────────── */}
+          <div
+            className="absolute bottom-0 left-0 w-full p-6"
+            style={{ background: "linear-gradient(to top, #060e20 60%, transparent)" }}
+          >
+            <div className="max-w-4xl mx-auto space-y-2">
+              {/* Target selector (only when in conversation) */}
+              {currentConversationId && (
+                <div className="flex items-center gap-2 px-2">
+                  <span className="text-[10px] uppercase tracking-widest" style={{ color: "#6d758c", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                    Route to:
+                  </span>
+                  <select
+                    value={selectedTarget}
+                    onChange={(e) => setSelectedTarget(e.target.value)}
+                    className="text-xs px-2 py-1 rounded outline-none"
+                    style={{ background: "#0f1930", border: "1px solid rgba(64,72,93,0.3)", color: "#a3aac4", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                  >
+                    <option value="all">All Agents</option>
+                    {agents.filter((a) => a.enabled).map((a) => (
+                      <option key={a.id} value={a.id}>{a.teamMember}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div
+                className="rounded-2xl p-2 shadow-2xl transition-all duration-300 glass-panel"
+                style={{ border: "1px solid rgba(64,72,93,0.2)" }}
+              >
+                <textarea
+                  ref={chatInputRef}
+                  value={inputValue}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={currentConversationId ? "Command the agents…" : "Define your neural task — describe what you need the agents to accomplish…"}
+                  rows={2}
+                  className="w-full bg-transparent border-none outline-none text-sm resize-none p-4"
+                  style={{ color: "#dee5ff", fontFamily: "var(--font-inter), Inter, sans-serif" }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.shiftKey || e.metaKey)) {
+                      e.preventDefault()
+                      if (canSubmit) handleSubmit()
+                    }
+                  }}
+                />
+
+                <div className="flex items-center justify-between px-2 pb-2">
+                  <div className="flex gap-1">
+                    {/* Agent selector shortcut */}
+                    <button
+                      onClick={() => setLeftTab("agents")}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                      style={{ background: "#192540", border: "1px solid rgba(64,72,93,0.2)", color: "#a3aac4" }}
+                    >
+                      <span className="material-symbols-outlined text-sm">smart_toy</span>
+                      {enabledCount > 0 ? `${enabledCount} Agents` : "No Agents"}
+                      <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+                    </button>
+
+                    {currentConversationId && (
+                      <button
+                        onClick={clearConversation}
+                        className="p-1.5 rounded-lg transition-colors"
+                        style={{ background: "#192540", border: "1px solid rgba(64,72,93,0.2)", color: "#6d758c" }}
+                        title="Clear conversation"
+                      >
+                        <span className="material-symbols-outlined text-sm">delete_sweep</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!canSubmit}
+                    className="px-6 py-2 rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 disabled:opacity-40"
+                    style={{
+                      background: canSubmit ? "#78b0ff" : "#192540",
+                      color: canSubmit ? "#002f5c" : "#40485d",
+                      boxShadow: canSubmit ? "0 4px 20px rgba(120,176,255,0.2)" : "none",
+                    }}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <span className="material-symbols-outlined text-sm animate-spin">autorenew</span>
+                        RUNNING
+                      </>
+                    ) : currentConversationId ? (
+                      <>
+                        EXECUTE
+                        <span className="material-symbols-outlined text-sm">send</span>
+                      </>
+                    ) : (
+                      <>
+                        DEPLOY
+                        <span className="material-symbols-outlined text-sm">rocket_launch</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={startTask}
-                  disabled={!taskDescription.trim() || isProcessing || !agents.some((a) => a.enabled) || !isConnected}
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+
+              <div className="flex justify-center gap-6">
+                <span
+                  className="text-[10px] uppercase tracking-widest font-bold"
+                  style={{ color: "#40485d", fontFamily: "var(--font-jetbrains-mono), monospace" }}
                 >
-                  <Play className="h-4 w-4" />
-                  {!isConnected ? "Backend Disconnected" : isProcessing ? "Processing..." : "Start Task"}
-                </Button>
-                {currentConversationId && (
-                  <Button
-                    onClick={clearConversation}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    🗑️ Clear
-                  </Button>
-                )}
+                  Shift+Enter to submit
+                </span>
+                <span
+                  className="text-[10px] uppercase tracking-widest font-bold"
+                  style={{ color: "#40485d", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                >
+                  ⌘K shortcuts
+                </span>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Messages Area */}
-          <div className="flex-1 p-4">
-            <ScrollArea className="h-full">
-              <div className="space-y-4">
-                {messages.length === 0 ? (
-                  <div className="text-center text-slate-500 dark:text-slate-400 py-12">
-                    <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-2xl inline-block mb-4">
-                      <Bot className="h-16 w-16 mx-auto text-blue-500" />
-                    </div>
-                    <p className="text-xl font-semibold mb-2 text-slate-700 dark:text-slate-300">
-                      Ready for Collaboration
-                    </p>
-                    <p className="text-sm text-slate-500">Configure your agents and describe a task to get started</p>
-                  </div>
-                ) : (
-                  messages.map((message) => (
-                    <div key={message.id} className="space-y-2 group">
-                      {message.sender === "user" ? (
-                        <div className={`rounded-xl p-4 shadow-sm ${
-                          message.content.startsWith('Task:')
-                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border border-blue-200 dark:border-blue-800'
-                            : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border border-green-200 dark:border-green-800 ml-8'
-                        }`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className={`p-1 rounded-full ${
-                                message.content.startsWith('Task:') ? 'bg-blue-500' : 'bg-green-500'
-                              }`}>
-                                {message.content.startsWith('Task:') ? (
-                                  <Users className="h-3 w-3 text-white" />
-                                ) : (
-                                  <MessageSquare className="h-3 w-3 text-white" />
-                                )}
-                              </div>
-                              <span className={`font-semibold ${
-                                message.content.startsWith('Task:')
-                                  ? 'text-blue-900 dark:text-blue-100'
-                                  : 'text-green-900 dark:text-green-100'
-                              }`}>
-                                {message.content.startsWith('Task:') ? 'Task Assignment' : 'You'}
-                              </span>
-                            </div>
-                            <MessageActions
-                              message={{
-                                id: message.id,
-                                role: 'user',
-                                content: message.content,
-                              }}
-                              onCopy={handleCopyMessage}
-                              onEdit={handleEditMessage}
-                              onDelete={handleDeleteMessage}
-                              onShare={handleShareMessage}
-                            />
-                          </div>
-                          <p className={`font-medium ${
-                            message.content.startsWith('Task:')
-                              ? 'text-blue-800 dark:text-blue-200'
-                              : 'text-green-800 dark:text-green-200'
-                          }`}>{message.content}</p>
-                        </div>
-                      ) : (
-                        <div
-                          className={`bg-white dark:bg-slate-800 border rounded-xl p-4 shadow-sm transition-all duration-200 ${
-                            message.typing
-                              ? "border-blue-300 dark:border-blue-700 animate-pulse"
-                              : message.streaming
-                              ? "border-purple-300 dark:border-purple-700 streaming-bubble"
-                              : "border-slate-200 dark:border-slate-700"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 mb-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className={agents.find((a) => a.id === message.agent)?.color}>
-                                <Bot className="h-4 w-4 text-white" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-sm">
-                                  {agents.find((a) => a.id === message.agent)?.teamMember}
-                                </span>
-                                {activeAgents.includes(message.agent || "") && (
-                                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                                    <Activity className="h-2 w-2 mr-1" />
-                                    Active
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="text-xs text-slate-500">{message.timestamp.toLocaleTimeString()}</span>
-                            </div>
-                            {!message.typing && !message.streaming && (
-                              <MessageActions
-                                message={{
-                                  id: message.id,
-                                  role: 'assistant',
-                                  content: message.content,
-                                }}
-                                onCopy={handleCopyMessage}
-                                onRegenerate={handleRegenerateMessage}
-                                onDelete={handleDeleteMessage}
-                                onShare={handleShareMessage}
-                                onFeedback={handleMessageFeedback}
-                              />
-                            )}
-                          </div>
-                          <div className="text-sm whitespace-pre-wrap text-slate-700 dark:text-slate-300 leading-relaxed">
-                            {message.typing ? (
-                              <div className="flex items-center gap-2 text-blue-600">
-                                <div className="flex gap-1">
-                                  <div
-                                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                                    style={{ animationDelay: "0ms" }}
-                                  />
-                                  <div
-                                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                                    style={{ animationDelay: "150ms" }}
-                                  />
-                                  <div
-                                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                                    style={{ animationDelay: "300ms" }}
-                                  />
-                                </div>
-                                {message.content}
-                              </div>
-                            ) : message.streaming ? (
-                              <span>
-                                {message.content}
-                                <span className="inline-block w-0.5 h-4 bg-purple-500 ml-0.5 animate-pulse align-text-bottom" />
-                              </span>
-                            ) : (
-                              message.content
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
-
-            {/* Chat Input - Only show after task has started */}
-            {currentConversationId && (
-              <div className="border-t p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <div className="flex flex-col gap-3">
-                  {/* Target Selection */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Send to:</span>
-                    <select
-                      value={selectedTarget}
-                      onChange={(e) => setSelectedTarget(e.target.value)}
-                      className="text-xs px-2 py-1 border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800"
-                    >
-                      <option value="all">All Agents</option>
-                      {agents.filter(agent => agent.enabled).map(agent => (
-                        <option key={agent.id} value={agent.id}>
-                          {agent.teamMember}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Message Input */}
-                  <div className="flex gap-2">
-                    <Input
-                      ref={chatInputRef}
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder="Continue the conversation, ask questions, or provide additional guidance..."
-                      className="flex-1 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault()
-                          sendFollowUpMessage()
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={sendFollowUpMessage}
-                      disabled={!chatInput.trim()}
-                      size="sm"
-                      className="bg-blue-500 hover:bg-blue-600"
-                    >
-                      Send
-                    </Button>
-                  </div>
-
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    💡 You can now chat with your agents in real-time! Ask follow-up questions, provide clarifications, or discuss specific aspects of the task.
-                  </div>
+        {/* ── Right Sidebar — Agent Registry ──────────────────────────────── */}
+        <aside
+          className="fixed right-0 top-0 pt-16 h-full flex flex-col z-40"
+          style={{ width: 260, background: "#060e20", borderLeft: "1px solid rgba(64,72,93,0.1)", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+        >
+          {/* Header */}
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <div className="text-sm font-bold" style={{ color: "#dee5ff" }}>Agent Registry</div>
+                <div className="text-[10px]" style={{ color: "#6d758c" }}>
+                  {enabledCount} Active Instance{enabledCount !== 1 ? "s" : ""}
                 </div>
               </div>
-            )}
+              <span
+                className="material-symbols-outlined text-lg animate-pulse"
+                style={{ color: "#4edea3", fontVariationSettings: "'FILL' 1" }}
+              >
+                shield
+              </span>
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* Agent list */}
+          <nav className="flex-1 space-y-1 mt-2 overflow-y-auto">
+            {agents.map((agent) => {
+              const meta = getAgentMeta(agent.id)
+              const isActive = agent.status === "active" || agent.status === "thinking"
+              return (
+                <div
+                  key={agent.id}
+                  className="pl-4 py-4 flex items-center justify-between pr-4 cursor-pointer transition-colors"
+                  style={{
+                    color: agent.enabled ? meta.color : "#40485d",
+                    background: isActive ? `${meta.color}10` : "transparent",
+                    borderRadius: isActive ? "0 0.5rem 0.5rem 0" : "0",
+                    marginLeft: isActive ? 8 : 0,
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-lg">{meta.icon}</span>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-xs">{meta.label}</span>
+                      <span className="text-[9px]" style={{ color: agent.enabled ? `${meta.color}70` : "#6d758c" }}>
+                        {agent.status === "thinking" ? "thinking…" : agent.status === "active" ? "generating…" : meta.role}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className="w-2 h-2 rounded-full transition-all"
+                    style={{
+                      background: agent.status === "active" ? meta.color : agent.status === "thinking" ? "#FFBF00" : agent.enabled ? "transparent" : "transparent",
+                      border: (!agent.enabled || agent.status === "online") ? `1px solid ${agent.enabled ? meta.color : "#40485d"}` : "none",
+                      boxShadow: isActive ? `0 0 8px ${meta.color}80` : agent.status === "thinking" ? "0 0 8px rgba(255,191,0,0.6)" : "none",
+                      animation: agent.status === "thinking" ? "pulse 1s ease-in-out infinite" : "none",
+                    }}
+                  />
+                </div>
+              )
+            })}
+
+            {/* Manager */}
+            <div
+              className="pl-6 py-4 flex items-center justify-between pr-4"
+              style={{ color: "#40485d" }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg">shield</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-xs">Manager</span>
+                  <span className="text-[9px]" style={{ color: "#6d758c" }}>Safety Gate</span>
+                </div>
+              </div>
+              <div className="w-2 h-2 rounded-full" style={{ border: "1px solid #40485d" }} />
+            </div>
+          </nav>
+
+          {/* Metrics */}
+          <div className="p-6">
+            <div
+              className="rounded-xl p-4"
+              style={{ background: "#0f1930", border: "1px solid rgba(64,72,93,0.1)" }}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] uppercase font-bold" style={{ color: "#6d758c" }}>Compute Load</span>
+                <span className="text-[10px] font-mono" style={{ color: "#4edea3" }}>
+                  {isProcessing ? "RUNNING" : `${enabledCount * 6}%`}
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "#192540" }}>
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: isProcessing ? "68%" : `${enabledCount * 6}%`,
+                    background: "#4edea3",
+                    boxShadow: "0 0 8px rgba(78,222,163,0.4)",
+                  }}
+                />
+              </div>
+              <div className="mt-4 flex justify-between items-center">
+                <span className="text-[10px] uppercase font-bold" style={{ color: "#6d758c" }}>Status</span>
+                <span className="text-[10px] font-mono" style={{ color: "#78b0ff" }}>
+                  {isConnected ? "ONLINE" : "OFFLINE"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </main>
 
       {/* Keyboard Shortcuts Dialog */}
-      <KeyboardShortcutsDialog
-        open={showShortcutsDialog}
-        onOpenChange={setShowShortcutsDialog}
-      />
+      <KeyboardShortcutsDialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog} />
     </div>
   )
 }

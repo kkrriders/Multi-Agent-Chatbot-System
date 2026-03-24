@@ -20,7 +20,7 @@ const fs   = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
-const { generateResponse } = require('../shared/ollama');
+const { generateResponse, generateResponseJson } = require('../shared/ollama');
 
 const DATASET    = path.join(__dirname, '../../tests/evals/dataset.jsonl');
 const REPORT_DIR = path.join(__dirname, '../../logs');
@@ -41,16 +41,14 @@ async function judgeResponse(question, expected, actual) {
     `Question: ${question}\n` +
     `Expected answer: ${expected}\n` +
     `Actual answer: ${actual}\n\n` +
-    `Score the actual answer on a scale from 0 to 10 based on accuracy, ` +
-    `completeness, and conciseness compared to the expected answer.\n` +
-    `Respond with ONLY a JSON object: {"score": <integer 0-10>, "reason": "<one sentence>"}`;
+    `Score the actual answer from 0 to 10 based on accuracy, completeness, and conciseness.\n` +
+    `Respond ONLY with valid JSON: {"score": <integer 0-10>, "reason": "<one sentence>"}`;
 
   try {
-    const raw  = await generateResponse(JUDGE_MODEL, prompt, { temperature: 0.1, num_predict: 120 });
-    const json = JSON.parse((raw.match(/\{[\s\S]*?\}/) || ['{}'])[0]);
+    const result = await generateResponseJson(JUDGE_MODEL, prompt, { temperature: 0.1, num_predict: 150 });
     return {
-      score:  Math.min(10, Math.max(0, Math.round(Number(json.score) || 0))),
-      reason: String(json.reason || '').slice(0, 300),
+      score:  Math.min(10, Math.max(0, Math.round(Number(result.score) || 0))),
+      reason: String(result.reason || '').slice(0, 300),
     };
   } catch (err) {
     return { score: 0, reason: `Judge error: ${err.message}` };
@@ -95,6 +93,30 @@ async function runEvals() {
     const { question, expected, category = 'general' } = item;
     if (!question || !expected) {
       console.warn(`Skipping line ${i + 1}: missing question or expected`);
+      continue;
+    }
+
+    // Routing-only tests: verify a question goes to the expected agent/model
+    if (category === 'routing') {
+      const { routeModel } = require('../shared/modelRouter');
+      const { model: routedModel } = routeModel(question);
+      const passed = item.expected_model
+        ? routedModel === item.expected_model
+        : true;
+      const score = passed ? 10 : 0;
+      const reason = passed
+        ? `Correctly routed to ${routedModel}`
+        : `Expected ${item.expected_model}, got ${routedModel}`;
+
+      totalScore += score;
+      evaluated++;
+      process.stdout.write(` [${score}/10] routing\n`);
+
+      reportLines.push(JSON.stringify({
+        index: i + 1, category, question,
+        expected: item.expected_model, actual: routedModel,
+        score, reason, timestamp: new Date().toISOString(),
+      }));
       continue;
     }
 

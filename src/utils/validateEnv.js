@@ -49,6 +49,14 @@ const REQUIRED = [
       return null;
     },
   },
+  {
+    key: 'GROQ_API_KEY',
+    validate(val) {
+      if (!val.startsWith('gsk_')) return 'must be a valid Groq API key (starts with gsk_)';
+      if (val.length < 20) return 'appears too short — check your Groq API key';
+      return null;
+    },
+  },
 ];
 
 // Optional — warn when missing but don't abort startup

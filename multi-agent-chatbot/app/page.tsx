@@ -1,298 +1,434 @@
-"use client"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Bot, Sparkles, Zap, Users, Shield, Globe, Check } from "lucide-react"
 import Link from "next/link"
+
+const features = [
+  { icon: "hub",          color: "#78b0ff", title: "Multi-Agent Collaboration",  desc: "Multiple intelligence nodes work in parallel on your tasks, each contributing unique expertise and perspective." },
+  { icon: "bolt",         color: "#4edea3", title: "Real-Time Streaming",        desc: "Watch agents generate responses token-by-token via WebSocket. See the thinking process unfold live." },
+  { icon: "auto_awesome", color: "#FFBF00", title: "Intelligent Model Routing",  desc: "Tasks auto-route to the best model — LLaMA3, Mixtral, Gemma2, or LLaMA3-70b — based on query type." },
+  { icon: "shield",       color: "#d0bcff", title: "Secure by Default",          desc: "JWT auth, HMAC-signed agent calls, LLM-based content moderation, and circuit breakers on every node." },
+  { icon: "schema",       color: "#78b0ff", title: "Custom Agent Teams",         desc: "Define system prompts per agent. Use pre-built Coding, Research, Business, or Creative team templates." },
+  { icon: "memory",       color: "#4edea3", title: "Persistent Context",         desc: "Conversation history in MongoDB with Jaccard-similarity memory retrieval keeps agents contextually aware." },
+]
+
+const steps = [
+  { num: "01", icon: "manage_accounts", color: "#78b0ff", title: "Configure Your Nodes",   desc: "Enable agents and assign specialized system prompts or pick a pre-built team template." },
+  { num: "02", icon: "terminal",        color: "#4edea3", title: "Deploy Your Task",        desc: "Describe your objective. The manager node routes work to the most capable agents automatically." },
+  { num: "03", icon: "stream",          color: "#d0bcff", title: "Watch Them Execute",      desc: "Agents collaborate in real-time. Follow each response streaming live to the unified workspace." },
+]
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                <Bot className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Multi-Agent AI
+    <div
+      className="min-h-screen"
+      style={{ background: "#060e20", color: "#dee5ff", fontFamily: "var(--font-inter), Inter, sans-serif" }}
+    >
+      {/* ── Navigation ───────────────────────────────────────────────────── */}
+      <nav
+        className="sticky top-0 z-50 w-full"
+        style={{ background: "rgba(6,14,32,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(64,72,93,0.2)" }}
+      >
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center"
+              style={{ background: "rgba(78,222,163,0.15)", border: "1px solid rgba(78,222,163,0.3)" }}
+            >
+              <span className="material-symbols-outlined text-xl" style={{ color: "#4edea3", fontVariationSettings: "'FILL' 1" }}>
+                deployed_code
               </span>
             </div>
-            <div className="hidden md:flex items-center gap-6">
-              <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Features
-              </a>
-              <a href="#how-it-works" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                How It Works
-              </a>
-              <a href="#pricing" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Pricing
-              </a>
+            <div>
+              <div className="text-base font-black tracking-tighter uppercase leading-none" style={{ color: "#dee5ff" }}>
+                Neural Workspace
+              </div>
+              <div
+                className="text-[9px] uppercase tracking-[0.3em]"
+                style={{ color: "rgba(78,222,163,0.6)", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+              >
+                Synthetic Architect
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href="/login">
-                <Button variant="ghost" className="text-slate-700 dark:text-slate-300">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+          </div>
+
+          {/* Links */}
+          <div className="hidden md:flex items-center gap-8">
+            {[["#features", "Features"], ["#how-it-works", "How It Works"], ["#models", "Models"]].map(([href, label]) => (
+              <a
+                key={label}
+                href={href}
+                className="text-sm font-medium transition-colors hover:text-[#78b0ff]"
+                style={{ color: "#6d758c" }}
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              style={{ color: "#a3aac4" }}
+            >
+              Login
+            </Link>
+            <Link
+              href="/signup"
+              className="flex items-center gap-2 text-sm font-bold px-5 py-2 rounded-xl transition-all active:scale-95"
+              style={{ background: "#4edea3", color: "#003824", boxShadow: "0 4px 20px rgba(78,222,163,0.2)" }}
+            >
+              Get Access
+              <span className="material-symbols-outlined text-base">arrow_forward</span>
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-6 py-20 md:py-32">
-        <div className="text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-950 rounded-full mb-6">
-            <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-              Powered by Advanced AI Models
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            style={{
+              position: "absolute", inset: 0, opacity: 0.025,
+              backgroundImage: "radial-gradient(#4edea3 1px, transparent 1px)",
+              backgroundSize: "28px 28px",
+            }}
+          />
+          <div style={{ position: "absolute", top: "-10%", right: "-5%", width: "50%", height: "60%", background: "rgba(120,176,255,0.06)", filter: "blur(120px)", borderRadius: "50%" }} />
+          <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "45%", height: "55%", background: "rgba(78,222,163,0.06)", filter: "blur(120px)", borderRadius: "50%" }} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-24 md:py-36 relative z-10 text-center">
+          {/* Status badge */}
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
+            style={{ background: "rgba(78,222,163,0.08)", border: "1px solid rgba(78,222,163,0.2)" }}
+          >
+            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4edea3" }} />
+            <span
+              className="text-[10px] uppercase tracking-wider font-bold"
+              style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              Groq-Powered · 4 Specialized Nodes · Real-Time Streaming
             </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Collaborate with AI Agents Like Never Before
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-[1.05]" style={{ color: "#dee5ff" }}>
+            Orchestrate AI Agents <br />
+            <span style={{ color: "#78b0ff" }}>at Neural Speed</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-            Harness the power of multiple specialized AI agents working together to solve complex problems,
-            generate creative solutions, and accelerate your workflow.
+          <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: "#6d758c" }}>
+            Deploy specialized intelligence nodes — code, analysis, creative, general — that collaborate in real-time to tackle any problem you throw at them.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Link href="/signup">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all duration-200 text-lg px-8 py-6">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <Link
+              href="/signup"
+              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all active:scale-95 text-base"
+              style={{ background: "#4edea3", color: "#003824", boxShadow: "0 8px 30px rgba(78,222,163,0.2)" }}
+            >
+              Initialize Workspace
+              <span className="material-symbols-outlined">rocket_launch</span>
             </Link>
-            <Link href="/chat">
-              <Button size="lg" variant="outline" className="border-2 border-slate-300 dark:border-slate-700 text-lg px-8 py-6 hover:bg-slate-100 dark:hover:bg-slate-800">
-                Try Demo
-              </Button>
-            </Link>
-          </div>
-
-          <div className="flex items-center justify-center gap-8 text-sm text-slate-600 dark:text-slate-400">
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-500" />
-              <span>No credit card required</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-500" />
-              <span>14-day free trial</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white">
-              Powerful Features for Modern Teams
-            </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Everything you need to build, collaborate, and innovate with AI
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 border border-slate-200 dark:border-slate-700">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl w-fit mb-4">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Multi-Agent Collaboration</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Multiple AI agents work together on your tasks, each bringing unique perspectives and expertise.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 border border-slate-200 dark:border-slate-700">
-              <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl w-fit mb-4">
-                <Zap className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Real-Time Responses</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Get instant feedback and see agents collaborating in real-time through WebSocket technology.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 border border-slate-200 dark:border-slate-700">
-              <div className="p-3 bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl w-fit mb-4">
-                <Bot className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Specialized AI Models</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Choose from LLaMA3, Mistral, Phi3, and Qwen2.5-Coder for different expertise areas.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 border border-slate-200 dark:border-slate-700">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl w-fit mb-4">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Secure & Private</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Your data stays protected with enterprise-grade security and content moderation.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 border border-slate-200 dark:border-slate-700">
-              <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl w-fit mb-4">
-                <Globe className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Custom Teams</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Create specialized teams for coding, research, business, or creative projects.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 border border-slate-200 dark:border-slate-700">
-              <div className="p-3 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-xl w-fit mb-4">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Smart Memory</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Agents remember context and learn from conversations for better assistance over time.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white">
-              How It Works
-            </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Get started in three simple steps
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
-                1
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Configure Your Team</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Select AI agents and customize their roles to match your project needs
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
-                2
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Describe Your Task</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                Tell the AI what you want to accomplish - no technical expertise required
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
-                3
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Watch Them Collaborate</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                See agents work together in real-time and get comprehensive solutions
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-            Ready to Transform Your Workflow?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of teams already using Multi-Agent AI to accelerate their projects
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/signup">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl text-lg px-8 py-6">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/chat">
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6">
-                View Demo
-              </Button>
+            <Link
+              href="/chat"
+              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all text-base"
+              style={{ background: "rgba(120,176,255,0.1)", color: "#78b0ff", border: "1px solid rgba(120,176,255,0.25)" }}
+            >
+              <span className="material-symbols-outlined">play_circle</span>
+              Live Demo
             </Link>
           </div>
-        </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                  <Bot className="h-5 w-5 text-white" />
+          {/* Stat row */}
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            {[
+              { val: "4",      unit: "Agent Nodes",         color: "#78b0ff" },
+              { val: "<2s",    unit: "Avg Response",        color: "#4edea3" },
+              { val: "32k",    unit: "Context Window",      color: "#d0bcff" },
+              { val: "100%",   unit: "Open Source Models",  color: "#FFBF00" },
+            ].map(({ val, unit, color }) => (
+              <div key={unit} className="flex flex-col items-center">
+                <div className="text-2xl font-black" style={{ color }}>{val}</div>
+                <div
+                  className="text-[10px] uppercase tracking-widest"
+                  style={{ color: "#40485d", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                >
+                  {unit}
                 </div>
-                <span className="font-bold text-slate-900 dark:text-white">Multi-Agent AI</span>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Collaborative AI that works together to solve complex problems.
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features ─────────────────────────────────────────────────────── */}
+      <section id="features" className="py-24" style={{ background: "rgba(9,19,40,0.5)" }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div
+              className="text-[10px] uppercase tracking-widest font-bold mb-4"
+              style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              System Capabilities
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: "#dee5ff" }}>
+              Built for Serious Workflows
+            </h2>
+            <p className="text-lg max-w-xl mx-auto" style={{ color: "#6d758c" }}>
+              Every component engineered for reliability, speed, and intelligence at scale.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {features.map(({ icon, color, title, desc }) => (
+              <div
+                key={title}
+                className="p-6 rounded-xl transition-all duration-200 group"
+                style={{
+                  background: "rgba(15,25,48,0.6)",
+                  border: "1px solid rgba(64,72,93,0.2)",
+                  backdropFilter: "blur(12px)",
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+                  style={{ background: `${color}15`, border: `1px solid ${color}25` }}
+                >
+                  <span className="material-symbols-outlined" style={{ color }}>{icon}</span>
+                </div>
+                <h3 className="text-base font-bold mb-2" style={{ color: "#dee5ff" }}>{title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#6d758c" }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Models ───────────────────────────────────────────────────────── */}
+      <section id="models" className="py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div
+              className="text-[10px] uppercase tracking-widest font-bold mb-4"
+              style={{ color: "#78b0ff", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              Agent Registry
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: "#dee5ff" }}>
+              Four Specialized Nodes
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: "psychology",    color: "#78b0ff", label: "Llama3",     model: "llama3-8b-8192",     role: "General Logic",   desc: "Fast, versatile reasoning for everyday tasks and conversation." },
+              { icon: "storm",         color: "#4edea3", label: "Mixtral",    model: "mixtral-8x7b-32768", role: "Analysis",        desc: "32k context window. Deep analysis, research, and long-form reasoning." },
+              { icon: "blur_on",       color: "#d0bcff", label: "Gemma2",     model: "gemma2-9b-it",       role: "Creative",        desc: "Open-ended generation, storytelling, and imaginative problem solving." },
+              { icon: "auto_awesome",  color: "#FFBF00", label: "Llama3-70b", model: "llama3-70b-8192",    role: "Developer",       desc: "Strongest code generation. Architecture design, debugging, algorithms." },
+            ].map(({ icon, color, label, model, role, desc }) => (
+              <div
+                key={label}
+                className="p-5 rounded-xl"
+                style={{ background: "rgba(15,25,48,0.6)", border: `1px solid ${color}20` }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
+                    style={{ background: `${color}15`, border: `1px solid ${color}30` }}
+                  >
+                    <span className="material-symbols-outlined text-base" style={{ color }}>{icon}</span>
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold" style={{ color }}>{label}</div>
+                    <div
+                      className="text-[9px] uppercase tracking-widest"
+                      style={{ color: `${color}70`, fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                    >
+                      {role}
+                    </div>
+                  </div>
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}80` }} />
+                </div>
+                <div
+                  className="text-[10px] px-2 py-1 rounded mb-3 font-mono"
+                  style={{ background: `${color}08`, color: `${color}90`, fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                >
+                  {model}
+                </div>
+                <p className="text-xs leading-relaxed" style={{ color: "#6d758c" }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How It Works ─────────────────────────────────────────────────── */}
+      <section id="how-it-works" className="py-24" style={{ background: "rgba(9,19,40,0.4)" }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div
+              className="text-[10px] uppercase tracking-widest font-bold mb-4"
+              style={{ color: "#d0bcff", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              Deployment Protocol
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: "#dee5ff" }}>
+              Three Steps to Launch
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
+            {/* Connector line */}
+            <div
+              className="absolute hidden md:block"
+              style={{ top: 40, left: "16.67%", right: "16.67%", height: 1, background: "linear-gradient(to right, rgba(120,176,255,0.2), rgba(78,222,163,0.2), rgba(208,188,255,0.2))" }}
+            />
+
+            {steps.map(({ num, icon, color, title, desc }) => (
+              <div key={num} className="flex flex-col items-center text-center relative">
+                <div
+                  className="w-20 h-20 rounded-2xl flex flex-col items-center justify-center mb-6 relative z-10"
+                  style={{ background: `${color}12`, border: `1px solid ${color}30` }}
+                >
+                  <span className="material-symbols-outlined text-2xl mb-1" style={{ color }}>{icon}</span>
+                  <span
+                    className="text-[9px] font-black"
+                    style={{ color: `${color}60`, fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                  >
+                    {num}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold mb-3" style={{ color: "#dee5ff" }}>{title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#6d758c" }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(78,222,163,0.06) 0%, transparent 70%)" }} />
+          <div style={{ position: "absolute", inset: 0, opacity: 0.02, backgroundImage: "radial-gradient(#4edea3 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+        </div>
+
+        <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
+            style={{ background: "rgba(78,222,163,0.08)", border: "1px solid rgba(78,222,163,0.2)" }}
+          >
+            <span className="material-symbols-outlined text-sm" style={{ color: "#4edea3" }}>verified</span>
+            <span
+              className="text-[10px] uppercase tracking-wider font-bold"
+              style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              Free to deploy · No GPU required · Groq-powered
+            </span>
+          </div>
+
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6" style={{ color: "#dee5ff" }}>
+            Ready to Command <br />
+            <span style={{ color: "#4edea3" }}>Your Intelligence Network?</span>
+          </h2>
+
+          <p className="text-lg mb-10" style={{ color: "#6d758c" }}>
+            Sign up, add your Groq API key, and have multi-agent collaboration running in under 5 minutes.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/signup"
+              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all active:scale-95 text-base"
+              style={{ background: "#4edea3", color: "#003824", boxShadow: "0 8px 30px rgba(78,222,163,0.2)" }}
+            >
+              Initialize Deployment
+              <span className="material-symbols-outlined">terminal</span>
+            </Link>
+            <Link
+              href="/login"
+              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all text-base"
+              style={{ background: "transparent", color: "#a3aac4", border: "1px solid rgba(64,72,93,0.4)" }}
+            >
+              Already have access? Login
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer style={{ background: "#070e1e", borderTop: "1px solid rgba(64,72,93,0.15)" }}>
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: "rgba(78,222,163,0.15)", border: "1px solid rgba(78,222,163,0.3)" }}
+                >
+                  <span className="material-symbols-outlined text-base" style={{ color: "#4edea3", fontVariationSettings: "'FILL' 1" }}>deployed_code</span>
+                </div>
+                <span className="font-black tracking-tighter uppercase text-sm" style={{ color: "#dee5ff" }}>Neural Workspace</span>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: "#40485d" }}>
+                Multi-agent AI orchestration. Collaborative intelligence nodes working in real-time.
               </p>
             </div>
 
-            <div>
-              <h4 className="font-bold mb-3 text-slate-900 dark:text-white">Product</h4>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><a href="#" className="hover:text-blue-600">Features</a></li>
-                <li><a href="#" className="hover:text-blue-600">Pricing</a></li>
-                <li><a href="#" className="hover:text-blue-600">Documentation</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-3 text-slate-900 dark:text-white">Company</h4>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><a href="#" className="hover:text-blue-600">About</a></li>
-                <li><a href="#" className="hover:text-blue-600">Blog</a></li>
-                <li><a href="#" className="hover:text-blue-600">Careers</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-3 text-slate-900 dark:text-white">Legal</h4>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><a href="#" className="hover:text-blue-600">Privacy</a></li>
-                <li><a href="#" className="hover:text-blue-600">Terms</a></li>
-                <li><a href="#" className="hover:text-blue-600">Security</a></li>
-              </ul>
-            </div>
+            {/* Links */}
+            {[
+              { heading: "Platform", links: ["Features", "Models", "Documentation", "Changelog"] },
+              { heading: "Company",  links: ["About", "Blog", "Careers", "Contact"] },
+              { heading: "Legal",    links: ["Privacy Policy", "Terms of Service", "Security", "Support"] },
+            ].map(({ heading, links }) => (
+              <div key={heading}>
+                <h4
+                  className="font-bold mb-4 text-xs uppercase tracking-widest"
+                  style={{ color: "#a3aac4", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                >
+                  {heading}
+                </h4>
+                <ul className="space-y-2">
+                  {links.map((link) => (
+                    <li key={link}>
+                      <a
+                        href="#"
+                        className="text-xs transition-colors hover:text-[#78b0ff]"
+                        style={{ color: "#40485d" }}
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
-          <div className="pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-sm text-slate-600 dark:text-slate-400">
-            <p>© 2025 Multi-Agent AI. All rights reserved.</p>
+          <div
+            className="pt-6 flex flex-col md:flex-row justify-between items-center gap-3"
+            style={{ borderTop: "1px solid rgba(64,72,93,0.15)" }}
+          >
+            <span
+              className="text-[10px] uppercase tracking-[0.05em]"
+              style={{ color: "#40485d", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+            >
+              © 2024 Neural Workspace. Tactical Intelligence Systems v4.2.0
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4edea3" }} />
+              <span
+                className="text-[10px] uppercase tracking-widest"
+                style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+              >
+                All Systems Operational
+              </span>
+            </div>
           </div>
         </div>
       </footer>
