@@ -2,10 +2,12 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/tests-154%20passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-34%20unit%20passing-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/docker-compose-blue)](https://docs.docker.com/compose/)
 
-A multi-agent AI system that routes user messages to specialized local LLMs — Llama3, Mistral, Phi3, and Qwen — running entirely on your hardware via Ollama. Includes JWT authentication, circuit breakers, Prometheus metrics, semantic memory, prompt versioning, LLM tracing, and a full Docker Compose deployment.
+A multi-agent AI system that routes user messages to specialized LLMs via **Groq** — no GPU, no model downloads, no local inference required. Get a free API key, set one env var, and start chatting.
+
+Agents specialise by task type (code, analysis, creative, general) and communicate over HMAC-signed HTTP. The stack includes JWT authentication, circuit breakers, Prometheus metrics, semantic memory, prompt versioning, LLM tracing, and a full Docker Compose deployment.
 
 ---
 
@@ -29,14 +31,14 @@ A multi-agent AI system that routes user messages to specialized local LLMs — 
 
 | Category | Highlights |
 |----------|------------|
+| **LLM Backend** | Groq free-tier cloud inference — no GPU or local model downloads needed |
 | **Security** | JWT auth, HMAC-signed agent calls, Redis-backed rate limiting, append-only audit log |
 | **Resilience** | Per-agent circuit breakers, exponential backoff with full jitter, graceful shutdown |
-| **Routing** | Content-aware model selection (code → Qwen, analytical → Mistral, creative → Phi3, general → Llama3) |
+| **Routing** | Content-aware model selection (code → Llama3-70b, analysis → Mixtral, creative → Gemma2, general → Llama3-8b) |
 | **Observability** | Prometheus metrics, JSONL LLM traces, optional OpenTelemetry + Jaeger |
-| **AI Features** | Semantic memory with vector embeddings, conversation summarization, token usage tracking, prompt versioning |
-| **Evaluation** | LLM-as-judge eval harness with `pass@k` metrics |
+| **AI Features** | Semantic memory with cosine/Jaccard similarity, conversation summarisation, token usage tracking, prompt versioning |
+| **Evaluation** | LLM-as-judge eval harness + routing validation tests |
 | **Deployment** | Full Docker Compose stack — MongoDB, Redis, manager, 4 agents, Next.js frontend, optional Jaeger |
-| **Tests** | 154 tests: 32 unit + 122 e2e, all passing |
 
 ---
 
@@ -55,14 +57,15 @@ A multi-agent AI system that routes user messages to specialized local LLMs — 
 └──────┬───────────┬───────────┬───────────┬───────────────────┘
        │           │           │           │  HMAC-signed HTTP
   ┌────▼───┐  ┌───▼────┐  ┌───▼────┐  ┌───▼────┐
-  │ Llama3 │  │Mistral │  │  Phi3  │  │  Qwen  │
+  │ agent-1│  │ agent-2│  │ agent-3│  │ agent-4│
   │ :3005  │  │ :3006  │  │ :3007  │  │ :3008  │
   │general │  │analyt. │  │creativ.│  │  code  │
   └────────┘  └────────┘  └────────┘  └────────┘
        │           │           │           │
 ┌──────▼───────────────────────────────────▼───────────────────┐
-│                    Ollama  :11434                            │
-│        llama3 · mistral · phi3 · qwen2.5-coder              │
+│                    Groq Cloud API                            │
+│   llama3-8b · mixtral-8x7b · gemma2-9b · llama3-70b        │
+│   Each model has its own independent rate limit bucket      │
 └──────────────────────────────────────────────────────────────┘
 ┌──────────────────┐  ┌──────────────┐  ┌──────────────────────┐
 │  MongoDB  :27017 │  │ Redis  :6379 │  │ Jaeger  :16686       │
@@ -80,7 +83,8 @@ A multi-agent AI system that routes user messages to specialized local LLMs — 
 ```bash
 git clone https://github.com/your-username/multi-agent-chatbot-system.git
 cd multi-agent-chatbot-system
-cp .env.example .env       # set JWT_SECRET and AGENT_SHARED_SECRET
+cp .env.example .env
+# Edit .env — set JWT_SECRET, AGENT_SHARED_SECRET, GROQ_API_KEY
 docker compose up -d
 ```
 
@@ -99,26 +103,19 @@ docker compose --profile tracing up -d
 
 ### Option B — Local Development
 
-**Prerequisites:** Node.js 18+, MongoDB, Redis, Ollama
+**Prerequisites:** Node.js 18+, MongoDB, Redis, a free [Groq API key](https://console.groq.com)
 
 ```bash
-# 1. Pull models
-ollama pull llama3:latest
-ollama pull mistral:latest
-ollama pull phi3:latest
-ollama pull qwen2.5-coder:latest
-
-# 2. Install dependencies
+# 1. Install dependencies
 npm install
 cd multi-agent-chatbot && npm install && cd ..
 
-# 3. Configure environment
+# 2. Configure environment
 cp .env.example .env
-# Edit .env — set JWT_SECRET, AGENT_SHARED_SECRET, MONGODB_URI, REDIS_URL
+# Edit .env — set JWT_SECRET, AGENT_SHARED_SECRET, MONGODB_URI, GROQ_API_KEY
 
-# 4. Start all services
-npm start                    # backend only (start-stable.js)
-npm run dev                  # backend services with colored output
+# 3. Start all services
+npm run dev                  # backend services with coloured output
 npm run start-with-frontend  # backend + Next.js frontend
 ```
 
@@ -133,17 +130,17 @@ Copy `.env.example` for the full annotated list. Key variables:
 | `JWT_SECRET` | Yes | Min 32 chars — signs user JWTs |
 | `AGENT_SHARED_SECRET` | Yes | Min 32 chars — HMAC signs manager→agent calls |
 | `MONGODB_URI` | Yes | MongoDB connection string |
-| `REDIS_URL` | Yes | Redis connection string |
-| `OLLAMA_API_BASE` | Yes | Ollama base URL (default: `http://localhost:11434/api`) |
+| `GROQ_API_KEY` | Yes | Groq API key — starts with `gsk_` (free at console.groq.com) |
+| `REDIS_URL` | No | Redis URL — falls back to in-memory rate limiting if unset |
+| `FRONTEND_URL` | Yes | Allowed CORS origin (default: `http://localhost:3002`) |
 | `MANAGER_PORT` | No | Default: `3000` |
 | `AGENT_1_PORT` — `AGENT_4_PORT` | No | Defaults: `3005`–`3008` |
-| `AGENT_1_MODEL` — `AGENT_4_MODEL` | No | Model names (e.g. `llama3:latest`) |
+| `AGENT_1_MODEL` — `AGENT_4_MODEL` | No | Groq model IDs (see defaults in `.env.example`) |
 | `AGENT_1_URL` — `AGENT_4_URL` | Docker | Set automatically by `docker-compose.yml` |
 | `OTEL_ENABLED` | No | `true` to emit OpenTelemetry spans |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | No | OTLP receiver URL |
-| `OLLAMA_TIMEOUT` / `AGENT_TIMEOUT` | No | Request timeouts in ms (default: `180000`) |
 
-> **Startup aborts** if `JWT_SECRET` or `AGENT_SHARED_SECRET` are missing or shorter than 32 characters.
+> **Startup aborts** if `JWT_SECRET`, `AGENT_SHARED_SECRET`, or `GROQ_API_KEY` are missing or invalid.
 
 ---
 
@@ -220,14 +217,16 @@ socket.on('conversation-update', (msg) => console.log(msg));
 
 ### Content-Aware Model Routing
 
-Messages are automatically dispatched to the best-fit model:
+Messages are automatically dispatched to the best-fit Groq model. Each model has its own independent rate-limit bucket, so routing effectively multiplies total throughput.
 
-| Keywords | Model | Agent |
-|----------|-------|-------|
-| `code`, `debug`, `function`, `api`, `implement` | `qwen2.5-coder` | agent-qwen |
-| `analyze`, `research`, `compare`, `data`, `statistics` | `mistral` | agent-mistral |
-| `story`, `poem`, `creative`, `brainstorm`, `fiction` | `phi3` | agent-phi3 |
-| *(everything else)* | `llama3` | agent-llama3 |
+| Keywords | Model | Agent | Specialisation |
+|----------|-------|-------|----------------|
+| `code`, `debug`, `function`, `sql`, `implement`, `algorithm` | `llama3-70b-8192` | agent-4 | Code generation |
+| `analyze`, `research`, `compare`, `data`, `statistics` | `mixtral-8x7b-32768` | agent-2 | Analysis (32k context) |
+| `story`, `poem`, `creative`, `brainstorm`, `fiction` | `gemma2-9b-it` | agent-3 | Creative writing |
+| *(everything else)* | `llama3-8b-8192` | agent-1 | General purpose |
+
+All model defaults are overridable via `AGENT_{N}_MODEL` env vars — no code changes required.
 
 ### Circuit Breakers
 
@@ -239,29 +238,32 @@ Every LLM call is appended to `logs/llm-traces.jsonl`:
 
 ```json
 {
-  "timestamp": "2026-03-20T10:00:00.000Z",
-  "model": "qwen2.5-coder",
+  "timestamp": "2026-03-24T10:00:00.000Z",
+  "model": "llama3-70b-8192",
   "inputTokens": 142,
   "outputTokens": 87,
   "durationMs": 1240,
-  "agentId": "agent-qwen"
+  "agentId": "agent-4"
 }
 ```
 
 ### Semantic Memory
 
-Each agent stores user-specific memories with vector embeddings via Ollama `/api/embeddings`. Retrieval uses cosine similarity when embeddings are available, Jaccard similarity as fallback.
+Each agent stores user-specific memories. Retrieval uses cosine similarity when embeddings are available (requires an external embeddings API), with Jaccard similarity as automatic fallback.
 
 ### Token Usage Tracking
 
 ```http
 GET /api/conversations/:id/usage
-→ { "qwen2.5-coder": { "inputTokens": 450, "outputTokens": 210 }, ... }
+→ { "llama3-70b-8192": { "inputTokens": 450, "outputTokens": 210 }, ... }
 ```
 
 ### Eval Harness
 
-LLM-as-judge evaluation against `tests/evals/dataset.jsonl`:
+Automated evaluations against `tests/evals/dataset.jsonl` (18 pairs across three categories):
+
+- **routing** — verifies the model router selects the correct Groq model for a given query (no LLM call, runs instantly)
+- **quality** — LLM-as-judge scores agent answers 0–10 against expected answers
 
 ```bash
 npm run eval
@@ -280,21 +282,21 @@ Set `OTEL_ENABLED=true` to emit spans to any OTLP-compatible backend (Jaeger, Te
 ├── src/
 │   ├── agents/
 │   │   ├── manager/         # Central orchestrator: routing, auth, metrics
-│   │   ├── agent-llama3/    # General-purpose agent
-│   │   ├── agent-mistral/   # Analytical agent
-│   │   ├── agent-phi3/      # Creative agent
-│   │   └── agent-qwen/      # Code agent
+│   │   ├── agent-llama3/    # General-purpose agent (llama3-8b)
+│   │   ├── agent-mistral/   # Analytical agent (mixtral-8x7b)
+│   │   ├── agent-phi3/      # Creative agent (gemma2-9b)
+│   │   └── agent-qwen/      # Code agent (llama3-70b)
 │   ├── shared/
 │   │   ├── agent-base.js    # Base class: memory, streaming, HMAC verify
 │   │   ├── agent-config.js  # Prompt versioning cache
 │   │   ├── agentAuth.js     # HMAC-SHA256 sign/verify
 │   │   ├── circuitBreaker.js
 │   │   ├── llmTracer.js     # JSONL trace writer
-│   │   ├── memory.js        # Semantic memory + embeddings
-│   │   ├── modelRouter.js   # Content-aware model selection
-│   │   ├── ollama.js        # Ollama client + retry
+│   │   ├── memory.js        # Semantic memory + cosine/Jaccard similarity
+│   │   ├── modelRouter.js   # Content-aware Groq model selection
+│   │   ├── ollama.js        # Groq API client (same interface as previous Ollama client)
 │   │   ├── retry.js         # Full-jitter exponential backoff
-│   │   ├── summarizer.js    # Conversation summarization
+│   │   ├── summarizer.js    # Conversation summarisation
 │   │   └── tracing.js       # OpenTelemetry init
 │   ├── middleware/
 │   │   ├── auditLog.js      # Append-only audit.log
@@ -314,21 +316,22 @@ Set `OTEL_ENABLED=true` to emit spans to any OTLP-compatible backend (Jaeger, Te
 │   │   ├── database.js
 │   │   └── redis.js
 │   ├── scripts/
-│   │   └── evalHarness.js   # LLM-as-judge eval runner
+│   │   └── evalHarness.js   # LLM-as-judge + routing eval runner
 │   └── utils/
 │       ├── jwt.js
-│       └── validateEnv.js   # Startup validation for required secrets
+│       └── validateEnv.js   # Startup validation (JWT_SECRET, GROQ_API_KEY, etc.)
 ├── multi-agent-chatbot/     # Next.js 15 frontend
 │   └── app/chat/            # Chat UI with Socket.IO streaming
 ├── tests/
-│   ├── unit/                # 32 Jest unit tests
-│   ├── e2e/                 # 122 Jest e2e tests (supertest)
+│   ├── unit/                # 34 Jest unit tests
+│   ├── e2e/                 # Jest e2e tests (supertest)
 │   └── evals/
-│       └── dataset.jsonl    # 10 eval pairs for LLM-as-judge
+│       └── dataset.jsonl    # 18 eval pairs (8 routing + 10 quality)
 ├── logs/
 │   ├── audit.log
 │   ├── llm-traces.jsonl
 │   └── eval-report.jsonl
+├── DECISIONS.md             # Architectural decisions and tradeoffs
 ├── docker-compose.yml       # Full stack (MongoDB, Redis, agents, frontend, Jaeger)
 ├── Dockerfile               # Backend image
 ├── multi-agent-chatbot/Dockerfile  # Frontend 3-stage build
@@ -340,9 +343,8 @@ Set `OTEL_ENABLED=true` to emit spans to any OTLP-compatible backend (Jaeger, Te
 ## Testing
 
 ```bash
-npm test             # all 154 tests
-npm run test:unit    # 32 unit tests
-npm run test:e2e     # 122 e2e tests (auth, conversations, health, prompts)
+npm run test:unit    # 34 unit tests (Jest)
+npm run test:e2e     # e2e tests — auth, conversations, health, prompts
 npm run eval         # eval harness → logs/eval-report.jsonl
 ```
 
@@ -353,16 +355,20 @@ npm run eval         # eval harness → logs/eval-report.jsonl
 ### Adding a New Agent
 
 1. Copy `src/agents/agent-llama3/` → `src/agents/agent-{name}/`
-2. Set `this.model` and `this.agentName` in the constructor
+2. Set `this.model` (a Groq model ID) and `this.agentName` in the constructor
 3. Add port to `.env` and a service entry to `docker-compose.yml`
 4. Register the agent in `src/agents/manager/index.js`
 5. Add routing keywords to `src/shared/modelRouter.js` if needed
+
+### Swapping Models
+
+Change `AGENT_{N}_MODEL` in `.env` to any model available on your Groq plan. No code changes needed. See available models at [console.groq.com/docs/models](https://console.groq.com/docs/models).
 
 ---
 
 ## Security
 
-- `JWT_SECRET` and `AGENT_SHARED_SECRET` must be at least 32 characters — startup aborts if not
+- `JWT_SECRET`, `AGENT_SHARED_SECRET`, and `GROQ_API_KEY` are validated at startup — the process aborts if any are missing or malformed
 - All manager → agent HTTP calls are HMAC-SHA256 signed and verified on receipt
 - Rate limits: 5 req/15 min (auth endpoints), 30 req/min (messages), 10 req/hour (exports)
 - All authentication events are written to `logs/audit.log`
@@ -376,8 +382,7 @@ npm run eval         # eval harness → logs/eval-report.jsonl
 
 ## Acknowledgments
 
-- [Ollama](https://ollama.ai) — local LLM inference
+- [Groq](https://groq.com) — fast free-tier cloud inference
 - [Meta AI](https://ai.meta.com) — Llama models
-- [Mistral AI](https://mistral.ai) — Mistral models
-- [Microsoft](https://microsoft.com) — Phi-3 models
-- [Alibaba / Qwen Team](https://qwenlm.github.io) — Qwen models
+- [Mistral AI](https://mistral.ai) — Mixtral models
+- [Google DeepMind](https://deepmind.google) — Gemma models
