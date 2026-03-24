@@ -1,10 +1,18 @@
-{"category":"factual","question":"What is the capital of France?","expected":"Paris"}
-{"category":"math","question":"What is 17 multiplied by 13?","expected":"221"}
-{"category":"technical","question":"What does REST stand for in REST API?","expected":"Representational State Transfer"}
-{"category":"technical","question":"In JavaScript, what is the difference between == and ===?","expected":"== performs type coercion before comparison while === checks both value and type without coercion"}
-{"category":"technical","question":"What does the HTTP status code 429 mean?","expected":"Too Many Requests — the client has sent too many requests in a given time window"}
-{"category":"factual","question":"What are the four pillars of object-oriented programming?","expected":"Encapsulation, abstraction, inheritance, and polymorphism"}
-{"category":"technical","question":"What is a circuit breaker pattern in distributed systems?","expected":"A design pattern that detects failures and prevents an application from repeatedly trying an operation that is likely to fail, allowing it to recover gracefully"}
-{"category":"factual","question":"What does SQL stand for?","expected":"Structured Query Language"}
-{"category":"technical","question":"What is the purpose of an index in a database?","expected":"To speed up data retrieval by creating a separate data structure that allows the database to find rows without scanning the entire table"}
-{"category":"technical","question":"Explain what a JWT token is in one sentence.","expected":"A JSON Web Token is a compact, self-contained token that encodes claims as a signed JSON payload, allowing stateless authentication between services"}
+{"category":"routing","question":"write me a debounce function in JavaScript","expected_model":"llama3-70b-8192"}
+{"category":"routing","question":"debug this Python error: TypeError: 'NoneType' object is not subscriptable","expected_model":"llama3-70b-8192"}
+{"category":"routing","question":"implement a binary search algorithm","expected_model":"llama3-70b-8192"}
+{"category":"routing","question":"write a SQL query to find duplicate emails","expected_model":"llama3-70b-8192"}
+{"category":"routing","question":"analyze the pros and cons of microservices vs monoliths","expected_model":"mixtral-8x7b-32768"}
+{"category":"routing","question":"compare REST and GraphQL for a mobile app","expected_model":"mixtral-8x7b-32768"}
+{"category":"routing","question":"write a short story about a robot learning to paint","expected_model":"gemma2-9b-it"}
+{"category":"routing","question":"brainstorm 5 creative names for a coffee shop","expected_model":"gemma2-9b-it"}
+{"category":"quality","question":"What is a closure in JavaScript?","expected":"A closure is a function that retains access to variables from its outer lexical scope even after that outer function has returned."}
+{"category":"quality","question":"What does the HTTP status code 429 mean?","expected":"Too Many Requests — the client has sent too many requests in a given time window and is being rate limited."}
+{"category":"quality","question":"What is the difference between == and === in JavaScript?","expected":"== performs type coercion before comparison while === checks both value and type without coercion, making === the safer choice."}
+{"category":"quality","question":"What is a circuit breaker pattern in distributed systems?","expected":"A design pattern that detects failures and prevents an application from repeatedly trying an operation that is likely to fail, allowing it to recover gracefully."}
+{"category":"quality","question":"What does REST stand for?","expected":"Representational State Transfer — an architectural style for designing networked applications using stateless HTTP requests."}
+{"category":"quality","question":"What is the purpose of a database index?","expected":"To speed up data retrieval by creating a separate data structure that allows the database to find rows without scanning the entire table."}
+{"category":"quality","question":"Explain what a JWT is in one sentence.","expected":"A JSON Web Token is a compact, self-contained token that encodes signed claims as a JSON payload, enabling stateless authentication between services."}
+{"category":"quality","question":"What are the four pillars of object-oriented programming?","expected":"Encapsulation, abstraction, inheritance, and polymorphism."}
+{"category":"quality","question":"What is the difference between a process and a thread?","expected":"A process is an independent program with its own memory space; a thread is a lighter unit of execution that shares memory with other threads in the same process."}
+{"category":"quality","question":"What is a race condition?","expected":"A race condition occurs when two or more operations execute concurrently and the final outcome depends on the unpredictable order in which they complete."}

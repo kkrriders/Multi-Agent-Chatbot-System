@@ -1,12 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Bot, ArrowLeft, Eye, EyeOff, Github, Mail } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { setAuth } from "@/lib/auth"
@@ -18,10 +12,8 @@ export default function SignupPage() {
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -31,17 +23,15 @@ export default function SignupPage() {
     setError("")
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords don't match!")
+      setError("Access keys do not match")
       return
     }
-
     if (!agreedToTerms) {
-      setError("Please agree to the terms and conditions")
+      setError("You must confirm compliance with Security Protocols")
       return
     }
-
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters")
+      setError("Access key must be at least 6 characters")
       return
     }
 
@@ -49,11 +39,9 @@ export default function SignupPage() {
 
     try {
       const response = await fetch(`${API_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           fullName: formData.name,
           email: formData.email,
@@ -65,206 +53,467 @@ export default function SignupPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create account')
+        throw new Error(data.error || "Initialization failed")
       }
 
       if (data.data.token) {
         setAuth(data.data.token, data.data.user)
       }
 
-      // Redirect to chat
       router.push("/chat")
     } catch (err: any) {
-      setError(err.message || 'Failed to create account')
+      setError(err.message || "Initialization failed")
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const update = (field: string, value: string) =>
+    setFormData((prev) => ({ ...prev, [field]: value }))
+
+  const inputClass =
+    "w-full py-3.5 pl-12 pr-4 rounded-xl outline-none transition-all"
+  const inputStyle = {
+    background: "rgba(35,42,59,0.5)",
+    border: "1px solid rgba(66,71,84,0.3)",
+    color: "#dce2f9",
+    fontFamily: "var(--font-inter), Inter, sans-serif",
+  }
+  const onFocusInput = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = "#4edea3"
+    e.target.style.boxShadow = "0 0 0 1px rgba(78,222,163,0.2)"
+  }
+  const onBlurInput = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = "rgba(66,71,84,0.3)"
+    e.target.style.boxShadow = "none"
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex items-center justify-center p-4">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Back button */}
-        <Link href="/" className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-6">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Back to home</span>
-        </Link>
-
-        <Card className="border-slate-200 dark:border-slate-800 shadow-2xl">
-          <CardHeader className="space-y-1 text-center pb-6">
-            <div className="mx-auto p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl w-fit mb-4">
-              <Bot className="h-8 w-8 text-white" />
-            </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Create Account
-            </CardTitle>
-            <CardDescription className="text-base">
-              Get started with your free trial today
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSignup} className="space-y-4">
-              {error && (
-                <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  required
-                  className="h-11"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  required
-                  className="h-11"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Create a strong password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
-                    required
-                    className="h-11 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm your password"
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    required
-                    className="h-11 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-2 pt-2">
-                <Checkbox
-                  id="terms"
-                  checked={agreedToTerms}
-                  onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                />
-                <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed cursor-pointer">
-                  I agree to the{" "}
-                  <a href="#" className="text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a href="#" className="text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                    Privacy Policy
-                  </a>
-                </label>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating account..." : "Create Account"}
-              </Button>
-            </form>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-slate-950 px-2 text-slate-500">
-                  Or sign up with
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="h-11" type="button">
-                <Github className="mr-2 h-4 w-4" />
-                Github
-              </Button>
-              <Button variant="outline" className="h-11" type="button">
-                <Mail className="mr-2 h-4 w-4" />
-                Google
-              </Button>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-              Already have an account?{" "}
-              <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                Sign in
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
-
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
-            🎉 Start with a <strong>14-day free trial</strong>. No credit card required!
-          </p>
+    <div
+      className="min-h-screen flex flex-col selection:bg-nw-primary/30"
+      style={{ background: "#0c1323", color: "#dce2f9", fontFamily: "var(--font-inter), Inter, sans-serif" }}
+    >
+      <main className="flex-grow flex items-center justify-center p-4 md:p-12 relative">
+        {/* Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute"
+            style={{
+              inset: 0,
+              opacity: 0.03,
+              backgroundImage: "radial-gradient(#4edea3 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+          <div
+            className="absolute"
+            style={{ top: "-20%", right: "-10%", width: "60%", height: "60%", background: "rgba(173,198,255,0.1)", filter: "blur(150px)", borderRadius: "50%" }}
+          />
+          <div
+            className="absolute"
+            style={{ bottom: "-20%", left: "-10%", width: "60%", height: "60%", background: "rgba(78,222,163,0.1)", filter: "blur(150px)", borderRadius: "50%" }}
+          />
         </div>
-      </div>
+
+        {/* Two-column card */}
+        <div
+          className="w-full max-w-[1100px] grid md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl relative z-10"
+          style={{
+            backdropFilter: "blur(20px)",
+            background: "rgba(24,31,48,0.7)",
+            border: "1px solid rgba(66,71,84,0.2)",
+          }}
+        >
+          {/* Left branding panel */}
+          <div
+            className="hidden md:flex flex-col justify-between p-12 relative overflow-hidden"
+            style={{ background: "rgba(9,19,40,0.5)", borderRight: "1px solid rgba(66,71,84,0.1)" }}
+          >
+            <div className="scanline" />
+
+            <div className="relative z-10">
+              {/* Logo */}
+              <div className="flex items-center gap-4 mb-16">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ background: "rgba(78,222,163,0.2)", border: "1px solid rgba(78,222,163,0.3)" }}
+                >
+                  <span
+                    className="material-symbols-outlined text-3xl"
+                    style={{ color: "#4edea3", fontVariationSettings: "'FILL' 1" }}
+                  >
+                    deployed_code
+                  </span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-black tracking-tighter uppercase leading-none" style={{ color: "#dce2f9" }}>
+                    Neural
+                  </h1>
+                  <p
+                    className="text-[10px] uppercase tracking-[0.4em]"
+                    style={{ color: "rgba(78,222,163,0.7)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    Workspace
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full"
+                  style={{ background: "rgba(78,222,163,0.1)", border: "1px solid rgba(78,222,163,0.2)" }}
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-nw-green animate-pulse" style={{ background: "#4edea3" }} />
+                  <span
+                    className="text-[10px] uppercase tracking-wider"
+                    style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    System Ready: Protocol 01-A
+                  </span>
+                </div>
+
+                <h2 className="text-5xl font-extrabold leading-[1.1] tracking-tight" style={{ color: "#dce2f9" }}>
+                  Deploy your next <br />
+                  high-performance <br />
+                  <span style={{ color: "#4edea3" }}>intelligence node.</span>
+                </h2>
+
+                <p className="text-lg leading-relaxed max-w-sm" style={{ color: "#c2c6d6" }}>
+                  Join the high-density ecosystem designed for orchestrating complex agentic workflows and neural automation.
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom card */}
+            <div className="relative z-10 mt-auto">
+              <div
+                className="flex items-center gap-4 p-5 rounded-xl"
+                style={{
+                  background: "rgba(35,42,59,0.8)",
+                  border: "1px solid rgba(66,71,84,0.1)",
+                  backdropFilter: "blur(12px)",
+                }}
+              >
+                <div
+                  className="w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center"
+                  style={{ background: "#232a3b", border: "1px solid rgba(66,71,84,0.3)" }}
+                >
+                  <span className="material-symbols-outlined text-3xl" style={{ color: "#4edea3" }}>
+                    person_pin
+                  </span>
+                </div>
+                <div>
+                  <p
+                    className="text-[10px] uppercase tracking-widest"
+                    style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    Initialization Phase
+                  </p>
+                  <p className="text-sm font-bold" style={{ color: "#dce2f9" }}>
+                    Registration Authority
+                  </p>
+                  <p
+                    className="text-[10px]"
+                    style={{ color: "#c2c6d6", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    ID: 0x82...FC21
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right form panel */}
+          <div className="p-8 md:p-16 flex flex-col justify-center" style={{ background: "rgba(20,27,44,0.3)" }}>
+            <div className="max-w-md mx-auto w-full space-y-8">
+              <div>
+                <h3 className="text-3xl font-bold mb-3 flex items-center gap-3" style={{ color: "#dce2f9" }}>
+                  Initialize Account
+                  <span className="material-symbols-outlined" style={{ color: "#4edea3" }}>
+                    verified
+                  </span>
+                </h3>
+                <p className="text-sm font-medium" style={{ color: "#c2c6d6" }}>
+                  Create your secure credentials to access the command center.
+                </p>
+              </div>
+
+              <form onSubmit={handleSignup} className="space-y-6">
+                {error && (
+                  <div
+                    className="px-4 py-3 rounded-lg text-sm"
+                    style={{
+                      background: "rgba(147,0,10,0.2)",
+                      border: "1px solid rgba(255,180,171,0.3)",
+                      color: "#ffb4ab",
+                      fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace",
+                    }}
+                  >
+                    ✗ {error}
+                  </div>
+                )}
+
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <label
+                    className="block text-[10px] uppercase tracking-[0.2em] ml-1"
+                    style={{ color: "rgba(194,198,214,0.8)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    Identity Tag (Full Name)
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg" style={{ color: "rgba(194,198,214,0.4)" }}>
+                      person
+                    </span>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => update("name", e.target.value)}
+                      placeholder="ERIK LARSSON"
+                      required
+                      className={inputClass}
+                      style={{ ...inputStyle, textTransform: "uppercase" } as React.CSSProperties}
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="space-y-2">
+                  <label
+                    className="block text-[10px] uppercase tracking-[0.2em] ml-1"
+                    style={{ color: "rgba(194,198,214,0.8)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    Intelligence Endpoint (Email)
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg" style={{ color: "rgba(194,198,214,0.4)" }}>
+                      alternate_email
+                    </span>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => update("email", e.target.value)}
+                      placeholder="ARCHITECT@NEURAL.WORKSPACE"
+                      required
+                      className={inputClass}
+                      style={{ ...inputStyle, textTransform: "uppercase" } as React.CSSProperties}
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="space-y-2">
+                  <label
+                    className="block text-[10px] uppercase tracking-[0.2em] ml-1"
+                    style={{ color: "rgba(194,198,214,0.8)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    Access Key (Password)
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg" style={{ color: "rgba(194,198,214,0.4)" }}>
+                      lock
+                    </span>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => update("password", e.target.value)}
+                      placeholder="••••••••••••"
+                      required
+                      className={inputClass}
+                      style={inputStyle as React.CSSProperties}
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                  {/* Password strength */}
+                  <div className="mt-2 px-1">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span
+                        className="text-[10px] uppercase tracking-widest"
+                        style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                      >
+                        Security Grade: {formData.password.length === 0 ? "—" : formData.password.length < 8 ? "Weak" : formData.password.length < 12 ? "Moderate" : "Tactical"}
+                      </span>
+                      <span
+                        className="text-[10px]"
+                        style={{ color: "#c2c6d6", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                      >
+                        {formData.password.length === 0 ? "0%" : formData.password.length < 8 ? "33%" : formData.password.length < 12 ? "66%" : "100%"}
+                      </span>
+                    </div>
+                    <div className="flex gap-1.5 h-1.5 w-full">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="flex-1 rounded-full transition-all"
+                          style={{
+                            background: formData.password.length === 0
+                              ? "#2e3446"
+                              : formData.password.length < 8
+                              ? (i < 1 ? "#ff8a65" : "#2e3446")
+                              : formData.password.length < 12
+                              ? (i < 3 ? "#4edea3" : "#2e3446")
+                              : "#4edea3",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Confirm Password */}
+                <div className="space-y-2">
+                  <label
+                    className="block text-[10px] uppercase tracking-[0.2em] ml-1"
+                    style={{ color: "rgba(194,198,214,0.8)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+                  >
+                    Verify Access Key
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg" style={{ color: "rgba(194,198,214,0.4)" }}>
+                      security
+                    </span>
+                    <input
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => update("confirmPassword", e.target.value)}
+                      placeholder="••••••••••••"
+                      required
+                      className={inputClass}
+                      style={inputStyle as React.CSSProperties}
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                </div>
+
+                {/* Terms */}
+                <div className="flex items-start gap-3 py-1">
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      id="terms"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="w-4 h-4 rounded cursor-pointer"
+                      style={{ accentColor: "#4edea3" }}
+                    />
+                  </div>
+                  <label htmlFor="terms" className="text-[11px] leading-relaxed cursor-pointer select-none" style={{ color: "#c2c6d6" }}>
+                    I confirm strict compliance with the{" "}
+                    <a href="#" className="underline underline-offset-4" style={{ color: "#4edea3", textDecorationColor: "rgba(78,222,163,0.3)" }}>
+                      Security Protocols
+                    </a>{" "}
+                    and{" "}
+                    <a href="#" className="underline underline-offset-4" style={{ color: "#4edea3", textDecorationColor: "rgba(78,222,163,0.3)" }}>
+                      Engagement Terms
+                    </a>{" "}
+                    of the Neural Workspace environment.
+                  </label>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="group relative w-full py-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden disabled:opacity-60 active:scale-[0.98]"
+                  style={{
+                    background: "#4edea3",
+                    color: "#003824",
+                    fontFamily: "var(--font-inter), Inter, sans-serif",
+                    boxShadow: "0 8px 30px rgba(78,222,163,0.15)",
+                    textTransform: "uppercase",
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.2em",
+                    fontWeight: "900",
+                  }}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="material-symbols-outlined text-lg animate-spin">autorenew</span>
+                      INITIALIZING...
+                    </>
+                  ) : (
+                    <>
+                      Initialize Deployment
+                      <span className="material-symbols-outlined text-lg">terminal</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="text-center">
+                  <p className="text-xs font-medium" style={{ color: "#c2c6d6" }}>
+                    Already authorized?{" "}
+                    <Link href="/login" className="font-bold hover:underline underline-offset-4" style={{ color: "#4edea3" }}>
+                      Initiate Login
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer
+        className="w-full py-8 mt-auto relative overflow-hidden"
+        style={{ background: "rgba(7,14,30,0.8)", borderTop: "1px solid rgba(66,71,84,0.1)", backdropFilter: "blur(12px)" }}
+      >
+        <div className="max-w-[1200px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
+          <div className="flex flex-col gap-2">
+            <div
+              className="text-[9px] uppercase tracking-[0.2em] flex items-center gap-2"
+              style={{ color: "rgba(194,198,214,0.6)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#4edea3" }} />
+              Node Status: <span style={{ color: "#4edea3" }}>Optimal</span>
+            </div>
+            <div
+              className="text-[9px] uppercase tracking-[0.2em]"
+              style={{ color: "rgba(194,198,214,0.6)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+            >
+              © 2024 Neural Workspace. Tactical Intelligence Systems v4.2.0
+            </div>
+          </div>
+          <div className="flex items-center gap-12">
+            <div className="flex flex-col items-end gap-1">
+              <span
+                className="text-[9px] uppercase tracking-widest"
+                style={{ color: "rgba(194,198,214,0.4)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+              >
+                Session Encryption
+              </span>
+              <span
+                className="text-[10px]"
+                style={{ color: "rgba(78,222,163,0.8)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
+              >
+                AES-256-GCM / TLS 1.3
+              </span>
+            </div>
+            <div className="h-8 w-px" style={{ background: "rgba(66,71,84,0.2)" }} />
+            <div className="flex gap-8">
+              {["Privacy", "Terms", "Security"].map((item) => (
+                <a
+                  key={item}
+                  href="#"
+                  className="text-[10px] uppercase tracking-widest transition-colors hover:opacity-100"
+                  style={{
+                    color: "rgba(194,198,214,0.6)",
+                    fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace",
+                  }}
+                >
+                  {item}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

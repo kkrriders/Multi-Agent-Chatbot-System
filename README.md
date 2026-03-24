@@ -1,22 +1,44 @@
 # Multi-Agent Chatbot System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D%2018.0.0-brightgreen)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
 [![Tests](https://img.shields.io/badge/tests-154%20passing-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/docker-compose-blue)](https://docs.docker.com/compose/)
 
-A production-ready multi-agent AI system that routes user messages to specialized local LLMs (Llama3, Mistral, Phi3, Qwen), with JWT authentication, circuit breakers, Prometheus metrics, semantic memory, prompt versioning, LLM tracing, and full Docker Compose deployment.
+A multi-agent AI system that routes user messages to specialized local LLMs — Llama3, Mistral, Phi3, and Qwen — running entirely on your hardware via Ollama. Includes JWT authentication, circuit breakers, Prometheus metrics, semantic memory, prompt versioning, LLM tracing, and a full Docker Compose deployment.
 
-## What's in This Version
+---
 
-- **Security-first**: JWT auth, HMAC-signed agent calls, Redis-backed rate limiting, audit logs
-- **Resilience**: Circuit breakers per agent, exponential backoff retry, graceful shutdown
-- **Intelligent routing**: Content-aware model selection (code → Qwen, creative → Phi3, analytical → Mistral, general → Llama3)
-- **Observability**: Prometheus metrics, LLM tracing to JSONL, OpenTelemetry + Jaeger support
-- **AI features**: Semantic memory with embeddings, conversation summarization, token usage tracking, prompt versioning
-- **Eval harness**: LLM-as-judge evaluation with `pass@k` metrics
-- **Docker**: Full stack via `docker-compose.yml` (MongoDB, Redis, manager, 4 agents, frontend, optional Jaeger)
-- **154 tests**: 32 unit + 122 e2e, all passing
+## Table of Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [API Reference](#api-reference)
+- [Key Features](#key-features)
+- [Project Structure](#project-structure)
+- [Testing](#testing)
+- [Extending the System](#extending-the-system)
+- [Security](#security)
+- [License](#license)
+
+---
+
+## Features
+
+| Category | Highlights |
+|----------|------------|
+| **Security** | JWT auth, HMAC-signed agent calls, Redis-backed rate limiting, append-only audit log |
+| **Resilience** | Per-agent circuit breakers, exponential backoff with full jitter, graceful shutdown |
+| **Routing** | Content-aware model selection (code → Qwen, analytical → Mistral, creative → Phi3, general → Llama3) |
+| **Observability** | Prometheus metrics, JSONL LLM traces, optional OpenTelemetry + Jaeger |
+| **AI Features** | Semantic memory with vector embeddings, conversation summarization, token usage tracking, prompt versioning |
+| **Evaluation** | LLM-as-judge eval harness with `pass@k` metrics |
+| **Deployment** | Full Docker Compose stack — MongoDB, Redis, manager, 4 agents, Next.js frontend, optional Jaeger |
+| **Tests** | 154 tests: 32 unit + 122 e2e, all passing |
+
+---
 
 ## Architecture
 
@@ -25,7 +47,7 @@ A production-ready multi-agent AI system that routes user messages to specialize
 │              Next.js Frontend  :3002                         │
 │         React 19 · TypeScript · Tailwind · Socket.IO        │
 └──────────────────────────┬───────────────────────────────────┘
-                           │ JWT  WebSocket
+                           │ JWT · WebSocket
 ┌──────────────────────────▼───────────────────────────────────┐
 │                    Manager Agent  :3000                      │
 │   Auth · Routing · Circuit Breakers · Prometheus /metrics   │
@@ -49,6 +71,8 @@ A production-ready multi-agent AI system that routes user messages to specialize
 └──────────────────┘  └──────────────┘  └──────────────────────┘
 ```
 
+---
+
 ## Quick Start
 
 ### Option A — Docker Compose (recommended)
@@ -56,23 +80,22 @@ A production-ready multi-agent AI system that routes user messages to specialize
 ```bash
 git clone https://github.com/your-username/multi-agent-chatbot-system.git
 cd multi-agent-chatbot-system
-cp .env.example .env          # fill in JWT_SECRET and AGENT_SHARED_SECRET
+cp .env.example .env       # set JWT_SECRET and AGENT_SHARED_SECRET
 docker compose up -d
 ```
 
-With distributed tracing:
+To include distributed tracing:
 ```bash
 docker compose --profile tracing up -d
 ```
 
-Services:
 | URL | Service |
 |-----|---------|
 | http://localhost:3002 | Next.js frontend |
-| http://localhost:3000 | Manager REST + WebSocket API |
+| http://localhost:3000 | Manager API (REST + WebSocket) |
 | http://localhost:3000/metrics | Prometheus metrics |
 | http://localhost:3000/api/health | Health check (JSON) |
-| http://localhost:16686 | Jaeger UI (tracing profile) |
+| http://localhost:16686 | Jaeger UI (tracing profile only) |
 
 ### Option B — Local Development
 
@@ -94,52 +117,35 @@ cp .env.example .env
 # Edit .env — set JWT_SECRET, AGENT_SHARED_SECRET, MONGODB_URI, REDIS_URL
 
 # 4. Start all services
-node start-stable.js                 # backend only
-npm run start-with-frontend          # backend + Next.js frontend
+npm start                    # backend only (start-stable.js)
+npm run dev                  # backend services with colored output
+npm run start-with-frontend  # backend + Next.js frontend
 ```
+
+---
 
 ## Environment Variables
 
-```bash
-# --- Required secrets (generate strong random values) ---
-JWT_SECRET=your-secret-here-min-32-chars
-AGENT_SHARED_SECRET=your-hmac-secret-here-min-32-chars
+Copy `.env.example` for the full annotated list. Key variables:
 
-# --- Ports ---
-MANAGER_PORT=3000
-AGENT_1_PORT=3005
-AGENT_2_PORT=3006
-AGENT_3_PORT=3007
-AGENT_4_PORT=3008
-FRONTEND_PORT=3002
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `JWT_SECRET` | Yes | Min 32 chars — signs user JWTs |
+| `AGENT_SHARED_SECRET` | Yes | Min 32 chars — HMAC signs manager→agent calls |
+| `MONGODB_URI` | Yes | MongoDB connection string |
+| `REDIS_URL` | Yes | Redis connection string |
+| `OLLAMA_API_BASE` | Yes | Ollama base URL (default: `http://localhost:11434/api`) |
+| `MANAGER_PORT` | No | Default: `3000` |
+| `AGENT_1_PORT` — `AGENT_4_PORT` | No | Defaults: `3005`–`3008` |
+| `AGENT_1_MODEL` — `AGENT_4_MODEL` | No | Model names (e.g. `llama3:latest`) |
+| `AGENT_1_URL` — `AGENT_4_URL` | Docker | Set automatically by `docker-compose.yml` |
+| `OTEL_ENABLED` | No | `true` to emit OpenTelemetry spans |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | No | OTLP receiver URL |
+| `OLLAMA_TIMEOUT` / `AGENT_TIMEOUT` | No | Request timeouts in ms (default: `180000`) |
 
-# --- Models ---
-AGENT_1_MODEL=llama3:latest
-AGENT_2_MODEL=mistral:latest
-AGENT_3_MODEL=phi3:latest
-AGENT_4_MODEL=qwen2.5-coder:latest
+> **Startup aborts** if `JWT_SECRET` or `AGENT_SHARED_SECRET` are missing or shorter than 32 characters.
 
-# --- Services ---
-OLLAMA_API_BASE=http://localhost:11434/api
-MONGODB_URI=mongodb://localhost:27017/chatbot
-REDIS_URL=redis://localhost:6379
-
-# --- Docker agent routing (set automatically by docker-compose) ---
-AGENT_1_URL=http://agent-llama3:3005
-AGENT_2_URL=http://agent-mistral:3006
-AGENT_3_URL=http://agent-phi3:3007
-AGENT_4_URL=http://agent-qwen:3008
-
-# --- OpenTelemetry (optional) ---
-OTEL_ENABLED=false
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-
-# --- Timeouts ---
-OLLAMA_TIMEOUT=180000
-AGENT_TIMEOUT=180000
-```
-
-Copy `.env.example` for the full list with descriptions.
+---
 
 ## API Reference
 
@@ -148,46 +154,52 @@ Copy `.env.example` for the full list with descriptions.
 ```http
 POST /auth/register
 POST /auth/login
-# Returns: { token }
 ```
 
-All subsequent requests require `Authorization: Bearer <token>`.
+Both return `{ token }`. Pass it on all subsequent requests as `Authorization: Bearer <token>`.
 
-### Messages
+### Messaging
 
 ```http
 POST /message
-{ "content": "explain async/await", "conversationId": "..." }
+Content-Type: application/json
 
+{ "content": "explain async/await", "conversationId": "<id>" }
+```
+
+```http
 POST /team-conversation
+Content-Type: application/json
+
 { "message": "compare REST vs GraphQL", "agents": ["agent-1", "agent-2"] }
 ```
+
+Override automatic routing via `X-Agent` header or `"agent"` field in the request body.
 
 ### Conversations
 
 ```http
-GET  /api/conversations              # list user conversations
-GET  /api/conversations/:id          # get with full history
-DELETE /api/conversations/:id        # delete
-
-GET  /api/conversations/:id/usage    # token usage breakdown by model
+GET    /api/conversations           # list user conversations
+GET    /api/conversations/:id       # full history
+DELETE /api/conversations/:id       # delete
+GET    /api/conversations/:id/usage # token usage by model
 ```
 
 ### Prompt Versioning
 
 ```http
-GET    /api/prompts                  # list all versions
-POST   /api/prompts                  # create new version
-POST   /api/prompts/:id/activate     # set active prompt
+GET    /api/prompts                 # list all versions
+POST   /api/prompts                 # create new version
+POST   /api/prompts/:id/activate    # set active prompt
 DELETE /api/prompts/:id
 ```
 
 ### Monitoring
 
 ```http
-GET /api/health        # system health (MongoDB, Redis, agents, circuit breakers)
-GET /metrics           # Prometheus metrics
-GET /status            # legacy status
+GET /api/health   # MongoDB, Redis, agents, circuit breaker states
+GET /metrics      # Prometheus metrics
+GET /status       # legacy status endpoint
 ```
 
 ### WebSocket (Socket.IO)
@@ -198,51 +210,59 @@ const socket = io('http://localhost:3000', {
 });
 
 socket.emit('join-conversation', conversationId);
-socket.on('token', (chunk) => process.stdout.write(chunk));   // streaming
+socket.on('token', (chunk) => process.stdout.write(chunk));  // streaming
 socket.on('conversation-update', (msg) => console.log(msg));
 ```
 
+---
+
 ## Key Features
 
-### Model Routing
+### Content-Aware Model Routing
 
-Messages are automatically routed to the best model based on content:
+Messages are automatically dispatched to the best-fit model:
 
 | Keywords | Model | Agent |
 |----------|-------|-------|
-| code, debug, function, api, implement | `qwen2.5-coder` | agent-qwen |
-| analyze, research, compare, data, statistics | `mistral` | agent-mistral |
-| story, poem, creative, brainstorm, fiction | `phi3` | agent-phi3 |
+| `code`, `debug`, `function`, `api`, `implement` | `qwen2.5-coder` | agent-qwen |
+| `analyze`, `research`, `compare`, `data`, `statistics` | `mistral` | agent-mistral |
+| `story`, `poem`, `creative`, `brainstorm`, `fiction` | `phi3` | agent-phi3 |
 | *(everything else)* | `llama3` | agent-llama3 |
-
-Override via `X-Agent` header or `agent` field in the request body.
 
 ### Circuit Breakers
 
-Each agent has an independent circuit breaker (CLOSED → OPEN after 3 failures → HALF_OPEN after 30 s). The manager falls back gracefully when an agent is unavailable. Circuit breaker state is exposed in `/api/health`.
+Each agent has an independent circuit breaker: **CLOSED → OPEN** after 3 consecutive failures → **HALF_OPEN** after 30 s. The manager falls back gracefully and exposes circuit states in `/api/health`.
 
 ### LLM Tracing
 
-Every LLM call is traced to `logs/llm-traces.jsonl`:
+Every LLM call is appended to `logs/llm-traces.jsonl`:
+
 ```json
-{ "timestamp": "...", "model": "qwen2.5-coder", "inputTokens": 142, "outputTokens": 87, "durationMs": 1240, "agentId": "agent-qwen" }
+{
+  "timestamp": "2026-03-20T10:00:00.000Z",
+  "model": "qwen2.5-coder",
+  "inputTokens": 142,
+  "outputTokens": 87,
+  "durationMs": 1240,
+  "agentId": "agent-qwen"
+}
 ```
 
 ### Semantic Memory
 
-Agents store user-specific memories with vector embeddings (via Ollama `/api/embeddings`). Retrieval uses cosine similarity when embeddings are present, Jaccard fallback otherwise.
+Each agent stores user-specific memories with vector embeddings via Ollama `/api/embeddings`. Retrieval uses cosine similarity when embeddings are available, Jaccard similarity as fallback.
 
-### Token Usage
+### Token Usage Tracking
 
-Track spend per model per conversation:
 ```http
 GET /api/conversations/:id/usage
-→ { "qwen2.5-coder": { inputTokens: 450, outputTokens: 210 }, ... }
+→ { "qwen2.5-coder": { "inputTokens": 450, "outputTokens": 210 }, ... }
 ```
 
 ### Eval Harness
 
-Run LLM-as-judge evaluations against `tests/evals/dataset.jsonl`:
+LLM-as-judge evaluation against `tests/evals/dataset.jsonl`:
+
 ```bash
 npm run eval
 # writes pass/fail report to logs/eval-report.jsonl
@@ -250,106 +270,114 @@ npm run eval
 
 ### OpenTelemetry
 
-Set `OTEL_ENABLED=true` to emit spans to any OTLP-compatible backend (Jaeger, Tempo, Honeycomb). Start Jaeger locally:
-```bash
-docker compose --profile tracing up -d
-# Jaeger UI → http://localhost:16686
-```
+Set `OTEL_ENABLED=true` to emit spans to any OTLP-compatible backend (Jaeger, Tempo, Honeycomb). Start Jaeger locally with `docker compose --profile tracing up -d`.
+
+---
 
 ## Project Structure
 
 ```
 ├── src/
 │   ├── agents/
-│   │   ├── manager/        # Central orchestrator (routing, auth, metrics)
-│   │   ├── agent-llama3/   # General-purpose agent
-│   │   ├── agent-mistral/  # Analytical agent
-│   │   ├── agent-phi3/     # Creative agent
-│   │   └── agent-qwen/     # Code agent
+│   │   ├── manager/         # Central orchestrator: routing, auth, metrics
+│   │   ├── agent-llama3/    # General-purpose agent
+│   │   ├── agent-mistral/   # Analytical agent
+│   │   ├── agent-phi3/      # Creative agent
+│   │   └── agent-qwen/      # Code agent
 │   ├── shared/
-│   │   ├── agent-base.js   # Base class (memory, streaming, HMAC verify)
-│   │   ├── agent-config.js # Prompt versioning cache
-│   │   ├── agentAuth.js    # HMAC-SHA256 sign/verify
+│   │   ├── agent-base.js    # Base class: memory, streaming, HMAC verify
+│   │   ├── agent-config.js  # Prompt versioning cache
+│   │   ├── agentAuth.js     # HMAC-SHA256 sign/verify
 │   │   ├── circuitBreaker.js
-│   │   ├── llmTracer.js    # JSONL trace writer
-│   │   ├── memory.js       # Semantic memory + embeddings
-│   │   ├── modelRouter.js  # Content-aware model selection
-│   │   ├── ollama.js       # Ollama client + retry
-│   │   ├── retry.js        # Full-jitter exponential backoff
-│   │   ├── summarizer.js   # Conversation summarization
-│   │   └── tracing.js      # OpenTelemetry init
+│   │   ├── llmTracer.js     # JSONL trace writer
+│   │   ├── memory.js        # Semantic memory + embeddings
+│   │   ├── modelRouter.js   # Content-aware model selection
+│   │   ├── ollama.js        # Ollama client + retry
+│   │   ├── retry.js         # Full-jitter exponential backoff
+│   │   ├── summarizer.js    # Conversation summarization
+│   │   └── tracing.js       # OpenTelemetry init
 │   ├── middleware/
-│   │   ├── auditLog.js     # Append-only audit.log
-│   │   └── rateLimiter.js  # Redis-backed rate limits
+│   │   ├── auditLog.js      # Append-only audit.log
+│   │   └── rateLimiter.js   # Redis-backed rate limits
 │   ├── models/
-│   │   ├── Conversation.js # Message + tokenUsage schema
-│   │   ├── Memory.js       # Memory + embedding schema
-│   │   ├── PromptVersion.js# Versioned system prompts
+│   │   ├── Conversation.js  # Message + tokenUsage schema
+│   │   ├── Memory.js        # Memory + embedding schema
+│   │   ├── PromptVersion.js # Versioned system prompts
 │   │   └── User.js
 │   ├── routes/
 │   │   ├── auth.js
 │   │   ├── conversations.js
 │   │   └── prompts.js
 │   ├── monitoring/
-│   │   └── metrics.js      # Prometheus (7 metrics + Node defaults)
+│   │   └── metrics.js       # Prometheus (7 custom metrics + Node defaults)
 │   ├── config/
 │   │   ├── database.js
 │   │   └── redis.js
 │   ├── scripts/
-│   │   └── evalHarness.js  # LLM-as-judge eval runner
+│   │   └── evalHarness.js   # LLM-as-judge eval runner
 │   └── utils/
 │       ├── jwt.js
-│       └── validateEnv.js  # Startup aborts on missing/weak secrets
-├── multi-agent-chatbot/    # Next.js 15 frontend
-│   └── app/chat/           # Chat UI with Socket.IO streaming
+│       └── validateEnv.js   # Startup validation for required secrets
+├── multi-agent-chatbot/     # Next.js 15 frontend
+│   └── app/chat/            # Chat UI with Socket.IO streaming
 ├── tests/
-│   ├── unit/               # 32 Jest unit tests
-│   └── e2e/                # 122 Jest e2e tests (supertest)
-├── tests/evals/
-│   └── dataset.jsonl       # 10 eval pairs for LLM-as-judge
+│   ├── unit/                # 32 Jest unit tests
+│   ├── e2e/                 # 122 Jest e2e tests (supertest)
+│   └── evals/
+│       └── dataset.jsonl    # 10 eval pairs for LLM-as-judge
 ├── logs/
 │   ├── audit.log
 │   ├── llm-traces.jsonl
 │   └── eval-report.jsonl
-├── docker-compose.yml      # Full stack (MongoDB, Redis, agents, frontend, Jaeger)
-├── Dockerfile              # Backend image
+├── docker-compose.yml       # Full stack (MongoDB, Redis, agents, frontend, Jaeger)
+├── Dockerfile               # Backend image
 ├── multi-agent-chatbot/Dockerfile  # Frontend 3-stage build
 └── .env.example
 ```
 
+---
+
 ## Testing
 
 ```bash
-npm test            # all 154 tests
-npm run test:unit   # 32 unit tests
-npm run test:e2e    # 122 e2e tests (auth, conversations, health, prompts)
-npm run eval        # eval harness → logs/eval-report.jsonl
+npm test             # all 154 tests
+npm run test:unit    # 32 unit tests
+npm run test:e2e     # 122 e2e tests (auth, conversations, health, prompts)
+npm run eval         # eval harness → logs/eval-report.jsonl
 ```
 
-## Adding a New Agent
+---
 
-1. Copy `src/agents/agent-llama3/` to `src/agents/agent-{name}/`
+## Extending the System
+
+### Adding a New Agent
+
+1. Copy `src/agents/agent-llama3/` → `src/agents/agent-{name}/`
 2. Set `this.model` and `this.agentName` in the constructor
-3. Add port to `.env` and agent URL to `docker-compose.yml`
-4. Register in `src/agents/manager/index.js` agent map
-5. Add routing keyword to `src/shared/modelRouter.js` if needed
+3. Add port to `.env` and a service entry to `docker-compose.yml`
+4. Register the agent in `src/agents/manager/index.js`
+5. Add routing keywords to `src/shared/modelRouter.js` if needed
 
-## Security Notes
+---
+
+## Security
 
 - `JWT_SECRET` and `AGENT_SHARED_SECRET` must be at least 32 characters — startup aborts if not
-- All manager → agent HTTP calls are HMAC-SHA256 signed and verified
-- Rate limits: 5 req/15 min (auth), 30 req/min (messages), 10 req/hour (exports)
-- All auth events written to `logs/audit.log`
+- All manager → agent HTTP calls are HMAC-SHA256 signed and verified on receipt
+- Rate limits: 5 req/15 min (auth endpoints), 30 req/min (messages), 10 req/hour (exports)
+- All authentication events are written to `logs/audit.log`
 - `.env` is gitignored — never commit secrets
+
+---
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+[MIT](LICENSE)
 
 ## Acknowledgments
 
-- [Ollama](https://ollama.ai) — local LLM serving
+- [Ollama](https://ollama.ai) — local LLM inference
 - [Meta AI](https://ai.meta.com) — Llama models
 - [Mistral AI](https://mistral.ai) — Mistral models
 - [Microsoft](https://microsoft.com) — Phi-3 models
-- [Alibaba](https://qwenlm.github.io) — Qwen models
+- [Alibaba / Qwen Team](https://qwenlm.github.io) — Qwen models

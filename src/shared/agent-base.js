@@ -13,7 +13,7 @@ const dotenv = require('dotenv');
 
 // Import shared utilities
 const { logger } = require('./logger');
-const { generateResponseWithMeta, generateResponseStream } = require('./ollama');
+const { generateResponseWithMeta, generateResponseWithMetaJson, generateResponseJson, generateResponseStream } = require('./ollama');
 const { tracedGenerate } = require('./llmTracer');
 const { routeModel } = require('./modelRouter');
 const { verifyAgentRequest } = require('./agentAuth');
@@ -195,22 +195,22 @@ class BaseAgent {
           writeEvent({ token });
         });
 
-        const confidenceData = this.extractConfidenceScore(fullContent);
+        // Streaming uses free-form text (not JSON mode) — store content directly
+        const streamedContent = fullContent.trim();
 
         // Persist to memory
         if (this.memory) {
           try {
             await this.memory.storeConversation(
               message.content,
-              confidenceData.cleanedContent,
+              streamedContent,
               {
                 conversationId: message.conversationId || 'unknown',
                 messageId: message.id,
                 timestamp: new Date().toISOString(),
-                confidence: confidenceData.confidence
               }
             );
-            await this.extractAndStorePreferences(message.content, confidenceData.cleanedContent);
+            await this.extractAndStorePreferences(message.content);
           } catch (err) {
             logger.warn(`Error storing streaming conversation memory: ${err.message}`);
           }
@@ -218,8 +218,7 @@ class BaseAgent {
 
         writeEvent({
           done: true,
-          content: confidenceData.cleanedContent,
-          confidence: confidenceData.confidence,
+          content: streamedContent,
           agentId: this.agentId
         });
         res.end();
@@ -328,84 +327,80 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
   }
 
   /**
-   * Generate a response to an incoming message
-   * 
+   * Generate a response to an incoming message.
+   * Uses Ollama's native JSON mode to get structured output — answer + confidence — in a
+   * single LLM call, replacing the previous heuristic regex-based confidence detection.
+   *
    * @param {Object} message - Incoming message
    * @returns {Promise<Object>} - Structured response message
    */
   async generateAgentResponse(message) {
-    const prompt = await this.createPrompt(message);
-    
+    const basePrompt = await this.createPrompt(message);
+
+    // Append JSON format instruction. The model must return {"answer": "...", "confidence": 0-100}.
+    const jsonPrompt =
+      `${basePrompt}\n\n` +
+      `Respond ONLY with valid JSON in this exact format — no other text:\n` +
+      `{"answer": "your complete response here", "confidence": 75}\n` +
+      `Where confidence is 0–100 reflecting how certain you are about the answer.`;
+
     try {
-      // Adjust generation parameters based on prompt length
-      const promptLength = prompt.length;
-      let numPredict = 300; // Default length limit
-      
-      // For very long prompts, reduce the expected output length to help avoid timeouts
-      if (promptLength > 8000) {
-        numPredict = 200;
-        logger.info(`${this.agentId}: Long prompt detected (${promptLength} chars). Reducing output length.`);
-      } else if (promptLength > 4000) {
-        numPredict = 250;
-      }
-      
-      // Route to the best model for this message type, then call Ollama
-      // with trace logging (latency + token counts → logs/llm-traces.jsonl).
-      // generateResponseWithMeta already uses withRetry internally.
+      const promptLength = jsonPrompt.length;
+      let numPredict = 600;
+      if (promptLength > 8000) numPredict = 400;
+      else if (promptLength > 4000) numPredict = 500;
+
       const { model: routedModel, reason } = routeModel(message.content);
       if (routedModel !== this.model) {
         logger.info(`${this.agentId}: model router → ${routedModel} (${reason})`);
       }
 
-      const meta = await tracedGenerate(generateResponseWithMeta, {
+      const meta = await tracedGenerate(generateResponseWithMetaJson, {
         model:   routedModel,
-        prompt,
+        prompt:  jsonPrompt,
         options: { temperature: 0.7, num_predict: numPredict },
         agentId: this.agentId,
       });
 
-      let content = meta.text;
-      if (!content || content.trim().length === 0) {
-        logger.warn(`${this.agentId}: Empty response received`);
-        content = "I received your message, but I'm having trouble generating a specific response right now.";
+      // Parse structured output — fall back to raw text if the model misbehaves despite JSON mode
+      let content = '';
+      let confidence = 75;
+      try {
+        const parsed = JSON.parse(meta.text);
+        content    = String(parsed.answer || '').trim();
+        confidence = Math.min(100, Math.max(0, Number(parsed.confidence) || 75));
+      } catch (_) {
+        logger.warn(`${this.agentId}: model returned non-JSON; using raw text`);
+        content = meta.text.trim();
       }
 
-      // Extract confidence score from response
-      const confidenceData = this.extractConfidenceScore(content);
+      if (!content) {
+        logger.warn(`${this.agentId}: empty content after parsing`);
+        content = "I received your message, but I'm having trouble generating a response right now.";
+      }
 
-      // Store conversation in memory
       if (this.memory) {
         try {
-          await this.memory.storeConversation(
-            message.content,
-            confidenceData.cleanedContent,
-            {
-              conversationId: message.conversationId || 'unknown',
-              messageId: message.id,
-              timestamp: new Date().toISOString(),
-              confidence: confidenceData.confidence
-            }
-          );
-
-          // Extract and store potential preferences from the conversation
-          await this.extractAndStorePreferences(message.content, confidenceData.cleanedContent);
+          await this.memory.storeConversation(message.content, content, {
+            conversationId: message.conversationId || 'unknown',
+            messageId: message.id,
+            timestamp: new Date().toISOString(),
+            confidence,
+          });
+          await this.extractAndStorePreferences(message.content);
         } catch (error) {
           logger.warn(`Error storing conversation memory: ${error.message}`);
         }
       }
 
-      // Create structured response message with correct parameter order: from, to, content, performative
       const responseMessage = createMessage(
-        this.agentId,                 // from
-        message.from,                 // to
-        confidenceData.cleanedContent, // content (without confidence markers)
-        PERFORMATIVES.RESPOND         // performative
+        this.agentId,
+        message.from,
+        content,
+        PERFORMATIVES.RESPOND
       );
-
-      // Add confidence score and token usage to response metadata
-      responseMessage.confidence    = confidenceData.confidence;
-      responseMessage.uncertainties = confidenceData.uncertainties;
-      responseMessage.tokenUsage    = {
+      responseMessage.confidence = confidence;
+      responseMessage.tokenUsage = {
         inputTokens:  meta.inputTokens,
         outputTokens: meta.outputTokens,
         totalTokens:  meta.inputTokens + meta.outputTokens,
@@ -415,141 +410,53 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
       return responseMessage;
     } catch (error) {
       logger.error(`Error generating response with ${this.model}:`, error.message);
-      
-      // Provide a more helpful error message for timeouts
+
       let errorMessage = "I apologize, but I'm having trouble generating a response at the moment.";
-      
       if (error.message.includes('timeout')) {
         errorMessage = "I apologize, but your request is too complex for me to process right now. Please try a shorter or simpler request.";
       }
-      
-      // Return error message if LLM fails
+
       return createMessage(
-        this.agentId,                 // from
-        message.from,                 // to
-        errorMessage,                 // content
-        PERFORMATIVES.RESPOND         // performative
+        this.agentId,
+        message.from,
+        errorMessage,
+        PERFORMATIVES.RESPOND
       );
     }
   }
 
   /**
-   * Extract confidence score from LLM response
-   * Analyzes response for uncertainty markers and hedging language
+   * Extract and store explicit user preferences using a structured LLM call.
+   * Replaces the previous heuristic regex approach with JSON-mode inference,
+   * which is reliable across different phrasings and languages.
+   *
+   * @param {string} userMessage - The user's message to analyse
    */
-  extractConfidenceScore(content) {
-    // Default confidence score
-    let confidence = 75; // Start at moderate confidence
-    const uncertainties = [];
-
-    // Convert to lowercase for pattern matching
-    const lowerContent = content.toLowerCase();
-
-    // Uncertainty markers that reduce confidence
-    const uncertaintyPatterns = [
-      { pattern: /i'm not sure|not certain|unclear|unsure/g, impact: -15, label: 'explicit uncertainty' },
-      { pattern: /might|may|could|possibly|perhaps|maybe/g, impact: -5, label: 'hedging language' },
-      { pattern: /i think|i believe|in my opinion|seems like/g, impact: -8, label: 'subjective statements' },
-      { pattern: /probably|likely|unlikely/g, impact: -7, label: 'probabilistic language' },
-      { pattern: /don't know|can't say|hard to say|difficult to determine/g, impact: -20, label: 'knowledge gaps' },
-      { pattern: /assumption|assume|assuming/g, impact: -10, label: 'assumptions' },
-      { pattern: /\?/g, impact: -3, label: 'questions in response' },
-    ];
-
-    // Certainty markers that increase confidence
-    const certaintyPatterns = [
-      { pattern: /definitely|certainly|absolutely|clearly|obviously/g, impact: +10, label: 'strong certainty' },
-      { pattern: /according to|based on|research shows|studies indicate/g, impact: +8, label: 'evidence-based' },
-      { pattern: /always|never|must|will/g, impact: +5, label: 'definitive statements' },
-    ];
-
-    // Check uncertainty patterns
-    uncertaintyPatterns.forEach(({ pattern, impact, label }) => {
-      const matches = lowerContent.match(pattern);
-      if (matches) {
-        const count = matches.length;
-        confidence += impact * Math.min(count, 3); // Cap impact at 3 occurrences
-        if (count > 0) {
-          uncertainties.push({ type: label, count });
-        }
-      }
-    });
-
-    // Check certainty patterns
-    certaintyPatterns.forEach(({ pattern, impact, label }) => {
-      const matches = lowerContent.match(pattern);
-      if (matches) {
-        const count = matches.length;
-        confidence += impact * Math.min(count, 2); // Cap positive impact
-      }
-    });
-
-    // Adjust based on response length (very short responses often indicate uncertainty)
-    if (content.length < 50) {
-      confidence -= 10;
-      uncertainties.push({ type: 'very short response', count: 1 });
-    }
-
-    // Ensure confidence stays within 0-100 range
-    confidence = Math.max(0, Math.min(100, confidence));
-
-    // Clean content by removing confidence markers if present
-    // (in case LLM was instructed to include them)
-    let cleanedContent = content.replace(/\[CONFIDENCE:\s*\d+%?\]/gi, '').trim();
-
-    return {
-      confidence: Math.round(confidence),
-      uncertainties,
-      cleanedContent
-    };
-  }
-
-  /**
-   * Extract and store user preferences from conversation
-   */
-  async extractAndStorePreferences(userMessage, agentResponse) {
+  async extractAndStorePreferences(userMessage) {
     if (!this.memory) return;
 
+    const prompt =
+      `Extract any explicit user preferences from the message below.\n` +
+      `Only extract preferences the user explicitly states (e.g. "I prefer Python", "please be brief", "I work as a doctor").\n` +
+      `Do NOT infer preferences that are not clearly stated.\n\n` +
+      `Message: "${userMessage.slice(0, 500)}"\n\n` +
+      `Respond ONLY with valid JSON:\n` +
+      `{"preferences": [{"key": "preference_name", "value": "preference_value"}]}\n` +
+      `If no explicit preferences are mentioned, return: {"preferences": []}`;
+
     try {
-      // Simple heuristic-based preference extraction
-      const userLower = userMessage.toLowerCase();
-      
-      // Language preferences
-      if (userLower.includes('speak in') || userLower.includes('language')) {
-        const languageMatch = userLower.match(/speak in (\w+)|language.*?(\w+)/);
-        if (languageMatch) {
-          const language = languageMatch[1] || languageMatch[2];
-          await this.memory.storePreference('language', language, 0.7);
+      const result = await generateResponseJson(
+        process.env.SUMMARIZER_MODEL || 'phi3:latest',
+        prompt,
+        { temperature: 0.1, num_predict: 200 }
+      );
+      for (const pref of (result.preferences || [])) {
+        if (pref.key && pref.value) {
+          await this.memory.storePreference(String(pref.key), String(pref.value), 0.8);
         }
       }
-      
-      // Communication style preferences
-      if (userLower.includes('brief') || userLower.includes('short')) {
-        await this.memory.storePreference('responseStyle', 'brief', 0.6);
-      }
-      if (userLower.includes('detailed') || userLower.includes('explain')) {
-        await this.memory.storePreference('responseStyle', 'detailed', 0.6);
-      }
-      
-      // Topic interests
-      if (userLower.includes('interested in') || userLower.includes('like')) {
-        const interestMatch = userLower.match(/interested in (.+?)[.!?]|like (.+?)[.!?]/);
-        if (interestMatch) {
-          const interest = interestMatch[1] || interestMatch[2];
-          await this.memory.storePreference('interests', interest, 0.5);
-        }
-      }
-      
-      // Professional context
-      if (userLower.includes('work') || userLower.includes('job') || userLower.includes('profession')) {
-        const workMatch = userLower.match(/work.+?as.+?(\w+)|job.+?(\w+)|profession.+?(\w+)/);
-        if (workMatch) {
-          const profession = workMatch[1] || workMatch[2] || workMatch[3];
-          await this.memory.storePreference('profession', profession, 0.8);
-        }
-      }
-    } catch (error) {
-      logger.warn(`Error extracting preferences: ${error.message}`);
+    } catch (err) {
+      logger.warn(`Preference extraction failed: ${err.message}`);
     }
   }
 

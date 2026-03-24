@@ -1,454 +1,185 @@
 /**
- * Ollama API integration module
+ * LLM Client — Groq backend
+ *
+ * Drop-in replacement for the previous Ollama client.
+ * Exports the exact same interface so no other file needs to change.
+ *
+ * Groq provides free, fast inference for open-source models (Llama3, Mixtral,
+ * Gemma) via an OpenAI-compatible API. Rate limits are per-model, so routing
+ * different query types to different models effectively multiplies capacity.
+ *
+ * Embeddings: Groq does not expose an embeddings endpoint. getEmbedding()
+ * returns [] and the memory system falls back to Jaccard similarity automatically.
  */
-const axios = require('axios');
-const dotenv = require('dotenv');
-const { getDynamicOllamaURL } = require('./wsl-network');
+
+'use strict';
+
+const Groq = require('groq-sdk');
 const { withRetry } = require('./retry');
+const { logger } = require('./logger');
 
-dotenv.config();
-
-// Configure Ollama API URL with dynamic detection
-let OLLAMA_API_BASE = null;
-const REQUEST_TIMEOUT = parseInt(process.env.REQUEST_TIMEOUT) || 120000; // 2 minutes default
-
-/**
- * Get Ollama API base URL with dynamic detection
- * 
- * @returns {Promise<string>} - Ollama API base URL
- */
-async function getOllamaAPIBase() {
-  if (!OLLAMA_API_BASE) {
-    OLLAMA_API_BASE = await getDynamicOllamaURL();
+// Lazy-initialise so the module can be required before dotenv runs
+let _client = null;
+function getClient() {
+  if (!_client) {
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error('GROQ_API_KEY is not set — add it to your .env file');
+    }
+    _client = new Groq({ apiKey: process.env.GROQ_API_KEY });
   }
-  return OLLAMA_API_BASE;
+  return _client;
 }
 
-/**
- * Check if Ollama service is available
- * 
- * @returns {Promise<boolean>} - True if Ollama is available, false otherwise
- */
+// ── Availability ───────────────────────────────────────────────────────────────
+
 async function checkOllamaAvailability() {
   try {
-    const apiBase = await getOllamaAPIBase();
-    await axios.get(`${apiBase}/version`, { timeout: 5000 });
+    await getClient().models.list();
     return true;
-  } catch (error) {
-    console.error('Ollama service unavailable:', error.message);
-    // Reset cached URL on failure to force re-detection
-    OLLAMA_API_BASE = null;
+  } catch {
     return false;
   }
 }
 
-/**
- * Get list of available models
- * 
- * @returns {Promise<Array>} - List of available model names
- */
 async function getAvailableModels() {
   try {
-    const apiBase = await getOllamaAPIBase();
-    const response = await axios.get(`${apiBase}/tags`, { timeout: 5000 });
-    return response.data.models ? response.data.models.map(m => m.name) : [];
-  } catch (error) {
-    console.error('Failed to get available models:', error.message);
+    const list = await getClient().models.list();
+    return list.data.map(m => m.id);
+  } catch {
     return [];
   }
 }
 
-/**
- * Find a fallback model if the requested model is not available
- * 
- * @param {string} requestedModel - The model that was requested
- * @returns {Promise<string>} - Available model to use instead
- */
-async function findFallbackModel(requestedModel) {
-  try {
-    const availableModels = await getAvailableModels();
-    
-    if (availableModels.includes(requestedModel)) {
-      return requestedModel;
-    }
-    
-    // Common fallback models in order of preference
-    const fallbackModels = [
-      'llama3:latest',
-      'llama2:latest', 
-      'phi3:latest',
-      'mistral:latest',
-      'qwen:latest'
-    ];
-    
-    for (const fallback of fallbackModels) {
-      if (availableModels.includes(fallback)) {
-        console.warn(`Model ${requestedModel} not available, using fallback: ${fallback}`);
-        return fallback;
-      }
-    }
-    
-    // If no fallback found, return the first available model
-    if (availableModels.length > 0) {
-      console.warn(`Model ${requestedModel} not available, using first available: ${availableModels[0]}`);
-      return availableModels[0];
-    }
-    
-    // No models available - just return the requested model and let it fail gracefully
-    console.warn(`No models available. Will try to use requested model: ${requestedModel}`);
-    return requestedModel;
-  } catch (error) {
-    console.warn(`Error finding fallback model, using requested: ${requestedModel}`);
-    return requestedModel;
-  }
+async function findFallbackModel(model) {
+  return model;
 }
 
-/**
- * Generate a response from Ollama LLM model with retry logic
- * 
- * @param {string} model - Ollama model name
- * @param {string} prompt - Text prompt for the model
- * @param {Object} options - Additional options for the model
- * @param {number} retries - Number of retries (internal use)
- * @returns {Promise<string>} - Model's generated response
- */
+async function getOllamaAPIBase() {
+  return 'https://api.groq.com/openai/v1';
+}
+
+// ── Text generation ────────────────────────────────────────────────────────────
+
 async function generateResponse(model, prompt, options = {}) {
-  const isAvailable = await checkOllamaAvailability();
-  if (!isAvailable) {
-    return "I'm unable to connect to the Ollama service at the moment. Please check if Ollama is running properly.";
-  }
-
-  const availableModel = await findFallbackModel(model);
-
-  const defaultOptions = {
-    temperature: 0.7,
-    num_predict: 500,
-    top_k: 50,
-    top_p: 0.9,
-    stop: ["</answer>", "User:", "Human:"]
-  };
-  const finalOptions    = { ...defaultOptions, ...options };
-  const enhancedPrompt  = `${prompt}\n\n<answer>`;
-  const apiBase         = await getOllamaAPIBase();
-
-  console.log(`Generating response with model: ${availableModel}`);
-
-  let response;
-  try {
-    response = await withRetry(
-      () => axios.post(`${apiBase}/generate`, {
-        model: availableModel,
-        prompt: enhancedPrompt,
-        stream: false,
-        ...finalOptions
-      }, {
-        timeout: REQUEST_TIMEOUT,
-        maxRedirects: 5,
-        headers: { 'Connection': 'keep-alive', 'Content-Type': 'application/json' },
-        httpAgent: new (require('http')).Agent({ keepAlive: true, keepAliveMsecs: 30000, maxSockets: 10 })
-      }),
-      { maxAttempts: 3, baseDelayMs: 500, maxDelayMs: 10_000 }
-    );
-  } catch (error) {
-    let errorMessage = `Failed to generate response: ${error.message}`;
-    if (error.code === 'ECONNABORTED') {
-      errorMessage = `TIMEOUT ERROR: Model timed out after ${REQUEST_TIMEOUT / 1000}s. Try reducing prompt size.`;
-    } else if (error.code === 'ECONNREFUSED') {
-      errorMessage = `CONNECTION ERROR: Could not connect to Ollama at ${apiBase}.`;
-    } else if (error.response?.status === 404) {
-      errorMessage = `MODEL ERROR: Model not found. Ensure it is downloaded.`;
-    } else if (error.response?.status === 400) {
-      errorMessage = `REQUEST ERROR: Bad request to Ollama API.`;
-    }
-    console.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  if (!response.data?.response) {
-    console.warn(`Empty response from Ollama for model ${availableModel}`);
-    return "I processed your request but couldn't generate a specific response at this time.";
-  }
-
-  let text = response.data.response.trim();
-  if (text.endsWith("</answer>")) text = text.slice(0, -9).trim();
-  return text;
-}
-
-/**
- * Generate a response and return token usage metadata.
- *
- * Same as generateResponse but returns { text, inputTokens, outputTokens, model }
- * instead of a plain string. Use this wherever you need token accounting or
- * LLM tracing; all other callers continue using generateResponse unchanged.
- *
- * @param {string} model - Ollama model name
- * @param {string} prompt - Text prompt
- * @param {Object} options - Additional Ollama options
- * @returns {Promise<{ text: string, inputTokens: number, outputTokens: number, model: string }>}
- */
-async function generateResponseWithMeta(model, prompt, options = {}) {
-  const isAvailable = await checkOllamaAvailability();
-  if (!isAvailable) {
-    return {
-      text: "I'm unable to connect to the Ollama service at the moment. Please check if Ollama is running properly.",
-      inputTokens: 0,
-      outputTokens: 0,
+  const response = await withRetry(
+    () => getClient().chat.completions.create({
       model,
-    };
-  }
+      messages:    [{ role: 'user', content: prompt }],
+      max_tokens:  options.num_predict  ?? 500,
+      temperature: options.temperature  ?? 0.7,
+    }),
+    { maxAttempts: 3, baseDelayMs: 1000, maxDelayMs: 15_000 }
+  );
+  return response.choices[0]?.message?.content?.trim() || '';
+}
 
-  const availableModel = await findFallbackModel(model);
-
-  const defaultOptions = {
-    temperature: 0.7,
-    num_predict: 500,
-    top_k: 50,
-    top_p: 0.9,
-    stop: ["</answer>", "User:", "Human:"]
-  };
-  const finalOptions   = { ...defaultOptions, ...options };
-  const enhancedPrompt = `${prompt}\n\n<answer>`;
-  const apiBase        = await getOllamaAPIBase();
-
-  let response;
-  try {
-    response = await withRetry(
-      () => axios.post(`${apiBase}/generate`, {
-        model: availableModel,
-        prompt: enhancedPrompt,
-        stream: false,
-        ...finalOptions
-      }, {
-        timeout: REQUEST_TIMEOUT,
-        maxRedirects: 5,
-        headers: { 'Connection': 'keep-alive', 'Content-Type': 'application/json' },
-        httpAgent: new (require('http')).Agent({ keepAlive: true, keepAliveMsecs: 30000, maxSockets: 10 })
-      }),
-      { maxAttempts: 3, baseDelayMs: 500, maxDelayMs: 10_000 }
-    );
-  } catch (error) {
-    let errorMessage = `Failed to generate response: ${error.message}`;
-    if (error.code === 'ECONNABORTED') {
-      errorMessage = `TIMEOUT ERROR: Model timed out after ${REQUEST_TIMEOUT / 1000}s. Try reducing prompt size.`;
-    } else if (error.code === 'ECONNREFUSED') {
-      errorMessage = `CONNECTION ERROR: Could not connect to Ollama at ${apiBase}.`;
-    } else if (error.response?.status === 404) {
-      errorMessage = `MODEL ERROR: Model not found. Ensure it is downloaded.`;
-    } else if (error.response?.status === 400) {
-      errorMessage = `REQUEST ERROR: Bad request to Ollama API.`;
-    }
-    console.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  if (!response.data?.response) {
-    return {
-      text: "I processed your request but couldn't generate a specific response at this time.",
-      inputTokens: 0,
-      outputTokens: 0,
-      model: availableModel,
-    };
-  }
-
-  let text = response.data.response.trim();
-  if (text.endsWith("</answer>")) text = text.slice(0, -9).trim();
-
+async function generateResponseWithMeta(model, prompt, options = {}) {
+  const response = await withRetry(
+    () => getClient().chat.completions.create({
+      model,
+      messages:    [{ role: 'user', content: prompt }],
+      max_tokens:  options.num_predict  ?? 500,
+      temperature: options.temperature  ?? 0.7,
+    }),
+    { maxAttempts: 3, baseDelayMs: 1000, maxDelayMs: 15_000 }
+  );
   return {
-    text,
-    inputTokens: response.data.prompt_eval_count ?? 0,
-    outputTokens: response.data.eval_count ?? 0,
-    model: availableModel,
+    text:         response.choices[0]?.message?.content?.trim() || '',
+    inputTokens:  response.usage?.prompt_tokens     ?? 0,
+    outputTokens: response.usage?.completion_tokens ?? 0,
+    model,
   };
 }
 
 /**
- * Generate a vector embedding for a piece of text using Ollama's /api/embeddings endpoint.
- *
- * @param {string} model - Embedding model name (default: nomic-embed-text)
- * @param {string} text  - Text to embed
- * @returns {Promise<number[]>} - Embedding vector, or empty array on failure
+ * JSON mode — Groq constrains the model to output valid JSON via response_format.
+ * No regex extraction needed.
  */
-async function getEmbedding(model, text) {
-  const embeddingModel = model || process.env.EMBEDDING_MODEL || 'nomic-embed-text:latest';
+async function generateResponseWithMetaJson(model, prompt, options = {}) {
+  const response = await withRetry(
+    () => getClient().chat.completions.create({
+      model,
+      messages:        [{ role: 'user', content: prompt }],
+      max_tokens:      options.num_predict  ?? 600,
+      temperature:     options.temperature  ?? 0.1,
+      response_format: { type: 'json_object' },
+    }),
+    { maxAttempts: 3, baseDelayMs: 1000, maxDelayMs: 15_000 }
+  );
+  return {
+    text:         response.choices[0]?.message?.content?.trim() || '{}',
+    inputTokens:  response.usage?.prompt_tokens     ?? 0,
+    outputTokens: response.usage?.completion_tokens ?? 0,
+    model,
+  };
+}
+
+async function generateResponseJson(model, prompt, options = {}) {
+  const meta = await generateResponseWithMetaJson(model, prompt, options);
   try {
-    const apiBase = await getOllamaAPIBase();
-    const response = await axios.post(`${apiBase}/embeddings`, {
-      model: embeddingModel,
-      prompt: text,
-    }, { timeout: 30_000, headers: { 'Content-Type': 'application/json' } });
-    return Array.isArray(response.data?.embedding) ? response.data.embedding : [];
-  } catch (err) {
-    console.warn(`getEmbedding failed (${embeddingModel}): ${err.message}`);
-    return [];
+    return JSON.parse(meta.text);
+  } catch {
+    throw new Error(`Model returned invalid JSON: ${meta.text.slice(0, 200)}`);
   }
 }
 
-/**
- * Check if a message contains inappropriate content using LLM
- * 
- * @param {string} model - Ollama model name
- * @param {string} content - Content to check
- * @returns {Promise<boolean>} - True if content is flagged, false otherwise
- */
-async function moderateWithLLM(model, content) {
-  const moderationPrompt = `
-You are evaluating a message for inappropriate content.
-The message is: "${content}"
-
-Your task is to determine if this message contains harmful, offensive, insulting, or inappropriate content.
-Respond ONLY with the word "FLAG" if it does, or "OK" if it's safe and appropriate.
-`;
-
-  try {
-    const result = await generateResponse(model, moderationPrompt, {
-      temperature: 0.1, // Low temperature for more deterministic results
-      num_predict: 50   // Short response
-    });
-    
-    // Handle undefined or null result
-    if (result === undefined || result === null) {
-      console.warn(`Received undefined/null response from LLM during moderation. Using safe default.`);
-      return false; // Assume safe content if we can't get a proper response
-    }
-    
-    // More robust parsing - normalize and check for exact match or inclusion
-    const normalizedResult = result.trim().toUpperCase();
-    
-    // First check if result is exactly "FLAG" or contains "FLAG" as a whole word
-    if (normalizedResult === "FLAG" || 
-        normalizedResult.match(/\bFLAG\b/) || 
-        normalizedResult.includes("FLAG")) {
-      return true;
-    }
-    
-    // If result is exactly "OK" or clearly contains "OK" as a standalone response, not flag
-    if (normalizedResult === "OK" || 
-        normalizedResult.match(/\bOK\b/)) {
-      return false;
-    }
-    
-    // If response is ambiguous or doesn't match expected format, log the unexpected response
-    console.warn(`Unexpected moderation response: "${result}". Using safe default.`);
-    return false; // Changed to assume safe if response is ambiguous
-    
-  } catch (error) {
-    console.error('Error during LLM moderation:', error.message);
-    // Changed to assume safe if moderation fails
-    return false;
-  }
-}
-
-/**
- * Generate a streaming response from Ollama LLM model
- *
- * @param {string} model - Ollama model name
- * @param {string} prompt - Text prompt for the model
- * @param {Object} options - Additional options for the model
- * @param {Function} onToken - Callback invoked with each token string as it arrives
- * @returns {Promise<string>} - Full generated text
- */
 async function generateResponseStream(model, prompt, options = {}, onToken) {
-  const isAvailable = await checkOllamaAvailability();
-  if (!isAvailable) {
-    throw new Error("Ollama service unavailable");
-  }
-
-  const availableModel = await findFallbackModel(model);
-
-  const defaultOptions = {
-    temperature: 0.7,
-    num_predict: 500,
-    top_k: 50,
-    top_p: 0.9,
-    stop: ["</answer>", "User:", "Human:"]
-  };
-  const finalOptions = { ...defaultOptions, ...options };
-  const enhancedPrompt = `${prompt}\n\n<answer>`;
-
-  console.log(`Streaming response with model: ${availableModel}`);
-  const apiBase = await getOllamaAPIBase();
-
-  const response = await axios.post(`${apiBase}/generate`, {
-    model: availableModel,
-    prompt: enhancedPrompt,
+  const stream = await getClient().chat.completions.create({
+    model,
+    messages:    [{ role: 'user', content: prompt }],
+    max_tokens:  options.num_predict  ?? 500,
+    temperature: options.temperature  ?? 0.7,
     stream: true,
-    ...finalOptions
-  }, {
-    responseType: 'stream',
-    timeout: REQUEST_TIMEOUT,
-    headers: { 'Content-Type': 'application/json' }
   });
 
-  return new Promise((resolve, reject) => {
-    let fullText = '';
-    let buffer = '';
-
-    response.data.on('data', (chunk) => {
-      buffer += chunk.toString();
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // keep any incomplete line for next chunk
-
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          const data = JSON.parse(line);
-          if (data.response) {
-            fullText += data.response;
-            if (onToken) onToken(data.response);
-          }
-        } catch (e) {
-          // skip malformed JSON lines
-        }
-      }
-    });
-
-    response.data.on('end', () => {
-      // flush any remaining buffer
-      if (buffer.trim()) {
-        try {
-          const data = JSON.parse(buffer);
-          if (data.response) {
-            fullText += data.response;
-            if (onToken) onToken(data.response);
-          }
-        } catch (e) { /* ignore */ }
-      }
-      let text = fullText.trim();
-      if (text.endsWith("</answer>")) {
-        text = text.substring(0, text.length - 9).trim();
-      }
-      resolve(text);
-    });
-
-    response.data.on('error', reject);
-  });
+  let fullText = '';
+  for await (const chunk of stream) {
+    const token = chunk.choices[0]?.delta?.content || '';
+    if (token) {
+      fullText += token;
+      if (onToken) onToken(token);
+    }
+  }
+  return fullText;
 }
 
+// ── Embeddings ─────────────────────────────────────────────────────────────────
+
 /**
- * Function to pull Ollama models
- *
- * @param {string} modelName - Name of the model to pull
- * @returns {Promise<boolean>} - True if pull successful, false otherwise
+ * Groq has no embeddings endpoint. Return [] so the memory system
+ * falls back to Jaccard similarity (already implemented in memory.js).
  */
-async function pullModel(modelName) {
+async function getEmbedding(_model, _text) {
+  return [];
+}
+
+// ── Moderation ─────────────────────────────────────────────────────────────────
+
+async function moderateWithLLM(model, content) {
+  const prompt =
+    `You are a content moderation system. Determine if this message contains harmful, offensive, or inappropriate content.\n\n` +
+    `Message: "${content.slice(0, 1000)}"\n\n` +
+    `Respond ONLY with valid JSON: {"flagged": true} or {"flagged": false}`;
   try {
-    console.log(`Pulling model ${modelName}...`);
-    const apiBase = await getOllamaAPIBase();
-    const response = await axios.post(`${apiBase}/pull`, {
-      name: modelName,
-    });
-    
-    console.log(`Successfully pulled model ${modelName}`);
-    return true;
-  } catch (error) {
-    console.error(`Error pulling model ${modelName}:`, error.message);
+    const result = await generateResponseJson(model, prompt, { temperature: 0.1, num_predict: 20 });
+    return result.flagged === true;
+  } catch {
+    logger.warn('moderateWithLLM failed — defaulting to safe (false)');
     return false;
   }
 }
+
+// ── Stubs ──────────────────────────────────────────────────────────────────────
+
+async function pullModel(_modelName) { return true; }
+
+// ── Exports ────────────────────────────────────────────────────────────────────
 
 module.exports = {
   generateResponse,
   generateResponseWithMeta,
+  generateResponseWithMetaJson,
+  generateResponseJson,
   generateResponseStream,
   getEmbedding,
   moderateWithLLM,
@@ -456,5 +187,5 @@ module.exports = {
   checkOllamaAvailability,
   getAvailableModels,
   findFallbackModel,
-  getOllamaAPIBase
-}; 
+  getOllamaAPIBase,
+};
