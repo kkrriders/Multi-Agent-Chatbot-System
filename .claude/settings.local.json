@@ -20,7 +20,8 @@
       "Read(//tmp/everything-claude-code/.agents/skills/$skill/**)",
       "Bash(done)",
       "Bash(find /tmp/everything-claude-code -path *.claude/commands* -o -path */commands/*.md)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(node -e \"require\\(''dotenv''\\).config\\(\\); const Groq = require\\(''groq-sdk''\\); const g = new Groq\\({apiKey: process.env.GROQ_API_KEY}\\); g.models.list\\(\\).then\\(r => console.log\\(''Connected. Models:'', r.data.slice\\(0,4\\).map\\(m=>m.id\\).join\\('', ''\\)\\)\\).catch\\(e => console.error\\(''FAILED:'', e.message\\)\\)\")"
     ],
     "deny": [],
     "ask": []
