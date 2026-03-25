@@ -1,437 +1,260 @@
 import Link from "next/link"
 
-const features = [
-  { icon: "hub",          color: "#78b0ff", title: "Multi-Agent Collaboration",  desc: "Multiple intelligence nodes work in parallel on your tasks, each contributing unique expertise and perspective." },
-  { icon: "bolt",         color: "#4edea3", title: "Real-Time Streaming",        desc: "Watch agents generate responses token-by-token via WebSocket. See the thinking process unfold live." },
-  { icon: "auto_awesome", color: "#FFBF00", title: "Intelligent Model Routing",  desc: "Tasks auto-route to the best model — LLaMA3, Mixtral, Gemma2, or LLaMA3-70b — based on query type." },
-  { icon: "shield",       color: "#d0bcff", title: "Secure by Default",          desc: "JWT auth, HMAC-signed agent calls, LLM-based content moderation, and circuit breakers on every node." },
-  { icon: "schema",       color: "#78b0ff", title: "Custom Agent Teams",         desc: "Define system prompts per agent. Use pre-built Coding, Research, Business, or Creative team templates." },
-  { icon: "memory",       color: "#4edea3", title: "Persistent Context",         desc: "Conversation history in MongoDB with Jaccard-similarity memory retrieval keeps agents contextually aware." },
-]
-
-const steps = [
-  { num: "01", icon: "manage_accounts", color: "#78b0ff", title: "Configure Your Nodes",   desc: "Enable agents and assign specialized system prompts or pick a pre-built team template." },
-  { num: "02", icon: "terminal",        color: "#4edea3", title: "Deploy Your Task",        desc: "Describe your objective. The manager node routes work to the most capable agents automatically." },
-  { num: "03", icon: "stream",          color: "#d0bcff", title: "Watch Them Execute",      desc: "Agents collaborate in real-time. Follow each response streaming live to the unified workspace." },
-]
-
 export default function HomePage() {
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: "#060e20", color: "#dee5ff", fontFamily: "var(--font-inter), Inter, sans-serif" }}
-    >
-      {/* ── Navigation ───────────────────────────────────────────────────── */}
-      <nav
-        className="sticky top-0 z-50 w-full"
-        style={{ background: "rgba(6,14,32,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(64,72,93,0.2)" }}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(78,222,163,0.15)", border: "1px solid rgba(78,222,163,0.3)" }}
-            >
-              <span className="material-symbols-outlined text-xl" style={{ color: "#4edea3", fontVariationSettings: "'FILL' 1" }}>
-                deployed_code
-              </span>
-            </div>
-            <div>
-              <div className="text-base font-black tracking-tighter uppercase leading-none" style={{ color: "#dee5ff" }}>
-                Neural Workspace
-              </div>
-              <div
-                className="text-[9px] uppercase tracking-[0.3em]"
-                style={{ color: "rgba(78,222,163,0.6)", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-              >
-                Synthetic Architect
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen" style={{ background: "#0c1323", color: "#dce2f9", fontFamily: "var(--font-inter), Inter, sans-serif" }}>
 
-          {/* Links */}
-          <div className="hidden md:flex items-center gap-8">
-            {[["#features", "Features"], ["#how-it-works", "How It Works"], ["#models", "Models"]].map(([href, label]) => (
-              <a
-                key={label}
-                href={href}
-                className="text-sm font-medium transition-colors hover:text-[#78b0ff]"
-                style={{ color: "#6d758c" }}
-              >
-                {label}
-              </a>
-            ))}
+      {/* ── Navigation ── */}
+      <nav className="fixed top-0 w-full z-50" style={{ background: "rgba(12,19,35,0.6)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(46,52,70,0.15)", boxShadow: "0 24px 40px rgba(77,142,255,0.06)" }}>
+        <div className="flex justify-between items-center w-full px-6 py-3 max-w-screen-2xl mx-auto">
+          <div className="text-base font-bold tracking-tighter" style={{ color: "#dce2f9" }}>Neural Workspace</div>
+          <div className="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <a className="transition-colors hover:text-[#dce2f9]" href="#models" style={{ color: "rgba(220,226,249,0.7)" }}>Models</a>
+            <a className="transition-colors hover:text-[#dce2f9]" href="#infrastructure" style={{ color: "rgba(220,226,249,0.7)" }}>Infrastructure</a>
+            <a className="transition-colors hover:text-[#dce2f9]" href="#features" style={{ color: "rgba(220,226,249,0.7)" }}>Security</a>
           </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-              style={{ color: "#a3aac4" }}
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="flex items-center gap-2 text-sm font-bold px-5 py-2 rounded-xl transition-all active:scale-95"
-              style={{ background: "#4edea3", color: "#003824", boxShadow: "0 4px 20px rgba(78,222,163,0.2)" }}
-            >
-              Get Access
-              <span className="material-symbols-outlined text-base">arrow_forward</span>
+          <div className="flex items-center space-x-3">
+            <a href="#" className="px-3 py-1.5 text-xs font-mono transition-colors hover:text-[#dce2f9]" style={{ color: "rgba(220,226,249,0.7)" }}>Documentation</a>
+            <Link href="/signup" className="px-4 py-1.5 rounded-lg font-bold text-xs transition-all active:scale-95 hover:shadow-[0_0_12px_rgba(0,165,114,0.4)]" style={{ background: "#00a572", color: "#00311f" }}>
+              Launch Console
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        {/* Background elements */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div
-            style={{
-              position: "absolute", inset: 0, opacity: 0.025,
-              backgroundImage: "radial-gradient(#4edea3 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-            }}
-          />
-          <div style={{ position: "absolute", top: "-10%", right: "-5%", width: "50%", height: "60%", background: "rgba(120,176,255,0.06)", filter: "blur(120px)", borderRadius: "50%" }} />
-          <div style={{ position: "absolute", bottom: "-10%", left: "-5%", width: "45%", height: "55%", background: "rgba(78,222,163,0.06)", filter: "blur(120px)", borderRadius: "50%" }} />
-        </div>
+      <main className="pt-14">
 
-        <div className="max-w-7xl mx-auto px-6 py-24 md:py-36 relative z-10 text-center">
-          {/* Status badge */}
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
-            style={{ background: "rgba(78,222,163,0.08)", border: "1px solid rgba(78,222,163,0.2)" }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4edea3" }} />
-            <span
-              className="text-[10px] uppercase tracking-wider font-bold"
-              style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-            >
-              Groq-Powered · 4 Specialized Nodes · Real-Time Streaming
-            </span>
+        {/* ── Hero ── */}
+        <section className="relative flex items-center overflow-hidden px-6 py-16 md:py-24" style={{ minHeight: "680px" }}>
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom right, #0c1323, #070e1e, #0c1323)", opacity: 0.9 }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ width: 600, height: 600, background: "rgba(173,198,255,0.08)", filter: "blur(100px)" }} />
           </div>
-
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-[1.05]" style={{ color: "#dee5ff" }}>
-            Orchestrate AI Agents <br />
-            <span style={{ color: "#78b0ff" }}>at Neural Speed</span>
-          </h1>
-
-          <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: "#6d758c" }}>
-            Deploy specialized intelligence nodes — code, analysis, creative, general — that collaborate in real-time to tackle any problem you throw at them.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link
-              href="/signup"
-              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all active:scale-95 text-base"
-              style={{ background: "#4edea3", color: "#003824", boxShadow: "0 8px 30px rgba(78,222,163,0.2)" }}
-            >
-              Initialize Workspace
-              <span className="material-symbols-outlined">rocket_launch</span>
-            </Link>
-            <Link
-              href="/chat"
-              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all text-base"
-              style={{ background: "rgba(120,176,255,0.1)", color: "#78b0ff", border: "1px solid rgba(120,176,255,0.25)" }}
-            >
-              <span className="material-symbols-outlined">play_circle</span>
-              Live Demo
-            </Link>
-          </div>
-
-          {/* Stat row */}
-          <div className="flex flex-wrap items-center justify-center gap-8">
-            {[
-              { val: "4",      unit: "Agent Nodes",         color: "#78b0ff" },
-              { val: "<2s",    unit: "Avg Response",        color: "#4edea3" },
-              { val: "32k",    unit: "Context Window",      color: "#d0bcff" },
-              { val: "100%",   unit: "Open Source Models",  color: "#FFBF00" },
-            ].map(({ val, unit, color }) => (
-              <div key={unit} className="flex flex-col items-center">
-                <div className="text-2xl font-black" style={{ color }}>{val}</div>
-                <div
-                  className="text-[10px] uppercase tracking-widest"
-                  style={{ color: "#40485d", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-                >
-                  {unit}
-                </div>
+          <div className="relative z-10 max-w-screen-2xl mx-auto w-full grid md:grid-cols-2 gap-8 items-center">
+            <div className="space-y-5">
+              <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full ghost-border" style={{ background: "#232a3b" }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4edea3" }} />
+                <span className="text-[9px] uppercase tracking-widest font-mono" style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}>System Online: v3.1.0</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ─────────────────────────────────────────────────────── */}
-      <section id="features" className="py-24" style={{ background: "rgba(9,19,40,0.5)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div
-              className="text-[10px] uppercase tracking-widest font-bold mb-4"
-              style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-            >
-              System Capabilities
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: "#dee5ff" }}>
-              Built for Serious Workflows
-            </h2>
-            <p className="text-lg max-w-xl mx-auto" style={{ color: "#6d758c" }}>
-              Every component engineered for reliability, speed, and intelligence at scale.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map(({ icon, color, title, desc }) => (
-              <div
-                key={title}
-                className="p-6 rounded-xl transition-all duration-200 group"
-                style={{
-                  background: "rgba(15,25,48,0.6)",
-                  border: "1px solid rgba(64,72,93,0.2)",
-                  backdropFilter: "blur(12px)",
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
-                  style={{ background: `${color}15`, border: `1px solid ${color}25` }}
-                >
-                  <span className="material-symbols-outlined" style={{ color }}>{icon}</span>
-                </div>
-                <h3 className="text-base font-bold mb-2" style={{ color: "#dee5ff" }}>{title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#6d758c" }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Models ───────────────────────────────────────────────────────── */}
-      <section id="models" className="py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div
-              className="text-[10px] uppercase tracking-widest font-bold mb-4"
-              style={{ color: "#78b0ff", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-            >
-              Agent Registry
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: "#dee5ff" }}>
-              Four Specialized Nodes
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { icon: "psychology",    color: "#78b0ff", label: "Llama3",     model: "llama3-8b-8192",     role: "General Logic",   desc: "Fast, versatile reasoning for everyday tasks and conversation." },
-              { icon: "storm",         color: "#4edea3", label: "Mixtral",    model: "mixtral-8x7b-32768", role: "Analysis",        desc: "32k context window. Deep analysis, research, and long-form reasoning." },
-              { icon: "blur_on",       color: "#d0bcff", label: "Gemma2",     model: "gemma2-9b-it",       role: "Creative",        desc: "Open-ended generation, storytelling, and imaginative problem solving." },
-              { icon: "auto_awesome",  color: "#FFBF00", label: "Llama3-70b", model: "llama3-70b-8192",    role: "Developer",       desc: "Strongest code generation. Architecture design, debugging, algorithms." },
-            ].map(({ icon, color, label, model, role, desc }) => (
-              <div
-                key={label}
-                className="p-5 rounded-xl"
-                style={{ background: "rgba(15,25,48,0.6)", border: `1px solid ${color}20` }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center"
-                    style={{ background: `${color}15`, border: `1px solid ${color}30` }}
-                  >
-                    <span className="material-symbols-outlined text-base" style={{ color }}>{icon}</span>
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold" style={{ color }}>{label}</div>
-                    <div
-                      className="text-[9px] uppercase tracking-widest"
-                      style={{ color: `${color}70`, fontFamily: "var(--font-jetbrains-mono), monospace" }}
-                    >
-                      {role}
-                    </div>
-                  </div>
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}80` }} />
-                </div>
-                <div
-                  className="text-[10px] px-2 py-1 rounded mb-3 font-mono"
-                  style={{ background: `${color}08`, color: `${color}90`, fontFamily: "var(--font-jetbrains-mono), monospace" }}
-                >
-                  {model}
-                </div>
-                <p className="text-xs leading-relaxed" style={{ color: "#6d758c" }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── How It Works ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-24" style={{ background: "rgba(9,19,40,0.4)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div
-              className="text-[10px] uppercase tracking-widest font-bold mb-4"
-              style={{ color: "#d0bcff", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-            >
-              Deployment Protocol
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: "#dee5ff" }}>
-              Three Steps to Launch
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
-            {/* Connector line */}
-            <div
-              className="absolute hidden md:block"
-              style={{ top: 40, left: "16.67%", right: "16.67%", height: 1, background: "linear-gradient(to right, rgba(120,176,255,0.2), rgba(78,222,163,0.2), rgba(208,188,255,0.2))" }}
-            />
-
-            {steps.map(({ num, icon, color, title, desc }) => (
-              <div key={num} className="flex flex-col items-center text-center relative">
-                <div
-                  className="w-20 h-20 rounded-2xl flex flex-col items-center justify-center mb-6 relative z-10"
-                  style={{ background: `${color}12`, border: `1px solid ${color}30` }}
-                >
-                  <span className="material-symbols-outlined text-2xl mb-1" style={{ color }}>{icon}</span>
-                  <span
-                    className="text-[9px] font-black"
-                    style={{ color: `${color}60`, fontFamily: "var(--font-jetbrains-mono), monospace" }}
-                  >
-                    {num}
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold mb-3" style={{ color: "#dee5ff" }}>{title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#6d758c" }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(78,222,163,0.06) 0%, transparent 70%)" }} />
-          <div style={{ position: "absolute", inset: 0, opacity: 0.02, backgroundImage: "radial-gradient(#4edea3 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        </div>
-
-        <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
-            style={{ background: "rgba(78,222,163,0.08)", border: "1px solid rgba(78,222,163,0.2)" }}
-          >
-            <span className="material-symbols-outlined text-sm" style={{ color: "#4edea3" }}>verified</span>
-            <span
-              className="text-[10px] uppercase tracking-wider font-bold"
-              style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-            >
-              Free to deploy · No GPU required · Groq-powered
-            </span>
-          </div>
-
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6" style={{ color: "#dee5ff" }}>
-            Ready to Command <br />
-            <span style={{ color: "#4edea3" }}>Your Intelligence Network?</span>
-          </h2>
-
-          <p className="text-lg mb-10" style={{ color: "#6d758c" }}>
-            Sign up, add your Groq API key, and have multi-agent collaboration running in under 5 minutes.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/signup"
-              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all active:scale-95 text-base"
-              style={{ background: "#4edea3", color: "#003824", boxShadow: "0 8px 30px rgba(78,222,163,0.2)" }}
-            >
-              Initialize Deployment
-              <span className="material-symbols-outlined">terminal</span>
-            </Link>
-            <Link
-              href="/login"
-              className="flex items-center gap-2 font-bold px-8 py-4 rounded-xl transition-all text-base"
-              style={{ background: "transparent", color: "#a3aac4", border: "1px solid rgba(64,72,93,0.4)" }}
-            >
-              Already have access? Login
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer style={{ background: "#070e1e", borderTop: "1px solid rgba(64,72,93,0.15)" }}>
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: "rgba(78,222,163,0.15)", border: "1px solid rgba(78,222,163,0.3)" }}
-                >
-                  <span className="material-symbols-outlined text-base" style={{ color: "#4edea3", fontVariationSettings: "'FILL' 1" }}>deployed_code</span>
-                </div>
-                <span className="font-black tracking-tighter uppercase text-sm" style={{ color: "#dee5ff" }}>Neural Workspace</span>
-              </div>
-              <p className="text-xs leading-relaxed" style={{ color: "#40485d" }}>
-                Multi-agent AI orchestration. Collaborative intelligence nodes working in real-time.
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter" style={{ color: "#dce2f9", lineHeight: "1" }}>
+                The Neural Workspace: <br />
+                <span style={{ color: "#adc6ff" }}>High-Performance</span> <br />
+                Multi-Agent Orchestration
+              </h1>
+              <p className="text-sm max-w-md leading-relaxed" style={{ color: "#c2c6d6" }}>
+                Orchestrate, monitor, and direct specialized intelligence agents with the precision of a tactical flight deck. Built for Groq-powered, low-latency cognitive operations.
               </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/signup" className="px-6 py-2.5 rounded-lg font-black text-sm tracking-tight transition-all hover:shadow-[0_0_20px_rgba(0,165,114,0.3)]" style={{ background: "#00a572", color: "#00311f" }}>
+                  Open Workspace
+                </Link>
+                <Link href="/login" className="px-6 py-2.5 rounded-lg font-semibold text-sm transition-all ghost-border" style={{ background: "#232a3b", color: "#dce2f9" }}>
+                  Sign In
+                </Link>
+              </div>
             </div>
+            <div className="hidden md:block relative hero-float">
+              <div className="aspect-square rounded-xl overflow-hidden relative hero-glow" style={{ background: "rgba(50,57,75,0.6)", backdropFilter: "blur(12px)" }}>
 
-            {/* Links */}
+                {/* Image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ opacity: 0.75 }}
+                  alt="Abstract 3D crystalline neural network structures with neon blue and emerald light paths"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6vtUQEefDRK4ZFXWZ1PKRG_aUpREtkRbV-g0supfjpp3llY6ttZK_py4f8EnLuIYRM6tZHplScDtyfruInRMFhAOLw6LEygMUUl-GLN4AZfKAX-4IeqXF8tQVUAPc7KKfMfxLZhnGaYxmotVFfXQ6AYlInOd2T4JpSWjsxL1xzyuZzkSrj5xynx5gXf-keI_VRKwpH3aAj8qv6JcBkuDmX4Jhp_dqXqw-sre_MdOA8hHZsFnHoPxRpEnOUJs-nHMMb9PbuxnKMkiC"
+                />
+
+                {/* Colour tint overlay */}
+                <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(173,198,255,0.06) 0%, transparent 50%, rgba(78,222,163,0.04) 100%)" }} />
+
+                {/* Bottom fade so log panel blends in */}
+                <div className="absolute bottom-0 left-0 right-0 h-2/5" style={{ background: "linear-gradient(to top, rgba(20,27,44,0.95), transparent)" }} />
+
+                {/* Scanline sweep */}
+                <div className="scanline" />
+
+                {/* HUD corner brackets */}
+                <div className="hud-corner absolute top-3 left-3 w-4 h-4" style={{ borderTop: "1.5px solid #4edea3", borderLeft: "1.5px solid #4edea3" }} />
+                <div className="hud-corner absolute top-3 right-3 w-4 h-4" style={{ borderTop: "1.5px solid #4edea3", borderRight: "1.5px solid #4edea3", animationDelay: "0.75s" }} />
+                <div className="hud-corner absolute bottom-3 left-3 w-4 h-4" style={{ borderBottom: "1.5px solid #4edea3", borderLeft: "1.5px solid #4edea3", animationDelay: "1.5s" }} />
+                <div className="hud-corner absolute bottom-3 right-3 w-4 h-4" style={{ borderBottom: "1.5px solid #4edea3", borderRight: "1.5px solid #4edea3", animationDelay: "2.25s" }} />
+
+                {/* Log overlay */}
+                <div className="absolute bottom-4 left-4 right-4 p-3 rounded-lg" style={{ background: "rgba(12,19,35,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(78,222,163,0.12)" }}>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-[9px] font-mono" style={{ color: "rgba(220,226,249,0.5)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>LATEST LOGS</span>
+                    <span className="flex items-center gap-1 text-[9px] font-mono" style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                      <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
+                      ACTIVE
+                    </span>
+                  </div>
+                  <div className="space-y-0.5 text-[10px]" style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                    <p style={{ color: "rgba(173,198,255,0.9)", animation: "log-appear 0.4s ease forwards", animationDelay: "0.3s", opacity: 0 }}>&gt; AGENT READY: LLAMA3_8B</p>
+                    <p style={{ color: "rgba(194,198,214,0.7)", animation: "log-appear 0.4s ease forwards", animationDelay: "1.2s", opacity: 0 }}>&gt; ROUTING TO GROQ ENDPOINT...</p>
+                    <p style={{ color: "rgba(78,222,163,0.9)", animation: "log-appear 0.4s ease forwards", animationDelay: "2.1s", opacity: 0 }}>&gt; RESPONSE RECEIVED: 12ms LATENCY</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Infrastructure Status ── */}
+        <section id="infrastructure" className="py-6" style={{ background: "#070e1e", borderTop: "1px solid rgba(66,71,84,0.1)", borderBottom: "1px solid rgba(66,71,84,0.1)" }}>
+          <div className="max-w-screen-2xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { heading: "Platform", links: ["Features", "Models", "Documentation", "Changelog"] },
-              { heading: "Company",  links: ["About", "Blog", "Careers", "Contact"] },
-              { heading: "Legal",    links: ["Privacy Policy", "Terms of Service", "Security", "Support"] },
-            ].map(({ heading, links }) => (
-              <div key={heading}>
-                <h4
-                  className="font-bold mb-4 text-xs uppercase tracking-widest"
-                  style={{ color: "#a3aac4", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-                >
-                  {heading}
-                </h4>
-                <ul className="space-y-2">
-                  {links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="text-xs transition-colors hover:text-[#78b0ff]"
-                        style={{ color: "#40485d" }}
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+              { icon: "dns",    color: "#4edea3", label: "Node Status",   value: "OPTIMAL", valueColor: "#4edea3" },
+              { icon: "memory", color: "#adc6ff", label: "System Load",   value: "24%",     valueColor: "#dce2f9" },
+              { icon: "hub",    color: "#d0bcff", label: "Active Agents", value: "4 / 4",   valueColor: "#dce2f9" },
+            ].map(({ icon, color, label, value, valueColor }) => (
+              <div key={label} className="flex items-center space-x-4 p-3 rounded-xl transition-colors hover:bg-[#181f30]">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${color}1A` }}>
+                  <span className="material-symbols-outlined text-base" style={{ color, fontVariationSettings: "'FILL' 1" }}>{icon}</span>
+                </div>
+                <div>
+                  <p className="text-[9px] font-mono uppercase tracking-widest" style={{ color: "rgba(194,198,214,0.6)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>{label}</p>
+                  <h4 className="text-base font-black" style={{ color: valueColor }}>{value}</h4>
+                </div>
               </div>
             ))}
           </div>
+        </section>
 
-          <div
-            className="pt-6 flex flex-col md:flex-row justify-between items-center gap-3"
-            style={{ borderTop: "1px solid rgba(64,72,93,0.15)" }}
-          >
-            <span
-              className="text-[10px] uppercase tracking-[0.05em]"
-              style={{ color: "#40485d", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-            >
-              © 2024 Neural Workspace. Tactical Intelligence Systems v4.2.0
-            </span>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4edea3" }} />
-              <span
-                className="text-[10px] uppercase tracking-widest"
-                style={{ color: "#4edea3", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-              >
-                All Systems Operational
-              </span>
+        {/* ── System Overview (Agent Cards) ── */}
+        <section id="models" className="py-20 px-6 max-w-screen-2xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+            <div className="max-w-xl">
+              <h2 className="text-[9px] font-mono uppercase mb-2" style={{ color: "#adc6ff", letterSpacing: "0.4em", fontFamily: "var(--font-jetbrains-mono), monospace" }}>The Orchestration Core</h2>
+              <h3 className="text-2xl font-black tracking-tighter" style={{ color: "#dce2f9" }}>Specialized Neural Units</h3>
             </div>
+            <p className="max-w-sm text-xs" style={{ color: "#c2c6d6" }}>Each agent is isolated in a secure container, optimized for specific cognitive workloads within the tactical cluster.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Llama3 — wide */}
+            <div className="md:col-span-2 group relative p-5 rounded-xl overflow-hidden transition-all ghost-border hover:bg-[#181f30]" style={{ background: "#141b2c" }}>
+              <div className="absolute top-0 right-0 w-28 h-28 rounded-full" style={{ background: "rgba(173,198,255,0.08)", filter: "blur(50px)" }} />
+              <span className="text-[9px] font-mono mb-3 block" style={{ color: "#adc6ff", letterSpacing: "0.2em", fontFamily: "var(--font-jetbrains-mono), monospace" }}>ROUTING / GENERAL</span>
+              <h4 className="text-xl font-black mb-2" style={{ color: "#dce2f9" }}>Llama3</h4>
+              <p className="mb-4 leading-relaxed text-xs" style={{ color: "#c2c6d6" }}>The primary coordinator for multi-agent reasoning. Handles instruction following, routing, and meta-cognitive oversight with ultra-low latency.</p>
+              <button className="flex items-center space-x-1 text-xs font-bold transition-transform hover:translate-x-1" style={{ color: "#adc6ff" }}>
+                <span>View Detail</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>arrow_forward</span>
+              </button>
+            </div>
+
+            {/* Mixtral */}
+            <div className="group relative p-5 rounded-xl transition-all ghost-border hover:bg-[#181f30]" style={{ background: "#141b2c" }}>
+              <div className="absolute top-0 right-0 w-20 h-20 rounded-full" style={{ background: "rgba(78,222,163,0.08)", filter: "blur(35px)" }} />
+              <span className="text-[9px] font-mono mb-3 block" style={{ color: "#4edea3", letterSpacing: "0.2em", fontFamily: "var(--font-jetbrains-mono), monospace" }}>CODE / LOGIC</span>
+              <h4 className="text-lg font-black mb-2" style={{ color: "#dce2f9" }}>Mixtral</h4>
+              <p className="mb-4 text-xs leading-relaxed" style={{ color: "#c2c6d6" }}>High-precision syntax parsing and algorithmic generation. 32k context window for complex reasoning tasks.</p>
+              <button className="w-full py-2 rounded-lg font-bold text-xs transition-all ghost-border hover:opacity-80" style={{ background: "rgba(78,222,163,0.05)", color: "#4edea3" }}>View Detail</button>
+            </div>
+
+            {/* Gemma2 */}
+            <div className="group relative p-5 rounded-xl transition-all ghost-border hover:bg-[#181f30]" style={{ background: "#141b2c" }}>
+              <div className="absolute top-0 right-0 w-20 h-20 rounded-full" style={{ background: "rgba(245,158,11,0.08)", filter: "blur(35px)" }} />
+              <span className="text-[9px] font-mono mb-3 block" style={{ color: "#f59e0b", letterSpacing: "0.2em", fontFamily: "var(--font-jetbrains-mono), monospace" }}>ANALYSIS / DATA</span>
+              <h4 className="text-lg font-black mb-2" style={{ color: "#dce2f9" }}>Gemma2</h4>
+              <p className="mb-4 text-xs leading-relaxed" style={{ color: "#c2c6d6" }}>Specialized in context-dense retrieval, analytical research, and data synthesis.</p>
+              <button className="w-full py-2 rounded-lg font-bold text-xs transition-all ghost-border hover:opacity-80" style={{ background: "rgba(245,158,11,0.05)", color: "#f59e0b" }}>View Detail</button>
+            </div>
+
+            {/* Llama3-70b — full width */}
+            <div className="md:col-span-4 group relative p-5 rounded-xl transition-all ghost-border flex flex-col md:flex-row items-center gap-8 hover:bg-[#181f30]" style={{ background: "#141b2c" }}>
+              <div className="md:w-1/2 relative">
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 w-40 h-40 rounded-full" style={{ background: "rgba(208,188,255,0.08)", filter: "blur(60px)" }} />
+                <span className="text-[9px] font-mono mb-3 block uppercase" style={{ color: "#d0bcff", letterSpacing: "0.2em", fontFamily: "var(--font-jetbrains-mono), monospace" }}>Developer / Power</span>
+                <h4 className="text-2xl font-black mb-2" style={{ color: "#dce2f9" }}>Llama3-70b</h4>
+                <p className="mb-4 text-xs leading-relaxed" style={{ color: "#c2c6d6" }}>The most capable node for creative synthesis and complex developer tasks. Optimized for architecture design, debugging, and algorithmic generation at scale.</p>
+                <button className="px-6 py-2 rounded-lg font-black text-xs transition-all hover:opacity-90" style={{ background: "#a078ff", color: "#340080" }}>View Detail</button>
+              </div>
+              <div className="md:w-1/2 flex justify-center">
+                <div className="relative w-full max-w-sm overflow-hidden rounded-lg ghost-border" style={{ aspectRatio: "16/9", background: "#232a3b" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className="w-full h-full object-cover"
+                    style={{ opacity: 0.6 }}
+                    alt="Abstract fluid wave shapes in violet and purple gradients"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNuI5pH0TF_yRcJiYzJXxfyg9HTODn1PK12yjjMDIvyq2KBOI670QMk0_VBjPMVi72Ga87S7eaW3J6bXvUI2EM17R3XNDDVs-mDo8Zhs2kdtxEvKtOar_AB-aMzkvSOQtBkvPcU9d1CQexHGFEyqZnutDRqkRStOO3G53wMq3f6H5PbHULBZ2hVzl33wzXhf9aUGVxAX0YZFrHxnsxvc9R_TLzZfJhnwGs18NlFvFAn4emNQ-hA7r2Or49V9yXnCBpEidEg0HjBVFA"
+                  />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #141b2c, transparent)" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Key Features (Bento Grid) ── */}
+        <section id="features" className="py-20" style={{ background: "#070e1e" }}>
+          <div className="max-w-screen-2xl mx-auto px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-black tracking-tight mb-2" style={{ color: "#dce2f9" }}>Enterprise-Grade Performance</h2>
+              <p className="max-w-xl mx-auto text-sm" style={{ color: "#c2c6d6" }}>Tactical tools for modern intelligence orchestration, built with security and observability at the core.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-px" style={{ background: "rgba(66,71,84,0.1)" }}>
+              {[
+                { icon: "security",    color: "#adc6ff", title: "Secure Authentication",   desc: "JWT + HMAC-signed agent calls, LLM-based content moderation, and circuit breakers on every node." },
+                { icon: "bolt",        color: "#4edea3", title: "Real-time Orchestration", desc: "Low-latency token streaming between specialized model nodes via Socket.IO WebSocket." },
+                { icon: "database",    color: "#d0bcff", title: "Semantic Memory",         desc: "Persistent MongoDB conversation history with relevance-based retrieval keeps agents contextually aware." },
+                { icon: "query_stats", color: "#f59e0b", title: "Distributed Tracing",     desc: "Full-stack observability for every inference token and reasoning step taken." },
+              ].map(({ icon, color, title, desc }) => (
+                <div key={title} className="p-7 transition-all hover:bg-[#232a3b]" style={{ background: "#181f30" }}>
+                  <span className="material-symbols-outlined mb-4 text-3xl block" style={{ color }}>{icon}</span>
+                  <h5 className="text-sm font-bold mb-2" style={{ color: "#dce2f9" }}>{title}</h5>
+                  <p className="text-xs leading-relaxed" style={{ color: "#c2c6d6" }}>{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Final CTA ── */}
+        <section className="py-24 px-6 relative overflow-hidden">
+          <div className="absolute inset-0" style={{ background: "rgba(173,198,255,0.04)" }} />
+          <div className="max-w-3xl mx-auto relative z-10 text-center space-y-7">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter" style={{ color: "#dce2f9" }}>
+              Ready to command your <br />intelligence network?
+            </h2>
+            <div className="flex flex-col md:flex-row justify-center items-center gap-4">
+              <Link href="/signup" className="w-full md:w-auto px-10 py-3.5 rounded-lg font-black tracking-tight transition-all hover:scale-105" style={{ background: "#00a572", color: "#00311f", boxShadow: "0 0 30px rgba(0,165,114,0.2)" }}>
+                Register Now
+              </Link>
+              <Link href="/login" className="w-full md:w-auto px-10 py-3.5 rounded-lg font-bold transition-all ghost-border" style={{ background: "#181f30", color: "#dce2f9" }}>
+                Log In
+              </Link>
+            </div>
+            <div className="flex justify-center items-center gap-8" style={{ opacity: 0.35 }}>
+              <span className="font-mono text-[10px] uppercase tracking-widest" style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>GROQ POWERED</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest" style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>SELF-HOSTED</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest" style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>OPEN-SOURCE CORE</span>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      {/* ── Footer ── */}
+      <footer style={{ background: "#0c1323", borderTop: "1px solid rgba(46,52,70,0.15)" }}>
+        <div className="flex flex-col md:flex-row justify-between items-center px-6 py-8 w-full max-w-screen-2xl mx-auto">
+          <div className="mb-4 md:mb-0">
+            <div className="font-black text-sm mb-1" style={{ color: "#dce2f9" }}>Neural Workspace</div>
+            <div className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(220,226,249,0.4)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+              © 2025 Neural Workspace. Tactical Intelligence Orchestration.
+            </div>
+          </div>
+          <div className="flex flex-wrap justify-center gap-6">
+            {["System Status", "Privacy Policy", "Security Terms", "API Docs"].map((link) => (
+              <a key={link} href="#" className="text-[9px] uppercase tracking-widest transition-colors hover:text-[#3b82f6]" style={{ color: "rgba(220,226,249,0.4)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                {link}
+              </a>
+            ))}
           </div>
         </div>
       </footer>
+
     </div>
   )
 }

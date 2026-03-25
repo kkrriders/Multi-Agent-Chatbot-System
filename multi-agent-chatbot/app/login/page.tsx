@@ -18,7 +18,6 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
     setIsLoading(true)
-
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
@@ -26,17 +25,9 @@ export default function LoginPage() {
         credentials: "include",
         body: JSON.stringify({ email, password }),
       })
-
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Authentication failed")
-      }
-
-      if (data.data.token) {
-        setAuth(data.data.token, data.data.user)
-      }
-
+      if (!response.ok) throw new Error(data.error || "Authentication failed")
+      if (data.data.token) setAuth(data.data.token, data.data.user)
       router.push("/chat")
     } catch (err: any) {
       setError(err.message || "Authentication failed")
@@ -45,222 +36,116 @@ export default function LoginPage() {
     }
   }
 
+  const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = "rgba(173,198,255,0.5)"
+  }
+  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = "rgba(66,71,84,0.3)"
+  }
+
   return (
     <div
-      className="min-h-screen flex flex-col selection:bg-nw-primary/30"
+      className="min-h-screen flex flex-col"
       style={{ background: "#070e1e", color: "#dce2f9", fontFamily: "var(--font-inter), Inter, sans-serif" }}
     >
-      {/* Header */}
-      <header
-        className="w-full sticky top-0 z-50"
-        style={{ background: "#0c1323", boxShadow: "0 24px 40px rgba(77,142,255,0.06)" }}
-      >
-        <div className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto w-full">
-          <div className="text-xl font-bold tracking-tighter uppercase" style={{ color: "#dce2f9", fontFamily: "var(--font-inter), Inter, sans-serif" }}>
-            Neural Workspace
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="material-symbols-outlined p-2 rounded cursor-pointer transition-colors"
-              style={{ color: "rgba(220,226,249,0.5)" }}
-            >
-              help
-            </span>
-            <span
-              className="material-symbols-outlined p-2 rounded cursor-pointer transition-colors"
-              style={{ color: "rgba(220,226,249,0.5)" }}
-            >
-              language
-            </span>
-          </div>
-        </div>
-      </header>
+      {/* Minimal top bar */}
+      <div className="flex items-center justify-between px-6 py-3" style={{ borderBottom: "1px solid rgba(66,71,84,0.1)" }}>
+        <Link href="/" className="flex items-center gap-2 text-sm font-bold tracking-tighter" style={{ color: "#dce2f9" }}>
+          <span className="material-symbols-outlined text-base" style={{ color: "#4edea3", fontVariationSettings: "'FILL' 1" }}>deployed_code</span>
+          Neural Workspace
+        </Link>
+        <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: "rgba(194,198,214,0.4)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+          Auth Protocol v3.1
+        </span>
+      </div>
 
       {/* Main */}
       <main className="flex-grow flex items-center justify-center p-6 relative overflow-hidden">
         {/* Ambient blobs */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            top: "25%", left: "25%",
-            width: 384, height: 384,
-            background: "rgba(173,198,255,0.05)",
-            borderRadius: "50%",
-            filter: "blur(120px)",
-          }}
-        />
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            bottom: "25%", right: "25%",
-            width: 384, height: 384,
-            background: "rgba(78,222,163,0.05)",
-            borderRadius: "50%",
-            filter: "blur(120px)",
-          }}
-        />
+        <div className="absolute pointer-events-none" style={{ top: "20%", left: "20%", width: 320, height: 320, background: "rgba(173,198,255,0.04)", borderRadius: "50%", filter: "blur(100px)" }} />
+        <div className="absolute pointer-events-none" style={{ bottom: "20%", right: "20%", width: 320, height: 320, background: "rgba(78,222,163,0.04)", borderRadius: "50%", filter: "blur(100px)" }} />
 
-        {/* Card */}
-        <div className="w-full max-w-md relative z-10">
-          {/* Tactical accents */}
-          <div className="flex justify-between items-end mb-2 px-1">
-            <div
-              className="text-[10px] uppercase tracking-[0.2em]"
-              style={{ color: "#adc6ff", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
-            >
-              System.Auth_Protocol_v4.2
-            </div>
-            <div className="h-px flex-1 mx-4 mb-1" style={{ background: "rgba(66,71,84,0.3)" }} />
-            <div
-              className="text-[10px] uppercase tracking-[0.2em]"
-              style={{ color: "#adc6ff", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
-            >
-              Secure_Node: 882-X
-            </div>
+        <div className="w-full max-w-[380px] relative z-10">
+          {/* Tactical accent line */}
+          <div className="flex items-center gap-3 mb-3 px-0.5">
+            <span className="text-[9px] uppercase tracking-widest font-mono whitespace-nowrap" style={{ color: "#adc6ff", fontFamily: "var(--font-jetbrains-mono), monospace" }}>Auth_Protocol</span>
+            <div className="flex-1 h-px" style={{ background: "rgba(66,71,84,0.3)" }} />
+            <span className="text-[9px] uppercase tracking-widest font-mono whitespace-nowrap" style={{ color: "#adc6ff", fontFamily: "var(--font-jetbrains-mono), monospace" }}>Node: 882-X</span>
           </div>
 
-          <div
-            className="rounded-xl overflow-hidden shadow-2xl"
-            style={{
-              backdropFilter: "blur(12px)",
-              background: "rgba(50,57,75,0.6)",
-              border: "1px solid rgba(66,71,84,0.2)",
-            }}
-          >
-            {/* Biometric header */}
-            <div
-              className="p-8 pb-4 flex flex-col items-center"
-              style={{ borderBottom: "1px solid rgba(66,71,84,0.1)" }}
-            >
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center mb-4 biometric-glow"
-                style={{
-                  background: "#2e3446",
-                  border: "1px solid rgba(173,198,255,0.3)",
-                }}
-              >
-                <span
-                  className="material-symbols-outlined text-3xl"
-                  style={{ color: "#adc6ff", fontVariationSettings: "'FILL' 1" }}
-                >
-                  fingerprint
-                </span>
+          {/* Card */}
+          <div className="rounded-xl overflow-hidden shadow-2xl" style={{ background: "rgba(20,27,44,0.9)", border: "1px solid rgba(66,71,84,0.2)", backdropFilter: "blur(16px)" }}>
+
+            {/* Card header */}
+            <div className="px-6 pt-6 pb-5 flex flex-col items-center" style={{ borderBottom: "1px solid rgba(66,71,84,0.1)" }}>
+              <div className="w-11 h-11 rounded-full flex items-center justify-center mb-3" style={{ background: "#1e2840", border: "1px solid rgba(173,198,255,0.25)", boxShadow: "0 0 20px rgba(77,142,255,0.2)" }}>
+                <span className="material-symbols-outlined" style={{ color: "#adc6ff", fontVariationSettings: "'FILL' 1", fontSize: "22px" }}>fingerprint</span>
               </div>
-              <h1
-                className="font-bold text-2xl tracking-tight"
-                style={{ color: "#dce2f9", fontFamily: "var(--font-inter), Inter, sans-serif" }}
-              >
-                Neural Access
-              </h1>
-              <p
-                className="text-sm mt-1"
-                style={{ color: "rgba(194,198,214,0.7)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
-              >
+              <h1 className="font-bold text-lg tracking-tight" style={{ color: "#dce2f9" }}>Neural Access</h1>
+              <p className="text-[10px] mt-0.5" style={{ color: "rgba(194,198,214,0.5)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
                 IDENTITY VERIFICATION REQUIRED
               </p>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleLogin} className="p-8 space-y-6">
+            <form onSubmit={handleLogin} className="px-6 py-5 space-y-4">
               {error && (
-                <div
-                  className="px-4 py-3 rounded-lg text-sm"
-                  style={{
-                    background: "rgba(147,0,10,0.2)",
-                    border: "1px solid rgba(255,180,171,0.3)",
-                    color: "#ffb4ab",
-                    fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace",
-                  }}
-                >
+                <div className="px-3 py-2.5 rounded-lg text-xs" style={{ background: "rgba(147,0,10,0.2)", border: "1px solid rgba(255,180,171,0.25)", color: "#ffb4ab", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
                   ✗ {error}
                 </div>
               )}
 
               {/* Email */}
-              <div className="space-y-2">
-                <label
-                  className="block text-[10px] uppercase tracking-[0.1em] ml-1"
-                  style={{ color: "rgba(194,198,214,0.6)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
-                >
+              <div className="space-y-1.5">
+                <label className="block text-[9px] uppercase tracking-widest ml-0.5" style={{ color: "rgba(194,198,214,0.5)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
                   Terminal Address
                 </label>
-                <div className="relative group">
-                  <span
-                    className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg transition-colors"
-                    style={{ color: "#8c909f" }}
-                  >
-                    alternate_email
-                  </span>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#8c909f", fontSize: "16px" }}>alternate_email</span>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="agent@neural.workspace"
                     required
-                    className="w-full py-4 pl-12 pr-4 rounded-t-lg outline-none transition-all"
-                    style={{
-                      background: "#232a3b",
-                      border: "none",
-                      borderBottom: "2px solid transparent",
-                      color: "#dce2f9",
-                      fontFamily: "var(--font-inter), Inter, sans-serif",
-                    }}
-                    onFocus={(e) => { e.target.style.borderBottomColor = "#adc6ff" }}
-                    onBlur={(e) => { e.target.style.borderBottomColor = "transparent" }}
+                    className="w-full py-2.5 pl-9 pr-3 rounded-lg outline-none text-sm transition-all"
+                    style={{ background: "#232a3b", border: "1px solid rgba(66,71,84,0.3)", color: "#dce2f9" }}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
                   />
                 </div>
               </div>
 
               {/* Password */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center ml-1">
-                  <label
-                    className="block text-[10px] uppercase tracking-[0.1em]"
-                    style={{ color: "rgba(194,198,214,0.6)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
-                  >
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center ml-0.5">
+                  <label className="block text-[9px] uppercase tracking-widest" style={{ color: "rgba(194,198,214,0.5)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
                     Encryption Key
                   </label>
-                  <a
-                    href="#"
-                    className="text-[10px] uppercase tracking-[0.05em] transition-colors"
-                    style={{ color: "#adc6ff", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
-                  >
-                    Forgot Password?
+                  <a href="#" className="text-[9px] uppercase tracking-widest transition-colors hover:text-[#adc6ff]" style={{ color: "rgba(173,198,255,0.6)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                    Forgot?
                   </a>
                 </div>
-                <div className="relative group">
-                  <span
-                    className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg"
-                    style={{ color: "#8c909f" }}
-                  >
-                    lock
-                  </span>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#8c909f", fontSize: "16px" }}>lock</span>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
-                    className="w-full py-4 pl-12 pr-12 rounded-t-lg outline-none transition-all"
-                    style={{
-                      background: "#232a3b",
-                      border: "none",
-                      borderBottom: "2px solid transparent",
-                      color: "#dce2f9",
-                      fontFamily: "var(--font-inter), Inter, sans-serif",
-                    }}
-                    onFocus={(e) => { e.target.style.borderBottomColor = "#adc6ff" }}
-                    onBlur={(e) => { e.target.style.borderBottomColor = "transparent" }}
+                    className="w-full py-2.5 pl-9 pr-9 rounded-lg outline-none text-sm transition-all"
+                    style={{ background: "#232a3b", border: "1px solid rgba(66,71,84,0.3)", color: "#dce2f9" }}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center transition-colors"
-                    style={{ color: "rgba(194,198,214,0.4)" }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                    style={{ color: "rgba(194,198,214,0.35)" }}
                   >
-                    <span className="material-symbols-outlined text-lg">
-                      {showPassword ? "visibility_off" : "visibility"}
-                    </span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>{showPassword ? "visibility_off" : "visibility"}</span>
                   </button>
                 </div>
               </div>
@@ -269,78 +154,44 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 rounded-lg font-bold text-sm tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-60"
-                style={{
-                  background: "#00a572",
-                  color: "#00311f",
-                  fontFamily: "var(--font-inter), Inter, sans-serif",
-                  boxShadow: isLoading ? "none" : "0 8px 30px rgba(0,165,114,0.2)",
-                  textTransform: "uppercase",
-                }}
+                className="w-full py-3 rounded-lg font-bold text-xs tracking-widest uppercase transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
+                style={{ background: "#00a572", color: "#00311f", boxShadow: isLoading ? "none" : "0 4px 20px rgba(0,165,114,0.2)", marginTop: "8px" }}
               >
                 {isLoading ? (
-                  <>
-                    <span className="material-symbols-outlined text-lg animate-spin">autorenew</span>
-                    AUTHENTICATING...
-                  </>
+                  <><span className="material-symbols-outlined text-base animate-spin">autorenew</span>AUTHENTICATING...</>
                 ) : (
-                  <>
-                    AUTHENTICATE
-                    <span className="material-symbols-outlined text-lg">security</span>
-                  </>
+                  <><span className="material-symbols-outlined text-base">security</span>AUTHENTICATE</>
                 )}
               </button>
             </form>
 
             {/* Footer link */}
-            <div className="px-8 pb-8 text-center">
-              <Link href="/signup" className="text-xs transition-colors group" style={{ color: "rgba(194,198,214,0.5)" }}>
+            <div className="px-6 pb-5 text-center">
+              <Link href="/signup" className="text-xs group" style={{ color: "rgba(194,198,214,0.4)" }}>
                 New to the Workspace?{" "}
-                <span className="group-hover:underline underline-offset-4" style={{ color: "#adc6ff" }}>
-                  Create an Account
-                </span>
+                <span className="group-hover:underline underline-offset-4" style={{ color: "#adc6ff" }}>Create an Account</span>
               </Link>
             </div>
           </div>
 
-          {/* Decorative dots */}
-          <div className="mt-4 flex justify-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#4edea3" }} />
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#424754" }} />
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#424754" }} />
+          {/* Status dots */}
+          <div className="mt-3 flex justify-center gap-1.5">
+            <div className="w-1 h-1 rounded-full" style={{ background: "#4edea3" }} />
+            <div className="w-1 h-1 rounded-full" style={{ background: "#424754" }} />
+            <div className="w-1 h-1 rounded-full" style={{ background: "#424754" }} />
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer
-        className="w-full"
-        style={{ background: "#0c1323", borderTop: "1px solid rgba(220,226,249,0.15)" }}
-      >
-        <div className="flex flex-col md:flex-row justify-between items-center px-8 py-6 gap-4 max-w-7xl mx-auto w-full">
-          <span
-            className="text-[10px] uppercase tracking-[0.05em]"
-            style={{ color: "rgba(220,226,249,0.4)", fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace" }}
-          >
-            © 2024 Neural Workspace. Tactical Intelligence Systems.
-          </span>
-          <div className="flex gap-6">
-            {["Privacy Policy", "Terms of Service", "Security Audit", "Support"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-[10px] uppercase tracking-[0.05em] transition-colors hover:opacity-100"
-                style={{
-                  color: "rgba(220,226,249,0.4)",
-                  fontFamily: "var(--font-jetbrains-mono), JetBrains Mono, monospace",
-                }}
-              >
-                {item}
-              </a>
-            ))}
-          </div>
+      <div className="flex items-center justify-between px-6 py-3" style={{ borderTop: "1px solid rgba(66,71,84,0.08)" }}>
+        <span className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(220,226,249,0.25)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>© 2025 Neural Workspace</span>
+        <div className="flex gap-5">
+          {["Privacy", "Terms", "Security"].map((item) => (
+            <a key={item} href="#" className="text-[9px] uppercase tracking-widest transition-colors hover:text-[#adc6ff]" style={{ color: "rgba(220,226,249,0.25)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>{item}</a>
+          ))}
         </div>
-      </footer>
+      </div>
     </div>
   )
 }

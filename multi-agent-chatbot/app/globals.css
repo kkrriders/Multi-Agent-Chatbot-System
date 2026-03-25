@@ -162,6 +162,10 @@
 
 /* ── Neural Workspace custom utilities ───────────────────────────────────── */
 @layer utilities {
+  .ghost-border {
+    border: 1px solid rgba(66, 71, 84, 0.15);
+  }
+
   .glass-panel {
     backdrop-filter: blur(16px);
     background: rgba(24, 31, 48, 0.7);
@@ -228,6 +232,40 @@
     position: absolute;
     animation: scan 5s linear infinite;
     pointer-events: none;
+  }
+
+  /* Hero panel float */
+  @keyframes hero-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    40%       { transform: translateY(-10px) rotate(0.4deg); }
+    70%       { transform: translateY(-5px) rotate(-0.2deg); }
+  }
+  .hero-float {
+    animation: hero-float 9s ease-in-out infinite;
+  }
+
+  /* Hero panel border glow pulse */
+  @keyframes hero-glow {
+    0%, 100% { box-shadow: 0 0 30px rgba(173,198,255,0.05), 0 0 0 1px rgba(66,71,84,0.15); }
+    50%       { box-shadow: 0 0 60px rgba(173,198,255,0.18), 0 0 100px rgba(78,222,163,0.06), 0 0 0 1px rgba(173,198,255,0.3); }
+  }
+  .hero-glow {
+    animation: hero-glow 5s ease-in-out infinite;
+  }
+
+  /* HUD corners pulse */
+  @keyframes hud-corner {
+    0%, 100% { opacity: 0.25; }
+    50%       { opacity: 0.7; }
+  }
+  .hud-corner {
+    animation: hud-corner 3s ease-in-out infinite;
+  }
+
+  /* Log line stagger appear */
+  @keyframes log-appear {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
   }
 
   /* streaming bubble glow */
