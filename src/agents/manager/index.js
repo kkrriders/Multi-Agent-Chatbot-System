@@ -36,6 +36,8 @@ const {
   buildSystemPrompt
 } = require('../../shared/agent-config');
 const { connectDB } = require('../../config/database');
+const { PlannerAgent } = require('../../shared/plannerAgent');
+const { routeModelAsync, routeModelWithFallback } = require('../../shared/modelRouter');
 
 // Import routes
 const authRoutes = require('../../routes/auth');
@@ -534,6 +536,72 @@ async function routeMessageToAgent(message) {
 }
 
 /**
+ * Consult two agents in parallel and return the response with higher confidence.
+ * Used when routing confidence is below the LOW_CONFIDENCE_THRESHOLD.
+ *
+ * For requests with a conversationId the winning response is emitted as
+ * stream-start + stream-end Socket.IO events so the frontend renders it
+ * identically to a normally-streamed response.
+ *
+ * @param {string}  primaryId       — first-choice agentId
+ * @param {string}  secondaryId     — fallback agentId
+ * @param {Object}  baseMessage     — message template (will be cloned per agent)
+ * @param {string|null} conversationId
+ * @returns {Promise<{ content: string, agentId: string, messageId: string, confidence: number }>}
+ */
+async function consultDualAgents(primaryId, secondaryId, baseMessage, conversationId) {
+  const primaryMsg   = { ...baseMessage, to: primaryId };
+  const secondaryMsg = { ...baseMessage, to: secondaryId };
+
+  const [primarySettled, secondarySettled] = await Promise.allSettled([
+    routeMessageToAgent(primaryMsg),
+    routeMessageToAgent(secondaryMsg),
+  ]);
+
+  const primary   = primarySettled.status   === 'fulfilled' ? primarySettled.value   : null;
+  const secondary = secondarySettled.status === 'fulfilled' ? secondarySettled.value : null;
+
+  if (!primary && !secondary) {
+    throw new Error('Both agents failed during low-confidence fallback');
+  }
+
+  // Pick higher confidence (agents report 0-100; default to 50 when missing)
+  const primaryConf   = primary   ? (primary.confidence   ?? 50) : -1;
+  const secondaryConf = secondary ? (secondary.confidence ?? 50) : -1;
+
+  const winner   = secondaryConf > primaryConf ? secondary   : (primary || secondary);
+  const winnerId = secondaryConf > primaryConf ? secondaryId : primaryId;
+
+  const content   = winner.content || '';
+  const messageId = winner.id || `fallback-${Date.now()}`;
+
+  // Emit to Socket.IO room when a conversationId is present
+  if (conversationId) {
+    io.to(conversationId).emit('stream-start', {
+      messageId, agentId: winnerId, conversationId, timestamp: Date.now(),
+    });
+    io.to(conversationId).emit('stream-end', {
+      messageId,
+      agentId:        winnerId,
+      content,
+      confidence:     winner.confidence,
+      conversationId,
+      timestamp:      Date.now(),
+      type:           'fallback-response',
+      fallbackUsed:   true,
+      originalAgent:  primaryId,
+    });
+  }
+
+  logger.info(
+    `[consultDualAgents] winner=${winnerId} (conf=${winner.confidence ?? '?'}) ` +
+    `over ${winnerId === primaryId ? secondaryId : primaryId} (conf=${Math.min(primaryConf, secondaryConf)})`
+  );
+
+  return { content, agentId: winnerId, messageId, confidence: winner.confidence };
+}
+
+/**
  * Send message to agent (simplified wrapper for voting sessions)
  * Uses caching to avoid redundant LLM calls
  *
@@ -703,27 +771,47 @@ app.post('/message', messageLimiter, async (req, res) => {
     if (!content || !agentId) {
       return res.status(400).json({ error: 'Content and agentId are required' });
     }
-    
+
     if (typeof content !== 'string' || content.trim().length === 0) {
       return res.status(400).json({ error: 'Content must be a non-empty string' });
     }
-    
-    if (typeof agentId !== 'string' || !/^agent-[1-4]$/.test(agentId)) {
-      return res.status(400).json({ error: 'AgentId must be in format agent-1, agent-2, agent-3, or agent-4' });
+
+    if (typeof agentId !== 'string' || (!/^agent-[1-4]$/.test(agentId) && agentId !== 'auto')) {
+      return res.status(400).json({ error: 'AgentId must be agent-1..4 or "auto"' });
     }
-    
+
     if (agentName && (typeof agentName !== 'string' || agentName.trim().length === 0)) {
       return res.status(400).json({ error: 'AgentName must be a non-empty string if provided' });
+    }
+
+    // Intelligent routing: when agentId is "auto", classify intent and pick the best agent
+    let resolvedAgentId = agentId;
+    let routingMeta = null;
+    let isLowConfidence = false;
+    let secondaryAgentId = null;
+
+    if (agentId === 'auto') {
+      const route = await routeModelWithFallback(content);
+      routingMeta       = route.primary;
+      resolvedAgentId   = route.primary.agentId;
+      isLowConfidence   = route.isLowConfidence;
+      secondaryAgentId  = route.secondary?.agentId || null;
+      const confStr = Number.isFinite(routingMeta.confidence) ? routingMeta.confidence.toFixed(2) : 'n/a';
+      logger.info(
+        `[/message] auto-routed "${content.slice(0, 60)}…" → ${resolvedAgentId} ` +
+        `(${routingMeta.method}, conf=${confStr}` +
+        `${isLowConfidence ? `, LOW → also consulting ${secondaryAgentId}` : ''})`
+      );
     }
 
     // Create message with agent name
     const message = createMessage(
       'user',
-      agentId,
+      resolvedAgentId,
       content,
       PERFORMATIVES.REQUEST
     );
-    
+
     // Add agent name if provided
     if (agentName) {
       message.agentName = agentName;
@@ -741,8 +829,41 @@ app.post('/message', messageLimiter, async (req, res) => {
     let responseContent;
     let responseMessageId;
 
-    if (conversationId) {
-      // Streaming path: tokens flow to the frontend via Socket.IO in real-time
+    // ── Low-confidence path: consult two agents and pick the better response ────
+    if (isLowConfidence && secondaryAgentId) {
+      const conversation = conversations.get(conversationId);
+
+      if (conversationId) {
+        const userMessage = { from: 'user', content, timestamp: Date.now(), type: 'direct-message' };
+        if (conversation) {
+          conversation.history.push(userMessage);
+          conversation.lastActivity = Date.now();
+        }
+        broadcastConversationUpdate(conversationId, userMessage);
+        io.to(conversationId).emit('agent-thinking', {
+          agentId: resolvedAgentId, conversationId, timestamp: Date.now(), fallback: true,
+        });
+      }
+
+      const dual = await consultDualAgents(resolvedAgentId, secondaryAgentId, message, conversationId);
+      responseContent  = dual.content;
+      responseMessageId = dual.messageId;
+      resolvedAgentId  = dual.agentId; // update to actual winner
+
+      if (conversationId && conversation) {
+        conversation.history.push({
+          from:      agentName || `Agent ${resolvedAgentId.slice(-1)}`,
+          content:   responseContent,
+          timestamp: Date.now(),
+          agentId:   resolvedAgentId,
+          type:      'fallback-response',
+          messageId: responseMessageId,
+        });
+        conversation.lastActivity = Date.now();
+      }
+
+    // ── Normal streaming path ───────────────────────────────────────────────────
+    } else if (conversationId) {
       const conversation = conversations.get(conversationId);
 
       // Broadcast user message immediately so the frontend sees it right away
@@ -758,58 +879,60 @@ app.post('/message', messageLimiter, async (req, res) => {
       }
       broadcastConversationUpdate(conversationId, userMessage);
 
-      // Emit before opening the HTTP stream to the agent. There is a latency
-      // gap of 200 ms – 2 s between this point and the first stream-start event
-      // (TCP connect + Ollama context load). agent-thinking lets the frontend
-      // show a "thinking" indicator immediately so the UI never looks frozen.
       io.to(conversationId).emit('agent-thinking', {
         agentId: message.to,
         conversationId,
         timestamp: Date.now(),
       });
 
-      // Inner try-catch so we can emit stream-error before the outer catch
-      // sends the HTTP 500 — this removes the "thinking" bubble from the UI.
-      // conversationId is in this block's scope so we can reference it here
-      // but not in the outer catch where it would be out of scope.
       try {
         const streamResult = await streamMessageToAgent(message, conversationId);
         responseContent = streamResult.content;
         responseMessageId = streamResult.messageId;
 
-        // Persist agent response to conversation history
         if (conversation) {
-          const agentMessage = {
-            from: agentName || `Agent ${agentId.slice(-1)}`,
-            content: responseContent,
+          conversation.history.push({
+            from:      agentName || `Agent ${resolvedAgentId.slice(-1)}`,
+            content:   responseContent,
             timestamp: Date.now(),
-            agentId,
-            type: 'direct-response',
-            messageId: responseMessageId
-          };
-          conversation.history.push(agentMessage);
+            agentId:   resolvedAgentId,
+            type:      'direct-response',
+            messageId: responseMessageId,
+          });
           conversation.lastActivity = Date.now();
         }
       } catch (streamError) {
-        // Tell the frontend to remove the thinking placeholder — without this,
-        // the bubble stays on screen with spinning dots indefinitely.
         io.to(conversationId).emit('stream-error', { agentId: message.to, conversationId });
-        throw streamError; // propagate so the outer catch returns HTTP 500
+        throw streamError;
       }
+
+    // ── Non-streaming fallback (no Socket.IO room) ──────────────────────────────
     } else {
-      // Non-streaming fallback (no active Socket.IO room)
       const response = await routeMessageToAgent(message);
       responseContent = response.content;
     }
 
     res.json({
       success: true,
-      response: { content: responseContent, agentId, messageId: responseMessageId }
+      response: {
+        content:   responseContent,
+        agentId:   resolvedAgentId,
+        messageId: responseMessageId,
+        ...(routingMeta ? {
+          routing: {
+            method:         routingMeta.method,
+            confidence:     routingMeta.confidence,
+            reason:         routingMeta.reason,
+            lowConfidence:  isLowConfidence,
+            ...(isLowConfidence && secondaryAgentId ? { consulted: [resolvedAgentId, secondaryAgentId] } : {}),
+          },
+        } : {}),
+      },
     });
   } catch (error) {
     logger.error('Error in single message route:', error.message);
-    res.status(500).json({ 
-      error: `Error processing message: ${error.message}` 
+    res.status(500).json({
+      error: `Error processing message: ${error.message}`
     });
   }
 });
@@ -936,6 +1059,115 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
     res.status(500).json({ 
       error: `Error processing team conversation: ${error.message}` 
     });
+  }
+});
+
+/**
+ * Plan-and-execute: multi-agent orchestration via the PlannerAgent.
+ *
+ * The planner decomposes the user message into subtasks, routes each to the
+ * best-fit agent, runs independent tasks in parallel, then synthesizes one
+ * final response. Real-time progress is streamed via Socket.IO events:
+ *
+ *   planner-decomposing    — decomposition started
+ *   planner-plan-ready     — task list ready { tasks }
+ *   planner-task-start     — a subtask began  { taskId, agentId, description }
+ *   planner-task-complete  — a subtask ended  { taskId, agentId, contentPreview }
+ *   planner-synthesizing   — synthesis started
+ *   stream-end             — final synthesized response ready
+ */
+app.post('/plan-and-execute', messageLimiter, async (req, res) => {
+  try {
+    const { content, conversationId } = req.body;
+
+    if (!content || typeof content !== 'string' || content.trim().length === 0) {
+      return res.status(400).json({ error: 'content is required' });
+    }
+
+    const convId = conversationId || `plan-${Date.now()}`;
+
+    // Ensure conversation record exists
+    if (!conversations.has(convId)) {
+      conversations.set(convId, { id: convId, history: [], participants: [], createdAt: new Date().toISOString() });
+    }
+    const conversation = conversations.get(convId);
+
+    // Persist user message
+    const userMsg = { from: 'user', content, timestamp: Date.now(), type: 'plan-request' };
+    conversation.history.push(userMsg);
+    conversation.lastActivity = Date.now();
+    broadcastConversationUpdate(convId, userMsg);
+
+    // Build planner with injected callbacks so there are no circular imports
+    const planner = new PlannerAgent({
+      /**
+       * executeTask — sends a message to a specific agent and returns its response.
+       * Delegates to the existing routeMessageToAgent / streamMessageToAgent
+       * infrastructure already wired up in this file.
+       */
+      executeTask: async (agentId, taskDescription, cId) => {
+        const message = createMessage('user', agentId, taskDescription, PERFORMATIVES.REQUEST);
+        message.conversationHistory = [...conversation.history];
+
+        if (cId) {
+          io.to(cId).emit('agent-thinking', { agentId, conversationId: cId, timestamp: Date.now() });
+          try {
+            return await streamMessageToAgent(message, cId, 'plan-task');
+          } catch (err) {
+            io.to(cId).emit('stream-error', { agentId, conversationId: cId });
+            throw err;
+          }
+        }
+
+        return routeMessageToAgent(message);
+      },
+
+      emit: (event, payload) => {
+        io.to(convId).emit(event, { ...payload, conversationId: convId });
+      },
+    });
+
+    const { plan, results, finalResponse, aggregation, critic } = await planner.plan(content, convId, conversation.history);
+
+    // Persist the synthesized response to conversation history
+    const agentMsg = {
+      from:      'Planner',
+      content:   finalResponse,
+      timestamp: Date.now(),
+      type:      'plan-response',
+      plan:      { taskCount: plan.tasks.length, agents: [...new Set(plan.tasks.map(t => t.agentId))] },
+    };
+    conversation.history.push(agentMsg);
+    conversation.lastActivity = Date.now();
+
+    // Emit final answer as a stream-end so the frontend renders it the same
+    // way as a normal agent response
+    const synthMessageId = `planner-${Date.now()}`;
+    io.to(convId).emit('stream-end', {
+      messageId:      synthMessageId,
+      agentId:        'planner',
+      content:        finalResponse,
+      conversationId: convId,
+      timestamp:      Date.now(),
+      type:           'plan-response',
+      ...(aggregation ? { aggregation } : {}),
+    });
+
+    res.json({
+      success:         true,
+      conversationId:  convId,
+      plan:            { tasks: plan.tasks.map(t => ({ id: t.id, agentId: t.agentId, description: t.description.slice(0, 120) })) },
+      taskResults:     Object.fromEntries(
+        Object.entries(results).map(([k, v]) => [k, { agentId: v.agentId, preview: String(v.content).slice(0, 200) }])
+      ),
+      finalResponse,
+      ...(aggregation ? { aggregation } : {}),
+      ...(critic ? { critic } : {}),
+    });
+
+  } catch (error) {
+    logger.error('[plan-and-execute] Error:', error.message);
+    res.status(500).json({ error: `Planner error: ${error.message}` });
   }
 });
 
