@@ -21,6 +21,7 @@ const { buildPromptContext } = require('./summarizer');
 const { PERFORMATIVES, createMessage, validateMessage } = require('./messaging');
 const { AgentMemory, MEMORY_TYPES } = require('./memory');
 const { ModelManager } = require('./model-manager');
+const { sharedMemoryBroker } = require('./sharedMemory');
 
 // Load environment variables
 dotenv.config();
@@ -273,6 +274,21 @@ class BaseAgent {
     let prompt = this.personality ? `${this.personality}\n\n` : '';
     
     prompt += `You are ${this.agentId}, an AI assistant.`;
+
+    // Inject shared memory context (global + agent-specific) so all agents
+    // have access to cross-agent facts established during this session.
+    try {
+      const sharedContext = await sharedMemoryBroker.mergeContextForAgent(
+        this.agentId,
+        this.memory ? this.memory.userId : 'default',
+        message.content
+      );
+      if (sharedContext) {
+        prompt += `\n\n${sharedContext}`;
+      }
+    } catch (sharedErr) {
+      logger.warn(`[${this.agentId}] Shared memory context error: ${sharedErr.message}`);
+    }
 
     // Add memory context if available
     if (this.memory) {
