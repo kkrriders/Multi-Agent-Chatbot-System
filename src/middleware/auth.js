@@ -1,4 +1,5 @@
 const { verifyToken } = require('../utils/jwt');
+const { isBlacklisted } = require('../utils/tokenBlacklist');
 const User = require('../models/User');
 const { logger } = require('../shared/logger');
 
@@ -29,6 +30,14 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = verifyToken(token);
 
+    // Reject tokens that have been explicitly revoked (e.g. via logout)
+    if (await isBlacklisted(decoded.jti)) {
+      return res.status(401).json({
+        success: false,
+        error: 'Token has been revoked',
+      });
+    }
+
     // Get user from database
     const user = await User.findById(decoded.id).select('-password');
 
@@ -46,8 +55,9 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Attach user to request object
+    // Attach user and decoded token payload to request
     req.user = user;
+    req.tokenPayload = decoded; // exposes jti/exp to logout handler
     next();
   } catch (error) {
     logger.error('Authentication error:', error);
@@ -74,9 +84,11 @@ const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = verifyToken(token);
-      const user = await User.findById(decoded.id).select('-password');
-      if (user && user.isActive) {
-        req.user = user;
+      if (!await isBlacklisted(decoded.jti)) {
+        const user = await User.findById(decoded.id).select('-password');
+        if (user && user.isActive) {
+          req.user = user;
+        }
       }
     }
   } catch (error) {

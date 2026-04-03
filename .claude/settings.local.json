@@ -28,7 +28,12 @@
       "Bash(node --check src/shared/sharedMemory.js)",
       "Bash(node --check src/shared/plannerAgent.js)",
       "Bash(node --check src/shared/agent-base.js)",
-      "Bash(ls C:UserskartiMulti-Agent-Chatbot-Systemsrcsharedollama*)"
+      "Bash(ls C:UserskartiMulti-Agent-Chatbot-Systemsrcsharedollama*)",
+      "Bash(grep -rn \"llama3-8b-8192\\\\|llama3-70b-8192\\\\|mixtral-8x7b-32768\\\\|gemma2-9b-it\\\\|llama3:latest\\\\|mistral:latest\\\\|phi3:latest\\\\|qwen2.5-coder:latest\" C:/Users/karti/Multi-Agent-Chatbot-System/src/ C:/Users/karti/Multi-Agent-Chatbot-System/.env C:/Users/karti/Multi-Agent-Chatbot-System/.env.example --include=*.js --include=.env --include=.env.example)",
+      "Bash(grep -n \"TODO\\\\|FIXME\\\\|HACK\\\\|XXX\\\\|BUG\" /c/Users/karti/Multi-Agent-Chatbot-System/src/**/*.js)",
+      "Bash(xargs head:*)",
+      "Bash(node --check src/agents/manager/index.js)",
+      "Bash(npx jest:*)"
     ],
     "deny": [],
     "ask": []

@@ -19,7 +19,7 @@ const { logger } = require('./logger');
 
 const AGENT_PROFILES = {
   'agent-1': {
-    model:    process.env.AGENT_1_MODEL || 'llama3-8b-8192',
+    model:    process.env.AGENT_1_MODEL || 'llama-3.1-8b-instant',
     label:    'general',
     llmLabel: 'general',
     keywords: [
@@ -29,7 +29,7 @@ const AGENT_PROFILES = {
     ],
   },
   'agent-2': {
-    model:    process.env.AGENT_2_MODEL || 'mixtral-8x7b-32768',
+    model:    process.env.AGENT_2_MODEL || 'qwen/qwen3-32b',
     label:    'analyst',
     llmLabel: 'analyst',
     keywords: [
@@ -40,7 +40,7 @@ const AGENT_PROFILES = {
     ],
   },
   'agent-3': {
-    model:    process.env.AGENT_3_MODEL || 'gemma2-9b-it',
+    model:    process.env.AGENT_3_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct',
     label:    'creative',
     llmLabel: 'creative',
     keywords: [
@@ -51,7 +51,7 @@ const AGENT_PROFILES = {
     ],
   },
   'agent-4': {
-    model:    process.env.AGENT_4_MODEL || 'llama3-70b-8192',
+    model:    process.env.AGENT_4_MODEL || 'llama-3.3-70b-versatile',
     label:    'specialist',
     llmLabel: 'specialist',
     keywords: [
@@ -77,12 +77,16 @@ function _getCached(text) {
   const entry = _cache.get(text);
   if (!entry) return null;
   if (Date.now() - entry.ts > CACHE_TTL_MS) { _cache.delete(text); return null; }
+  // LRU: move to end so it survives the next eviction
+  _cache.delete(text);
+  _cache.set(text, entry);
   return entry.result;
 }
 
 function _setCached(text, result) {
+  if (_cache.has(text)) _cache.delete(text); // re-insert to update position
   if (_cache.size >= 200) {
-    // Evict the oldest entry
+    // LRU eviction: first entry is the least recently used
     _cache.delete(_cache.keys().next().value);
   }
   _cache.set(text, { result, ts: Date.now() });
@@ -178,7 +182,7 @@ async function _llmClassify(text) {
     `{"agent": "general|analyst|creative|specialist", "confidence": 0.0-1.0, "reasoning": "one sentence"}`;
 
   const result = await generateResponseJson(
-    process.env.AGENT_1_MODEL || 'llama3-8b-8192',
+    process.env.AGENT_1_MODEL || 'llama-3.1-8b-instant',
     prompt,
     { temperature: 0.1, num_predict: 80 }
   );

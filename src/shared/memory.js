@@ -7,7 +7,9 @@
  */
 
 const mongoose = require('mongoose');
+const { randomUUID } = require('crypto');
 const { logger } = require('./logger');
+const { withRetry } = require('./retry');
 
 // Lazy-load to avoid circular-require issues
 let Memory = null;
@@ -30,7 +32,7 @@ const MEMORY_TYPES = {
 
 class MemoryEntry {
   constructor(type, content, metadata = {}) {
-    this.id = `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.id = `mem_${randomUUID()}`;
     this.type = type;
     this.content = content;
     this.metadata = {
@@ -119,9 +121,20 @@ class AgentMemory {
 
     if (this.useDb) {
       try {
+        const isMongoTransient = (err) =>
+          err.name === 'MongoNetworkError' ||
+          err.name === 'MongoServerSelectionError' ||
+          err.name === 'MongoNotConnectedError';
+
         const MemoryModel = getMemoryModel();
-        const record = await MemoryModel.getOrCreate(this.userId, this.agentId);
-        await record.addEntry(type, content, metadata.confidence ?? 0.5, metadata);
+        const record = await withRetry(
+          () => MemoryModel.getOrCreate(this.userId, this.agentId),
+          { maxAttempts: 3, baseDelayMs: 200, maxDelayMs: 2000, retryOn: isMongoTransient }
+        );
+        await withRetry(
+          () => record.addEntry(type, content, metadata.confidence ?? 0.5, metadata),
+          { maxAttempts: 3, baseDelayMs: 200, maxDelayMs: 2000, retryOn: isMongoTransient }
+        );
 
         // Fire-and-forget: generate embedding and attach it to the new entry.
         // Done after the save so the store never blocks on the embedding model.

@@ -17,7 +17,7 @@
  * using the issues as guidance. A second revision is never attempted — the
  * system prefers fast + good over slow + perfect.
  *
- * Model choice: llama3-8b-8192 (fastest Groq model) keeps the added latency
+ * Model choice: llama-3.1-8b-instant (fastest Groq model) keeps the added latency
  * under ~800 ms in the happy path.
  */
 
@@ -26,8 +26,8 @@
 const { generateResponseJson, generateResponse } = require('./ollama');
 const { logger } = require('./logger');
 
-const CRITIC_MODEL   = process.env.AGENT_1_MODEL || 'llama3-8b-8192';   // fast
-const REVISION_MODEL = process.env.AGENT_4_MODEL || 'llama3-70b-8192';  // strong
+const CRITIC_MODEL   = process.env.AGENT_1_MODEL || 'llama-3.1-8b-instant';   // fast
+const REVISION_MODEL = process.env.AGENT_4_MODEL || 'llama-3.3-70b-versatile';  // strong
 
 // ── Critique ─────────────────────────────────────────────────────────────────
 

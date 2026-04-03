@@ -17,7 +17,7 @@ const { getAgentConfig, buildSystemPrompt } = require('../../shared/agent-config
 // Agent configuration
 const AGENT_ID = 'agent-1';
 const PORT = process.env.AGENT_1_PORT || 3001;
-const MODEL = process.env.AGENT_1_MODEL || 'llama3:latest';
+const MODEL = process.env.AGENT_1_MODEL || 'deepseek-r1-distill-llama-70b';
 
 // Flexible agent implementation
 class FlexibleAgent extends BaseAgent {
@@ -25,7 +25,7 @@ class FlexibleAgent extends BaseAgent {
     super(agentId, model, port, options);
   }
 
-  createPrompt(message) {
+  async createPrompt(message) {
     // Check if there's a custom prompt for this specific conversation
     if (message.customPrompt) {
       // Use custom prompt defined by user
@@ -44,9 +44,9 @@ class FlexibleAgent extends BaseAgent {
         prompt += `\nNow respond as ${agentName} according to your role.`;
       }
       
-      return prompt;
+      return this._injectMemoryContext(prompt, message);
     }
-    
+
     // Fallback to default configuration
     const config = getAgentConfig(AGENT_ID);
     
@@ -73,8 +73,8 @@ class FlexibleAgent extends BaseAgent {
       prompt += `${message.from} asks: ${message.content}\n\n`;
       prompt += `Provide a helpful and relevant response:`;
     }
-    
-    return prompt;
+
+    return this._injectMemoryContext(prompt, message);
   }
 }
 

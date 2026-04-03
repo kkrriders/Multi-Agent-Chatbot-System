@@ -22,6 +22,8 @@
 
 'use strict';
 
+const { logger } = require('./logger');
+
 // Error codes that indicate a transient infrastructure fault (safe to retry)
 const DEFAULT_RETRYABLE_CODES = new Set([
   'ECONNRESET',
@@ -61,7 +63,7 @@ async function withRetry(fn, opts = {}) {
       const cap   = Math.min(maxDelay, baseDelay * 2 ** attempt);
       const delay = Math.random() * cap; // full jitter: spread across [0, cap]
 
-      console.warn(
+      logger.warn(
         `[retry] attempt ${attempt + 1}/${maxAttempts} failed (${err.code ?? err.message}) — ` +
         `retrying in ${Math.round(delay)}ms`
       );

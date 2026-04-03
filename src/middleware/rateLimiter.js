@@ -46,11 +46,13 @@ const authLimiter = rateLimit({
 
 /**
  * Rate limiter for message/chat endpoints
- * Allows 30 requests per minute per IP
+ * Allows 30 requests per minute, keyed on authenticated user ID when available
+ * (avoids blocking all users behind a shared NAT IP).
  */
 const messageLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 30,
+  keyGenerator: (req) => req.user?.id?.toString() || req.ip,
   store: buildStore('message'),
   handler: (req, res) => {
     res.status(429).json({ error: 'Message rate limit exceeded', message: 'Please wait a moment before sending more messages.', retryAfter: req.rateLimit.resetTime });
@@ -59,11 +61,12 @@ const messageLimiter = rateLimit({
 
 /**
  * Rate limiter for PDF export endpoints
- * Allows 5 exports per hour per IP
+ * Allows 5 exports per hour, keyed on user ID (export route requires auth).
  */
 const exportLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
+  keyGenerator: (req) => req.user?.id?.toString() || req.ip,
   store: buildStore('export'),
   handler: (req, res) => {
     res.status(429).json({ error: 'Export rate limit exceeded', message: 'You can only export 5 conversations per hour.', retryAfter: req.rateLimit.resetTime });

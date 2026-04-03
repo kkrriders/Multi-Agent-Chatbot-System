@@ -22,10 +22,10 @@ const { logger } = require('./logger');
 
 // Model constants (read from env so deployment can swap without code changes)
 const MODELS = {
-  'agent-1': process.env.AGENT_1_MODEL || 'llama3-8b-8192',
-  'agent-2': process.env.AGENT_2_MODEL || 'mixtral-8x7b-32768',
-  'agent-3': process.env.AGENT_3_MODEL || 'gemma2-9b-it',
-  'agent-4': process.env.AGENT_4_MODEL || 'llama3-70b-8192',
+  'agent-1': process.env.AGENT_1_MODEL || 'llama-3.1-8b-instant',
+  'agent-2': process.env.AGENT_2_MODEL || 'qwen/qwen3-32b',
+  'agent-3': process.env.AGENT_3_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct',
+  'agent-4': process.env.AGENT_4_MODEL || 'llama-3.3-70b-versatile',
 };
 
 // Kept for callers that import ROUTING_RULES directly
