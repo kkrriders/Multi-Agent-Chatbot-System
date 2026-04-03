@@ -17,6 +17,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const { logger } = require('./logger');
 
 const HEADER = 'x-agent-signature';
 
@@ -46,6 +47,9 @@ function signAgentRequest(body, secret) {
  * @returns {import('express').RequestHandler}
  */
 function verifyAgentRequest(secret) {
+  if (!secret) {
+    throw new Error('verifyAgentRequest: secret must not be empty');
+  }
   return (req, res, next) => {
     const receivedSig = req.headers[HEADER];
     if (!receivedSig) {
@@ -55,6 +59,12 @@ function verifyAgentRequest(secret) {
     const rawBody = req.rawBody;
     if (!rawBody || rawBody.length === 0) {
       return res.status(400).json({ error: 'Empty request body' });
+    }
+
+    // Reject non-hex or wrong-length signatures before Buffer.from silently drops invalid chars
+    if (!/^[0-9a-f]{64}$/i.test(receivedSig)) {
+      logger.warn(`[agentAuth] Malformed signature from ${req.ip}: "${receivedSig.slice(0, 16)}..."`);
+      return res.status(403).json({ error: 'Invalid agent signature' });
     }
 
     const expectedSig = crypto

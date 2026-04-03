@@ -43,6 +43,7 @@ const { routeModelAsync, routeModelWithFallback } = require('../../shared/modelR
 const authRoutes = require('../../routes/auth');
 const conversationRoutes = require('../../routes/conversations');
 const promptRoutes = require('../../routes/prompts');
+const agentConfigRoutes = require('../../routes/agentConfigs');
 const { authenticate } = require('../../middleware/auth');
 const { signAgentRequest } = require('../../shared/agentAuth');
 const { auditLog } = require('../../middleware/auditLog');
@@ -59,6 +60,29 @@ const {
   createConversationLimiter
 } = require('../../middleware/rateLimiter');
 
+// Debate engine — full cross-questioning cycle
+const { runDebate } = require('../../shared/debateEngine');
+
+/**
+ * Convert a technical internal error into a user-friendly message.
+ * Internal details (circuit state, model names, error codes) must never
+ * reach the client — they aid attackers and confuse users.
+ */
+function toUserError(err) {
+  const msg = (err?.message || '').toLowerCase();
+  if (msg.includes('circuit') || msg.includes('circuit_open'))
+    return 'One or more AI agents are temporarily unavailable. Please try again in a moment.';
+  if (msg.includes('invalid json') || msg.includes('json parse') || msg.includes('json at position'))
+    return 'The AI assistant encountered a processing error. Please rephrase your request and try again.';
+  if (msg.includes('timeout') || msg.includes('etimedout') || msg.includes('econnaborted'))
+    return 'The request took too long to process. Please try again.';
+  if (msg.includes('econnrefused') || msg.includes('econnreset') || msg.includes('failed to communicate'))
+    return 'Unable to reach the AI assistant right now. Please try again in a moment.';
+  if (msg.includes('rate limit') || msg.includes('429'))
+    return 'The system is busy. Please wait a few seconds and try again.';
+  return 'An unexpected error occurred. Please try again.';
+}
+
 // HTML escape function to prevent XSS
 function escapeHtml(text) {
   if (typeof text !== 'string') return text;
@@ -70,9 +94,31 @@ function escapeHtml(text) {
     .replace(/'/g, '&#39;');
 }
 
+// ── Input-size and injection-guard constants ──────────────────────────────────
+const MAX_CONTENT_LENGTH    = 4_000;   // chars — user chat message / follow-up
+const MAX_TOPIC_LENGTH      = 500;
+const MAX_TASK_LENGTH       = 1_000;
+const MAX_MANAGER_ROLE_LEN  = 300;
+const MAX_CUSTOM_PROMPT_LEN = 2_000;
+const MAX_AGENT_NAME_LEN    = 60;
+const MAX_ROUNDS            = 10;
+const MAX_HISTORY_ENTRIES   = 100;     // entries trimmed before forwarding to agents
+const MAX_DEBATE_TASK_LEN   = 2_000;   // debate tasks may be longer than simple chat messages
+
+/**
+ * Return the last MAX_HISTORY_ENTRIES entries from a history array to prevent
+ * sending unbounded context to agents / exceeding Groq's context window.
+ */
+function trimHistory(history) {
+  if (!Array.isArray(history)) return [];
+  return history.length > MAX_HISTORY_ENTRIES
+    ? history.slice(history.length - MAX_HISTORY_ENTRIES)
+    : history;
+}
+
 // Constants
 const PORT = process.env.MANAGER_PORT || 3000;
-const MANAGER_MODEL = process.env.MANAGER_MODEL || 'llama3:latest';
+const MANAGER_MODEL = process.env.MANAGER_MODEL || 'llama-3.1-8b-instant';
 const EXPORTS_DIR = path.join(__dirname, '../exports');
 
 // Ensure exports directory exists
@@ -80,29 +126,13 @@ if (!fs.existsSync(EXPORTS_DIR)) {
   fs.mkdirSync(EXPORTS_DIR, { recursive: true });
 }
 
-// Agent service endpoints.
-// In Docker set AGENT_{N}_URL=http://<container-name>:<port> so the manager
-// reaches agents by Docker network hostname instead of localhost.
-const AGENT_ENDPOINTS = {
-  'agent-1': `${process.env.AGENT_1_URL || `http://localhost:${process.env.AGENT_1_PORT || 3005}`}/message`,
-  'agent-2': `${process.env.AGENT_2_URL || `http://localhost:${process.env.AGENT_2_PORT || 3006}`}/message`,
-  'agent-3': `${process.env.AGENT_3_URL || `http://localhost:${process.env.AGENT_3_PORT || 3007}`}/message`,
-  'agent-4': `${process.env.AGENT_4_URL || `http://localhost:${process.env.AGENT_4_PORT || 3008}`}/message`,
-};
-
-// One circuit breaker per agent — prevents thundering-herd when an agent is down
-const circuitBreakers = {};
-for (const agentId of Object.keys(AGENT_ENDPOINTS)) {
-  const cb = new CircuitBreaker(agentId, { failureThreshold: 3, recoveryTimeoutMs: 30_000 });
-  // Mirror every state change into Prometheus immediately
-  cb.on('stateChange', ({ name, to }) => {
-    agentMetrics.setCircuitState(name, to);
-    logger.warn(`Circuit breaker [${name}]: → ${to}`);
-  });
-  // Initialise metric to CLOSED (0) so Grafana has a baseline from startup
-  agentMetrics.setCircuitState(agentId, 'CLOSED');
-  circuitBreakers[agentId] = cb;
-}
+const {
+  AGENT_ENDPOINTS,
+  circuitBreakers,
+  routeMessageToAgent,
+  consultDualAgents,
+  setIo: setAgentRouterIo,
+} = require('./agentRouter');
 
 // Create Express app and HTTP server
 const app = express();
@@ -119,16 +149,20 @@ const io = new Server(server, {
   transports: ['websocket', 'polling'],
   connectTimeout: 120000,
   allowEIO3: true,
-  maxHttpBufferSize: 1e8,
+  maxHttpBufferSize: 1e6,  // 1 MB — sufficient for text-only payloads
   allowUpgrades: false,  // Prevent transport upgrades that cause disconnects
   upgradeTimeout: 60000,
   cookie: {
     name: 'multi-agent-session',
-    httpOnly: false,
-    sameSite: 'lax'
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
   },
   perMessageDeflate: false  // Disable compression to prevent issues
 });
+
+// Provide Socket.IO instance to agentRouter for dual-agent Socket.IO emissions
+setAgentRouterIo(io);
 
 // ── Security middleware (must be first) ───────────────────────────────────────
 
@@ -230,6 +264,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authLimiter, csrfProtection, auditLog, authRoutes);
 app.use('/api/conversations', generalLimiter, csrfProtection, authenticate, auditLog, conversationRoutes);
 app.use('/api/prompts', generalLimiter, csrfProtection, authenticate, auditLog, promptRoutes);
+app.use('/api', generalLimiter, csrfProtection, authenticate, agentConfigRoutes);
 
 // Store for active conversations
 const conversations = new Map();
@@ -272,15 +307,21 @@ setInterval(() => {
 // Clients must send { auth: { token } } in the io() call options.
 // Unauthenticated sockets are disconnected immediately.
 const { verifyToken } = require('../../utils/jwt');
+const { isBlacklisted } = require('../../utils/tokenBlacklist');
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const token = socket.handshake.auth?.token;
   if (!token) {
     logger.warn(`Socket ${socket.id} rejected — no token`);
     return next(new Error('Authentication required'));
   }
   try {
-    socket.user = verifyToken(token); // { id, email, iat, exp }
+    const decoded = verifyToken(token);
+    if (await isBlacklisted(decoded.jti)) {
+      logger.warn(`Socket ${socket.id} rejected — revoked token jti=${decoded.jti}`);
+      return next(new Error('Token has been revoked'));
+    }
+    socket.user = decoded;
     next();
   } catch {
     logger.warn(`Socket ${socket.id} rejected — invalid token`);
@@ -360,15 +401,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Add health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    version: '2.0.0',
-    message: 'Multi-Agent Chatbot System is running',
-    agents: Object.keys(AGENT_ENDPOINTS)
-  });
-});
 
 /**
  * Response cache to reduce redundant LLM calls
@@ -392,15 +424,8 @@ const cacheAnalytics = {
  * Generate cache key from message content
  */
 function generateCacheKey(agentId, content) {
-  // Simple hash function for cache key
   const str = `${agentId}:${content.trim().toLowerCase()}`;
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash.toString();
+  return crypto.createHash('sha256').update(str).digest('hex').slice(0, 16);
 }
 
 /**
@@ -415,6 +440,9 @@ function getCachedResponse(agentId, content) {
   if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
     cacheAnalytics.hits++;
     logger.info(`Cache hit for ${agentId} (hit rate: ${getCacheHitRate().toFixed(1)}%)`);
+    // Move to tail (most-recently-used) so LRU eviction spares it
+    responseCache.delete(key);
+    responseCache.set(key, cached);
     return cached.response;
   }
 
@@ -426,18 +454,16 @@ function getCachedResponse(agentId, content) {
  * Store response in cache
  */
 function cacheResponse(agentId, content, response) {
-  // Limit cache size
+  const key = generateCacheKey(agentId, content);
+  // LRU: re-inserting an existing key moves it to tail (Map preserves insertion order)
+  if (responseCache.has(key)) responseCache.delete(key);
+  // Evict least-recently-used (head) entry when at capacity
   if (responseCache.size >= MAX_CACHE_SIZE) {
-    const firstKey = responseCache.keys().next().value;
-    responseCache.delete(firstKey);
+    const lruKey = responseCache.keys().next().value;
+    responseCache.delete(lruKey);
     cacheAnalytics.evictions++;
   }
-
-  const key = generateCacheKey(agentId, content);
-  responseCache.set(key, {
-    response,
-    timestamp: Date.now()
-  });
+  responseCache.set(key, { response, timestamp: Date.now() });
 }
 
 /**
@@ -489,117 +515,6 @@ function resetCacheAnalytics() {
   logger.info('Cache analytics reset');
 }
 
-/**
- * Route message to an agent with conversation history
- *
- * @param {Object} message - Message to route
- * @returns {Promise<Object>} - Agent's response
- */
-async function routeMessageToAgent(message) {
-  const targetAgent = message.to;
-
-  if (!targetAgent || !targetAgent.startsWith('agent-')) {
-    throw new Error(`Invalid agent destination: ${targetAgent}`);
-  }
-
-  const endpoint = AGENT_ENDPOINTS[targetAgent];
-  if (!endpoint) {
-    throw new Error(`Unknown agent: ${targetAgent}`);
-  }
-
-  const cb = circuitBreakers[targetAgent];
-  const startMs = Date.now();
-
-  try {
-    logger.info(`Sending message to ${targetAgent}`);
-    const response = await cb.execute(() =>
-      withRetry(
-        () => axios.post(endpoint, message, {
-          timeout: 60_000,
-          headers: signAgentRequest(message, process.env.AGENT_SHARED_SECRET),
-        }),
-        { maxAttempts: 3, baseDelayMs: 500, maxDelayMs: 10_000 }
-      )
-    );
-    agentMetrics.recordRequest(targetAgent, 'success');
-    agentMetrics.recordDuration(targetAgent, (Date.now() - startMs) / 1000);
-    return response.data;
-  } catch (error) {
-    if (error.code === 'CIRCUIT_OPEN') {
-      agentMetrics.recordRequest(targetAgent, 'circuit_open');
-    } else {
-      agentMetrics.recordRequest(targetAgent, 'error');
-    }
-    logger.error(`Error routing message to ${targetAgent}:`, error.message);
-    throw new Error(`Failed to communicate with ${targetAgent}: ${error.message}`);
-  }
-}
-
-/**
- * Consult two agents in parallel and return the response with higher confidence.
- * Used when routing confidence is below the LOW_CONFIDENCE_THRESHOLD.
- *
- * For requests with a conversationId the winning response is emitted as
- * stream-start + stream-end Socket.IO events so the frontend renders it
- * identically to a normally-streamed response.
- *
- * @param {string}  primaryId       — first-choice agentId
- * @param {string}  secondaryId     — fallback agentId
- * @param {Object}  baseMessage     — message template (will be cloned per agent)
- * @param {string|null} conversationId
- * @returns {Promise<{ content: string, agentId: string, messageId: string, confidence: number }>}
- */
-async function consultDualAgents(primaryId, secondaryId, baseMessage, conversationId) {
-  const primaryMsg   = { ...baseMessage, to: primaryId };
-  const secondaryMsg = { ...baseMessage, to: secondaryId };
-
-  const [primarySettled, secondarySettled] = await Promise.allSettled([
-    routeMessageToAgent(primaryMsg),
-    routeMessageToAgent(secondaryMsg),
-  ]);
-
-  const primary   = primarySettled.status   === 'fulfilled' ? primarySettled.value   : null;
-  const secondary = secondarySettled.status === 'fulfilled' ? secondarySettled.value : null;
-
-  if (!primary && !secondary) {
-    throw new Error('Both agents failed during low-confidence fallback');
-  }
-
-  // Pick higher confidence (agents report 0-100; default to 50 when missing)
-  const primaryConf   = primary   ? (primary.confidence   ?? 50) : -1;
-  const secondaryConf = secondary ? (secondary.confidence ?? 50) : -1;
-
-  const winner   = secondaryConf > primaryConf ? secondary   : (primary || secondary);
-  const winnerId = secondaryConf > primaryConf ? secondaryId : primaryId;
-
-  const content   = winner.content || '';
-  const messageId = winner.id || `fallback-${Date.now()}`;
-
-  // Emit to Socket.IO room when a conversationId is present
-  if (conversationId) {
-    io.to(conversationId).emit('stream-start', {
-      messageId, agentId: winnerId, conversationId, timestamp: Date.now(),
-    });
-    io.to(conversationId).emit('stream-end', {
-      messageId,
-      agentId:        winnerId,
-      content,
-      confidence:     winner.confidence,
-      conversationId,
-      timestamp:      Date.now(),
-      type:           'fallback-response',
-      fallbackUsed:   true,
-      originalAgent:  primaryId,
-    });
-  }
-
-  logger.info(
-    `[consultDualAgents] winner=${winnerId} (conf=${winner.confidence ?? '?'}) ` +
-    `over ${winnerId === primaryId ? secondaryId : primaryId} (conf=${Math.min(primaryConf, secondaryConf)})`
-  );
-
-  return { content, agentId: winnerId, messageId, confidence: winner.confidence };
-}
 
 /**
  * Send message to agent (simplified wrapper for voting sessions)
@@ -763,7 +678,7 @@ async function streamMessageToAgent(message, conversationId, type) {
 /**
  * Handle single agent conversation
  */
-app.post('/message', messageLimiter, async (req, res) => {
+app.post('/message', authenticate, messageLimiter, async (req, res) => {
   try {
     const { content, agentId, agentName, conversationId } = req.body;
     
@@ -774,6 +689,12 @@ app.post('/message', messageLimiter, async (req, res) => {
 
     if (typeof content !== 'string' || content.trim().length === 0) {
       return res.status(400).json({ error: 'Content must be a non-empty string' });
+    }
+    if (content.length > MAX_CONTENT_LENGTH) {
+      return res.status(400).json({ error: `content must be ≤ ${MAX_CONTENT_LENGTH} chars` });
+    }
+    if (agentName && typeof agentName === 'string' && agentName.length > MAX_AGENT_NAME_LEN) {
+      return res.status(400).json({ error: `agentName must be ≤ ${MAX_AGENT_NAME_LEN} chars` });
     }
 
     if (typeof agentId !== 'string' || (!/^agent-[1-4]$/.test(agentId) && agentId !== 'auto')) {
@@ -821,13 +742,14 @@ app.post('/message', messageLimiter, async (req, res) => {
     if (conversationId) {
       const conversation = conversations.get(conversationId);
       if (conversation) {
-        message.conversationHistory = [...conversation.history];
+        message.conversationHistory = trimHistory(conversation.history);
         message.isFollowUp = true;
       }
     }
 
     let responseContent;
     let responseMessageId;
+    let responseConfidence = null;
 
     // ── Low-confidence path: consult two agents and pick the better response ────
     if (isLowConfidence && secondaryAgentId) {
@@ -846,9 +768,10 @@ app.post('/message', messageLimiter, async (req, res) => {
       }
 
       const dual = await consultDualAgents(resolvedAgentId, secondaryAgentId, message, conversationId);
-      responseContent  = dual.content;
-      responseMessageId = dual.messageId;
-      resolvedAgentId  = dual.agentId; // update to actual winner
+      responseContent    = dual.content;
+      responseMessageId  = dual.messageId;
+      resolvedAgentId    = dual.agentId; // update to actual winner
+      responseConfidence = dual.confidence ?? null;
 
       if (conversationId && conversation) {
         conversation.history.push({
@@ -887,8 +810,9 @@ app.post('/message', messageLimiter, async (req, res) => {
 
       try {
         const streamResult = await streamMessageToAgent(message, conversationId);
-        responseContent = streamResult.content;
-        responseMessageId = streamResult.messageId;
+        responseContent    = streamResult.content;
+        responseMessageId  = streamResult.messageId;
+        responseConfidence = streamResult.confidence ?? null;
 
         if (conversation) {
           conversation.history.push({
@@ -909,15 +833,17 @@ app.post('/message', messageLimiter, async (req, res) => {
     // ── Non-streaming fallback (no Socket.IO room) ──────────────────────────────
     } else {
       const response = await routeMessageToAgent(message);
-      responseContent = response.content;
+      responseContent    = response.content;
+      responseConfidence = response.confidence ?? null;
     }
 
     res.json({
       success: true,
       response: {
-        content:   responseContent,
-        agentId:   resolvedAgentId,
-        messageId: responseMessageId,
+        content:    responseContent,
+        agentId:    resolvedAgentId,
+        messageId:  responseMessageId,
+        ...(responseConfidence !== null ? { confidence: responseConfidence } : {}),
         ...(routingMeta ? {
           routing: {
             method:         routingMeta.method,
@@ -931,16 +857,14 @@ app.post('/message', messageLimiter, async (req, res) => {
     });
   } catch (error) {
     logger.error('Error in single message route:', error.message);
-    res.status(500).json({
-      error: `Error processing message: ${error.message}`
-    });
+    res.status(500).json({ error: toUserError(error) });
   }
 });
 
 /**
  * Handle team conversation with multiple agents
  */
-app.post('/team-conversation', messageLimiter, async (req, res) => {
+app.post('/team-conversation', authenticate, messageLimiter, async (req, res) => {
   try {
     const { 
       content, 
@@ -954,26 +878,96 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
       });
     }
 
+    if (typeof content !== 'string' || content.trim().length === 0 || content.length > MAX_CONTENT_LENGTH) {
+      return res.status(400).json({ error: `content must be a non-empty string ≤ ${MAX_CONTENT_LENGTH} chars` });
+    }
+
     if (participants.length === 0 || participants.length > 4) {
       return res.status(400).json({
         error: 'participants must contain between 1 and 4 agents',
       });
     }
 
+    const invalidAgent = participants.find(p => !/^agent-[1-4]$/.test(p.agentId));
+    if (invalidAgent) {
+      return res.status(400).json({ error: `Invalid agentId: ${invalidAgent.agentId}` });
+    }
+    const longName = participants.find(p => typeof p.agentName === 'string' && p.agentName.length > MAX_AGENT_NAME_LEN);
+    if (longName) {
+      return res.status(400).json({ error: `agentName must be ≤ ${MAX_AGENT_NAME_LEN} chars` });
+    }
+
+    // ── Debate mode ──────────────────────────────────────────────────────────────
+    // When { debate: true } is passed the request is redirected through the full
+    // cross-questioning debate cycle instead of the sequential team conversation.
+    if (req.body.debate === true) {
+      const debateConvId = conversationId || `debate-${Date.now()}`;
+      if (!conversations.has(debateConvId)) {
+        conversations.set(debateConvId, {
+          id: debateConvId,
+          userId: req.user._id.toString(),
+          type: 'debate',
+          task: content,
+          history: [],
+          participants,
+          createdAt: new Date().toISOString(),
+          lastActivity: Date.now(),
+        });
+      }
+      const debateConv = conversations.get(debateConvId);
+      const debateTaskMsg = { from: 'user', content, timestamp: Date.now(), type: 'debate-task' };
+      debateConv.history.push(debateTaskMsg);
+      debateConv.lastActivity = Date.now();
+      broadcastConversationUpdate(debateConvId, debateTaskMsg);
+
+      const debateCallAgentFn = async (agentId, agentContent, cId) => {
+        const msg = createMessage('Manager', agentId, agentContent, PERFORMATIVES.REQUEST);
+        msg.conversationHistory = trimHistory(debateConv.history);
+        io.to(cId).emit('agent-thinking', { agentId, conversationId: cId, timestamp: Date.now() });
+        try {
+          return await streamMessageToAgent(msg, cId);
+        } catch (err) {
+          io.to(cId).emit('stream-error', { agentId, conversationId: cId });
+          throw err;
+        }
+      };
+
+      const debateResult = await runDebate(content, participants, debateCallAgentFn, io, debateConvId);
+      debateConv.history.push({
+        from: 'Debate-Synthesis',
+        content: debateResult.finalAnswer,
+        timestamp: Date.now(),
+        type: 'debate-synthesis',
+      });
+      debateConv.lastActivity = Date.now();
+
+      return res.json({
+        success: true,
+        conversationId: debateConvId,
+        finalAnswer: debateResult.finalAnswer,
+        debateMode: true,
+        proposalCount: debateResult.proposals.length,
+        challengeCount: debateResult.challenges.reduce((s, c) => s + c.challenges.length, 0),
+        defenseCount: debateResult.defenses.reduce((s, d) => s + d.defenses.length, 0),
+      });
+    }
+    // ── End debate mode ───────────────────────────────────────────────────────────
+
     const convId = conversationId || `conv-${Date.now()}`;
-    
+
     // Get or create conversation
     if (!conversations.has(convId)) {
       conversations.set(convId, {
         id: convId,
+        userId: req.user._id.toString(),
         history: [],
         participants: participants,
         createdAt: new Date().toISOString()
       });
     }
-    
+
     const conversation = conversations.get(convId);
-    
+
     // Add user message to history
     const userMessage = {
       from: 'user',
@@ -982,10 +976,10 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
     };
     conversation.history.push(userMessage);
     conversation.lastActivity = Date.now();
-    
+
     // Broadcast user message to connected clients
     broadcastConversationUpdate(convId, userMessage);
-    
+
     // Get responses from each participant in sequence
     const responses = [];
     
@@ -1002,8 +996,8 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
         );
         
         // Add agent name and conversation history
-        message.agentName = participant.agentName || `Agent ${participant.agentId.slice(-1)}`;
-        message.conversationHistory = [...conversation.history];
+        message.agentName = (participant.agentName || `Agent ${participant.agentId.slice(-1)}`).replace(/[\r\n]/g, ' ').slice(0, MAX_AGENT_NAME_LEN);
+        message.conversationHistory = trimHistory(conversation.history);
 
         // Emit before opening the HTTP stream. Covers the latency gap between
         // agent selection and the first arriving token so the UI never looks
@@ -1056,9 +1050,108 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
 
   } catch (error) {
     logger.error('Error in team conversation route:', error.message);
-    res.status(500).json({ 
-      error: `Error processing team conversation: ${error.message}` 
+    res.status(500).json({ error: toUserError(error) });
+  }
+});
+
+/**
+ * POST /debate-session
+ *
+ * Full cross-questioning debate cycle across 2-4 agents.
+ * Phases: proposal → challenge (any→any) → defense → synthesis.
+ *
+ * Body: { task, participants, conversationId? }
+ *   task         — the problem/question to debate (required, ≤ MAX_DEBATE_TASK_LEN)
+ *   participants — [{agentId, agentName}], 2–4 agents (required)
+ *   conversationId — optional; auto-generated if omitted
+ *
+ * Socket.IO events emitted (in addition to standard stream-* events):
+ *   debate-phase     { phase: 'proposal'|'challenge'|'defense'|'synthesis' }
+ *   debate-challenge { fromAgent, toAgent, challengeId, claim, critique }
+ *   debate-defense   { agentId, challengeId, stance }
+ *   debate-complete  { proposalCount, challengeCount, defenseCount }
+ */
+app.post('/debate-session', authenticate, messageLimiter, async (req, res) => {
+  try {
+    const { task, participants, conversationId } = req.body;
+
+    if (!task || typeof task !== 'string' || task.trim().length === 0) {
+      return res.status(400).json({ error: 'task is required' });
+    }
+    if (task.length > MAX_DEBATE_TASK_LEN) {
+      return res.status(400).json({ error: `task must be ≤ ${MAX_DEBATE_TASK_LEN} chars` });
+    }
+    if (!participants || !Array.isArray(participants) || participants.length < 2 || participants.length > 4) {
+      return res.status(400).json({ error: 'participants must be an array of 2–4 agents' });
+    }
+    const invalidDebateAgent = participants.find(p => !/^agent-[1-4]$/.test(p.agentId));
+    if (invalidDebateAgent) {
+      return res.status(400).json({ error: `Invalid agentId: ${invalidDebateAgent.agentId}` });
+    }
+    const longDebateName = participants.find(
+      p => typeof p.agentName === 'string' && p.agentName.length > MAX_AGENT_NAME_LEN
+    );
+    if (longDebateName) {
+      return res.status(400).json({ error: `agentName must be ≤ ${MAX_AGENT_NAME_LEN} chars` });
+    }
+
+    const convId = conversationId || `debate-${Date.now()}`;
+
+    if (!conversations.has(convId)) {
+      conversations.set(convId, {
+        id: convId,
+        userId: req.user._id.toString(),
+        type: 'debate',
+        task,
+        history: [],
+        participants,
+        createdAt: new Date().toISOString(),
+        lastActivity: Date.now(),
+      });
+    }
+    const conversation = conversations.get(convId);
+
+    const taskMsg = { from: 'user', content: task, timestamp: Date.now(), type: 'debate-task' };
+    conversation.history.push(taskMsg);
+    conversation.lastActivity = Date.now();
+    broadcastConversationUpdate(convId, taskMsg);
+
+    // callAgentFn wraps the existing streamMessageToAgent infrastructure
+    const callAgentFn = async (agentId, agentContent, cId) => {
+      const message = createMessage('Manager', agentId, agentContent, PERFORMATIVES.REQUEST);
+      message.conversationHistory = trimHistory(conversation.history);
+      io.to(cId).emit('agent-thinking', { agentId, conversationId: cId, timestamp: Date.now() });
+      try {
+        return await streamMessageToAgent(message, cId);
+      } catch (err) {
+        io.to(cId).emit('stream-error', { agentId, conversationId: cId });
+        throw err;
+      }
+    };
+
+    const result = await runDebate(task, participants, callAgentFn, io, convId);
+
+    const finalMsg = {
+      from: 'Debate-Synthesis',
+      content: result.finalAnswer,
+      timestamp: Date.now(),
+      type: 'debate-synthesis',
+    };
+    conversation.history.push(finalMsg);
+    conversation.lastActivity = Date.now();
+
+    res.json({
+      success: true,
+      conversationId: convId,
+      finalAnswer: result.finalAnswer,
+      proposalCount: result.proposals.length,
+      challengeCount: result.challenges.reduce((s, c) => s + c.challenges.length, 0),
+      defenseCount: result.defenses.reduce((s, d) => s + d.defenses.length, 0),
     });
+
+  } catch (error) {
+    logger.error('[debate-session] Error:', error.message);
+    res.status(500).json({ error: toUserError(error) });
   }
 });
 
@@ -1076,19 +1169,22 @@ app.post('/team-conversation', messageLimiter, async (req, res) => {
  *   planner-synthesizing   — synthesis started
  *   stream-end             — final synthesized response ready
  */
-app.post('/plan-and-execute', messageLimiter, async (req, res) => {
+app.post('/plan-and-execute', authenticate, messageLimiter, async (req, res) => {
   try {
     const { content, conversationId } = req.body;
 
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
       return res.status(400).json({ error: 'content is required' });
     }
+    if (content.length > MAX_CONTENT_LENGTH) {
+      return res.status(400).json({ error: `content must be ≤ ${MAX_CONTENT_LENGTH} chars` });
+    }
 
     const convId = conversationId || `plan-${Date.now()}`;
 
     // Ensure conversation record exists
     if (!conversations.has(convId)) {
-      conversations.set(convId, { id: convId, history: [], participants: [], createdAt: new Date().toISOString() });
+      conversations.set(convId, { id: convId, userId: req.user._id.toString(), history: [], participants: [], createdAt: new Date().toISOString() });
     }
     const conversation = conversations.get(convId);
 
@@ -1107,7 +1203,7 @@ app.post('/plan-and-execute', messageLimiter, async (req, res) => {
        */
       executeTask: async (agentId, taskDescription, cId) => {
         const message = createMessage('user', agentId, taskDescription, PERFORMATIVES.REQUEST);
-        message.conversationHistory = [...conversation.history];
+        message.conversationHistory = trimHistory(conversation.history);
 
         if (cId) {
           io.to(cId).emit('agent-thinking', { agentId, conversationId: cId, timestamp: Date.now() });
@@ -1163,43 +1259,63 @@ app.post('/plan-and-execute', messageLimiter, async (req, res) => {
       finalResponse,
       ...(aggregation ? { aggregation } : {}),
       ...(critic ? { critic } : {}),
+      meta: {
+        ...(critic ? {
+          critic: {
+            approved: critic.approved,
+            score:    critic.score,
+            issues:   critic.issues ?? [],
+            revised:  critic.revised ?? false,
+          },
+        } : {}),
+        ...(aggregation ? {
+          dedup: aggregation.dedupStats,
+          conflicts: aggregation.conflicts ?? [],
+        } : {}),
+      },
     });
 
   } catch (error) {
     logger.error('[plan-and-execute] Error:', error.message);
-    res.status(500).json({ error: `Planner error: ${error.message}` });
+    res.status(500).json({ error: toUserError(error) });
   }
 });
 
 /**
  * Get conversation history
  */
-app.get('/conversation/:conversationId', (req, res) => {
+app.get('/conversation/:conversationId', authenticate, (req, res) => {
   const conversationId = req.params.conversationId;
+  if (!/^[a-zA-Z0-9_-]+$/.test(conversationId)) {
+    return res.status(400).json({ error: 'Invalid conversation ID format' });
+  }
   const conversation = conversations.get(conversationId);
-  
   if (!conversation) {
     return res.status(404).json({ error: 'Conversation not found' });
   }
-  
-  res.json({
-    success: true,
-    conversation: conversation
-  });
+  if (conversation.userId && conversation.userId !== req.user._id.toString()) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  res.json({ success: true, conversation });
 });
 
 /**
  * Clear conversation history
  */
-app.delete('/conversation/:conversationId', (req, res) => {
+app.delete('/conversation/:conversationId', authenticate, (req, res) => {
   const conversationId = req.params.conversationId;
-  
-  if (conversations.has(conversationId)) {
-    conversations.delete(conversationId);
-    res.json({ success: true, message: 'Conversation cleared' });
-  } else {
-    res.status(404).json({ error: 'Conversation not found' });
+  if (!/^[a-zA-Z0-9_-]+$/.test(conversationId)) {
+    return res.status(400).json({ error: 'Invalid conversation ID format' });
   }
+  const conversation = conversations.get(conversationId);
+  if (!conversation) {
+    return res.status(404).json({ error: 'Conversation not found' });
+  }
+  if (conversation.userId && conversation.userId !== req.user._id.toString()) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  conversations.delete(conversationId);
+  res.json({ success: true, message: 'Conversation cleared' });
 });
 
 /**
@@ -1323,16 +1439,14 @@ app.get('/export-chat/:conversationId', exportLimiter, authenticate, async (req,
 
   } catch (error) {
     logger.error('Error exporting chat to PDF:', error.message);
-    res.status(500).json({ 
-      error: `Error exporting chat: ${error.message}` 
-    });
+    res.status(500).json({ error: 'Failed to export conversation. Please try again.' });
   }
 });
 
 /**
  * Get all PDF exports for a conversation
  */
-app.get('/export/:conversationId/pdfs', async (req, res) => {
+app.get('/export/:conversationId/pdfs', authenticate, async (req, res) => {
   try {
     const { conversationId } = req.params;
     const Conversation = require('../../models/Conversation');
@@ -1358,7 +1472,7 @@ app.get('/export/:conversationId/pdfs', async (req, res) => {
 /**
  * Download a specific PDF export from MongoDB
  */
-app.get('/export/:conversationId/pdf/:pdfId', async (req, res) => {
+app.get('/export/:conversationId/pdf/:pdfId', authenticate, async (req, res) => {
   try {
     const { conversationId, pdfId } = req.params;
     const Conversation = require('../../models/Conversation');
@@ -1454,7 +1568,7 @@ app.post('/api/cache/clear', (req, res) => {
 /**
  * Research Mode - Extended Multi-Round Agent Collaboration
  */
-app.post('/research-session', messageLimiter, async (req, res) => {
+app.post('/research-session', authenticate, messageLimiter, async (req, res) => {
   try {
     const { 
       topic, 
@@ -1470,10 +1584,28 @@ app.post('/research-session', messageLimiter, async (req, res) => {
       });
     }
 
+    if (typeof topic !== 'string' || topic.trim().length === 0 || topic.length > MAX_TOPIC_LENGTH) {
+      return res.status(400).json({ error: `topic must be a non-empty string ≤ ${MAX_TOPIC_LENGTH} chars` });
+    }
+    if (typeof managerInstructions === 'string' && managerInstructions.length > MAX_MANAGER_ROLE_LEN) {
+      return res.status(400).json({ error: `managerInstructions must be ≤ ${MAX_MANAGER_ROLE_LEN} chars` });
+    }
+
+    const clampedRounds = Math.min(Math.max(parseInt(rounds, 10) || 3, 1), MAX_ROUNDS);
+
     if (participants.length === 0 || participants.length > 4) {
       return res.status(400).json({
         error: 'participants must contain between 1 and 4 agents',
       });
+    }
+
+    const invalidResearchAgent = participants.find(p => !/^agent-[1-4]$/.test(p.agentId));
+    if (invalidResearchAgent) {
+      return res.status(400).json({ error: `Invalid agentId: ${invalidResearchAgent.agentId}` });
+    }
+    const longResearchName = participants.find(p => typeof p.agentName === 'string' && p.agentName.length > MAX_AGENT_NAME_LEN);
+    if (longResearchName) {
+      return res.status(400).json({ error: `agentName must be ≤ ${MAX_AGENT_NAME_LEN} chars` });
     }
 
     const convId = conversationId || `research-${Date.now()}`;
@@ -1482,9 +1614,10 @@ app.post('/research-session', messageLimiter, async (req, res) => {
     if (!conversations.has(convId)) {
       conversations.set(convId, {
         id: convId,
+        userId: req.user._id.toString(),
         type: 'research',
         topic: topic,
-        rounds: rounds,
+        rounds: clampedRounds,
         currentRound: 0,
         history: [],
         participants: participants,
@@ -1508,14 +1641,14 @@ app.post('/research-session', messageLimiter, async (req, res) => {
     broadcastConversationUpdate(convId, managerOpeningMessage);
     
     // Start the research rounds
-    await conductResearchRounds(convId, topic, participants, rounds);
-    
+    await conductResearchRounds(convId, topic, participants, clampedRounds);
+
     res.json({
       success: true,
       conversationId: convId,
       message: 'Research session started',
       participants: participants,
-      rounds: rounds
+      rounds: clampedRounds
     });
     
   } catch (error) {
@@ -1601,8 +1734,10 @@ function detectConvergence(roundResponses, threshold = 0.75) {
 async function conductResearchRounds(conversationId, topic, participants, totalRounds) {
   const conversation = conversations.get(conversationId);
   let converged = false;
+  let completedRounds = 0;
 
   for (let round = 1; round <= totalRounds; round++) {
+    completedRounds = round;
     conversation.currentRound = round;
     
     // Manager announces the round
@@ -1632,8 +1767,8 @@ async function conductResearchRounds(conversationId, topic, participants, totalR
           PERFORMATIVES.REQUEST
         );
         
-        message.agentName = participant.agentName;
-        message.conversationHistory = [...conversation.history];
+        message.agentName = (participant.agentName || `Agent ${participant.agentId.slice(-1)}`).replace(/[\r\n]/g, ' ').slice(0, MAX_AGENT_NAME_LEN);
+        message.conversationHistory = trimHistory(conversation.history);
         message.researchContext = {
           topic,
           round,
@@ -1735,7 +1870,7 @@ async function conductResearchRounds(conversationId, topic, participants, totalR
   // Final research summary
   const finalSummary = {
     from: 'Manager',
-    content: `🎯 **Research Session Complete**\n\n**Topic**: ${topic}\n**Rounds Completed**: ${totalRounds}\n**Participants**: ${participants.map(p => p.agentName).join(', ')}\n\nThank you all for your valuable contributions to this research session!`,
+    content: `🎯 **Research Session Complete**\n\n**Topic**: ${topic}\n**Rounds Completed**: ${completedRounds} of ${totalRounds}\n**Participants**: ${participants.map(p => p.agentName).join(', ')}\n\nThank you all for your valuable contributions to this research session!`,
     timestamp: Date.now(),
     type: 'session-complete'
   };
@@ -1790,7 +1925,7 @@ function createRoundPrompt(topic, round, totalRounds, conversationHistory) {
 /**
  * Flexible Work Session - User-Defined Agent Prompts
  */
-app.post('/flexible-work-session', messageLimiter, async (req, res) => {
+app.post('/flexible-work-session', authenticate, messageLimiter, async (req, res) => {
   try {
     const { 
       task, 
@@ -1801,22 +1936,35 @@ app.post('/flexible-work-session', messageLimiter, async (req, res) => {
     
     // Validate input
     if (!task || !agents || !Array.isArray(agents) || agents.length === 0) {
-      return res.status(400).json({ 
-        error: 'Task and agents array with custom prompts are required' 
+      return res.status(400).json({
+        error: 'Task and agents array with custom prompts are required'
       });
     }
-    
+
+    if (typeof task !== 'string' || task.trim().length === 0 || task.length > MAX_TASK_LENGTH) {
+      return res.status(400).json({ error: `task must be a non-empty string ≤ ${MAX_TASK_LENGTH} chars` });
+    }
+    if (typeof managerRole === 'string' && managerRole.length > MAX_MANAGER_ROLE_LEN) {
+      return res.status(400).json({ error: `managerRole must be ≤ ${MAX_MANAGER_ROLE_LEN} chars` });
+    }
+
     // Validate each agent has required fields
     for (const agent of agents) {
       if (!agent.agentId || !agent.agentName || !agent.customPrompt) {
-        return res.status(400).json({ 
-          error: 'Each agent must have agentId, agentName, and customPrompt' 
+        return res.status(400).json({
+          error: 'Each agent must have agentId, agentName, and customPrompt'
         });
       }
       if (!/^agent-[1-4]$/.test(agent.agentId)) {
-        return res.status(400).json({ 
-          error: 'AgentId must be in format agent-1, agent-2, agent-3, or agent-4' 
+        return res.status(400).json({
+          error: 'AgentId must be in format agent-1, agent-2, agent-3, or agent-4'
         });
+      }
+      if (agent.agentName.length > MAX_AGENT_NAME_LEN) {
+        return res.status(400).json({ error: `agentName must be ≤ ${MAX_AGENT_NAME_LEN} chars` });
+      }
+      if (agent.customPrompt.length > MAX_CUSTOM_PROMPT_LEN) {
+        return res.status(400).json({ error: `customPrompt must be ≤ ${MAX_CUSTOM_PROMPT_LEN} chars` });
       }
     }
 
@@ -1826,6 +1974,7 @@ app.post('/flexible-work-session', messageLimiter, async (req, res) => {
     if (!conversations.has(convId)) {
       conversations.set(convId, {
         id: convId,
+        userId: req.user._id.toString(),
         type: 'flexible-work',
         task: task,
         agents: agents,
@@ -1886,8 +2035,8 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
         PERFORMATIVES.REQUEST
       );
       
-      message.agentName = agent.agentName;
-      message.conversationHistory = [...conversation.history];
+      message.agentName = (agent.agentName || agent.agentId).replace(/[\r\n]/g, ' ').slice(0, MAX_AGENT_NAME_LEN);
+      message.conversationHistory = trimHistory(conversation.history);
       message.customPrompt = agent.customPrompt;
       message.workContext = {
         task,
@@ -1940,18 +2089,23 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
     }
   }
   
-  // Manager provides final enhancement/conclusion
+  // Manager provides final synthesis
   try {
-    const managerMessage = createMessage(
-      'System',
-      'manager',
-      `${managerRole}\n\nTask: ${task}\n\nReview all the work contributed by the team members above. Provide a final enhancement, synthesis, or conclusion to complete this work session. Highlight key insights and next steps if applicable.`,
-      PERFORMATIVES.REQUEST
-    );
-    
-    managerMessage.conversationHistory = [...conversation.history];
-    managerMessage.isManagerResponse = true;
-    
+    // Build a prompt that includes the actual agent outputs so the model has
+    // real content to synthesize — not just the instruction string.
+    const agentOutputs = conversation.history
+      .filter(m => m.agentId || (m.from && m.from !== 'Manager' && m.from !== 'user'))
+      .map(m => `**${m.from}**:\n${m.content}`)
+      .join('\n\n---\n\n');
+
+    const synthesisPrompt =
+      `${managerRole}\n\n` +
+      `Task: ${task}\n\n` +
+      `Team contributions:\n\n${agentOutputs}\n\n` +
+      `Synthesize the above into a final conclusion. Highlight the key insights, reconcile any differences, ` +
+      `and give 2-3 actionable next steps. Do NOT re-introduce or re-describe the agents — ` +
+      `focus on the substance of their contributions. Be concise and direct.`;
+
     // Stream manager conclusion — tokens delivered in real-time via Socket.IO
     const managerMessageId = `manager-${Date.now()}`;
     io.to(conversationId).emit('stream-start', {
@@ -1962,16 +2116,16 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
     });
 
     let managerContent = '';
-    const prefix = '🎯 **Final Enhancement & Conclusion**\n\n';
+    const prefix = '🎯 **Synthesis & Next Steps**\n\n';
     const suffix = '\n\n---\n✅ **Work Session Complete**';
 
     // Emit prefix tokens so the header appears immediately
     io.to(conversationId).emit('stream-token', { messageId: managerMessageId, token: prefix, conversationId });
 
     managerContent = await generateResponseStream(
-      process.env.MANAGER_MODEL || 'llama3:latest',
-      managerMessage.content,
-      {},
+      process.env.MANAGER_MODEL || 'llama-3.1-8b-instant',
+      synthesisPrompt,
+      { num_predict: 1500 },
       (token) => {
         io.to(conversationId).emit('stream-token', { messageId: managerMessageId, token, conversationId });
       }
@@ -2018,7 +2172,7 @@ async function conductFlexibleWorkSession(conversationId, task, agents, managerR
 /**
  * Continue an existing conversation with follow-up messages
  */
-app.post('/continue-conversation', messageLimiter, async (req, res) => {
+app.post('/continue-conversation', authenticate, messageLimiter, async (req, res) => {
   try {
     const { 
       conversationId, 
@@ -2027,9 +2181,22 @@ app.post('/continue-conversation', messageLimiter, async (req, res) => {
     } = req.body;
     
     if (!conversationId || !message || !participants || !Array.isArray(participants)) {
-      return res.status(400).json({ 
-        error: 'ConversationId, message, and participants array are required' 
+      return res.status(400).json({
+        error: 'ConversationId, message, and participants array are required'
       });
+    }
+
+    if (typeof message !== 'string' || message.trim().length === 0 || message.length > MAX_CONTENT_LENGTH) {
+      return res.status(400).json({ error: `message must be a non-empty string ≤ ${MAX_CONTENT_LENGTH} chars` });
+    }
+
+    const invalidContinueAgent = participants.find(p => !/^agent-[1-4]$/.test(p.agentId));
+    if (invalidContinueAgent) {
+      return res.status(400).json({ error: `Invalid agentId: ${invalidContinueAgent.agentId}` });
+    }
+    const longContinueName = participants.find(p => typeof p.agentName === 'string' && p.agentName.length > MAX_AGENT_NAME_LEN);
+    if (longContinueName) {
+      return res.status(400).json({ error: `agentName must be ≤ ${MAX_AGENT_NAME_LEN} chars` });
     }
 
     // Get existing conversation
@@ -2069,8 +2236,8 @@ app.post('/continue-conversation', messageLimiter, async (req, res) => {
         );
         
         // Add context about this being a follow-up
-        agentMessage.agentName = participant.agentName || `Agent ${participant.agentId.slice(-1)}`;
-        agentMessage.conversationHistory = [...conversation.history];
+        agentMessage.agentName = (participant.agentName || `Agent ${participant.agentId.slice(-1)}`).replace(/[\r\n]/g, ' ').slice(0, MAX_AGENT_NAME_LEN);
+        agentMessage.conversationHistory = trimHistory(conversation.history);
         agentMessage.isFollowUp = true;
         agentMessage.followUpContext = `This is a follow-up message in an ongoing conversation. Please respond appropriately based on the conversation history and this new input: "${message}"`;
 
@@ -2129,241 +2296,17 @@ app.post('/continue-conversation', messageLimiter, async (req, res) => {
 
   } catch (error) {
     logger.error('Error in continue conversation route:', error.message);
-    res.status(500).json({ 
-      error: `Error processing follow-up message: ${error.message}` 
-    });
+    res.status(500).json({ error: toUserError(error) });
   }
 });
 
-/**
- * Get suggested agent templates for different task types
- */
-app.get('/api/agent-templates', (req, res) => {
-  const templates = {
-    coding: {
-      name: "Software Development Team",
-      description: "Perfect for coding projects, web apps, and software development tasks",
-      agents: [
-        {
-          name: "Frontend Developer",
-          prompt: "You are a senior frontend developer specializing in React, JavaScript, and modern web technologies. Focus on creating user-friendly interfaces, responsive designs, and efficient frontend code. Provide detailed code examples and explain your architectural decisions."
-        },
-        {
-          name: "Backend Developer", 
-          prompt: "You are a senior backend developer specializing in API design, database architecture, and server-side logic. Focus on creating scalable, secure backend systems with proper authentication and data handling. Provide API specifications and database schema suggestions."
-        },
-        {
-          name: "DevOps Engineer",
-          prompt: "You are a DevOps engineer focused on deployment, CI/CD, and infrastructure. Provide recommendations for hosting, containerization, automated testing, and deployment strategies. Focus on scalability and reliability."
-        },
-        {
-          name: "QA Engineer",
-          prompt: "You are a quality assurance engineer focused on testing strategies, identifying potential bugs, and ensuring code quality. Suggest testing approaches, identify edge cases, and recommend validation methods."
-        }
-      ]
-    },
-    research: {
-      name: "Research Team",
-      description: "Ideal for research projects, data analysis, and academic investigations",
-      agents: [
-        {
-          name: "Primary Researcher",
-          prompt: "You are a primary researcher with expertise in academic methodology and data collection. Focus on research design, methodology, and comprehensive analysis. Provide structured findings with proper citations and evidence-based conclusions."
-        },
-        {
-          name: "Data Analyst",
-          prompt: "You are a data analyst specializing in statistical analysis and data interpretation. Focus on quantitative analysis, trend identification, and data visualization recommendations. Provide insights based on data patterns and statistical significance."
-        },
-        {
-          name: "Subject Matter Expert",
-          prompt: "You are a subject matter expert with deep domain knowledge. Provide specialized insights, industry context, and expert opinions. Focus on practical applications and real-world implications of research findings."
-        },
-        {
-          name: "Research Coordinator",
-          prompt: "You are a research coordinator focused on methodology validation and research integrity. Ensure research quality, identify potential biases, and suggest improvements to research approaches."
-        }
-      ]
-    },
-    business: {
-      name: "Business Strategy Team",
-      description: "Great for business planning, market analysis, and strategic decisions",
-      agents: [
-        {
-          name: "Market Analyst",
-          prompt: "You are a market research analyst specializing in consumer behavior and market trends. Analyze target demographics, market size, competition, and provide data-driven insights and market positioning recommendations."
-        },
-        {
-          name: "Financial Analyst",
-          prompt: "You are a financial analyst focused on business economics and profitability. Analyze pricing strategies, cost structures, profit margins, and financial projections. Provide recommendations on financial viability and ROI."
-        },
-        {
-          name: "Marketing Strategist",
-          prompt: "You are a marketing strategist with expertise in brand positioning and campaign development. Create comprehensive marketing strategies, identify key messaging, and suggest promotional channels."
-        },
-        {
-          name: "Operations Manager",
-          prompt: "You are an operations manager specializing in business processes and efficiency. Focus on operational scalability, process optimization, and resource management. Provide recommendations for operational excellence."
-        }
-      ]
-    },
-    creative: {
-      name: "Creative Team",
-      description: "Perfect for creative projects, content creation, and design work",
-      agents: [
-        {
-          name: "Creative Director",
-          prompt: "You are a creative director with expertise in brand storytelling and creative strategy. Develop compelling narratives, brand concepts, and creative direction. Focus on innovative and engaging creative solutions."
-        },
-        {
-          name: "Visual Designer",
-          prompt: "You are a visual designer with expertise in graphic design and visual identity. Create visual concepts, design recommendations, and aesthetic direction. Focus on modern, appealing design principles."
-        },
-        {
-          name: "Content Creator",
-          prompt: "You are a content creator specializing in engaging copy and content strategy. Develop compelling content, messaging, and communication strategies. Focus on audience engagement and brand voice."
-        },
-        {
-          name: "UX Designer",
-          prompt: "You are a UX designer focused on user experience and customer journey. Design user-centered experiences, identify pain points, and recommend improvements. Focus on usability and accessibility."
-        }
-      ]
-    },
-    technical: {
-      name: "Technical Analysis Team",
-      description: "Ideal for technical problem-solving, system design, and engineering tasks",
-      agents: [
-        {
-          name: "System Architect",
-          prompt: "You are a system architect with expertise in large-scale system design. Focus on scalability, reliability, and performance. Provide architectural recommendations and design patterns."
-        },
-        {
-          name: "Security Engineer",
-          prompt: "You are a security engineer focused on cybersecurity and system protection. Identify security vulnerabilities, recommend security measures, and ensure compliance with security standards."
-        },
-        {
-          name: "Performance Engineer",
-          prompt: "You are a performance engineer specializing in optimization and efficiency. Analyze performance bottlenecks, recommend optimizations, and ensure system scalability."
-        },
-        {
-          name: "Technical Writer",
-          prompt: "You are a technical writer focused on documentation and knowledge transfer. Create clear technical documentation, user guides, and ensure technical concepts are well-explained."
-        }
-      ]
-    }
-  };
-  
-  res.json({
-    success: true,
-    templates: templates
-  });
-});
-
-/**
- * Agent Configuration Management Endpoints
- */
-
-// Get all agent configurations
-app.get('/api/agent-configs', (req, res) => {
-  try {
-    const configs = getAllAgentConfigs();
-    res.json({
-      success: true,
-      configs: configs
-    });
-  } catch (error) {
-    logger.error('Error getting agent configurations:', error.message);
-    res.status(500).json({ error: 'Failed to get agent configurations' });
-  }
-});
-
-// Get specific agent configuration
-app.get('/api/agent-configs/:agentId', (req, res) => {
-  try {
-    const { agentId } = req.params;
-    
-    // Validate agent ID
-    if (!/^agent-[1-4]$/.test(agentId)) {
-      return res.status(400).json({ error: 'Invalid agent ID format' });
-    }
-    
-    const config = getAgentConfig(agentId);
-    res.json({
-      success: true,
-      config: config
-    });
-  } catch (error) {
-    logger.error('Error getting agent configuration:', error.message);
-    res.status(500).json({ error: 'Failed to get agent configuration' });
-  }
-});
-
-// Update agent configuration
-app.put('/api/agent-configs/:agentId', (req, res) => {
-  try {
-    const { agentId } = req.params;
-    const newConfig = req.body;
-    
-    // Validate agent ID
-    if (!/^agent-[1-4]$/.test(agentId)) {
-      return res.status(400).json({ error: 'Invalid agent ID format' });
-    }
-    
-    // Validate configuration
-    const validationErrors = validateAgentConfig(newConfig);
-    if (validationErrors.length > 0) {
-      return res.status(400).json({ 
-        error: 'Invalid configuration',
-        details: validationErrors 
-      });
-    }
-    
-    const success = updateAgentConfig(agentId, newConfig);
-    if (success) {
-      res.json({
-        success: true,
-        message: 'Agent configuration updated successfully',
-        config: getAgentConfig(agentId)
-      });
-    } else {
-      res.status(500).json({ error: 'Failed to update agent configuration' });
-    }
-  } catch (error) {
-    logger.error('Error updating agent configuration:', error.message);
-    res.status(500).json({ error: 'Failed to update agent configuration' });
-  }
-});
-
-// Reset agent configuration to default
-app.post('/api/agent-configs/:agentId/reset', (req, res) => {
-  try {
-    const { agentId } = req.params;
-
-    // Validate agent ID
-    if (!/^agent-[1-4]$/.test(agentId)) {
-      return res.status(400).json({ error: 'Invalid agent ID format' });
-    }
-
-    const success = resetAgentConfig(agentId);
-    if (success) {
-      res.json({
-        success: true,
-        message: 'Agent configuration reset to default',
-        config: getAgentConfig(agentId)
-      });
-    } else {
-      res.status(500).json({ error: 'Failed to reset agent configuration' });
-    }
-  } catch (error) {
-    logger.error('Error resetting agent configuration:', error.message);
-    res.status(500).json({ error: 'Failed to reset agent configuration' });
-  }
-});
+// Agent config + template routes are handled by agentConfigRoutes (see app.use above)
 
 /**
  * Agent Voting Session
  * Agents propose solutions and vote on the best one
  */
-app.post('/voting-session', messageLimiter, async (req, res) => {
+app.post('/voting-session', authenticate, messageLimiter, async (req, res) => {
   try {
     const {
       problem,
@@ -2374,14 +2317,26 @@ app.post('/voting-session', messageLimiter, async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!problem) {
+    if (!problem || typeof problem !== 'string' || problem.trim().length === 0) {
       return res.status(400).json({ error: 'Problem statement is required' });
+    }
+    if (problem.length > MAX_CONTENT_LENGTH) {
+      return res.status(400).json({ error: `problem must be ≤ ${MAX_CONTENT_LENGTH} chars` });
     }
 
     if (!participants || participants.length < 2) {
       return res.status(400).json({
         error: 'At least 2 agents required for voting'
       });
+    }
+
+    const invalidVoteAgent = participants.find(p => !/^agent-[1-4]$/.test(p.agentId));
+    if (invalidVoteAgent) {
+      return res.status(400).json({ error: `Invalid agentId: ${invalidVoteAgent.agentId}` });
+    }
+    const longVoteName = participants.find(p => typeof p.agentName === 'string' && p.agentName.length > MAX_AGENT_NAME_LEN);
+    if (longVoteName) {
+      return res.status(400).json({ error: `agentName must be ≤ ${MAX_AGENT_NAME_LEN} chars` });
     }
 
     logger.info(`Starting voting session with ${participants.length} agents`);
@@ -2392,7 +2347,8 @@ app.post('/voting-session', messageLimiter, async (req, res) => {
     // Initialize conversation
     if (!conversations.has(finalConversationId)) {
       conversations.set(finalConversationId, {
-        messages: [],
+        userId: req.user._id.toString(),
+        history: [],
         participants: participants.map(p => p.agentId),
         createdAt: Date.now(),
         lastActivity: Date.now()
@@ -2407,7 +2363,7 @@ app.post('/voting-session', messageLimiter, async (req, res) => {
       content: problem,
       timestamp: new Date().toISOString()
     };
-    conversation.messages.push(userMessage);
+    conversation.history.push(userMessage);
     conversation.lastActivity = Date.now();
 
     // Broadcast to WebSocket clients
@@ -2443,7 +2399,7 @@ app.post('/voting-session', messageLimiter, async (req, res) => {
           agentId,
           timestamp: new Date().toISOString()
         };
-        conversation.messages.push(proposalMessage);
+        conversation.history.push(proposalMessage);
         broadcastConversationUpdate(finalConversationId, proposalMessage);
 
         logger.info(`Received proposal from ${agentName}`);
@@ -2546,7 +2502,7 @@ app.post('/voting-session', messageLimiter, async (req, res) => {
       content: resultsText,
       timestamp: new Date().toISOString()
     };
-    conversation.messages.push(resultsMessage);
+    conversation.history.push(resultsMessage);
     broadcastConversationUpdate(finalConversationId, resultsMessage);
 
     // Send response
@@ -2561,10 +2517,7 @@ app.post('/voting-session', messageLimiter, async (req, res) => {
     });
   } catch (error) {
     logger.error('Voting session error:', error);
-    res.status(500).json({
-      error: 'Voting session failed',
-      details: error.message
-    });
+    res.status(500).json({ error: toUserError(error) });
   }
 });
 

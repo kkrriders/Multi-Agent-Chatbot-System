@@ -17,6 +17,7 @@ interface Message {
   timestamp: Date
   typing?: boolean
   streaming?: boolean
+  type?: string
 }
 
 interface Agent {
@@ -43,11 +44,12 @@ interface TeamTemplate {
 
 // Neural Workspace agent display metadata
 const AGENT_META: Record<string, { label: string; role: string; icon: string; color: string }> = {
-  "agent-1": { label: "Llama3",    role: "General Logic",    icon: "psychology",    color: "#78b0ff" },
-  "agent-2": { label: "Mixtral",   role: "Analysis",         icon: "storm",         color: "#4edea3" },
-  "agent-3": { label: "Gemma2",    role: "Creative",         icon: "blur_on",       color: "#d0bcff" },
-  "agent-4": { label: "Llama3-70b",role: "Developer",        icon: "auto_awesome",  color: "#FFBF00" },
-  "manager": { label: "Manager",   role: "Safety Gate",      icon: "shield",        color: "#adc6ff" },
+  "agent-1": { label: "DeepSeek-R1",  role: "Challenger",    icon: "psychology",    color: "#78b0ff" },
+  "agent-2": { label: "Qwen3-32b",    role: "Analyst",       icon: "storm",         color: "#4edea3" },
+  "agent-3": { label: "R1-Scout",     role: "Edge-Case",     icon: "blur_on",       color: "#d0bcff" },
+  "agent-4": { label: "Llama3-70b",   role: "Specialist",    icon: "auto_awesome",  color: "#FFBF00" },
+  "manager": { label: "Manager",      role: "Safety Gate",   icon: "shield",        color: "#adc6ff" },
+  "debate-synthesis": { label: "Synthesis", role: "Debate Result", icon: "hub",     color: "#ff8a65" },
 }
 
 function getAgentMeta(agentId?: string) {
@@ -73,6 +75,12 @@ export default function MultiAgentChatbot() {
   const messagesEndRef  = useRef<HTMLDivElement>(null)
   const socketRef       = useRef<Socket | null>(null)
   const chatInputRef    = useRef<HTMLTextAreaElement>(null)
+
+  // ── Debate mode state ────────────────────────────────────────────────────
+  const [isDebateMode, setIsDebateMode]         = useState(false)
+  const [debatePhase, setDebatePhase]           = useState<string | null>(null)
+  const [debateChallenges, setDebateChallenges] = useState<Record<string, { fromAgent: string; claim: string; critique: string }[]>>({})
+  const [debateDefenses, setDebateDefenses]     = useState<Record<string, { challengeId: string; stance: string }[]>>({})
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -199,7 +207,26 @@ export default function MultiAgentChatbot() {
     })
 
     socketRef.current.on("stream-end", (data: { messageId: string; agentId: string; content: string; timestamp: number; type?: string }) => {
-      setMessages((prev) => prev.map((msg) => msg.id === data.messageId ? { ...msg, content: data.content, streaming: false } : msg))
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === data.messageId)
+        if (idx !== -1) {
+          const updated = [...prev]
+          updated[idx] = { ...updated[idx], content: data.content, streaming: false, type: data.type }
+          return updated
+        }
+        // debate-synthesis arrives as a new message (no stream-start preceded it)
+        if (data.type === "debate-synthesis") {
+          return [...prev, {
+            id: data.messageId,
+            content: data.content,
+            sender: "agent" as const,
+            agent: data.agentId || "debate-synthesis",
+            timestamp: new Date(data.timestamp),
+            type: data.type,
+          }]
+        }
+        return prev
+      })
       if (data.agentId?.startsWith("agent-")) {
         setAgents((prev) => prev.map((a) => a.id === data.agentId ? { ...a, status: "online", messagesCount: a.messagesCount + 1 } : a))
         setActiveAgents((prev) => prev.filter((id) => id !== data.agentId))
@@ -216,6 +243,32 @@ export default function MultiAgentChatbot() {
       setMessages((prev) => prev.filter((m) => m.id !== `thinking-${data.agentId}`))
       setAgents((prev) => prev.map((a) => a.id === data.agentId ? { ...a, status: "online" } : a))
       setActiveAgents((prev) => prev.filter((id) => id !== data.agentId))
+    })
+
+    // ── Debate event handlers ────────────────────────────────────────────────
+    socketRef.current.on("debate-phase", (data: { phase: string }) => {
+      setDebatePhase(data.phase)
+    })
+
+    socketRef.current.on("debate-challenge", (data: { fromAgent: string; toAgent: string; challengeId: string; claim: string; critique: string }) => {
+      setDebateChallenges((prev) => ({
+        ...prev,
+        [data.toAgent]: [...(prev[data.toAgent] || []), { fromAgent: data.fromAgent, claim: data.claim, critique: data.critique }],
+      }))
+    })
+
+    socketRef.current.on("debate-defense", (data: { agentId: string; challengeId: string; stance: string }) => {
+      setDebateDefenses((prev) => ({
+        ...prev,
+        [data.agentId]: [...(prev[data.agentId] || []), { challengeId: data.challengeId, stance: data.stance }],
+      }))
+    })
+
+    socketRef.current.on("debate-complete", () => {
+      setDebatePhase(null)
+      setIsProcessing(false)
+      setActiveAgents([])
+      setTaskProgress(100)
     })
 
     socketRef.current.on("connect_error", (error) => { console.error("Socket error:", error) })
@@ -296,10 +349,21 @@ export default function MultiAgentChatbot() {
       const conversationId = `work-${Date.now()}`
       socketRef.current.emit("join-conversation", conversationId)
 
-      const response = await fetch(`${API_URL}/flexible-work-session`, {
+      // Reset debate state for new session
+      setDebateChallenges({})
+      setDebateDefenses({})
+      setDebatePhase(null)
+
+      const endpoint = isDebateMode ? `${API_URL}/debate-session` : `${API_URL}/flexible-work-session`
+      const body = isDebateMode
+        ? { task: taskDescription, participants: enabledAgents.map((a) => ({ agentId: a.id, agentName: a.teamMember })), conversationId }
+        : { task: taskDescription, agents: agentData, conversationId, managerRole: "Senior project manager who reviews all work and provides strategic guidance and final recommendations" }
+
+      const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ task: taskDescription, agents: agentData, conversationId, managerRole: "Senior project manager who reviews all work and provides strategic guidance and final recommendations" }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+        credentials: "include",
+        body: JSON.stringify(body),
       })
 
       const result = await response.json()
@@ -541,11 +605,34 @@ export default function MultiAgentChatbot() {
 
                 {/* Task description */}
                 <div className="px-1">
-                  <div
-                    className="text-[9px] uppercase tracking-widest font-bold mb-1.5"
-                    style={{ color: "#6d758c", fontFamily: "var(--font-jetbrains-mono), monospace" }}
-                  >
-                    Task Description
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div
+                      className="text-[9px] uppercase tracking-widest font-bold"
+                      style={{ color: "#6d758c", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                    >
+                      Task Description
+                    </div>
+                    {/* Debate Mode toggle */}
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="checkbox"
+                        id="debate-mode-toggle"
+                        checked={isDebateMode}
+                        onChange={(e) => setIsDebateMode(e.target.checked)}
+                        className="w-3 h-3 cursor-pointer"
+                        style={{ accentColor: "#ff8a65" }}
+                      />
+                      <label
+                        htmlFor="debate-mode-toggle"
+                        className="text-[9px] uppercase tracking-widest font-bold cursor-pointer"
+                        style={{
+                          color: isDebateMode ? "#ff8a65" : "#6d758c",
+                          fontFamily: "var(--font-jetbrains-mono), monospace",
+                        }}
+                      >
+                        Debate
+                      </label>
+                    </div>
                   </div>
                   <textarea
                     value={taskDescription}
@@ -634,6 +721,17 @@ export default function MultiAgentChatbot() {
             </div>
           )}
 
+          {/* Debate phase banner */}
+          {debatePhase && (
+            <div className="debate-phase-banner flex items-center gap-2 px-6 py-2 text-xs">
+              <span className="material-symbols-outlined text-sm">psychology_alt</span>
+              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                DEBATE — {debatePhase.toUpperCase()} PHASE
+              </span>
+              <span className="debate-phase-dot" />
+            </div>
+          )}
+
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-8 py-10 space-y-8 pb-44">
             {messages.length === 0 ? (
@@ -693,7 +791,7 @@ export default function MultiAgentChatbot() {
 
                     {/* Message body */}
                     <div className="max-w-3xl space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-bold uppercase tracking-tight" style={{ color: meta.color }}>{meta.label}</span>
                         <span
                           className="text-[10px] px-2 py-0.5 rounded-full"
@@ -706,6 +804,19 @@ export default function MultiAgentChatbot() {
                             {message.typing ? "thinking…" : "typing…"}
                           </span>
                         )}
+                        {/* Debate challenge badges — shown when this agent was challenged */}
+                        {debateChallenges[message.agent ?? ""]?.map((ch, i) => (
+                          <span key={i} className="debate-challenge-badge" title={`${ch.fromAgent}: ${ch.critique}`}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "10px" }}>flag</span>
+                            ← {ch.fromAgent.replace("agent-", "A")}
+                          </span>
+                        ))}
+                        {/* Debate defense badges */}
+                        {debateDefenses[message.agent ?? ""]?.map((d, i) => (
+                          <span key={i} className={`debate-defense-badge debate-defense-badge--${d.stance}`}>
+                            {d.stance === "defend" ? "defended" : d.stance === "concede" ? "conceded" : "partial"}
+                          </span>
+                        ))}
                       </div>
 
                       <div
@@ -722,6 +833,22 @@ export default function MultiAgentChatbot() {
                           <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#dee5ff" }}>
                             {message.content}
                             <span className="inline-block w-0.5 h-4 ml-0.5 animate-pulse align-text-bottom" style={{ background: "#4edea3" }} />
+                          </p>
+                        ) : message.type === "debate-synthesis" ? (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#dee5ff" }}>
+                            {message.content.split(/(\[agent-[1-4]\])/g).map((part, i) => {
+                              const m = part.match(/^\[agent-([1-4])\]$/)
+                              if (m) {
+                                const attrMeta = getAgentMeta(`agent-${m[1]}`)
+                                return (
+                                  <span key={i} className="attribution-badge"
+                                    style={{ background: `${attrMeta.color}20`, color: attrMeta.color, border: `1px solid ${attrMeta.color}40` }}>
+                                    {attrMeta.label}
+                                  </span>
+                                )
+                              }
+                              return <span key={i}>{part}</span>
+                            })}
                           </p>
                         ) : (
                           <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#dee5ff" }}>

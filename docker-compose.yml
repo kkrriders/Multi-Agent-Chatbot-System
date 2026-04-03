@@ -56,11 +56,15 @@ services:
       REDIS_URL: redis://redis:6379
       OLLAMA_API_BASE: http://host.docker.internal:11434/api
       AGENT_1_PORT: "3005"
-    ports:
-      - "3005:3005"
     depends_on:
       mongodb: { condition: service_healthy }
       redis:   { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3005/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - ./logs:/app/logs
 
@@ -77,11 +81,15 @@ services:
       REDIS_URL: redis://redis:6379
       OLLAMA_API_BASE: http://host.docker.internal:11434/api
       AGENT_2_PORT: "3006"
-    ports:
-      - "3006:3006"
     depends_on:
       mongodb: { condition: service_healthy }
       redis:   { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3006/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - ./logs:/app/logs
 
@@ -98,11 +106,15 @@ services:
       REDIS_URL: redis://redis:6379
       OLLAMA_API_BASE: http://host.docker.internal:11434/api
       AGENT_3_PORT: "3007"
-    ports:
-      - "3007:3007"
     depends_on:
       mongodb: { condition: service_healthy }
       redis:   { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3007/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - ./logs:/app/logs
 
@@ -119,11 +131,15 @@ services:
       REDIS_URL: redis://redis:6379
       OLLAMA_API_BASE: http://host.docker.internal:11434/api
       AGENT_4_PORT: "3008"
-    ports:
-      - "3008:3008"
     depends_on:
       mongodb: { condition: service_healthy }
       redis:   { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3008/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - ./logs:/app/logs
 
@@ -151,10 +167,16 @@ services:
     depends_on:
       mongodb:      { condition: service_healthy }
       redis:        { condition: service_healthy }
-      agent-llama3: { condition: service_started }
-      agent-mistral: { condition: service_started }
-      agent-phi3:   { condition: service_started }
-      agent-qwen:   { condition: service_started }
+      agent-llama3: { condition: service_healthy }
+      agent-mistral: { condition: service_healthy }
+      agent-phi3:   { condition: service_healthy }
+      agent-qwen:   { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     volumes:
       - ./logs:/app/logs
 
@@ -173,7 +195,7 @@ services:
     ports:
       - "3002:3002"
     depends_on:
-      manager: { condition: service_started }
+      manager: { condition: service_healthy }
 
   # ── Optional: Jaeger distributed tracing UI ───────────────────────────────
   # Enable with: docker compose --profile tracing up

@@ -58,6 +58,16 @@ async function getOllamaAPIBase() {
   return 'https://api.groq.com/openai/v1';
 }
 
+// ── Think-block suppressor ─────────────────────────────────────────────────────
+
+/**
+ * Strip <think>...</think> blocks that reasoning models (e.g. qwen3) emit.
+ * Applied to all non-streaming responses and to the final text of streamed ones.
+ */
+function stripThinkBlocks(text) {
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/^\s+/, '');
+}
+
 // ── Text generation ────────────────────────────────────────────────────────────
 
 async function generateResponse(model, prompt, options = {}) {
@@ -70,7 +80,7 @@ async function generateResponse(model, prompt, options = {}) {
     }),
     { maxAttempts: 3, baseDelayMs: 1000, maxDelayMs: 15_000 }
   );
-  return response.choices[0]?.message?.content?.trim() || '';
+  return stripThinkBlocks(response.choices[0]?.message?.content?.trim() || '');
 }
 
 async function generateResponseWithMeta(model, prompt, options = {}) {
@@ -84,7 +94,7 @@ async function generateResponseWithMeta(model, prompt, options = {}) {
     { maxAttempts: 3, baseDelayMs: 1000, maxDelayMs: 15_000 }
   );
   return {
-    text:         response.choices[0]?.message?.content?.trim() || '',
+    text:         stripThinkBlocks(response.choices[0]?.message?.content?.trim() || ''),
     inputTokens:  response.usage?.prompt_tokens     ?? 0,
     outputTokens: response.usage?.completion_tokens ?? 0,
     model,
@@ -107,7 +117,7 @@ async function generateResponseWithMetaJson(model, prompt, options = {}) {
     { maxAttempts: 3, baseDelayMs: 1000, maxDelayMs: 15_000 }
   );
   return {
-    text:         response.choices[0]?.message?.content?.trim() || '{}',
+    text:         stripThinkBlocks(response.choices[0]?.message?.content?.trim() || '{}'),
     inputTokens:  response.usage?.prompt_tokens     ?? 0,
     outputTokens: response.usage?.completion_tokens ?? 0,
     model,
@@ -133,13 +143,62 @@ async function generateResponseStream(model, prompt, options = {}, onToken) {
   });
 
   let fullText = '';
+  // Stateful suppressor: buffer incoming tokens and drop anything inside
+  // <think>...</think> blocks before forwarding to the onToken callback.
+  // Keeps last 7 chars in pendingBuf to handle tags split across chunks.
+  let inThink = false;
+  let pendingBuf = '';
+
   for await (const chunk of stream) {
-    const token = chunk.choices[0]?.delta?.content || '';
-    if (token) {
-      fullText += token;
-      if (onToken) onToken(token);
+    const rawToken = chunk.choices[0]?.delta?.content || '';
+    if (!rawToken) continue;
+
+    pendingBuf += rawToken;
+
+    let visible = '';
+    // Process pendingBuf until no more complete transitions are possible
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (inThink) {
+        const end = pendingBuf.indexOf('</think>');
+        if (end !== -1) {
+          inThink = false;
+          pendingBuf = pendingBuf.slice(end + 8).replace(/^\n/, '');
+        } else {
+          // Still inside think block — keep last 8 chars for partial </think>
+          if (pendingBuf.length > 8) pendingBuf = pendingBuf.slice(-8);
+          break;
+        }
+      } else {
+        const start = pendingBuf.indexOf('<think>');
+        if (start !== -1) {
+          visible += pendingBuf.slice(0, start);
+          inThink = true;
+          pendingBuf = pendingBuf.slice(start + 7);
+        } else {
+          // No open tag — emit all but the last 6 chars (partial '<think' guard)
+          const safeLen = pendingBuf.length - 6;
+          if (safeLen > 0) {
+            visible += pendingBuf.slice(0, safeLen);
+            pendingBuf = pendingBuf.slice(safeLen);
+          }
+          break;
+        }
+      }
+    }
+
+    if (visible) {
+      fullText += visible;
+      if (onToken) onToken(visible);
     }
   }
+
+  // Flush remainder that is not inside a think block
+  if (!inThink && pendingBuf) {
+    fullText += pendingBuf;
+    if (onToken) onToken(pendingBuf);
+  }
+
   return fullText;
 }
 

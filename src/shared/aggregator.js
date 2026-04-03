@@ -21,7 +21,9 @@
 const { generateResponse } = require('./ollama');
 const { logger } = require('./logger');
 
-const SYNTHESIS_MODEL = process.env.AGENT_4_MODEL || 'llama3-70b-8192';
+const SYNTHESIS_MODEL_LARGE = process.env.AGENT_4_MODEL || 'llama-3.3-70b-versatile';
+const SYNTHESIS_MODEL_SMALL = process.env.AGENT_1_MODEL || 'llama-3.1-8b-instant';
+const SMALL_MODEL_MAX_CHARS = 1_200;
 
 // ── Text utilities ────────────────────────────────────────────────────────────
 
@@ -254,9 +256,12 @@ async function aggregate(results, plan, userMessage, opts = {}) {
     cite
   );
 
+  const totalDeduped = deduped.reduce((sum, d) => sum + d.sentences.join(' ').length, 0);
+  const synthesisModel = totalDeduped <= SMALL_MODEL_MAX_CHARS ? SYNTHESIS_MODEL_SMALL : SYNTHESIS_MODEL_LARGE;
+
   let answer;
   try {
-    answer = await generateResponse(SYNTHESIS_MODEL, prompt, { temperature: 0.3, num_predict: 900 });
+    answer = await generateResponse(synthesisModel, prompt, { temperature: 0.3, num_predict: 900 });
   } catch (err) {
     logger.warn(`[Aggregator] synthesis LLM failed (${err.message}), concatenating deduped sentences`);
     // Graceful degradation: join all kept sentences

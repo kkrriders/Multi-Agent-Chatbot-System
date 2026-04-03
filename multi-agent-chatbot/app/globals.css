@@ -285,4 +285,86 @@
   .typing-dot:nth-child(1) { animation: typing-dot 1.4s ease infinite 0s; }
   .typing-dot:nth-child(2) { animation: typing-dot 1.4s ease infinite 0.2s; }
   .typing-dot:nth-child(3) { animation: typing-dot 1.4s ease infinite 0.4s; }
+
+  /* ── Debate System ──────────────────────────────────────────────────────── */
+
+  .debate-phase-banner {
+    background: rgba(255, 138, 101, 0.08);
+    border-bottom: 1px solid rgba(255, 138, 101, 0.25);
+    color: #ff8a65;
+    font-family: var(--font-jetbrains-mono), monospace;
+  }
+
+  .debate-phase-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff8a65;
+    animation: debatePulse 1s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(255, 138, 101, 0.6);
+  }
+
+  @keyframes debatePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .debate-challenge-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-family: var(--font-jetbrains-mono), monospace;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(255, 113, 108, 0.12);
+    color: #ff716c;
+    border: 1px solid rgba(255, 113, 108, 0.3);
+    animation: challengeSlideIn 0.3s ease forwards;
+    cursor: help;
+  }
+
+  @keyframes challengeSlideIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .debate-defense-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 9px;
+    font-family: var(--font-jetbrains-mono), monospace;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .debate-defense-badge--defend {
+    background: rgba(78, 222, 163, 0.12);
+    color: #4edea3;
+    border: 1px solid rgba(78, 222, 163, 0.3);
+  }
+
+  .debate-defense-badge--concede {
+    background: rgba(255, 191, 0, 0.12);
+    color: #FFBF00;
+    border: 1px solid rgba(255, 191, 0, 0.3);
+  }
+
+  .debate-defense-badge--partial {
+    background: rgba(208, 188, 255, 0.12);
+    color: #d0bcff;
+    border: 1px solid rgba(208, 188, 255, 0.3);
+  }
+
+  .attribution-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 9px;
+    font-family: var(--font-jetbrains-mono), monospace;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin: 0 2px;
+    vertical-align: middle;
+  }
 }

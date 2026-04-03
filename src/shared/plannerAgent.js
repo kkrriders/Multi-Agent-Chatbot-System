@@ -34,8 +34,8 @@ const { criticPass } = require('./criticAgent');
 const { logger } = require('./logger');
 
 // Models
-const PLANNER_MODEL   = process.env.AGENT_4_MODEL || 'llama3-70b-8192';   // strongest reasoning
-const SYNTHESIS_MODEL = process.env.AGENT_4_MODEL || 'llama3-70b-8192';
+const PLANNER_MODEL   = process.env.AGENT_4_MODEL || 'llama-3.3-70b-versatile';   // strongest reasoning
+const SYNTHESIS_MODEL = process.env.AGENT_4_MODEL || 'llama-3.3-70b-versatile';
 
 // Parallel task concurrency cap (stays within Groq 30 req/min per model)
 const MAX_PARALLEL = 2;

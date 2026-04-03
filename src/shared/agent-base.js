@@ -95,7 +95,8 @@ class BaseAgent {
   setupRoutes() {
     // Verify HMAC signature on all state-changing agent endpoints.
     // /status is intentionally excluded so health checks work without signing.
-    const agentAuthMiddleware = verifyAgentRequest(process.env.AGENT_SHARED_SECRET || '');
+    if (!process.env.AGENT_SHARED_SECRET) throw new Error('AGENT_SHARED_SECRET is not set — set it in .env');
+    const agentAuthMiddleware = verifyAgentRequest(process.env.AGENT_SHARED_SECRET);
 
     // Handle incoming messages
     this.app.post('/message', agentAuthMiddleware, async (req, res) => {
@@ -182,9 +183,9 @@ class BaseAgent {
         const prompt = await this.createPrompt(structuredMessage);
 
         const promptLength = prompt.length;
-        let numPredict = 300;
-        if (promptLength > 8000) numPredict = 200;
-        else if (promptLength > 4000) numPredict = 250;
+        let numPredict = 1200;
+        if (promptLength > 8000) numPredict = 800;
+        else if (promptLength > 4000) numPredict = 1000;
 
         // Stream tokens directly from Ollama — bypasses model manager queue
         // intentionally: streaming responses hold the connection open and cannot
@@ -241,8 +242,8 @@ class BaseAgent {
       });
     });
 
-    // Memory endpoint
-    this.app.get('/memory/:userId?', async (req, res) => {
+    // Memory endpoint — protected by HMAC so only the manager can read agent memory
+    this.app.get('/memory/:userId?', agentAuthMiddleware, async (req, res) => {
       try {
         const userId = req.params.userId || 'default';
         await this.initializeMemory(userId);
@@ -338,6 +339,65 @@ class BaseAgent {
     prompt += `\n\n${message.from} asks: ${message.content}
 
 Keep your response clear, helpful, and concise. Use your memory to provide personalized and contextually relevant responses.`;
+
+    return prompt;
+  }
+
+  /**
+   * Append shared-memory and user-memory context to an existing prompt string.
+   * Called by subclass createPrompt overrides so they inherit memory injection
+   * without having to replicate the full base logic.
+   *
+   * @param {string} prompt   — prompt built by the subclass
+   * @param {Object} message  — incoming message object
+   * @returns {Promise<string>} prompt with memory context appended
+   */
+  async _injectMemoryContext(prompt, message) {
+    try {
+      const sharedContext = await sharedMemoryBroker.mergeContextForAgent(
+        this.agentId,
+        this.memory ? this.memory.userId : 'default',
+        message.content
+      );
+      if (sharedContext) prompt += `\n\n${sharedContext}`;
+    } catch (err) {
+      logger.warn(`[${this.agentId}] Shared memory context error: ${err.message}`);
+    }
+
+    if (this.memory) {
+      try {
+        const relevantMemories = await this.memory.searchMemories(message.content, 3);
+        const recentContext    = await this.memory.getRecentContext(2);
+        const preferences      = await this.memory.getUserPreferences();
+
+        if (relevantMemories.length > 0) {
+          prompt += `\n\nRelevant memories:`;
+          relevantMemories.forEach(m => { prompt += `\n- ${m.content}`; });
+        }
+
+        if (recentContext.length > 0) {
+          const { promptContext } = await buildPromptContext(
+            recentContext.map(c => {
+              try { return JSON.parse(c.content); } catch { return { from: 'user', content: c.content }; }
+            }),
+            null
+          );
+          if (promptContext) prompt += `\n\nConversation context:\n${promptContext}`;
+        }
+
+        if (preferences.length > 0) {
+          prompt += `\n\nUser preferences:`;
+          preferences.forEach(pref => {
+            try {
+              const d = JSON.parse(pref.content);
+              prompt += `\n- ${d.preference}: ${d.value}`;
+            } catch { /* skip malformed */ }
+          });
+        }
+      } catch (err) {
+        logger.warn(`[${this.agentId}] Memory context error: ${err.message}`);
+      }
+    }
 
     return prompt;
   }
@@ -462,7 +522,7 @@ Keep your response clear, helpful, and concise. Use your memory to provide perso
 
     try {
       const result = await generateResponseJson(
-        process.env.SUMMARIZER_MODEL || 'phi3:latest',
+        process.env.SUMMARIZER_MODEL || 'llama-3.1-8b-instant',
         prompt,
         { temperature: 0.1, num_predict: 200 }
       );
