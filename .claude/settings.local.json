@@ -33,7 +33,12 @@
       "Bash(grep -n \"TODO\\\\|FIXME\\\\|HACK\\\\|XXX\\\\|BUG\" /c/Users/karti/Multi-Agent-Chatbot-System/src/**/*.js)",
       "Bash(xargs head:*)",
       "Bash(node --check src/agents/manager/index.js)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(grep -n \"challengeId\\\\|challenge-\\\\|challengeId.*\\\\`\\\\|challengeId.*idx\\\\|challengeId.*0\\\\b\" /c/Users/karti/Multi-Agent-Chatbot-System/src/shared/debateEngine.js)",
+      "Bash(node -e \"require\\('./src/shared/debateEngine'\\)\")",
+      "Bash(node -e \"require\\('./src/agents/manager/index.js'\\)\")",
+      "Bash(grep -rn \"^[ \\\\t]*//[^/]\" /c/Users/karti/Multi-Agent-Chatbot-System/src/shared/*.js)",
+      "Bash(grep -rn \"^\\\\s*\\\\/\\\\/.*\\\\\\(const\\\\|let\\\\|var\\\\|if\\\\|for\\\\|function\\\\\\)\" /c/Users/karti/Multi-Agent-Chatbot-System/src/shared/*.js)"
     ],
     "deny": [],
     "ask": []

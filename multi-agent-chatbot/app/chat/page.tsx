@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { io, Socket } from "socket.io-client"
-import { checkAuth, logout, getToken, type User } from "@/lib/auth"
+import { checkAuth, logout, type User } from "@/lib/auth"
 import { API_URL } from "@/lib/config"
 import ConversationSidebar from "@/components/ConversationSidebar"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
@@ -79,7 +79,7 @@ export default function MultiAgentChatbot() {
   // ── Debate mode state ────────────────────────────────────────────────────
   const [isDebateMode, setIsDebateMode]         = useState(false)
   const [debatePhase, setDebatePhase]           = useState<string | null>(null)
-  const [debateChallenges, setDebateChallenges] = useState<Record<string, { fromAgent: string; claim: string; critique: string }[]>>({})
+  const [debateChallenges, setDebateChallenges] = useState<Record<string, { challengeId: string; fromAgent: string; claim: string; critique: string }[]>>({})
   const [debateDefenses, setDebateDefenses]     = useState<Record<string, { challengeId: string; stance: string }[]>>({})
 
   // ── Auth ─────────────────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ export default function MultiAgentChatbot() {
     socketRef.current = io(API_URL, {
       transports: ["websocket", "polling"],
       timeout: 60000,
-      auth: { token: getToken() },
+      withCredentials: true,
     })
 
     socketRef.current.on("connect", () => { /* connected */ })
@@ -215,7 +215,15 @@ export default function MultiAgentChatbot() {
           return updated
         }
         // debate-synthesis arrives as a new message (no stream-start preceded it)
+        // I-2: on socket reconnect the messageId changes (Date.now()-based) so we must also
+        // check if a synthesis already exists — update it rather than inserting a duplicate
         if (data.type === "debate-synthesis") {
+          const existingIdx = prev.findIndex(m => m.type === "debate-synthesis")
+          if (existingIdx !== -1) {
+            const updated = [...prev]
+            updated[existingIdx] = { ...updated[existingIdx], content: data.content, streaming: false }
+            return updated
+          }
           return [...prev, {
             id: data.messageId,
             content: data.content,
@@ -231,7 +239,8 @@ export default function MultiAgentChatbot() {
         setAgents((prev) => prev.map((a) => a.id === data.agentId ? { ...a, status: "online", messagesCount: a.messagesCount + 1 } : a))
         setActiveAgents((prev) => prev.filter((id) => id !== data.agentId))
       }
-      if (data.type === "manager-conclusion") {
+      // C-1: also clear processing on debate-synthesis in case debate-complete is dropped
+      if (data.type === "manager-conclusion" || data.type === "debate-synthesis") {
         setIsProcessing(false)
         setActiveAgents([])
         setTaskProgress(100)
@@ -251,17 +260,25 @@ export default function MultiAgentChatbot() {
     })
 
     socketRef.current.on("debate-challenge", (data: { fromAgent: string; toAgent: string; challengeId: string; claim: string; critique: string }) => {
-      setDebateChallenges((prev) => ({
-        ...prev,
-        [data.toAgent]: [...(prev[data.toAgent] || []), { fromAgent: data.fromAgent, claim: data.claim, critique: data.critique }],
-      }))
+      setDebateChallenges((prev) => {
+        const existing = prev[data.toAgent] || []
+        // N-4: deduplicate by challengeId — prevents duplicate badges on socket reconnect
+        if (existing.some((ch) => ch.challengeId === data.challengeId)) return prev
+        return {
+          ...prev,
+          [data.toAgent]: [...existing, { challengeId: data.challengeId, fromAgent: data.fromAgent, claim: data.claim, critique: data.critique }],
+        }
+      })
     })
 
     socketRef.current.on("debate-defense", (data: { agentId: string; challengeId: string; stance: string }) => {
-      setDebateDefenses((prev) => ({
-        ...prev,
-        [data.agentId]: [...(prev[data.agentId] || []), { challengeId: data.challengeId, stance: data.stance }],
-      }))
+      setDebateDefenses((prev) => {
+        const existing = prev[data.agentId] || []
+        // I-1: deduplicate by challengeId — mirrors the debate-challenge fix; prevents duplicate
+        // defense badges on socket reconnect
+        if (existing.some((d) => d.challengeId === data.challengeId)) return prev
+        return { ...prev, [data.agentId]: [...existing, { challengeId: data.challengeId, stance: data.stance }] }
+      })
     })
 
     socketRef.current.on("debate-complete", () => {
@@ -269,6 +286,22 @@ export default function MultiAgentChatbot() {
       setIsProcessing(false)
       setActiveAgents([])
       setTaskProgress(100)
+    })
+
+    // N-1: surface synthesis errors and reset the banner — without this the "SYNTHESIZING…"
+    // spinner hangs forever if the synthesis LLM call fails before debate-complete fires
+    socketRef.current.on("debate-error", (data: { phase: string; error: string }) => {
+      setDebatePhase(null)
+      setIsProcessing(false)
+      setActiveAgents([])
+      setMessages((prev) => [...prev, {
+        id: `debate-error-${Date.now()}`,
+        content: `Debate ${data.phase} failed: ${data.error}`,
+        sender: "agent" as const,
+        agent: "debate-synthesis",
+        timestamp: new Date(),
+        type: "debate-error",
+      }])
     })
 
     socketRef.current.on("connect_error", (error) => { console.error("Socket error:", error) })
@@ -308,6 +341,7 @@ export default function MultiAgentChatbot() {
         const response = await fetch(`${API_URL}/continue-conversation`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ conversationId: currentConversationId, message: chatInput, participants: enabledAgents.map((a) => ({ agentId: a.id, agentName: a.teamMember })) }),
         })
         const result = await response.json()
@@ -318,6 +352,7 @@ export default function MultiAgentChatbot() {
         const response = await fetch(`${API_URL}/message`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ content: chatInput, agentId: selectedTarget, agentName: targetAgent.teamMember, conversationId: currentConversationId }),
         })
         const result = await response.json()
@@ -333,6 +368,8 @@ export default function MultiAgentChatbot() {
     setMessages([]); setCurrentConversationId(null)
     setIsProcessing(false); setTaskProgress(0)
     setActiveAgents([]); setChatInput("")
+    // S-6: reset debate state so stale badges don't bleed into the next session
+    setDebateChallenges({}); setDebateDefenses({}); setDebatePhase(null)
   }
 
   const startTask = async () => {
@@ -361,7 +398,7 @@ export default function MultiAgentChatbot() {
 
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(body),
       })
@@ -370,13 +407,20 @@ export default function MultiAgentChatbot() {
       if (result.success) {
         setCurrentConversationId(conversationId)
         setTimeout(() => {
-          setIsProcessing((prev) => { if (prev) setActiveAgents([]); return prev ? false : prev })
+          // S-3: also reset debatePhase so the phase banner doesn't linger after timeout
+          setIsProcessing((prev) => { if (prev) { setActiveAgents([]); setDebatePhase(null) } return prev ? false : prev })
         }, 180000)
       } else {
         throw new Error(result.error || "Failed to start task")
       }
     } catch (error) {
-      setMessages((prev) => [...prev, { id: `error-${Date.now()}`, content: `Error: ${(error as Error).message}`, sender: "agent", timestamp: new Date() }])
+      const errMsg = (error as Error).message
+      // C-1: synthesis failures in debate mode are already surfaced via the debate-error socket
+      // event; suppress the HTTP 500 error append to avoid a duplicate message in the list
+      const isSynthesisErrorAlreadyShown = isDebateMode && /proposals were generated/i.test(errMsg)
+      if (!isSynthesisErrorAlreadyShown) {
+        setMessages((prev) => [...prev, { id: `error-${Date.now()}`, content: `Error: ${errMsg}`, sender: "agent", timestamp: new Date() }])
+      }
       setIsProcessing(false)
     }
   }
@@ -385,8 +429,7 @@ export default function MultiAgentChatbot() {
 
   const handleSelectConversation = async (conversationId: string) => {
     try {
-      const token = getToken()
-      const response = await fetch(`${API_URL}/api/conversations/${conversationId}`, { headers: { Authorization: `Bearer ${token}` } })
+      const response = await fetch(`${API_URL}/api/conversations/${conversationId}`, { credentials: "include" })
       if (!response.ok) throw new Error("Failed to load conversation")
       const data = await response.json()
       const conversation = data.data
@@ -437,9 +480,11 @@ export default function MultiAgentChatbot() {
   const inputValue  = currentConversationId ? chatInput : taskDescription
   const setInput    = currentConversationId ? setChatInput : setTaskDescription
   const handleSubmit = currentConversationId ? sendFollowUpMessage : startTask
+  // N-2: debate mode requires ≥ 2 agents — catch it client-side before a 400 round-trip
   const canSubmit   = currentConversationId
     ? !!chatInput.trim()
-    : !!taskDescription.trim() && !isProcessing && enabledCount > 0 && isConnected
+    : !!taskDescription.trim() && !isProcessing && isConnected &&
+      (isDebateMode ? enabledCount >= 2 : enabledCount > 0)
 
   return (
     <div
@@ -726,9 +771,12 @@ export default function MultiAgentChatbot() {
             <div className="debate-phase-banner flex items-center gap-2 px-6 py-2 text-xs">
               <span className="material-symbols-outlined text-sm">psychology_alt</span>
               <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
-                DEBATE — {debatePhase.toUpperCase()} PHASE
+                {/* S-5: synthesis phase shows spinner + "SYNTHESIZING…" to indicate LLM work in progress */}
+                DEBATE — {debatePhase === "synthesis" ? "SYNTHESIZING…" : `${debatePhase.toUpperCase()} PHASE`}
               </span>
-              <span className="debate-phase-dot" />
+              {debatePhase === "synthesis"
+                ? <span className="material-symbols-outlined text-sm animate-spin">autorenew</span>
+                : <span className="debate-phase-dot" />}
             </div>
           )}
 
@@ -805,14 +853,15 @@ export default function MultiAgentChatbot() {
                           </span>
                         )}
                         {/* Debate challenge badges — shown when this agent was challenged */}
-                        {debateChallenges[message.agent ?? ""]?.map((ch, i) => (
+                        {/* I-4: guard with truthiness so empty-string key never matches */}
+                        {message.agent && debateChallenges[message.agent]?.map((ch, i) => (
                           <span key={i} className="debate-challenge-badge" title={`${ch.fromAgent}: ${ch.critique}`}>
                             <span className="material-symbols-outlined" style={{ fontSize: "10px" }}>flag</span>
                             ← {ch.fromAgent.replace("agent-", "A")}
                           </span>
                         ))}
                         {/* Debate defense badges */}
-                        {debateDefenses[message.agent ?? ""]?.map((d, i) => (
+                        {message.agent && debateDefenses[message.agent]?.map((d, i) => (
                           <span key={i} className={`debate-defense-badge debate-defense-badge--${d.stance}`}>
                             {d.stance === "defend" ? "defended" : d.stance === "concede" ? "conceded" : "partial"}
                           </span>

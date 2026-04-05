@@ -29,6 +29,7 @@ const HEADER = 'x-agent-signature';
  * @returns {{ 'x-agent-signature': string }}
  */
 function signAgentRequest(body, secret) {
+  if (!secret) throw new Error('signAgentRequest: secret is not set');
   const payload = typeof body === 'string' ? body : JSON.stringify(body);
   const sig = crypto
     .createHmac('sha256', secret)
@@ -77,6 +78,7 @@ function verifyAgentRequest(secret) {
     const expected = Buffer.from(expectedSig, 'hex');
 
     if (received.length !== expected.length || !crypto.timingSafeEqual(received, expected)) {
+      logger.warn(`[agentAuth] Signature mismatch from ${req.ip}`);
       return res.status(403).json({ error: 'Invalid agent signature' });
     }
 

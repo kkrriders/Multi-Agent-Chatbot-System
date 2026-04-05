@@ -46,7 +46,9 @@ const MAX_AGENT_ID_LEN = 10;   // "agent-4" is 7 chars; 10 is safe
 function sanitizeForPrompt(str, maxLen) {
   return String(str)
     .replace(/[\r\n\t]/g, ' ')
-    .replace(/[^\x20-\x7E]/g, '')
+    // Strip only true C0/C1 control characters — preserve all Unicode text
+    // (accented Latin, CJK, Arabic, emoji, etc.) so non-English debates work correctly.
+    .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
     .trim()
     .slice(0, maxLen);
 }
@@ -220,8 +222,9 @@ async function runChallengePhase(proposals, participants, task, io, conversation
 
       let raw;
       try {
+        
         raw = await generateResponseJson(
-          CHALLENGE_MODEL, prompt, { temperature: 0.4, num_predict: 800 }
+          CHALLENGE_MODEL, prompt, { temperature: 0.4, num_predict: 1_200 }
         );
       } catch (err) {
         logger.warn(`[debateEngine] challenge generation failed for ${participant.agentId}: ${err.message}`);
@@ -233,7 +236,8 @@ async function runChallengePhase(proposals, participants, task, io, conversation
       // Sycophancy guard — inject fallback if no challenges produced
       if (challenges.length === 0) {
         logger.warn(`[debateEngine] ${participant.agentId} produced 0 challenges — injecting fallback`);
-        const fallbackTarget = otherProposals[0];
+        // S-2: random target instead of always otherProposals[0] to avoid systematic bias
+        const fallbackTarget = otherProposals[Math.floor(Math.random() * otherProposals.length)];
         const firstSentence  = sanitizeForPrompt(
           (fallbackTarget.content.split('.')[0] || 'their main claim'), MAX_CLAIM_LEN
         );
@@ -246,15 +250,24 @@ async function runChallengePhase(proposals, participants, task, io, conversation
         }];
       }
 
+      // C-3: build set of agentIds that actually produced proposals so toAgent is always valid
+      const proposalAgentIds = new Set(proposals.map(p => p.agentId));
+
       // Validate and sanitize each challenge
       const sanitized = challenges
         .map((c, idx) => {
-          const toAgent = /^agent-[1-4]$/.test(c.toAgent)
+          // toAgent must exist in proposals and must not be self-challenge
+          const isValidTarget = proposalAgentIds.has(c.toAgent) && c.toAgent !== participant.agentId;
+          // C-3: also use random fallback here (not just in the sycophancy path) to avoid
+          // systematically always challenging the first proposal when LLM hallucinates a toAgent
+          const toAgent = isValidTarget
             ? c.toAgent
-            : (otherProposals[0]?.agentId || null);
+            : (otherProposals[Math.floor(Math.random() * otherProposals.length)]?.agentId || null);
           if (!toAgent) return null;
           return {
-            challengeId: `${participant.agentId}->${toAgent}-${idx}`,
+            // C-2: timestamp + random suffix eliminates the 1ms collision window when two
+            // parallel agents resolve at the same tick
+            challengeId: `${participant.agentId}->${toAgent}-${idx}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             fromAgent:   participant.agentId,
             toAgent,
             claim:       sanitizeForPrompt(c.claim      || '', MAX_CLAIM_LEN),
@@ -322,26 +335,33 @@ async function runDefensePhase(challenges, proposals, participants, task, io, co
 
       let raw;
       try {
+        // S-4: two full defenses (stance + response 400 + revisedClaim 200) can reach ~1400
+        // chars — 600 tokens caused silent JSON truncation; 1000 covers it safely
         raw = await generateResponseJson(
           CHALLENGE_MODEL,
           buildDefensePrompt(agentId, ownProposal, challengesAgainstMe, task),
-          { temperature: 0.3, num_predict: 600 }
+          { temperature: 0.3, num_predict: 1_000 }
         );
       } catch (err) {
         logger.warn(`[debateEngine] defense generation failed for ${agentId}: ${err.message}`);
         return null;
       }
 
+      // S-3: build set of known challengeIds so we reject hallucinated ones
+      const knownChallengeIds = new Set(challengesAgainstMe.map(c => c.challengeId));
+
       const VALID_STANCES = new Set(['defend', 'concede', 'partial']);
       const defenses = Array.isArray(raw?.defenses) ? raw.defenses : [];
-      const sanitized = defenses.map(d => ({
-        challengeId:  sanitizeForPrompt(d.challengeId || '', 60),
-        stance:       VALID_STANCES.has(d.stance) ? d.stance : 'defend',
-        response:     sanitizeForPrompt(d.response     || '', MAX_DEFENSE_LEN),
-        revisedClaim: d.revisedClaim
-          ? sanitizeForPrompt(d.revisedClaim, MAX_CLAIM_LEN)
-          : null,
-      }));
+      const sanitized = defenses
+        .filter(d => knownChallengeIds.has(d.challengeId))
+        .map(d => ({
+          challengeId:  sanitizeForPrompt(d.challengeId || '', 80),
+          stance:       VALID_STANCES.has(d.stance) ? d.stance : 'defend',
+          response:     sanitizeForPrompt(d.response     || '', MAX_DEFENSE_LEN),
+          revisedClaim: d.revisedClaim
+            ? sanitizeForPrompt(d.revisedClaim, MAX_CLAIM_LEN)
+            : null,
+        }));
 
       // Emit each defense event for real-time badge updates
       for (const d of sanitized) {
@@ -410,17 +430,38 @@ async function synthesizeDebate(proposals, challenges, defenses, task, io, conve
     content: p.content,
   }));
 
-  const aggregation = await aggregate(
-    aggregatorResults,
-    { tasks: [], synthesisInstructions },
-    task,
-    { cite: true }
-  );
-
-  const criticResult = await criticPass(aggregation.answer, task);
-
   const totalChallenges = challenges.reduce((s, c) => s + c.challenges.length, 0);
   const totalDefenses   = defenses.reduce((s, d) => s + d.defenses.length, 0);
+
+  // I-5: wrap aggregate+criticPass so a synthesis LLM failure still emits debate-complete
+  // (prevents isProcessing from getting stuck in the frontend forever)
+  let criticResult;
+  try {
+    const aggregation = await aggregate(
+      aggregatorResults,
+      { tasks: [], synthesisInstructions },
+      task,
+      { cite: true }
+    );
+    criticResult = await criticPass(aggregation.answer, task);
+  } catch (synthErr) {
+    logger.error(`[debateEngine] synthesis LLM failed: ${synthErr.message}`);
+    io.to(conversationId).emit('debate-error', {
+      conversationId,
+      timestamp: Date.now(),
+      phase: 'synthesis',
+      error: 'Synthesis failed — all proposals were retained without a final answer.',
+    });
+    // Still emit debate-complete so the frontend clears isProcessing
+    io.to(conversationId).emit('debate-complete', {
+      conversationId,
+      timestamp:      Date.now(),
+      proposalCount:  proposals.length,
+      challengeCount: totalChallenges,
+      defenseCount:   totalDefenses,
+    });
+    throw synthErr;
+  }
 
   // Emit final answer as a stream-end event so the existing frontend handler shows it
   io.to(conversationId).emit('stream-end', {

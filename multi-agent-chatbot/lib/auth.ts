@@ -9,17 +9,12 @@ export interface User {
 }
 
 /**
- * Token storage: sessionStorage instead of localStorage.
- * sessionStorage is cleared when the browser tab/window closes,
- * limiting the window for token theft compared to persistent localStorage.
+ * Auth strategy: rely on the HttpOnly cookie the backend sets on login/register.
+ * The browser sends it automatically with credentials:'include' — no JS-accessible
+ * token storage means XSS cannot steal the credential.
  *
- * Note: for full XSS protection the ideal solution is HttpOnly-only cookies
- * (requires same-origin or a Next.js API proxy to the backend).
+ * Non-sensitive user profile is kept in sessionStorage for UI display only.
  */
-export function getToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return sessionStorage.getItem('token')
-}
 
 export function getUser(): User | null {
   if (typeof window === 'undefined') return null
@@ -32,33 +27,26 @@ export function getUser(): User | null {
   }
 }
 
-export function setAuth(token: string, user: User): void {
-  sessionStorage.setItem('token', token)
+export function setAuth(_token: string, user: User): void {
+  // Token is intentionally NOT stored — the HttpOnly cookie is the credential.
   sessionStorage.setItem('user', JSON.stringify(user))
 }
 
 export function clearAuth(): void {
-  sessionStorage.removeItem('token')
   sessionStorage.removeItem('user')
 }
 
 export function isAuthenticated(): boolean {
-  return !!getToken()
+  return !!getUser()
 }
 
 export async function logout(): Promise<void> {
   try {
-    const token = getToken()
-    if (token) {
-      await fetch(`${API_URL}/api/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-    }
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    })
   } catch (error) {
     console.error('Logout error:', error)
   } finally {
@@ -67,15 +55,11 @@ export async function logout(): Promise<void> {
 }
 
 export async function checkAuth(): Promise<User | null> {
-  const token = getToken()
-  if (!token) return null
+  if (!isAuthenticated()) return null
 
   try {
     const response = await fetch(`${API_URL}/api/auth/me`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
     })
 
