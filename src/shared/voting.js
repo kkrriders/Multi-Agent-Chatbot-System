@@ -39,7 +39,6 @@ class VotingSystem {
   static majority(proposals, votes) {
     const voteCounts = {};
 
-    // Initialize counts
     proposals.forEach(proposal => {
       voteCounts[proposal.id] = {
         upvotes: 0,
@@ -49,7 +48,6 @@ class VotingSystem {
       };
     });
 
-    // Count votes
     votes.forEach(vote => {
       if (voteCounts[vote.proposalId]) {
         voteCounts[vote.proposalId][`${vote.type}s`]++;
@@ -57,7 +55,6 @@ class VotingSystem {
       }
     });
 
-    // Find winner (highest upvotes)
     let winner = null;
     let maxUpvotes = -1;
 
@@ -89,7 +86,6 @@ class VotingSystem {
   static weighted(proposals, votes) {
     const scores = {};
 
-    // Initialize scores
     proposals.forEach(proposal => {
       scores[proposal.id] = {
         score: 0,
@@ -122,7 +118,6 @@ class VotingSystem {
       }
     });
 
-    // Find winner (highest score)
     let winner = null;
     let maxScore = -Infinity;
 
@@ -156,7 +151,6 @@ class VotingSystem {
     const result = this.majority(proposals, votes);
     const threshold = 0.75;
 
-    // Check if winner meets consensus threshold
     const hasConsensus = result.confidence >= threshold;
 
     return {
@@ -181,7 +175,6 @@ class VotingSystem {
     const numProposals = proposals.length;
     const scores = {};
 
-    // Initialize
     proposals.forEach(proposal => {
       scores[proposal.id] = {
         totalPoints: 0,
@@ -194,7 +187,6 @@ class VotingSystem {
       }
     });
 
-    // Calculate points
     rankedVotes.forEach(vote => {
       vote.rankings.forEach((proposalId, index) => {
         const rank = index + 1;
@@ -208,7 +200,6 @@ class VotingSystem {
       });
     });
 
-    // Find winner
     let winner = null;
     let maxPoints = -1;
 

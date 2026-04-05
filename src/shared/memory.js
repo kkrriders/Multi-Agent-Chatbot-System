@@ -281,9 +281,11 @@ class AgentMemory {
         const MemoryModel = getMemoryModel();
         const record = await MemoryModel.findOne({ userId: this.userId, agentId: this.agentId });
         if (record) {
-          record.entries = record.entries.filter(
+          const kept = record.entries.filter(
             e => e.timestamp > cutoff || e.importance >= 0.2
           );
+          record.entries.splice(0, record.entries.length, ...kept);
+          record.markModified('entries');
           await record.save();
         }
         logger.info(`Memory cleanup completed for ${this.agentId} (mongodb)`);

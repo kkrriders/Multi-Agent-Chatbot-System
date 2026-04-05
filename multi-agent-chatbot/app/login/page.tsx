@@ -27,7 +27,7 @@ export default function LoginPage() {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Authentication failed")
-      if (data.data.token) setAuth(data.data.token, data.data.user)
+      if (data.data?.user) setAuth('', data.data.user)
       router.push("/chat")
     } catch (err: any) {
       setError(err.message || "Authentication failed")

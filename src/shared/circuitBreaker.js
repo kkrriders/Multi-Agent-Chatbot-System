@@ -99,6 +99,7 @@ class CircuitBreaker extends EventEmitter {
     if (newState === STATE.CLOSED) {
       this._failures = 0;
       this._successes = 0;
+      this._lastFailureAt = null;
     }
 
     if (prev !== newState) {

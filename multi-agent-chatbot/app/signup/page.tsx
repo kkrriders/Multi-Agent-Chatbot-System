@@ -18,7 +18,7 @@ export default function SignupPage() {
     setError("")
     if (formData.password !== formData.confirmPassword) { setError("Access keys do not match"); return }
     if (!agreedToTerms) { setError("You must confirm compliance with Security Protocols"); return }
-    if (formData.password.length < 6) { setError("Access key must be at least 6 characters"); return }
+    if (formData.password.length < 8) { setError("Access key must be at least 8 characters"); return }
     setIsLoading(true)
     try {
       const response = await fetch(`${API_URL}/api/auth/signup`, {
@@ -29,7 +29,7 @@ export default function SignupPage() {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Initialization failed")
-      if (data.data.token) setAuth(data.data.token, data.data.user)
+      if (data.data?.user) setAuth('', data.data.user)
       router.push("/chat")
     } catch (err: any) {
       setError(err.message || "Initialization failed")

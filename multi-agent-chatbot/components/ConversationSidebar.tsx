@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, Plus, Search, Archive, Trash2, Download } from 'lucide-react';
-import { getToken } from '@/lib/auth';
+import { MessageSquare, Plus, Search, Archive, Trash2 } from 'lucide-react';
 import { API_URL } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,19 +53,9 @@ export default function ConversationSidebar({
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const token = getToken();
-
-      if (!token) {
-        console.error('No auth token found');
-        return;
-      }
-
       const response = await fetch(
         `${API_URL}/api/conversations?status=${activeTab}&limit=100`,
-        {
-          headers: { 'Authorization': `Bearer ${token}` },
-          credentials: 'include',
-        }
+        { credentials: 'include' }
       );
 
       if (!response.ok) {
@@ -97,19 +86,11 @@ export default function ConversationSidebar({
 
   const createNewConversation = async () => {
     try {
-      const token = getToken();
-
       const response = await fetch(`${API_URL}/api/conversations`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          title: 'New Conversation',
-          agentType: 'manager',
-        }),
+        body: JSON.stringify({ title: 'New Conversation', agentType: 'manager' }),
       });
 
       if (!response.ok) {
@@ -128,14 +109,9 @@ export default function ConversationSidebar({
     e.stopPropagation();
 
     try {
-      const token = getToken();
-
       await fetch(`${API_URL}/api/conversations/${conversationId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ status: 'archived' }),
       });
@@ -154,13 +130,8 @@ export default function ConversationSidebar({
     }
 
     try {
-      const token = getToken();
-
       await fetch(`${API_URL}/api/conversations/${conversationId}`, {
         method: 'DELETE',
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
         credentials: 'include',
       });
 

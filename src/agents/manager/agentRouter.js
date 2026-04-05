@@ -1,17 +1,5 @@
 'use strict';
 
-/**
- * Agent Router
- *
- * Encapsulates:
- *   - AGENT_ENDPOINTS  — map of agentId → HTTP URL
- *   - circuitBreakers  — one CircuitBreaker per agent
- *   - routeMessageToAgent()  — sends a message to a single agent with retry + circuit breaker
- *   - consultDualAgents()    — parallel dual-agent consult for low-confidence routing
- *
- * The Socket.IO `io` instance must be injected at startup via `setIo(ioInstance)`.
- * This avoids circular imports between manager/index.js and agentRouter.js.
- */
 
 const axios = require('axios');
 const { CircuitBreaker, CircuitOpenError } = require('../../shared/circuitBreaker');

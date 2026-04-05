@@ -100,7 +100,7 @@ router.post('/signup', async (req, res) => {
           email: user.email,
           createdAt: user.createdAt,
         },
-        token,
+        // token intentionally omitted — credential is delivered via HttpOnly cookie only
       },
     });
   } catch (error) {
@@ -184,7 +184,7 @@ router.post('/login', async (req, res) => {
           email: user.email,
           lastLogin: user.lastLogin,
         },
-        token,
+        // token intentionally omitted — credential is delivered via HttpOnly cookie only
       },
     });
   } catch (error) {
@@ -323,7 +323,6 @@ router.post('/forgot-password', async (req, res) => {
     await redisClient.set(`pwd:reset:${tokenHash}`, user._id.toString(), 'EX', RESET_TTL_SECONDS);
 
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3002'}/reset-password?token=${rawToken}`;
-    // TODO: replace this with your email delivery service (nodemailer, SendGrid, etc.)
     // Do NOT log the resetUrl — it contains the raw token which is a credential.
     logger.info(`[PASSWORD RESET] reset link generated for email=${email}`);
     auditEvent({ userId: user._id, email, action: 'password_reset.requested', ip: req.ip, userAgent: req.headers['user-agent'] });

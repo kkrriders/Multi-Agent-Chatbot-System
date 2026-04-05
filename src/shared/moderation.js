@@ -3,7 +3,8 @@
  */
 const flaggedWords = require('./badwords');
 const { moderateWithLLM } = require('./ollama');
-const { logFlaggedContent } = require('./logger');
+const { logFlaggedContent, logger } = require('./logger');
+const { signAgentRequest } = require('./agentAuth');
 const axios = require('axios');
 
 /**
@@ -76,7 +77,7 @@ async function moderateContent(content, model, useLLM = true) {
       // Fail-closed: if the moderation check itself errors, block the content.
       // Better to occasionally block a safe message than to silently pass
       // unsafe content when the safety system is broken.
-      console.error('LLM moderation error — blocking content as precaution:', error.message);
+      logger.error('LLM moderation error — blocking content as precaution:', error.message);
       return {
         flagged: true,
         reason: 'Moderation service error — content blocked as a precaution'
@@ -103,10 +104,13 @@ async function issueWarningToAgent(agentId) {
       throw new Error(`Unknown agent ID: ${agentId}`);
     }
 
-    const response = await axios.post(`http://localhost:${agentPort}/warning`, {});
+    const body = {};
+    const response = await axios.post(`http://localhost:${agentPort}/warning`, body, {
+      headers: signAgentRequest(body, process.env.AGENT_SHARED_SECRET),
+    });
     return response.data.warningCount;
   } catch (error) {
-    console.error(`Failed to issue warning to ${agentId}:`, error.message);
+    logger.error(`Failed to issue warning to ${agentId}:`, error.message);
     return -1; // Unable to issue warning
   }
 }
@@ -118,15 +122,16 @@ async function issueWarningToAgent(agentId) {
  * @returns {number|null} - Port number or null if not found
  */
 function getAgentPort(agentId) {
+  // Defaults match the agent server defaults in agentRouter.js (3005-3008)
   switch (agentId) {
     case 'agent-1':
-      return process.env.AGENT_1_PORT || 3001;
+      return process.env.AGENT_1_PORT || 3005;
     case 'agent-2':
-      return process.env.AGENT_2_PORT || 3002;
+      return process.env.AGENT_2_PORT || 3006;
     case 'agent-3':
-      return process.env.AGENT_3_PORT || 3003;
+      return process.env.AGENT_3_PORT || 3007;
     case 'agent-4':
-      return process.env.AGENT_4_PORT || 3004;
+      return process.env.AGENT_4_PORT || 3008;
     default:
       return null;
   }
