@@ -1,16 +1,3 @@
-# ── Multi-Agent Chatbot System ────────────────────────────────────────────────
-#
-# Quick start:
-#   cp .env.example .env          # fill in JWT_SECRET, MONGODB_URI override, etc.
-#   docker compose up --build     # build and start all services
-#
-# With distributed tracing (Jaeger UI at http://localhost:16686):
-#   docker compose --profile tracing up --build
-#
-# Ollama is NOT containerised — GPU passthrough in containers requires
-# complex configuration. It runs on the host and is reachable from containers
-# via host.docker.internal (automatic on Docker Desktop for Windows/Mac).
-# ─────────────────────────────────────────────────────────────────────────────
 
 services:
 
