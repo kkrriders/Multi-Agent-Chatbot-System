@@ -72,15 +72,20 @@ export default function MultiAgentChatbot() {
   const [selectedTarget, setSelectedTarget]     = useState<"all" | string>("all")
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false)
   const [leftTab, setLeftTab]                   = useState<"threads" | "agents">("threads")
-  const messagesEndRef  = useRef<HTMLDivElement>(null)
-  const socketRef       = useRef<Socket | null>(null)
-  const chatInputRef    = useRef<HTMLTextAreaElement>(null)
+  const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0)
+  const messagesEndRef            = useRef<HTMLDivElement>(null)
+  const socketRef                 = useRef<Socket | null>(null)
+  const chatInputRef              = useRef<HTMLTextAreaElement>(null)
+  const currentConversationIdRef  = useRef<string | null>(null)
 
   // ── Debate mode state ────────────────────────────────────────────────────
   const [isDebateMode, setIsDebateMode]         = useState(false)
   const [debatePhase, setDebatePhase]           = useState<string | null>(null)
   const [debateChallenges, setDebateChallenges] = useState<Record<string, { challengeId: string; fromAgent: string; claim: string; critique: string }[]>>({})
   const [debateDefenses, setDebateDefenses]     = useState<Record<string, { challengeId: string; stance: string }[]>>({})
+
+  // Keep ref in sync so socket disconnect handler always reads the current conversationId
+  useEffect(() => { currentConversationIdRef.current = currentConversationId }, [currentConversationId])
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -138,7 +143,7 @@ export default function MultiAgentChatbot() {
       withCredentials: true,
     })
 
-    socketRef.current.on("connect", () => { /* connected */ })
+    socketRef.current.on("connect", () => { setIsConnected(true) })
 
     socketRef.current.on("conversation-update", (data) => {
       try {
@@ -248,10 +253,27 @@ export default function MultiAgentChatbot() {
     })
 
     socketRef.current.on("stream-error", (data: { agentId: string; conversationId: string }) => {
-      if (!data.agentId?.startsWith("agent-")) return
-      setMessages((prev) => prev.filter((m) => m.id !== `thinking-${data.agentId}`))
-      setAgents((prev) => prev.map((a) => a.id === data.agentId ? { ...a, status: "online" } : a))
-      setActiveAgents((prev) => prev.filter((id) => id !== data.agentId))
+      if (!data.agentId) return
+      setMessages((prev) => {
+        const filtered = prev.filter((m) => m.id !== `thinking-${data.agentId}`)
+        const meta = getAgentMeta(data.agentId)
+        return [...filtered, {
+          id: `error-${data.agentId}-${Date.now()}`,
+          content: `${meta.label} failed to respond — continuing without their input.`,
+          sender: "agent" as const,
+          agent: data.agentId,
+          timestamp: new Date(),
+          type: "stream-error",
+        }]
+      })
+      if (data.agentId.startsWith("agent-")) {
+        setAgents((prev) => prev.map((a) => a.id === data.agentId ? { ...a, status: "online" } : a))
+        setActiveAgents((prev) => prev.filter((id) => id !== data.agentId))
+      } else {
+        // manager/planner failure — clear processing state
+        setIsProcessing(false)
+        setActiveAgents([])
+      }
     })
 
     // ── Debate event handlers ────────────────────────────────────────────────
@@ -304,8 +326,16 @@ export default function MultiAgentChatbot() {
       }])
     })
 
-    socketRef.current.on("connect_error", (error) => { console.error("Socket error:", error) })
-    socketRef.current.on("disconnect", (reason) => { console.log("Disconnected:", reason) })
+    socketRef.current.on("connect_error", (error) => { console.error("Socket error:", error); setIsConnected(false) })
+    socketRef.current.on("disconnect", (reason) => {
+      console.log("Disconnected:", reason)
+      setIsConnected(false)
+      // Use ref (not state closure) so we always rejoin the current conversation
+      socketRef.current?.once("connect", () => {
+        const convId = currentConversationIdRef.current
+        if (convId) socketRef.current?.emit("join-conversation", convId)
+      })
+    })
   }
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }) }, [messages])
@@ -336,6 +366,25 @@ export default function MultiAgentChatbot() {
   const sendFollowUpMessage = async () => {
     if (!chatInput.trim() || !currentConversationId || !socketRef.current) return
     try {
+      if (isProcessing) {
+        const response = await fetch(`${API_URL}/inject-context`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ conversationId: currentConversationId, message: chatInput }),
+        })
+        const result = await response.json()
+        if (!result.success) throw new Error(result.error || "Failed to inject context")
+        setMessages((prev) => [...prev, {
+          id: `inject-${Date.now()}`,
+          content: `[Context added]: ${chatInput}`,
+          sender: "user" as const,
+          timestamp: new Date(),
+          type: "user-injection",
+        }])
+        setChatInput("")
+        return
+      }
       if (selectedTarget === "all") {
         const enabledAgents = agents.filter((a) => a.enabled)
         const response = await fetch(`${API_URL}/continue-conversation`, {
@@ -383,8 +432,19 @@ export default function MultiAgentChatbot() {
 
       if (!socketRef.current?.connected) throw new Error("Socket.IO not connected. Please refresh the page.")
 
-      const conversationId = `work-${Date.now()}`
+      // Create a MongoDB conversation document so it appears in the sidebar
+      const convCreateRes = await fetch(`${API_URL}/api/conversations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ title: taskDescription.slice(0, 60), agentType: "manager" }),
+      })
+      if (!convCreateRes.ok) throw new Error("Failed to create conversation")
+      const convCreateData = await convCreateRes.json()
+      const conversationId: string = convCreateData.data._id
+
       socketRef.current.emit("join-conversation", conversationId)
+      setSidebarRefreshKey((k) => k + 1)
 
       // Reset debate state for new session
       setDebateChallenges({})
@@ -613,6 +673,7 @@ export default function MultiAgentChatbot() {
                 <ConversationSidebar
                   onSelectConversation={handleSelectConversation}
                   currentConversationId={currentConversationId || undefined}
+                  refreshTrigger={sidebarRefreshKey}
                 />
               </div>
             ) : (
@@ -947,7 +1008,7 @@ export default function MultiAgentChatbot() {
                   ref={chatInputRef}
                   value={inputValue}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={currentConversationId ? "Command the agents…" : "Define your neural task — describe what you need the agents to accomplish…"}
+                  placeholder={currentConversationId ? (isProcessing ? "Add context for the next agent…" : "Send a follow-up message…") : "Define your neural task — describe what you need the agents to accomplish…"}
                   rows={2}
                   className="w-full bg-transparent border-none outline-none text-sm resize-none p-4"
                   style={{ color: "#dee5ff", fontFamily: "var(--font-inter), Inter, sans-serif" }}
