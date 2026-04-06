@@ -1,10 +1,5 @@
-# ── Multi-Agent Chatbot System — Backend ─────────────────────────────────────
-# One image for all backend services (manager + 4 agents).
-# The CMD is overridden per-service in docker-compose.yml.
-#
-# Build:  docker build -t mac-backend .
-# Run manager directly (without compose):
-#   docker run --env-file .env -p 3000:3000 mac-backend
+
+
 
 # ── Stage 1: install production dependencies ──────────────────────────────────
 FROM node:20-alpine AS deps
