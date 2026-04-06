@@ -30,11 +30,13 @@ interface Conversation {
 interface ConversationSidebarProps {
   onSelectConversation: (conversationId: string) => void;
   currentConversationId?: string;
+  refreshTrigger?: number;
 }
 
 export default function ConversationSidebar({
   onSelectConversation,
   currentConversationId,
+  refreshTrigger,
 }: ConversationSidebarProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([]);
@@ -45,6 +47,10 @@ export default function ConversationSidebar({
   useEffect(() => {
     fetchConversations();
   }, [activeTab]);
+
+  useEffect(() => {
+    if (refreshTrigger !== undefined && refreshTrigger > 0) fetchConversations();
+  }, [refreshTrigger]);
 
   useEffect(() => {
     filterConversations();

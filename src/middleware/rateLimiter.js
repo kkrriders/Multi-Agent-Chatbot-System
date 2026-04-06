@@ -1,4 +1,5 @@
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 const { RedisStore } = require('rate-limit-redis');
 const redisClient = require('../config/redis');
 
@@ -52,7 +53,7 @@ const authLimiter = rateLimit({
 const messageLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 30,
-  keyGenerator: (req) => req.user?.id?.toString() || req.ip,
+  keyGenerator: (req) => req.user?.id?.toString() || ipKeyGenerator(req),
   store: buildStore('message'),
   handler: (req, res) => {
     res.status(429).json({ error: 'Message rate limit exceeded', message: 'Please wait a moment before sending more messages.', retryAfter: req.rateLimit.resetTime });
@@ -66,7 +67,7 @@ const messageLimiter = rateLimit({
 const exportLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
-  keyGenerator: (req) => req.user?.id?.toString() || req.ip,
+  keyGenerator: (req) => req.user?.id?.toString() || ipKeyGenerator(req),
   store: buildStore('export'),
   handler: (req, res) => {
     res.status(429).json({ error: 'Export rate limit exceeded', message: 'You can only export 5 conversations per hour.', retryAfter: req.rateLimit.resetTime });

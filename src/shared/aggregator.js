@@ -28,6 +28,24 @@ const SMALL_MODEL_MAX_CHARS = 1_200;
 // ── Text utilities ────────────────────────────────────────────────────────────
 
 /**
+ * Strip markdown formatting for comparison only.
+ * Original content is preserved — this is used solely for Jaccard dedup.
+ */
+function stripMarkdown(str) {
+  return str
+    .replace(/```[\s\S]*?```/g, ' ')        // code fences
+    .replace(/`[^`]+`/g, ' ')               // inline code
+    .replace(/^#{1,6}\s+/gm, '')            // headers
+    .replace(/^\s*[-*+]\s+/gm, '')          // bullet points (must come before italic)
+    .replace(/^\s*\d+\.\s+/gm, '')          // numbered lists
+    .replace(/\*\*([^*]+)\*\*/g, '$1')      // bold (must come before italic)
+    .replace(/(?<![*])\*(?![*])([^*\n]+)\*(?![*])/g, '$1') // italic (non-greedy, no newlines)
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Split text into sentences (rough, language-agnostic).
  */
 function _sentences(text) {
@@ -35,7 +53,7 @@ function _sentences(text) {
     .replace(/([.!?])\s+/g, '$1\n')
     .split('\n')
     .map(s => s.trim())
-    .filter(s => s.length > 15);
+    .filter(s => s.length > 10);
 }
 
 /**
@@ -80,7 +98,8 @@ function deduplicate(outputs) {
     const kept = [];
 
     for (const s of raw) {
-      const isDuplicate = seen.some(existing => _jaccard(s, existing) >= THRESHOLD);
+      const sNorm = stripMarkdown(s);
+      const isDuplicate = seen.some(existing => _jaccard(sNorm, stripMarkdown(existing)) >= THRESHOLD);
       if (!isDuplicate) {
         seen.push(s);
         kept.push(s);

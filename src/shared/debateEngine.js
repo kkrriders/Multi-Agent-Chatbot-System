@@ -87,25 +87,29 @@ OTHER AGENTS' RESPONSES:
 
   prompt += `
 INSTRUCTIONS:
-Review the other agents' responses critically. You MUST produce at least 1 challenge.
-Agreeing with everything is not acceptable — find real weaknesses, missing edge cases,
-unsupported assumptions, security risks, or factual errors.
+You are a skeptical critic. Your job is to DISAGREE, not to add or complement.
+You MUST challenge at least one specific claim made by another agent.
 
-For each challenge:
-- Quote or closely paraphrase the specific claim you are challenging
-- Explain clearly why the claim is wrong, incomplete, or risky
-- Suggest what should replace it or what needs to be added
+Rules:
+- Pick the claim you find MOST WRONG or most poorly reasoned — not just incomplete
+- Do NOT say "I agree but..." — take a direct opposing stance
+- Do NOT suggest additions to their idea — argue why their specific claim is INCORRECT or HARMFUL
+- Identify the logical flaw, flawed assumption, or ignored counterevidence in their claim
+- Be direct and specific: name the exact claim and exactly why it fails
 
-Produce 1 or 2 challenges. No more.
+For example: if an agent says "we should add X to improve Y", your challenge might be
+"Adding X will NOT improve Y because Z — in fact it will make Y worse due to W."
+
+Produce exactly 1 or 2 challenges targeting DIFFERENT agents if possible.
 
 Respond ONLY with valid JSON matching this exact schema:
 {
   "challenges": [
     {
       "toAgent": "agent-X",
-      "claim": "the specific claim being challenged (max 200 chars)",
-      "critique": "why it is wrong or incomplete (max 400 chars)",
-      "suggestion": "what should replace it or be added (max 200 chars)",
+      "claim": "the exact claim you are challenging (max 200 chars)",
+      "critique": "why this claim is wrong or harmful — name the specific flaw or false assumption (max 400 chars)",
+      "suggestion": "what the correct position should be instead (max 200 chars)",
       "confidence": 75
     }
   ]
@@ -224,7 +228,7 @@ async function runChallengePhase(proposals, participants, task, io, conversation
       try {
         
         raw = await generateResponseJson(
-          CHALLENGE_MODEL, prompt, { temperature: 0.4, num_predict: 1_200 }
+          CHALLENGE_MODEL, prompt, { temperature: 0.7, num_predict: 1_200 }
         );
       } catch (err) {
         logger.warn(`[debateEngine] challenge generation failed for ${participant.agentId}: ${err.message}`);
