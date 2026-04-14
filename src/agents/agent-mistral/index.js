@@ -42,7 +42,7 @@ class FlexibleAgent extends BaseAgent {
     // Fallback to default configuration
     const config = getAgentConfig(AGENT_ID);
     const agentName = message.agentName || config.name || 'Assistant';
-    let prompt = buildSystemPrompt(config, `You are ${agentName}.`);
+    let prompt = await buildSystemPrompt(config, `You are ${agentName}.`);
 
     if (message.conversationHistory && message.conversationHistory.length > 0) {
       prompt += `You are ${agentName}, an AI assistant participating in a team discussion.\n\n`;
