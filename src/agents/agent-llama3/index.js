@@ -54,7 +54,7 @@ class FlexibleAgent extends BaseAgent {
     const agentName = message.agentName || config.name || 'Assistant';
     
     // Build system prompt with configuration
-    let prompt = buildSystemPrompt(config, `You are ${agentName}.`);
+    let prompt = await buildSystemPrompt(config, `You are ${agentName}.`);
     
     // Check if there's conversation history
     if (message.conversationHistory && message.conversationHistory.length > 0) {
