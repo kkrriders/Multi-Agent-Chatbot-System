@@ -45,6 +45,10 @@ const authRoutes = require('../../routes/auth');
 const conversationRoutes = require('../../routes/conversations');
 const promptRoutes = require('../../routes/prompts');
 const agentConfigRoutes = require('../../routes/agentConfigs');
+const cvRoutes = require('../../routes/cv');
+const interviewRoutes = require('../../routes/interview');
+const progressRoutes = require('../../routes/progress');
+const questionRoutes = require('../../routes/questions');
 const { authenticate } = require('../../middleware/auth');
 const { signAgentRequest } = require('../../shared/agentAuth');
 const { auditLog } = require('../../middleware/auditLog');
@@ -278,6 +282,12 @@ app.use('/api/auth', authLimiter, csrfProtection, auditLog, authRoutes);
 app.use('/api/conversations', generalLimiter, csrfProtection, authenticate, auditLog, conversationRoutes);
 app.use('/api/prompts', generalLimiter, csrfProtection, authenticate, auditLog, promptRoutes);
 app.use('/api', generalLimiter, csrfProtection, authenticate, agentConfigRoutes);
+
+// MockPrep interview routes
+app.use('/api/cv', generalLimiter, csrfProtection, cvRoutes);
+app.use('/api/interview', messageLimiter, csrfProtection, interviewRoutes);
+app.use('/api/progress', generalLimiter, csrfProtection, progressRoutes);
+app.use('/api/questions', generalLimiter, csrfProtection, questionRoutes);
 
 // Apply CSRF protection to all remaining (non-/api) state-changing routes.
 // csrfProtection is a no-op for GET/HEAD/OPTIONS so safe to apply globally here.

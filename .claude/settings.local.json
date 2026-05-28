@@ -38,7 +38,12 @@
       "Bash(node -e \"require\\('./src/shared/debateEngine'\\)\")",
       "Bash(node -e \"require\\('./src/agents/manager/index.js'\\)\")",
       "Bash(grep -rn \"^[ \\\\t]*//[^/]\" /c/Users/karti/Multi-Agent-Chatbot-System/src/shared/*.js)",
-      "Bash(grep -rn \"^\\\\s*\\\\/\\\\/.*\\\\\\(const\\\\|let\\\\|var\\\\|if\\\\|for\\\\|function\\\\\\)\" /c/Users/karti/Multi-Agent-Chatbot-System/src/shared/*.js)"
+      "Bash(grep -rn \"^\\\\s*\\\\/\\\\/.*\\\\\\(const\\\\|let\\\\|var\\\\|if\\\\|for\\\\|function\\\\\\)\" /c/Users/karti/Multi-Agent-Chatbot-System/src/shared/*.js)",
+      "Bash(gh api *)",
+      "WebFetch(domain:github.com)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\karti\\\\Mockprep\" -Recurse -Force | Select-Object -Property @{Name=\"Path\";Expression={$_.FullName.Replace\\(\"C:\\\\Users\\\\karti\\\\Mockprep\\\\\", \"\"\\)}} | Format-Table -AutoSize | Out-String)",
+      "Bash(Get-ChildItem C:\\\\Users\\\\karti\\\\Mockprep\\\\multi-agent-chatbot\\\\app *)",
+      "Bash(npx tsc *)"
     ],
     "deny": [],
     "ask": []
