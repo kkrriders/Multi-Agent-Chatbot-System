@@ -1,6 +1,6 @@
 # MockPrep — AI Mock Interview Platform
 
-> GitHub: [kkrriders/MockPrep](https://github.com/kkrriders/MockPrep)
+
 
 Upload your CV, pick a role and company, and practice with AI-generated questions tailored to your background. Get real-time scoring, speech analysis, adaptive follow-ups, and personalised feedback across sessions.
 
