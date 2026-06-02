@@ -1,83 +1,110 @@
 @import "tailwindcss";
 
-@theme inline {
+@theme {
+  /* Base fonts */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-geist: 'Geist', ui-sans-serif, system-ui, sans-serif;
 
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-
-  --color-border: hsl(var(--border));
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-
+  /* Semantic colors (used by shadcn/sonner) */
+  --color-background: #f8f9fa;
+  --color-foreground: #191c1d;
+  --color-border: #bbcabf;
+  --color-primary: #006c49;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #515f74;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #edeeef;
+  --color-muted-foreground: #64748B;
+  --color-accent: #f3f4f5;
+  --color-accent-foreground: #191c1d;
+  --color-destructive: #ba1a1a;
+  --color-destructive-foreground: #ffffff;
   --radius: 0.5rem;
-}
 
-/* Dark theme — app is dark-only */
-:root {
-  --background: 222 47% 11%;
-  --foreground: 213 31% 91%;
+  /* === Stitch Design System Color Tokens === */
 
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
+  /* Brand */
+  --color-emerald-deep: #065F46;
+  --color-ink: #0D0C22;
+  --color-slate-muted: #64748B;
+  --color-amber-light: #FEF3C7;
+  --color-white: #FFFFFF;
 
-  --secondary: 222 47% 15%;
-  --secondary-foreground: 213 31% 91%;
+  /* Surface layers */
+  --color-surface: #f8f9fa;
+  --color-surface-bright: #f8f9fa;
+  --color-surface-dim: #d9dadb;
+  --color-surface-container: #edeeef;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-variant: #e1e3e4;
+  --color-surface-tint: #006c49;
 
-  --muted: 223 47% 17%;
-  --muted-foreground: 215 20% 65%;
+  /* On-surface */
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #3c4a42;
+  --color-on-background: #191c1d;
+  --color-inverse-surface: #2e3132;
+  --color-inverse-on-surface: #f0f1f2;
 
-  --accent: 222 47% 17%;
-  --accent-foreground: 213 31% 91%;
+  /* Outline */
+  --color-outline: #6c7a71;
+  --color-outline-variant: #bbcabf;
 
-  --border: 217 33% 20%;
+  /* Primary scale */
+  --color-on-primary: #ffffff;
+  --color-primary-container: #10b981;
+  --color-on-primary-container: #00422b;
+  --color-inverse-primary: #4edea3;
+  --color-primary-fixed: #6ffbbe;
+  --color-primary-fixed-dim: #4edea3;
+  --color-on-primary-fixed: #002113;
+  --color-on-primary-fixed-variant: #005236;
 
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 210 40% 98%;
-}
+  /* Secondary scale */
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #d5e3fd;
+  --color-on-secondary-container: #57657b;
+  --color-secondary-fixed: #d5e3fd;
+  --color-secondary-fixed-dim: #b9c7e0;
+  --color-on-secondary-fixed: #0d1c2f;
+  --color-on-secondary-fixed-variant: #3a485c;
 
-.dark {
-  --background: 222 47% 11%;
-  --foreground: 213 31% 91%;
+  /* Tertiary scale */
+  --color-tertiary: #855300;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #e29100;
+  --color-on-tertiary-container: #523200;
+  --color-tertiary-fixed: #ffddb8;
+  --color-tertiary-fixed-dim: #ffb95f;
+  --color-on-tertiary-fixed: #2a1700;
+  --color-on-tertiary-fixed-variant: #653e00;
 
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-
-  --secondary: 222 47% 15%;
-  --secondary-foreground: 213 31% 91%;
-
-  --muted: 223 47% 17%;
-  --muted-foreground: 215 20% 65%;
-
-  --accent: 222 47% 17%;
-  --accent-foreground: 213 31% 91%;
-
-  --border: 217 33% 20%;
-
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 210 40% 98%;
+  /* Error scale */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    border-color: var(--color-outline-variant);
   }
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--color-background);
+    color: var(--color-on-background);
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    user-select: none;
+    line-height: 1;
+    display: inline-block;
+  }
+  .icon-fill {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
 }

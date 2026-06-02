@@ -1,5 +1,7 @@
 # MockPrep — AI Mock Interview Platform
 
+> GitHub: [kkrriders/MockPrep](https://github.com/kkrriders/MockPrep)
+
 Upload your CV, pick a role and company, and practice with AI-generated questions tailored to your background. Get real-time scoring, speech analysis, adaptive follow-ups, and personalised feedback across sessions.
 
 ---
@@ -47,9 +49,11 @@ Upload your CV, pick a role and company, and practice with AI-generated question
 - SSE (Server-Sent Events) — real-time score and speech events
 
 **Frontend**
-- Next.js 15 (App Router, TypeScript), port 3002
-- Tailwind CSS + Radix UI
+- Next.js 15 (App Router, TypeScript), port 3002 — React 19
+- Tailwind CSS v4 + Radix UI primitives
 - Recharts — progress trend charts
+- Zod + React Hook Form — client-side validation
+- next-themes — dark/light mode
 - Web Speech API — browser-side speech-to-text
 
 ---
@@ -120,7 +124,13 @@ Generate a secret:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-### 3. Run locally
+### 3. (Optional) Generate `.env` interactively
+
+```bash
+npm run setup
+```
+
+### 4. Run locally
 
 ```bash
 # Backend (port 3000)
@@ -130,7 +140,7 @@ npm run dev
 cd frontend && npm run dev
 ```
 
-### 4. Or run with Docker
+### 5. Or run with Docker
 
 ```bash
 docker compose up --build
@@ -217,6 +227,30 @@ Starts MongoDB, Redis, backend API, and frontend. No local Node.js needed.
 | `panel` | 12 questions from 3 personas: Alex (technical), Priya (behavioural), James (bar raiser) |
 
 Pass `companyName` to any mode to tailor questions to that company's interview style.
+
+---
+
+## Dev Commands
+
+```bash
+# Backend
+npm run dev              # start with --watch
+npm test                 # all tests (Jest)
+npm run test:unit        # unit tests only
+npm run test:e2e         # e2e tests only (supertest)
+npm run test:coverage    # test + coverage report
+npm run lint             # ESLint
+npm run lint:fix         # ESLint + auto-fix
+npm run format           # Prettier write
+npm run format:check     # Prettier check (CI)
+
+# Frontend
+cd frontend
+npm run dev              # Next.js dev server (port 3002)
+npm run build            # production build
+npm run lint             # Next.js ESLint
+npm run type-check       # tsc --noEmit
+```
 
 ---
 

@@ -1,7 +1,8 @@
 # Project planning and internal docs
+CLAUDE.md
 FEATURES_ROADMAP.md
 BUILD_LOG.md
-CLAUDE.md
+MOCKPREP_BUILD_SUMMARY.md
 
 # Dependencies
 node_modules/

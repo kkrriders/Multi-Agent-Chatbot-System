@@ -16,7 +16,8 @@
       "Bash(pkill -f \"node.*server.js\")",
       "Bash(mkdir -p \"C:\\\\Users\\\\karti\\\\Mockprep\\\\src\\\\services\\\\agents\")",
       "Bash(mkdir -p \"C:\\\\Users\\\\karti\\\\Mockprep\\\\src\\\\data\\\\companies\")",
-      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\" -X POST https://api.tavily.com/search -H \"Content-Type: application/json\" -H \"Authorization: Bearer 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\" -d \"{\\\\\"query\\\\\":\\\\\"Stripe backend engineer interview questions\\\\\",\\\\\"max_results\\\\\":1,\\\\\"search_depth\\\\\":\\\\\"basic\\\\\",\\\\\"include_answer\\\\\":true}\")"
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\" -X POST https://api.tavily.com/search -H \"Content-Type: application/json\" -H \"Authorization: Bearer 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\" -d \"{\\\\\"query\\\\\":\\\\\"Stripe backend engineer interview questions\\\\\",\\\\\"max_results\\\\\":1,\\\\\"search_depth\\\\\":\\\\\"basic\\\\\",\\\\\"include_answer\\\\\":true}\")",
+      "Bash(claude mcp *)"
     ],
     "deny": []
   }
