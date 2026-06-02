@@ -1,0 +1,21 @@
+{
+  "name": "Netflix",
+  "slug": "netflix",
+  "interviewFormat": "2-3 phone screens, 5-6 onsite rounds (each interviewer focuses on a different dimension: technical depth, judgment, communication, culture fit)",
+  "evaluationCriteria": ["judgment and independent thinking", "communication", "curiosity", "technical depth", "selflessness"],
+  "questionPatterns": [
+    "tell me about a hard decision you made with limited data",
+    "describe a time you pushed back on your manager and were right",
+    "design a global content delivery system / streaming pipeline",
+    "how do you stay current with technology",
+    "tell me about a failure and what you would do differently"
+  ],
+  "cultureSignals": ["freedom and responsibility", "judgment over rules", "candid communication", "curiosity", "selflessness", "innovation"],
+  "redFlags": ["needing micromanagement", "rigid rule-following without judgment", "not data-driven", "inability to receive candid feedback", "ego-driven decisions"],
+  "focusAreas": {
+    "technical": ["streaming systems", "distributed systems", "CDN architecture", "data engineering", "A/B testing"],
+    "behavioral": ["independent judgment", "candid communication", "curiosity and continuous learning", "impact-oriented decisions"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

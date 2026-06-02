@@ -1,0 +1,21 @@
+{
+  "name": "Airbnb",
+  "slug": "airbnb",
+  "interviewFormat": "5+ rounds: technical screen, 2 coding, 1 system design, 1 cross-functional, 1 culture/values (extensive — 'belong anywhere')",
+  "evaluationCriteria": ["mission alignment", "creative problem solving", "cross-functional thinking", "user empathy", "technical strength"],
+  "questionPatterns": [
+    "design Airbnb's search and ranking system",
+    "design a booking / reservation system with availability conflicts",
+    "design a pricing recommendation engine for hosts",
+    "tell me about a time you built something that genuinely helped people",
+    "how would you handle a trust and safety incident at scale"
+  ],
+  "cultureSignals": ["belong anywhere", "champion the mission", "be a host (care for others)", "embrace the adventure", "be a cereal entrepreneur"],
+  "redFlags": ["purely mercenary motivation with no mission alignment", "no empathy for hosts or guests", "ignoring trust and safety concerns", "not thinking about global/cultural differences"],
+  "focusAreas": {
+    "technical": ["search and ranking", "booking systems", "trust and safety systems", "pricing algorithms", "review systems"],
+    "behavioral": ["mission alignment", "user empathy", "entrepreneurial thinking", "cross-cultural sensitivity"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

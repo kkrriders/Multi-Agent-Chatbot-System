@@ -80,7 +80,7 @@ router.post('/signup', async (req, res) => {
     // Generate JWT token
     const token = generateToken(user);
 
-    logger.info(`New user registered: ${email}`);
+    logger.info(`[auth] signup success userId=${user._id}`);
     auditEvent({ userId: user._id, email, action: 'signup.success', ip: req.ip, userAgent: req.headers['user-agent'] });
 
     // Set cookie and send response
@@ -157,14 +157,12 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    // Update last login without triggering the full pre-save hook
+    await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
-    // Generate JWT token
     const token = generateToken(user);
 
-    logger.info(`User logged in: ${email}`);
+    logger.info(`[auth] login success userId=${user._id}`);
     auditEvent({ userId: user._id, email, action: 'login.success', ip: req.ip, userAgent: req.headers['user-agent'] });
 
     // Set cookie and send response
@@ -212,7 +210,7 @@ router.post('/logout', authenticate, async (req, res) => {
 
     res.clearCookie('token');
 
-    logger.info(`User logged out: ${req.user.email}`);
+    logger.info(`[auth] logout userId=${req.user._id}`);
 
     res.status(200).json({
       success: true,
@@ -277,7 +275,7 @@ router.put('/update-profile', authenticate, async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    logger.info(`User profile updated: ${req.user.email}`);
+    logger.info(`[auth] profile updated userId=${req.user._id}`);
 
     res.status(200).json({
       success: true,
@@ -372,11 +370,12 @@ router.post('/reset-password', async (req, res) => {
     // which is safer than leaving a used token valid in Redis.
     await redisClient.del(`pwd:reset:${tokenHash}`);
 
-    user.password = password; // pre-save hook will hash it
-    await user.save();
+    // Hash explicitly so we can use findByIdAndUpdate (avoids document mutation)
+    const hashedPassword = await User.hashPassword(password);
+    await User.findByIdAndUpdate(userId, { password: hashedPassword });
 
     auditEvent({ userId: user._id, email: user.email, action: 'password_reset.success', ip: req.ip, userAgent: req.headers['user-agent'] });
-    logger.info(`Password reset completed for ${user.email}`);
+    logger.info(`[auth] password reset completed userId=${user._id}`);
 
     res.status(200).json({ success: true, message: 'Password reset successfully. Please log in with your new password.' });
   } catch (error) {

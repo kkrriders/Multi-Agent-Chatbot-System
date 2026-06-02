@@ -11,6 +11,7 @@
 const ai = require('../ai/provider-manager');
 const Question = require('../../models/Question');
 const { assertSafe } = require('../../middleware/injection-guard');
+const { logger } = require('../../shared/logger');
 
 const CATEGORY_COUNTS = {
   practice: { technical: 5, behavioral: 3, situational: 2, intro: 0, closing: 0 },
@@ -18,20 +19,7 @@ const CATEGORY_COUNTS = {
   full:     { intro: 1, technical: 5, behavioral: 4, situational: 3, closing: 1 },
 };
 
-const GEN_PROMPT = (role, category, count, skills, jdSnippet) => `
-You are an expert interviewer. Generate exactly ${count} ${category} interview questions for a ${role} candidate.
-
-Candidate skills: ${skills.slice(0, 20).join(', ')}
-${jdSnippet ? `Job description excerpt:\n${jdSnippet.slice(0, 1500)}` : ''}
-
-Requirements:
-- Questions must be specific to the role and the candidate's background
-- Mix of easy, medium, and hard difficulty
-- For technical: test depth of knowledge, not just definitions
-- For behavioral: use STAR-method prompts ("Tell me about a time when...")
-- For situational: present a realistic scenario
-- Each question must be self-contained
-
+const RESPONSE_FORMAT = `
 Respond with valid JSON:
 {
   "questions": [
@@ -42,8 +30,43 @@ Respond with valid JSON:
       "followUpQuestions": ["optional follow-up"]
     }
   ]
+}`.trim();
+
+function _buildPrompt(role, category, count, skills, jdSnippet, companyContext, userProfile, liveSnippets) {
+  const companyBlock = companyContext ? `
+Target company: ${companyContext.name}
+Interview format: ${companyContext.interviewFormat}
+Key evaluation criteria: ${(companyContext.evaluationCriteria || []).join(', ')}
+Common question themes: ${(companyContext.questionPatterns || []).slice(0, 4).join('; ')}
+Culture signals: ${(companyContext.cultureSignals || []).join(', ')}
+Red flags to address in practice: ${(companyContext.redFlags || []).slice(0, 3).join('; ')}
+` : '';
+
+  const profileBlock = userProfile && userProfile.skills.length > 0 ? `
+Candidate's top skills: ${userProfile.skills.slice(0, 8).join(', ')}
+${userProfile.weakAreas.slice(0, 5).length ? `Areas needing practice (probe deeper here): ${userProfile.weakAreas.slice(0, 5).join(', ')}` : ''}
+${userProfile.strongAreas.slice(0, 5).length ? `Strong areas (can ask harder follow-ups): ${userProfile.strongAreas.slice(0, 5).join(', ')}` : ''}
+${userProfile.cvGaps.slice(0, 5).length ? `CV skill gaps to probe: ${userProfile.cvGaps.slice(0, 5).join(', ')}` : ''}
+` : `Candidate skills: ${skills.slice(0, 20).join(', ')}`;
+
+  const liveBlock = liveSnippets && liveSnippets.length > 0
+    ? `\nAdditional context from recent sources:\n${liveSnippets.slice(0, 2).join('\n')}`
+    : '';
+
+  const jdBlock = jdSnippet ? `\nJob description excerpt:\n${jdSnippet.slice(0, 800)}` : '';
+
+  return `You are an expert interviewer${companyContext ? ` simulating a ${companyContext.name} interview` : ''}. Generate exactly ${count} ${category} interview questions for a ${role} candidate.
+${companyBlock}${profileBlock}${jdBlock}${liveBlock}
+Requirements:
+- Questions must mirror ${companyContext ? `${companyContext.name}'s actual interview style and evaluation criteria` : 'the role and candidate background'}
+- For technical: test depth of knowledge, not just definitions
+- For behavioral: use STAR-method prompts; reflect the company's culture signals if provided
+- For situational: present a realistic scenario the company would actually face
+- If candidate has weak areas listed: include at least 1 question targeting those areas
+- Each question must be self-contained
+
+${RESPONSE_FORMAT}`.trim();
 }
-`.trim();
 
 /**
  * Generate questions for an interview session.
@@ -54,11 +77,15 @@ Respond with valid JSON:
  * @param {'practice'|'timed'|'full'} params.mode
  * @param {string[]} params.skills
  * @param {string} [params.jobDescription]
- * @param {string} [params.interviewId] - for tagging generated questions
+ * @param {string} [params.interviewId]
+ * @param {object} [params.companyContext]  — from orchestrator (curated company data)
+ * @param {object} [params.userProfile]     — from profile-agent (CV skills + weak areas)
+ * @param {string[]} [params.liveSnippets]  — sanitised live search results
  * @returns {Promise<object[]>} array of question documents
  */
-async function generate({ targetRole, mode, skills, jobDescription, interviewId }) {
+async function generate({ targetRole, mode, skills, jobDescription, interviewId, companyContext, userProfile, liveSnippets }) {
   if (jobDescription) assertSafe(jobDescription, 'job-description');
+  if (targetRole)     assertSafe(targetRole, 'target-role');
 
   const counts = CATEGORY_COUNTS[mode] || CATEGORY_COUNTS.practice;
   const allQuestions = [];
@@ -80,17 +107,27 @@ async function generate({ targetRole, mode, skills, jobDescription, interviewId 
       continue;
     }
 
-    // Generate remaining with AI
+    // Generate remaining with AI — enriched prompt when company/profile context is available
     const needed = count - bankQuestions.length;
     try {
-      const { data } = await ai.generateJson(
-        GEN_PROMPT(targetRole || 'Software Engineer', category, needed, skills, jobDescription),
-        'quality'
+      const prompt = _buildPrompt(
+        targetRole || 'Software Engineer',
+        category,
+        needed,
+        skills,
+        jobDescription,
+        companyContext || null,
+        userProfile || null,
+        liveSnippets || []
       );
 
+      const { data } = await ai.generateJson(prompt, 'balanced');
       const generated = Array.isArray(data.questions) ? data.questions.slice(0, needed) : [];
 
-      // Persist generated questions for future reuse
+      const questionSource = companyContext
+        ? 'company-tailored'
+        : jobDescription ? 'jd-generated' : 'cv-generated';
+
       const saved = await Question.insertMany(
         generated.map(q => ({
           text:              String(q.text || '').slice(0, 2000),
@@ -99,14 +136,14 @@ async function generate({ targetRole, mode, skills, jobDescription, interviewId 
           difficulty:        ['easy', 'medium', 'hard'].includes(q.difficulty) ? q.difficulty : 'medium',
           expectedKeywords:  Array.isArray(q.expectedKeywords) ? q.expectedKeywords.slice(0, 20) : [],
           followUpQuestions: Array.isArray(q.followUpQuestions) ? q.followUpQuestions.slice(0, 3) : [],
-          source:            jobDescription ? 'jd-generated' : 'cv-generated',
+          source:            questionSource,
           interviewId:       interviewId || undefined,
         }))
       );
 
       allQuestions.push(...bankQuestions, ...saved);
     } catch (err) {
-      // Fallback: use bank questions even if fewer than requested
+      logger.warn(`[question-generator] AI generation failed for category=${category}: ${err.message}`);
       allQuestions.push(...bankQuestions);
     }
   }

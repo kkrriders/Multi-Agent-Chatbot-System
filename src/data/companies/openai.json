@@ -1,0 +1,21 @@
+{
+  "name": "OpenAI",
+  "slug": "openai",
+  "interviewFormat": "Multiple rounds: technical screens (ML + systems), research presentations for research roles, systems design, behavioral — process varies significantly by team",
+  "evaluationCriteria": ["ML/AI depth", "systems engineering", "safety consciousness", "research ability", "impact orientation"],
+  "questionPatterns": [
+    "explain transformer architecture and attention mechanisms",
+    "design a large-scale model serving infrastructure",
+    "how would you approach fine-tuning vs RAG for a specific use case",
+    "what are your thoughts on AI safety and alignment",
+    "tell me about a research project or system you built and what you would improve"
+  ],
+  "cultureSignals": ["care about AGI safety", "curiosity and openness", "collaborate intensely", "high ambition", "be kind"],
+  "redFlags": ["dismissive of AI safety considerations", "no understanding of ML fundamentals", "purely academic without systems thinking", "closed to different perspectives"],
+  "focusAreas": {
+    "technical": ["LLMs", "distributed training", "model serving", "RLHF", "GPU systems", "inference optimisation"],
+    "behavioral": ["safety awareness", "research rigour", "collaboration under uncertainty", "long-term thinking"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

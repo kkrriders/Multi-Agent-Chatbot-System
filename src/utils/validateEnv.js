@@ -43,13 +43,6 @@ const REQUIRED = [
     },
   },
   {
-    key: 'AGENT_SHARED_SECRET',
-    validate(val) {
-      if (val.length < 32) return 'must be at least 32 characters';
-      return null;
-    },
-  },
-  {
     key: 'GROQ_API_KEY',
     validate(val) {
       if (!val.startsWith('gsk_')) return 'must be a valid Groq API key (starts with gsk_)';

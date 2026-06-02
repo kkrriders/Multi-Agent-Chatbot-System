@@ -1,0 +1,21 @@
+{
+  "name": "JPMorgan",
+  "slug": "jpmorgan",
+  "interviewFormat": "4-5 rounds: technical screen, coding, system design, behavioral, hiring manager — technology division has strong CS focus",
+  "evaluationCriteria": ["CS fundamentals", "enterprise system design", "regulatory/compliance awareness", "security mindset", "teamwork"],
+  "questionPatterns": [
+    "design a fraud detection system for credit card transactions",
+    "how would you ensure data consistency in a distributed banking system",
+    "explain how you would secure an API handling financial transactions",
+    "describe a time you dealt with a production incident in a critical system",
+    "how do you approach legacy system modernisation"
+  ],
+  "cultureSignals": ["service", "expertise", "integrity", "collaboration", "responsible innovation"],
+  "redFlags": ["no financial or regulatory awareness", "dismissing security considerations", "no understanding of compliance requirements", "poor communication"],
+  "focusAreas": {
+    "technical": ["enterprise systems", "security", "compliance", "payment systems", "legacy modernisation", "API security"],
+    "behavioral": ["stakeholder communication", "dealing with incidents", "regulatory mindset", "cross-team collaboration"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

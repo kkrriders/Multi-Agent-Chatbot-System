@@ -14,6 +14,7 @@
 
 const ai = require('../ai/provider-manager');
 const broadcaster = require('../sse/broadcaster');
+const { assertSafe } = require('../../middleware/injection-guard');
 
 const SCORE_PROMPT = (question, answer, keywords) => `
 You are an expert interview evaluator. Score this answer strictly and fairly.
@@ -52,6 +53,7 @@ Respond with valid JSON:
  * @returns {Promise<object>} { scores, improvementSuggestions, keywordsHit, keywordsMissed }
  */
 async function score({ questionText, expectedKeywords, answerText, sessionId, answerId }) {
+  assertSafe(answerText, 'answer-text');
   broadcaster.emit(sessionId, 'scoring-start', { answerId, timestamp: Date.now() });
 
   let data;
@@ -95,6 +97,42 @@ async function score({ questionText, expectedKeywords, answerText, sessionId, an
 }
 
 /**
+ * Compute an integrity score (0-100) from client-side behavioral signals.
+ * Higher = more likely genuine. No AI call — pure arithmetic.
+ *
+ * Penalties:
+ *   paste ratio   → up to -60  (pasting the whole answer is the strongest signal)
+ *   tab switches  → up to -30  (left the tab to consult another source)
+ *   speed         → up to -20  (polished long answer submitted suspiciously fast)
+ */
+function computeIntegrity(signals, answerLength, timeSpentSeconds) {
+  if (!signals) return { integrityScore: 100, integrityFlag: 'CLEAN' };
+
+  const {
+    pastedChars      = 0,
+    tabSwitchCount   = 0,
+  } = signals;
+
+  const len     = Math.max(answerLength || 0, 1);
+  const elapsed = timeSpentSeconds || 0;
+
+  const pasteRatio   = Math.min(pastedChars / len, 1);
+  const pastePenalty = Math.round(pasteRatio * 60);
+  const tabPenalty   = Math.min(tabSwitchCount * 15, 30);
+
+  let speedPenalty = 0;
+  if      (elapsed < 15 && len > 150) speedPenalty = 20;
+  else if (elapsed < 30 && len > 300) speedPenalty = 10;
+
+  const integrityScore = Math.min(100, Math.max(0, 100 - pastePenalty - tabPenalty - speedPenalty));
+  const integrityFlag  = integrityScore >= 70 ? 'CLEAN'
+    : integrityScore >= 40 ? 'SUSPICIOUS'
+    : 'LIKELY_AI';
+
+  return { integrityScore, integrityFlag };
+}
+
+/**
  * Aggregate scores from all answers in a session into category breakdowns.
  * @param {object[]} answers - Answer documents with scores and questionId populated
  * @param {object[]} questions - Question documents indexed by _id
@@ -128,4 +166,4 @@ function aggregate(answers, questions) {
   };
 }
 
-module.exports = { score, aggregate };
+module.exports = { score, aggregate, computeIntegrity };

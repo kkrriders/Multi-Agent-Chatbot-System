@@ -1,3 +1,8 @@
+# Project planning and internal docs
+FEATURES_ROADMAP.md
+BUILD_LOG.md
+CLAUDE.md
+
 # Dependencies
 node_modules/
 npm-debug.log*

@@ -1,0 +1,21 @@
+{
+  "name": "DeepMind",
+  "slug": "deepmind",
+  "interviewFormat": "Research-track: coding screen, technical interview, research presentation, team interviews. Engineering-track: coding, systems design, ML depth, behavioral",
+  "evaluationCriteria": ["research depth", "mathematical rigour", "ML theory and practice", "scientific communication", "collaborative curiosity"],
+  "questionPatterns": [
+    "explain reinforcement learning and policy gradient methods",
+    "walk me through a research paper you found interesting recently",
+    "design a distributed training system for large neural networks",
+    "how do you approach a problem where existing methods don't work",
+    "describe a research contribution you are most proud of and its limitations"
+  ],
+  "cultureSignals": ["scientific integrity", "ambitious goals for humanity", "openness and collaboration", "safety and ethics", "intellectual curiosity"],
+  "redFlags": ["narrow focus without breadth", "no mathematical rigour", "no awareness of research literature", "dismissing safety or ethics", "inability to communicate complex ideas clearly"],
+  "focusAreas": {
+    "technical": ["reinforcement learning", "deep learning theory", "distributed training", "scientific computing", "model evaluation"],
+    "behavioral": ["research communication", "intellectual curiosity", "cross-disciplinary thinking", "dealing with failure in research"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

@@ -28,14 +28,16 @@ const questionSchema = new mongoose.Schema({
   followUpQuestions: [{ type: String, maxlength: 500 }],
   // Time limit override for timed mode (null = use interview default)
   timeLimitSeconds: { type: Number, default: null },
-  // Source: 'system' (built-in), 'jd-generated' (from JD), 'cv-generated' (from CV)
   source: {
     type: String,
-    enum: ['system', 'jd-generated', 'cv-generated'],
+    enum: ['system', 'jd-generated', 'cv-generated', 'company-tailored'],
     default: 'system',
   },
   // If generated, which interview session created it
   interviewId: { type: mongoose.Schema.Types.ObjectId, ref: 'Interview', default: null },
+  // Panel mode: which interviewer persona asks this question
+  interviewerName: { type: String, enum: ['Alex', 'Priya', 'James'], default: null },
+
   active: { type: Boolean, default: true, index: true },
 }, {
   timestamps: true,

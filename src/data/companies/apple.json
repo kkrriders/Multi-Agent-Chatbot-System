@@ -1,0 +1,21 @@
+{
+  "name": "Apple",
+  "slug": "apple",
+  "interviewFormat": "Multiple rounds: 2-3 technical phone screens, 5-6 onsite (deep technical dives per team, manager round, director round)",
+  "evaluationCriteria": ["deep role-specific expertise", "attention to detail", "user empathy", "quality over quantity", "past project depth"],
+  "questionPatterns": [
+    "walk me through your most technically challenging project end-to-end",
+    "how did you ensure quality in X project",
+    "design a system where reliability is critical",
+    "tell me about a time your attention to detail caught a major bug",
+    "how do you approach performance optimisation"
+  ],
+  "cultureSignals": ["attention to detail", "quality over quantity", "user experience first", "confidentiality", "meticulous craftsmanship"],
+  "redFlags": ["hand-waving over implementation details", "unclean code", "no edge case discussion", "vague past project answers", "not knowing your own code deeply"],
+  "focusAreas": {
+    "technical": ["performance optimisation", "memory management", "low-level systems", "API design", "reliability"],
+    "behavioral": ["attention to detail", "pride in craftsmanship", "dealing with ambiguity", "deep technical ownership"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

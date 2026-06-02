@@ -28,10 +28,10 @@ const CandidateProfile = require('../models/CandidateProfile');
 const { logger } = require('../shared/logger');
 
 const MAX_ANSWER_LEN = 5_000;
-const VALID_MODES = ['practice', 'timed', 'full'];
+const VALID_MODES = ['practice', 'timed', 'full', 'panel'];
 
 // ── SSE stream (must be before :sessionId routes to avoid conflict) ──────────
-router.get('/stream/:sessionId', authenticate, (req, res) => {
+router.get('/stream/:sessionId', authenticate, generalLimiter, (req, res) => {
   broadcaster.connect(req, res);
 });
 
@@ -39,16 +39,19 @@ router.get('/stream/:sessionId', authenticate, (req, res) => {
 router.post('/start',
   authenticate,
   messageLimiter,
-  guard(['jobDescription']),
+  guard(['jobDescription', 'companyName', 'targetRole']),
   async (req, res) => {
     try {
-      const { mode, targetRole, jobDescription } = req.body;
+      const { mode, targetRole, jobDescription, companyName } = req.body;
 
       if (!VALID_MODES.includes(mode)) {
         return res.status(400).json({ success: false, error: `mode must be one of: ${VALID_MODES.join(', ')}` });
       }
       if (targetRole && typeof targetRole === 'string' && targetRole.length > 200) {
         return res.status(400).json({ success: false, error: 'targetRole too long' });
+      }
+      if (companyName && (typeof companyName !== 'string' || companyName.length > 100)) {
+        return res.status(400).json({ success: false, error: 'companyName must be a string under 100 characters' });
       }
 
       const profile = await CandidateProfile.findOne({ userId: req.user._id }).lean();
@@ -60,6 +63,7 @@ router.post('/start',
         targetRole:         targetRole || profile?.targetRole || 'Software Engineer',
         jobDescription:     jobDescription || profile?.targetJobDescription,
         skills:             profile?.skills || [],
+        companyName:        companyName    || null,
       });
 
       res.json({
@@ -67,12 +71,14 @@ router.post('/start',
         sessionId: result.interview._id,
         interview: result.interview,
         questions: result.questions.map(q => ({
-          id:         q._id,
-          text:       q.text,
-          category:   q.category,
-          difficulty: q.difficulty,
+          id:               q._id,
+          text:             q.text,
+          category:         q.category,
+          difficulty:       q.difficulty,
           timeLimitSeconds: q.timeLimitSeconds || result.interview.timeLimitPerQuestion,
+          interviewerName:  q.interviewerName || null,
         })),
+        companyResearch: result.companyResearch || null,
       });
     } catch (err) {
       logger.error(`[interview/start] ${err.message}`);
@@ -97,9 +103,24 @@ router.get('/history', authenticate, generalLimiter, async (req, res) => {
 
 router.get('/:sessionId', authenticate, generalLimiter, async (req, res) => {
   try {
-    _validateSessionId(req.params.sessionId, res);
+    if (!_validateSessionId(req.params.sessionId, res)) return;
     const state = await sessionManager.getState(req.params.sessionId, req.user._id);
-    res.json({ success: true, ...state });
+    const mapQuestion = q => ({
+      id:               q._id,
+      text:             q.text,
+      category:         q.category,
+      difficulty:       q.difficulty,
+      timeLimitSeconds: q.timeLimitSeconds || null,
+      interviewerName:  q.interviewerName  || null,
+      expectedKeywords: q.expectedKeywords || [],
+    });
+    res.json({
+      success: true,
+      interview:    state.interview,
+      answers:      state.answers,
+      questions:    state.questions.map(mapQuestion),
+      nextQuestion: state.nextQuestion ? mapQuestion(state.nextQuestion) : null,
+    });
   } catch (err) {
     logger.error(`[interview/state] ${err.message}`);
     res.status(err.message.includes('not found') ? 404 : 500).json({ success: false, error: err.message });
@@ -110,11 +131,12 @@ router.get('/:sessionId', authenticate, generalLimiter, async (req, res) => {
 router.post('/:sessionId/answer',
   authenticate,
   messageLimiter,
+  guard(['answerText']),
   async (req, res) => {
     try {
-      _validateSessionId(req.params.sessionId, res);
+      if (!_validateSessionId(req.params.sessionId, res)) return;
 
-      const { questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, speechDurationSeconds } = req.body;
+      const { questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, speechDurationSeconds, integritySignals: rawSignals } = req.body;
 
       if (!questionId || typeof questionId !== 'string') {
         return res.status(400).json({ success: false, error: 'questionId is required' });
@@ -124,6 +146,19 @@ router.post('/:sessionId/answer',
       }
       if (answerText.length > MAX_ANSWER_LEN) {
         return res.status(400).json({ success: false, error: `answerText must be ≤ ${MAX_ANSWER_LEN} chars` });
+      }
+
+      // Sanitize integrity signals — numeric fields only, no free text
+      let integritySignals = null;
+      if (rawSignals && typeof rawSignals === 'object') {
+        integritySignals = {
+          pasteCount:           Math.max(0, Number(rawSignals.pasteCount)           || 0),
+          pastedChars:          Math.max(0, Number(rawSignals.pastedChars)          || 0),
+          typedChars:           Math.max(0, Number(rawSignals.typedChars)           || 0),
+          tabSwitchCount:       Math.max(0, Number(rawSignals.tabSwitchCount)       || 0),
+          tabSwitchSeconds:     Math.max(0, Number(rawSignals.tabSwitchSeconds)     || 0),
+          timeToFirstKeystroke: rawSignals.timeToFirstKeystroke != null ? Math.max(0, Number(rawSignals.timeToFirstKeystroke)) : null,
+        };
       }
 
       // Analyze speech metrics if voice input
@@ -140,6 +175,7 @@ router.post('/:sessionId/answer',
         answerText:       answerText.trim(),
         inputMethod:      inputMethod === 'voice' ? 'voice' : 'text',
         timeSpentSeconds: Number(timeSpentSeconds) || null,
+        integritySignals,
       });
 
       // Persist speech metrics if available
@@ -163,7 +199,7 @@ router.post('/:sessionId/answer',
 // ── Complete interview ───────────────────────────────────────────────────────
 router.post('/:sessionId/complete', authenticate, messageLimiter, async (req, res) => {
   try {
-    _validateSessionId(req.params.sessionId, res);
+    if (!_validateSessionId(req.params.sessionId, res)) return;
     const result = await sessionManager.complete(req.params.sessionId, req.user._id);
     res.json({ success: true, ...result });
   } catch (err) {
@@ -175,7 +211,7 @@ router.post('/:sessionId/complete', authenticate, messageLimiter, async (req, re
 // ── Session summary ──────────────────────────────────────────────────────────
 router.get('/:sessionId/summary', authenticate, generalLimiter, async (req, res) => {
   try {
-    _validateSessionId(req.params.sessionId, res);
+    if (!_validateSessionId(req.params.sessionId, res)) return;
 
     const [interview, answers] = await Promise.all([
       Interview.findOne({ _id: req.params.sessionId, userId: req.user._id }).lean(),
@@ -201,8 +237,9 @@ router.get('/:sessionId/summary', authenticate, generalLimiter, async (req, res)
 function _validateSessionId(sessionId, res) {
   if (!/^[a-f0-9]{24}$/i.test(sessionId)) {
     res.status(400).json({ success: false, error: 'Invalid sessionId' });
-    throw new Error('Invalid sessionId');
+    return false;
   }
+  return true;
 }
 
 module.exports = router;

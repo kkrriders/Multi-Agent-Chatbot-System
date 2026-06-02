@@ -24,6 +24,13 @@ const { logger } = require('../shared/logger');
 const VALID_CATEGORIES = ['technical', 'behavioral', 'situational', 'closing', 'intro'];
 const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
 
+function requireAdmin(req, res, next) {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({ success: false, error: 'Admin access required' });
+  }
+  next();
+}
+
 // List/filter questions
 router.get('/', authenticate, generalLimiter, async (req, res) => {
   try {
@@ -42,7 +49,13 @@ router.get('/', authenticate, generalLimiter, async (req, res) => {
       Question.countDocuments(filter),
     ]);
 
-    res.json({ success: true, questions, total, limit: Number(limit), offset: Number(offset) });
+    res.json({
+      success: true,
+      questions: questions.map(q => ({ ...q, id: q._id })),
+      total,
+      limit: Number(limit),
+      offset: Number(offset),
+    });
   } catch (err) {
     logger.error(`[questions/list] ${err.message}`);
     res.status(500).json({ success: false, error: 'Failed to fetch questions' });
@@ -50,7 +63,7 @@ router.get('/', authenticate, generalLimiter, async (req, res) => {
 });
 
 // Create question (admin)
-router.post('/', authenticate, messageLimiter, async (req, res) => {
+router.post('/', authenticate, requireAdmin, messageLimiter, async (req, res) => {
   try {
     const { text, category, role, difficulty, expectedKeywords, followUpQuestions, timeLimitSeconds } = req.body;
 
@@ -80,7 +93,7 @@ router.post('/', authenticate, messageLimiter, async (req, res) => {
 });
 
 // Update question (admin)
-router.put('/:id', authenticate, messageLimiter, async (req, res) => {
+router.put('/:id', authenticate, requireAdmin, messageLimiter, async (req, res) => {
   try {
     if (!/^[a-f0-9]{24}$/i.test(req.params.id)) {
       return res.status(400).json({ success: false, error: 'Invalid question id' });
@@ -106,7 +119,7 @@ router.put('/:id', authenticate, messageLimiter, async (req, res) => {
 });
 
 // Deactivate question (admin)
-router.delete('/:id', authenticate, messageLimiter, async (req, res) => {
+router.delete('/:id', authenticate, requireAdmin, messageLimiter, async (req, res) => {
   try {
     if (!/^[a-f0-9]{24}$/i.test(req.params.id)) {
       return res.status(400).json({ success: false, error: 'Invalid question id' });

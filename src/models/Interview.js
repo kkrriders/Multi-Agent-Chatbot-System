@@ -2,6 +2,11 @@
 
 const mongoose = require('mongoose');
 
+const personaFeedbackSchema = new mongoose.Schema(
+  { score: Number, strengths: [String], gaps: [String], summary: String },
+  { _id: false }
+);
+
 const scoreSchema = new mongoose.Schema({
   relevance: { type: Number, min: 0, max: 100 },
   depth: { type: Number, min: 0, max: 100 },
@@ -14,7 +19,7 @@ const interviewSchema = new mongoose.Schema({
   candidateProfileId: { type: mongoose.Schema.Types.ObjectId, ref: 'CandidateProfile' },
   mode: {
     type: String,
-    enum: ['practice', 'timed', 'full'],
+    enum: ['practice', 'timed', 'full', 'panel'],
     required: true,
     default: 'practice',
   },
@@ -44,6 +49,13 @@ const interviewSchema = new mongoose.Schema({
   startedAt: { type: Date },
   completedAt: { type: Date },
   durationSeconds: { type: Number },
+
+  // Panel mode: multi-perspective end-of-session feedback
+  panelFeedback: {
+    alex:  { type: personaFeedbackSchema },
+    priya: { type: personaFeedbackSchema },
+    james: { type: personaFeedbackSchema },
+  },
 
   // Streak/gamification flag
   countedForStreak: { type: Boolean, default: false },

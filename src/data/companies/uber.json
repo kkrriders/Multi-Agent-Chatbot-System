@@ -1,0 +1,21 @@
+{
+  "name": "Uber",
+  "slug": "uber",
+  "interviewFormat": "5 rounds: 1 phone screen, 2 coding, 1 system design, 1 cross-functional behavioral + culture",
+  "evaluationCriteria": ["real-world system design", "customer experience focus", "data-driven thinking", "execution speed", "business impact"],
+  "questionPatterns": [
+    "design Uber's surge pricing system",
+    "design a driver-rider matching algorithm",
+    "design a real-time location tracking system at scale",
+    "tell me about a decision you made using data that surprised others",
+    "describe a time you improved a customer experience"
+  ],
+  "cultureSignals": ["hustle", "customer obsession", "big bold bets", "integrity", "do the right thing"],
+  "redFlags": ["theoretical-only answers without business impact", "ignoring real-world constraints", "no data to back decisions", "poor customer empathy"],
+  "focusAreas": {
+    "technical": ["geospatial systems", "real-time data", "matching algorithms", "pricing systems", "maps APIs"],
+    "behavioral": ["customer focus", "data-driven decisions", "cross-functional execution", "dealing with scale challenges"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

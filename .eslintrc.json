@@ -31,6 +31,7 @@
   "ignorePatterns": [
     "node_modules/",
     "multi-agent-chatbot/",
+    "frontend/",
     "logs/",
     "memory/",
     "exports/",

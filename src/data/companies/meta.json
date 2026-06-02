@@ -1,0 +1,21 @@
+{
+  "name": "Meta",
+  "slug": "meta",
+  "interviewFormat": "4-5 rounds: 1 phone screen, 2 coding (LeetCode medium/hard), 1 system design, 1 behavioral",
+  "evaluationCriteria": ["coding speed and correctness", "system design at social scale", "product thinking", "move fast"],
+  "questionPatterns": [
+    "design a news feed / notification system / social graph",
+    "graph problems (friend recommendations, BFS/DFS)",
+    "sliding window, two pointers, hash maps",
+    "tell me about a project where you moved fast and broke something — what did you learn",
+    "design a real-time messaging system"
+  ],
+  "cultureSignals": ["move fast", "bold and decisive", "focus on long-term impact", "build social value", "be open"],
+  "redFlags": ["over-engineering simple solutions", "ignoring scale in design", "poor product intuition", "no metrics or success criteria", "lack of initiative"],
+  "focusAreas": {
+    "technical": ["social graph algorithms", "distributed systems", "caching", "real-time systems", "data pipelines"],
+    "behavioral": ["speed of execution", "bold decisions", "learning from failure", "cross-functional collaboration"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

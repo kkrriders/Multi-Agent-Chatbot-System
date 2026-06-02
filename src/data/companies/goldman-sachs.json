@@ -1,0 +1,21 @@
+{
+  "name": "Goldman Sachs",
+  "slug": "goldman-sachs",
+  "interviewFormat": "Multiple rounds: quantitative assessment, 2-3 technical interviews, behavioral/fit, superday (multiple back-to-back interviews)",
+  "evaluationCriteria": ["CS fundamentals", "financial domain knowledge", "quantitative reasoning", "communication under pressure", "teamwork"],
+  "questionPatterns": [
+    "design a real-time trading system with low latency",
+    "explain the CAP theorem and how it applies to financial data",
+    "how would you design a risk management system",
+    "tell me about a time you worked on a high-stakes project with tight deadlines",
+    "how do you handle conflicting priorities from multiple stakeholders"
+  ],
+  "cultureSignals": ["client service first", "excellence", "integrity", "team over individual", "commercial awareness"],
+  "redFlags": ["arrogance without substance", "poor communication under pressure", "no financial or business context", "weak on fundamentals"],
+  "focusAreas": {
+    "technical": ["low-latency systems", "financial data pipelines", "risk systems", "database optimisation", "concurrency"],
+    "behavioral": ["stakeholder management", "working under pressure", "team collaboration", "commercial awareness"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

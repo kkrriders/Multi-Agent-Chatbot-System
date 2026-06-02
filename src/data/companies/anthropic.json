@@ -1,0 +1,21 @@
+{
+  "name": "Anthropic",
+  "slug": "anthropic",
+  "interviewFormat": "Multiple rounds: technical screen (ML + systems), research presentation (research roles), system design, safety/ethics discussion, behavioral",
+  "evaluationCriteria": ["AI safety awareness", "ML depth", "rigorous reasoning", "honest communication", "collaborative research ability"],
+  "questionPatterns": [
+    "how does Constitutional AI work and why is it important",
+    "explain RLHF and its limitations for alignment",
+    "design a system for serving large language models at scale",
+    "what safety considerations would you apply to a new AI feature",
+    "describe a time you identified and communicated a risk that others overlooked"
+  ],
+  "cultureSignals": ["safety-focused", "scientific rigour", "honest communication", "collaborative", "long-term thinking about AI impact"],
+  "redFlags": ["dismissive of AI safety", "overly optimistic about AI risks", "no ML fundamentals", "poor scientific communication", "short-term-only thinking"],
+  "focusAreas": {
+    "technical": ["large language models", "RLHF", "Constitutional AI", "model serving", "safety evaluations", "interpretability"],
+    "behavioral": ["safety reasoning", "scientific honesty", "cross-disciplinary collaboration", "communicating uncertainty"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

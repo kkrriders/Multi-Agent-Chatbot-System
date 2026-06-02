@@ -1,0 +1,21 @@
+{
+  "name": "Stripe",
+  "slug": "stripe",
+  "interviewFormat": "4-5 rounds: 1 phone screen, 2 coding/systems, 1 API design, 1 behavioral — heavy emphasis on technical depth and reliability",
+  "evaluationCriteria": ["API design quality", "reliability and fault tolerance", "financial accuracy", "attention to edge cases", "thoughtful engineering"],
+  "questionPatterns": [
+    "design a payment processing system with idempotency",
+    "implement a rate limiter (token bucket / leaky bucket)",
+    "design a webhook delivery system with retry logic",
+    "how do you handle distributed transactions and partial failures",
+    "tell me about a time you built something that had to be extremely reliable"
+  ],
+  "cultureSignals": ["move thoughtfully", "meticulous attention to detail", "care deeply about users", "increase GDP of the internet"],
+  "redFlags": ["no error handling in code", "ignoring idempotency in payment flows", "poor API design (no versioning, no backwards compatibility)", "no consideration for retries or partial failures"],
+  "focusAreas": {
+    "technical": ["API design", "distributed systems", "reliability", "financial systems", "rate limiting", "webhooks"],
+    "behavioral": ["attention to edge cases", "thoughtful trade-off reasoning", "ownership", "user empathy"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

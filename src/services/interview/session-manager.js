@@ -9,16 +9,20 @@ const Interview = require('../../models/Interview');
 const Answer = require('../../models/Answer');
 const Question = require('../../models/Question');
 const questionGenerator = require('./question-generator');
+const panelInterviewer = require('./panel-interviewer');
+const sessionFeedback = require('./session-feedback');
 const scorer = require('./answer-scorer');
 const obsCompiler = require('../history/observation-compiler');
 const broadcaster = require('../sse/broadcaster');
 const achievementService = require('../gamification/achievement-service');
+const scoringQueue = require('../queue/scoring-queue');
+const orchestrator = require('../agents/orchestrator');
 const { logger } = require('../../shared/logger');
 
 /**
  * Create a new interview session.
  */
-async function create({ userId, candidateProfileId, mode, targetRole, jobDescription, skills }) {
+async function create({ userId, candidateProfileId, mode, targetRole, jobDescription, skills, companyName }) {
   const interview = await Interview.create({
     userId,
     candidateProfileId,
@@ -28,14 +32,32 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
     status: 'pending',
   });
 
-  // Generate questions
-  const questions = await questionGenerator.generate({
-    targetRole,
-    mode,
-    skills: skills || [],
-    jobDescription,
-    interviewId: interview._id.toString(),
-  });
+  // Run research pipeline when a company is specified (10s max — session must always start)
+  let agentContext = null;
+  if (companyName) {
+    const researchTimeout = new Promise(resolve => setTimeout(() => resolve(null), 10_000));
+    agentContext = await Promise.race([
+      orchestrator.run({ userId: userId.toString(), companyName, targetRole }),
+      researchTimeout,
+    ]).catch((err) => {
+      logger.warn(`[session] research agent failed: ${err.message}`);
+      return null;
+    });
+  }
+
+  // Generate questions (panel mode uses its own generator)
+  const questions = mode === 'panel'
+    ? await panelInterviewer.generate({ targetRole, skills: skills || [], jobDescription, interviewId: interview._id.toString() })
+    : await questionGenerator.generate({
+        targetRole,
+        mode,
+        skills:        skills || [],
+        jobDescription,
+        interviewId:   interview._id.toString(),
+        companyContext: agentContext?.companyContext || null,
+        userProfile:    agentContext?.userProfile    || null,
+        liveSnippets:   agentContext?.liveSnippets   || [],
+      });
 
   interview.questionIds = questions.map(q => q._id);
   interview.status = 'active';
@@ -44,13 +66,19 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
 
   logger.info(`[session] created ${mode} interview ${interview._id} for user ${userId} with ${questions.length} questions`);
 
-  return { interview: interview.toObject(), questions };
+  return {
+    interview: interview.toObject(),
+    questions,
+    companyResearch: agentContext
+      ? { source: agentContext.source, confidence: agentContext.confidence, companyName }
+      : null,
+  };
 }
 
 /**
  * Submit an answer to the current question in a session.
  */
-async function submitAnswer({ interviewId, userId, questionId, questionIndex, answerText, inputMethod, timeSpentSeconds }) {
+async function submitAnswer({ interviewId, userId, questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, integritySignals }) {
   const interview = await Interview.findOne({ _id: interviewId, userId, status: 'active' });
   if (!interview) throw new Error('Interview session not found or not active');
 
@@ -66,41 +94,23 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
     inputMethod: inputMethod || 'text',
     timeSpentSeconds,
     questionIndex,
+    integritySignals: integritySignals || null,
     submittedAt: new Date(),
   });
 
-  // Score asynchronously — client gets updates via SSE
-  setImmediate(async () => {
-    try {
-      const result = await scorer.score({
-        questionText:     question.text,
-        expectedKeywords: question.expectedKeywords || [],
-        answerText,
-        sessionId:        interviewId.toString(),
-        answerId:         answer._id.toString(),
-      });
-
-      await Answer.findByIdAndUpdate(answer._id, {
-        scores:                 result.scores,
-        scored:                 true,
-        improvementSuggestions: result.improvementSuggestions,
-        keywordsHit:            result.keywordsHit,
-        keywordsMissed:         result.keywordsMissed,
-      });
-
-      // Record observation for progress tracking
-      await obsCompiler.record({
-        userId,
-        interviewId: interviewId.toString(),
-        type:    'technical_accuracy',
-        concept: question.category,
-        data:    { questionId: questionId.toString(), scores: result.scores },
-        score:   result.scores.overall,
-      });
-
-    } catch (err) {
-      logger.error(`[session] scoring failed for answer ${answer._id}: ${err.message}`);
-    }
+  // Score asynchronously via BullMQ queue (falls back to setImmediate if Redis unavailable)
+  await scoringQueue.enqueue({
+    answerId:         answer._id.toString(),
+    interviewId:      interviewId.toString(),
+    questionId:       questionId.toString(),
+    questionText:     question.text,
+    questionCategory: question.category,
+    expectedKeywords: question.expectedKeywords || [],
+    answerText,
+    userId:           userId.toString(),
+    mode:             interview.mode,
+    integritySignals: integritySignals || null,
+    timeSpentSeconds: timeSpentSeconds || null,
   });
 
   return answer.toObject();
@@ -125,6 +135,16 @@ async function complete(interviewId, userId) {
     : null;
   interview.overallScore = overallScore;
   interview.categoryScores = categoryScores;
+
+  // Panel mode: generate multi-perspective feedback (one AI call, 15s timeout)
+  if (interview.mode === 'panel') {
+    const feedbackTimeout = new Promise(resolve => setTimeout(() => resolve(null), 15_000));
+    interview.panelFeedback = await Promise.race([
+      sessionFeedback.generate({ targetRole: interview.targetRole, answers, questions }),
+      feedbackTimeout,
+    ]).catch(() => null);
+  }
+
   await interview.save();
 
   // Record weak/strong areas as observations

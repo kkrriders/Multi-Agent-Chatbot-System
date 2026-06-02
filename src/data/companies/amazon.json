@@ -1,0 +1,21 @@
+{
+  "name": "Amazon",
+  "slug": "amazon",
+  "interviewFormat": "5-7 rounds: 1 phone screen, multiple bar-raiser loops (each has coding + 2-3 LP behavioral questions), 1 system design",
+  "evaluationCriteria": ["Leadership Principles alignment", "customer obsession", "coding", "system design", "ownership"],
+  "questionPatterns": [
+    "tell me about a time you disagreed with your manager",
+    "describe a situation where you had to make a decision with incomplete data",
+    "design a highly available order processing system",
+    "tell me about a time you delivered results under extreme pressure",
+    "describe your most challenging technical project and the trade-offs you made"
+  ],
+  "cultureSignals": ["customer obsession", "ownership", "bias for action", "frugality", "earn trust", "dive deep", "think big"],
+  "redFlags": ["no mention of leadership principles", "vague or generic STAR answers", "blaming teammates", "no metrics in examples", "recent examples only (interviewers notice recency bias)"],
+  "focusAreas": {
+    "technical": ["distributed systems", "high availability", "fault tolerance", "API design", "database design"],
+    "behavioral": ["ownership", "customer focus", "delivering under pressure", "data-driven decisions"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

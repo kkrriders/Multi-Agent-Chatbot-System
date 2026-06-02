@@ -1,0 +1,21 @@
+{
+  "name": "Coinbase",
+  "slug": "coinbase",
+  "interviewFormat": "4-5 rounds: phone screen, 2 coding, 1 system design, 1 behavioral — crypto/blockchain domain knowledge expected",
+  "evaluationCriteria": ["crypto/blockchain knowledge", "financial systems design", "regulatory awareness", "coding", "mission alignment"],
+  "questionPatterns": [
+    "design a cryptocurrency exchange order book",
+    "explain how proof of work vs proof of stake differs",
+    "design a KYC / AML compliance system",
+    "how would you handle a wallet balance discrepancy at scale",
+    "tell me about a time you worked in a highly regulated environment"
+  ],
+  "cultureSignals": ["clear communication", "act like an owner", "top performance", "mission alignment (crypto economic freedom)"],
+  "redFlags": ["no blockchain or crypto understanding", "ignoring compliance and regulatory constraints", "no consideration for financial accuracy", "unclear communication"],
+  "focusAreas": {
+    "technical": ["blockchain protocols", "financial systems", "cryptography basics", "compliance systems", "high-frequency transactions"],
+    "behavioral": ["mission alignment", "regulatory awareness", "ownership", "communication clarity"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

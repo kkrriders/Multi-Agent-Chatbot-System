@@ -3,7 +3,7 @@
 /**
  * Multi-provider AI service with automatic fallback chain.
  *
- * Chain: Groq → OpenRouter
+ * Chain: Groq → OpenRouter (only when OPENROUTER_API_KEY is set)
  * On quota_exhausted or auth_invalid, falls through to the next provider.
  * On transient errors (network, 5xx), the provider's own retry logic handles it.
  *
@@ -20,8 +20,10 @@ const openrouter = require('./providers/openrouter-provider');
 const { withRetry } = require('../../shared/retry');
 const { logger } = require('../../shared/logger');
 
-// Ordered fallback chain
-const PROVIDERS = [groq, openrouter];
+// Ordered fallback chain — OpenRouter only included when key is configured
+const PROVIDERS = process.env.OPENROUTER_API_KEY
+  ? [groq, openrouter]
+  : [groq];
 
 // Model tiers for interview workloads
 const MODELS = {

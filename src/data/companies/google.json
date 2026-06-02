@@ -1,0 +1,21 @@
+{
+  "name": "Google",
+  "slug": "google",
+  "interviewFormat": "4-5 rounds: 1 phone screen (coding), 2 coding onsite (LeetCode medium/hard), 1 system design, 1 Googleyness behavioral",
+  "evaluationCriteria": ["coding proficiency", "algorithmic thinking", "system design at scale", "Googleyness"],
+  "questionPatterns": [
+    "design a URL shortener / search engine / YouTube",
+    "graph traversal and shortest path problems",
+    "dynamic programming (knapsack, LCS, edit distance)",
+    "distributed caching and consistency",
+    "tell me about a time you worked through ambiguity"
+  ],
+  "cultureSignals": ["intellectual humility", "passion for technology", "comfort with ambiguity", "user first"],
+  "redFlags": ["solving silently without communicating", "brute-force only without optimisation", "poor time management", "no testing or edge case discussion"],
+  "focusAreas": {
+    "technical": ["data structures", "algorithms", "distributed systems", "scalability", "graph theory"],
+    "behavioral": ["ambiguity handling", "collaboration", "learning agility", "impact over activity"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

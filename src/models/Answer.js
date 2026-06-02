@@ -11,11 +11,20 @@ const scoreBreakdownSchema = new mongoose.Schema({
 
 const speechMetricsSchema = new mongoose.Schema({
   fillerWordCount:    { type: Number, default: 0 },
-  fillerWords:        [{ type: String }],       // actual words found
+  fillerWords:        [{ type: String }],
   wordsPerMinute:     { type: Number },
   pronunciationScore: { type: Number, min: 0, max: 100 },
   totalWords:         { type: Number },
   durationSeconds:    { type: Number },
+}, { _id: false });
+
+const integritySignalsSchema = new mongoose.Schema({
+  pasteCount:           { type: Number, default: 0 },
+  pastedChars:          { type: Number, default: 0 },
+  typedChars:           { type: Number, default: 0 },
+  tabSwitchCount:       { type: Number, default: 0 },
+  tabSwitchSeconds:     { type: Number, default: 0 },
+  timeToFirstKeystroke: { type: Number, default: null }, // seconds from question display
 }, { _id: false });
 
 const answerSchema = new mongoose.Schema({
@@ -42,6 +51,18 @@ const answerSchema = new mongoose.Schema({
   // Timing
   timeSpentSeconds: { type: Number },
   submittedAt:      { type: Date, default: Date.now },
+
+  // Decision agent result — what the interviewer decided after reading this answer
+  followUpAction: {
+    action:   { type: String, enum: ['follow_up', 'probe_deeper', 'next_question', 'challenge'] },
+    reason:   { type: String, maxlength: 300 },
+    response: { type: String, maxlength: 500 },
+  },
+
+  // Anti-cheat: behavioral signals captured client-side
+  integritySignals: { type: integritySignalsSchema, default: null },
+  integrityScore:   { type: Number, min: 0, max: 100, default: null },
+  integrityFlag:    { type: String, enum: ['CLEAN', 'SUSPICIOUS', 'LIKELY_AI'], default: null },
 
   // Ordering within the interview
   questionIndex: { type: Number, default: 0 },

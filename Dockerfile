@@ -19,6 +19,7 @@ RUN addgroup --system --gid 1001 nodejs \
 
 # Application code
 COPY --from=deps /app/node_modules ./node_modules
+COPY server.js      ./server.js
 COPY src/           ./src/
 COPY .env.example   ./.env.example
 
@@ -27,9 +28,6 @@ RUN mkdir -p logs && chown nodejs:nodejs logs
 
 USER nodejs
 
-# Manager port — individual agent ports are set via AGENT_{N}_PORT env vars
 EXPOSE 3000
 
-# Default: start the manager.
-# Override in docker-compose: command: node src/agents/agent-llama3/index.js
-CMD ["node", "src/agents/manager/index.js"]
+CMD ["node", "server.js"]

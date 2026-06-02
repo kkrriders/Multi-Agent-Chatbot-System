@@ -1,7 +1,6 @@
-
 services:
 
-  # ── Infrastructure ──────────────────────────────────────────────────────────
+  # ── Infrastructure ────────────────────────────────────────────────────────────
 
   mongodb:
     image: mongo:7
@@ -27,151 +26,40 @@ services:
       timeout: 3s
       retries: 5
 
-  # ── Backend agents ──────────────────────────────────────────────────────────
-  # All agents use the same image — docker-compose overrides the CMD per service.
+  # ── Backend (single Express process on :3000) ─────────────────────────────────
 
-  agent-llama3:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
-    command: node src/agents/agent-llama3/index.js
     restart: unless-stopped
     env_file: .env
     environment:
       NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
+      MONGODB_URI: mongodb://mongodb:27017/mockprep
       REDIS_URL: redis://redis:6379
-      OLLAMA_API_BASE: http://host.docker.internal:11434/api
-      AGENT_1_PORT: "3005"
-    depends_on:
-      mongodb: { condition: service_healthy }
-      redis:   { condition: service_healthy }
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3005/status"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    volumes:
-      - ./logs:/app/logs
-
-  agent-mistral:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: node src/agents/agent-mistral/index.js
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
-      REDIS_URL: redis://redis:6379
-      OLLAMA_API_BASE: http://host.docker.internal:11434/api
-      AGENT_2_PORT: "3006"
-    depends_on:
-      mongodb: { condition: service_healthy }
-      redis:   { condition: service_healthy }
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3006/status"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    volumes:
-      - ./logs:/app/logs
-
-  agent-phi3:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: node src/agents/agent-phi3/index.js
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
-      REDIS_URL: redis://redis:6379
-      OLLAMA_API_BASE: http://host.docker.internal:11434/api
-      AGENT_3_PORT: "3007"
-    depends_on:
-      mongodb: { condition: service_healthy }
-      redis:   { condition: service_healthy }
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3007/status"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    volumes:
-      - ./logs:/app/logs
-
-  agent-qwen:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: node src/agents/agent-qwen/index.js
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
-      REDIS_URL: redis://redis:6379
-      OLLAMA_API_BASE: http://host.docker.internal:11434/api
-      AGENT_4_PORT: "3008"
-    depends_on:
-      mongodb: { condition: service_healthy }
-      redis:   { condition: service_healthy }
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3008/status"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    volumes:
-      - ./logs:/app/logs
-
-  manager:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: node src/agents/manager/index.js
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/multi-agent-chatbot
-      REDIS_URL: redis://redis:6379
-      OLLAMA_API_BASE: http://host.docker.internal:11434/api
-      MANAGER_PORT: "3000"
       FRONTEND_URL: http://localhost:3002
-      # Route agent calls to named containers (not localhost)
-      AGENT_1_URL: http://agent-llama3:3005
-      AGENT_2_URL: http://agent-mistral:3006
-      AGENT_3_URL: http://agent-phi3:3007
-      AGENT_4_URL: http://agent-qwen:3008
+      PORT: "3000"
     ports:
       - "3000:3000"
     depends_on:
-      mongodb:      { condition: service_healthy }
-      redis:        { condition: service_healthy }
-      agent-llama3: { condition: service_healthy }
-      agent-mistral: { condition: service_healthy }
-      agent-phi3:   { condition: service_healthy }
-      agent-qwen:   { condition: service_healthy }
+      mongodb: { condition: service_healthy }
+      redis:   { condition: service_healthy }
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 40s
+      start_period: 30s
     volumes:
       - ./logs:/app/logs
 
-  # ── Frontend ─────────────────────────────────────────────────────────────────
+  # ── Frontend (Next.js on :3002) ───────────────────────────────────────────────
+  # Requires frontend/Dockerfile — see frontend/package.json for build details.
 
   frontend:
     build:
-      context: ./multi-agent-chatbot
+      context: ./frontend
       dockerfile: Dockerfile
       args:
         # Baked into the Next.js client bundle — must be reachable from the browser
@@ -182,12 +70,11 @@ services:
     ports:
       - "3002:3002"
     depends_on:
-      manager: { condition: service_healthy }
+      backend: { condition: service_healthy }
 
-  # ── Optional: Jaeger distributed tracing UI ───────────────────────────────
+  # ── Optional: Jaeger distributed tracing ─────────────────────────────────────
   # Enable with: docker compose --profile tracing up
-  # UI: http://localhost:16686
-  # Set OTEL_ENABLED=true in .env to activate tracing in all services.
+  # UI at http://localhost:16686 — set OTEL_ENABLED=true in .env to activate.
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -196,7 +83,7 @@ services:
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
-      - "4318:4318"   # OTLP HTTP receiver (backend → Jaeger)
+      - "4318:4318"   # OTLP HTTP receiver
       - "16686:16686" # Jaeger web UI
 
 volumes:

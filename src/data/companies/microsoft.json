@@ -1,0 +1,21 @@
+{
+  "name": "Microsoft",
+  "slug": "microsoft",
+  "interviewFormat": "4-5 rounds: 1 phone screen, 3-4 onsite (coding, object-oriented design, system design, behavioral), debrief loop",
+  "evaluationCriteria": ["clean code", "object-oriented design", "system design", "growth mindset", "collaboration"],
+  "questionPatterns": [
+    "design an object-oriented parking lot / elevator system",
+    "design Azure blob storage or a distributed file system",
+    "string manipulation and tree problems",
+    "tell me about a time you had to learn something new quickly",
+    "describe a situation where you improved a process or system"
+  ],
+  "cultureSignals": ["growth mindset", "diversity and inclusion", "customer empathy", "one Microsoft (collaboration)", "clarity"],
+  "redFlags": ["arrogance or closed to feedback", "not asking clarifying questions", "unclean code without refactoring", "ignoring OOP principles"],
+  "focusAreas": {
+    "technical": ["object-oriented design", "system design", "APIs", "cloud services", "data structures"],
+    "behavioral": ["growth mindset", "learning agility", "cross-team collaboration", "customer empathy"]
+  },
+  "source": "curated",
+  "lastVerified": "2026-01"
+}

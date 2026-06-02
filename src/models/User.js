@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
   preferences: {
     theme: {
       type: String,
@@ -70,6 +74,12 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   } catch (error) {
     throw new Error('Password comparison failed');
   }
+};
+
+// Static: hash a plaintext password (used when saving via findByIdAndUpdate)
+userSchema.statics.hashPassword = async function(plaintext) {
+  const salt = await bcrypt.genSalt(12);
+  return bcrypt.hash(plaintext, salt);
 };
 
 // Method to get public user data (without sensitive fields)
