@@ -123,8 +123,8 @@ export default function ProgressPage() {
                     <div className={`w-12 h-12 rounded-full ${cfg.bg} flex items-center justify-center mb-3`}>
                       <span className={`material-symbols-outlined text-2xl icon-fill ${cfg.color}`}>{cfg.icon}</span>
                     </div>
-                    <span className="text-sm font-semibold text-on-surface">{ach.badge.label}</span>
-                    <span className="text-xs text-slate-muted mt-1">{ach.badge.description}</span>
+                    <span className="text-sm font-semibold text-on-surface">{ach.badge?.label ?? ach.type}</span>
+                    <span className="text-xs text-slate-muted mt-1">{ach.badge?.description ?? ''}</span>
                   </div>
                 )
               })}

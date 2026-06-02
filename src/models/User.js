@@ -17,9 +17,23 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    required: false, // not required for OAuth users
     minlength: 8,
-    select: false, // Don't return password by default in queries
+    select: false,
+  },
+  googleId: {
+    type: String,
+    sparse: true, // allows null + unique
+    select: false,
+  },
+  linkedinId: {
+    type: String,
+    sparse: true,
+    select: false,
+  },
+  avatarUrl: {
+    type: String,
+    default: null,
   },
   createdAt: {
     type: Date,

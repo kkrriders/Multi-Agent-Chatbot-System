@@ -17,6 +17,7 @@ const { logger } = require('./src/shared/logger');
 const { connectDB } = require('./src/config/database');
 
 const authRoutes      = require('./src/routes/auth');
+const oauthRoutes     = require('./src/routes/oauth');
 const cvRoutes        = require('./src/routes/cv');
 const interviewRoutes = require('./src/routes/interview');
 const progressRoutes  = require('./src/routes/progress');
@@ -97,6 +98,7 @@ app.get('/api/health', generalLimiter, (req, res) => {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth',      authLimiter,    csrfProtection, auditLog, authRoutes);
+app.use('/api/auth',      authLimiter,    oauthRoutes);   // OAuth callbacks skip CSRF (use state param instead)
 app.use('/api/cv',        generalLimiter, csrfProtection, cvRoutes);
 app.use('/api/interview', messageLimiter, csrfProtection, interviewRoutes);
 app.use('/api/progress',  generalLimiter, csrfProtection, progressRoutes);

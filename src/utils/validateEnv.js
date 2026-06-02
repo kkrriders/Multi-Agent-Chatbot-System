@@ -56,6 +56,8 @@ const REQUIRED = [
 const OPTIONAL = [
   'REDIS_URL',
   'COOKIE_SECRET',
+  'GOOGLE_CLIENT_ID',
+  'LINKEDIN_CLIENT_ID',
 ];
 
 function validateEnv() {
