@@ -65,8 +65,16 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3002')
+  .split(',')
+  .map(o => o.trim().replace(/\/$/, ''));
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3002',
+  origin: (origin, cb) => {
+    // allow server-to-server and same-origin requests
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
