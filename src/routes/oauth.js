@@ -76,8 +76,8 @@ function issueSessionAndRedirect(res, user, req) {
   const token = generateToken(user);
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     maxAge: JWT_EXPIRE_SECONDS * 1000,
   });
   auditEvent({ userId: user._id, email: user.email, action: 'oauth.login', ip: req.ip, userAgent: req.headers['user-agent'] });

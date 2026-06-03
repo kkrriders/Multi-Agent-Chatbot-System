@@ -86,8 +86,8 @@ router.post('/signup', async (req, res) => {
     // Set cookie and send response
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: JWT_EXPIRE_SECONDS * 1000,
     });
 
@@ -168,8 +168,8 @@ router.post('/login', async (req, res) => {
     // Set cookie and send response
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: JWT_EXPIRE_SECONDS * 1000,
     });
 
@@ -208,7 +208,7 @@ router.post('/logout', authenticate, async (req, res) => {
       await blacklistToken(payload.jti, payload.exp);
     }
 
-    res.clearCookie('token');
+    res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'none' });
 
     logger.info(`[auth] logout userId=${req.user._id}`);
 

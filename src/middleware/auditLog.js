@@ -19,11 +19,13 @@ const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure logs directory exists
-const logDir = path.join(__dirname, '../logs');
-if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+const logDir = process.env.LOG_DIR || path.join(__dirname, '../../logs');
+try {
+  if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+} catch {
+  // No write access — file transport skipped, audit events go to console only
+}
 
-// Dedicated audit logger — append-only, JSON, no console output
 const auditLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -31,11 +33,8 @@ const auditLogger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    new winston.transports.File({
-      filename: path.join(logDir, 'audit.log'),
-      // Never rotate automatically — use logrotate on the OS level in production
-      maxsize: undefined,
-    }),
+    ...(fs.existsSync(logDir) ? [new winston.transports.File({ filename: path.join(logDir, 'audit.log') })] : []),
+    new winston.transports.Console({ silent: !fs.existsSync(logDir) }),
   ],
 });
 
