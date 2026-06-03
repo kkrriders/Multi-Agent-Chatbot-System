@@ -8,10 +8,12 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Create logs directory if it doesn't exist
-const logDir = path.join(__dirname, '../logs');
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
+// Resolve to /app/logs — matches the directory pre-created in the Dockerfile
+const logDir = process.env.LOG_DIR || path.join(__dirname, '../../logs');
+try {
+  if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+} catch {
+  // No write access (e.g. read-only FS). File transports are skipped below.
 }
 
 // Configure logger
@@ -29,18 +31,15 @@ const logger = winston.createLogger({
         winston.format.simple()
       )
     }),
-    new winston.transports.File({ 
-      filename: path.join(logDir, 'error.log'), 
-      level: 'error' 
-    }),
-    new winston.transports.File({ 
-      filename: path.join(logDir, 'combined.log') 
-    })
+    ...(fs.existsSync(logDir) ? [
+      new winston.transports.File({ filename: path.join(logDir, 'error.log'), level: 'error' }),
+      new winston.transports.File({ filename: path.join(logDir, 'combined.log') }),
+    ] : []),
   ]
 });
 
 // Create a special logger for flagged content
-const flaggedContentPath = process.env.FLAGGED_LOG_PATH || 'logs/flagged.log';
+const flaggedLogFile = process.env.FLAGGED_LOG_PATH || path.join(logDir, 'flagged.log');
 const flaggedLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -49,10 +48,9 @@ const flaggedLogger = winston.createLogger({
   ),
   defaultMeta: { service: 'content-moderation' },
   transports: [
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '..', flaggedContentPath) 
-    })
-  ]
+    ...(fs.existsSync(logDir) ? [new winston.transports.File({ filename: flaggedLogFile })] : []),
+    new winston.transports.Console({ silent: true }),
+  ],
 });
 
 /**
