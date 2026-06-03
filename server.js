@@ -84,12 +84,11 @@ app.use(morgan('dev'));
 // ── CSRF protection ───────────────────────────────────────────────────────────
 function csrfProtection(req, res, next) {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
-  const allowed = process.env.FRONTEND_URL || 'http://localhost:3002';
   let source = req.headers.origin;
   if (!source && req.headers.referer) {
     try { source = new URL(req.headers.referer).origin; } catch (_) { /* ignore */ }
   }
-  if (!source || source !== allowed) {
+  if (!source || !allowedOrigins.includes(source)) {
     logger.warn(`CSRF: blocked ${req.method} ${req.path} from origin="${source}"`);
     return res.status(403).json({ success: false, error: 'Forbidden' });
   }
