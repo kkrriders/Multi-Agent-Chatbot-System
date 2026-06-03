@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import globals from "globals";
 
 export default [
   js.configs.recommended,
@@ -13,6 +14,11 @@ export default [
         sourceType: "module",
         ecmaFeatures: { jsx: true },
       },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        React: "readonly",
+      },
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
@@ -21,6 +27,7 @@ export default [
       ...tsPlugin.configs.recommended.rules,
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
+      "no-undef": "off",
     },
   },
   {
