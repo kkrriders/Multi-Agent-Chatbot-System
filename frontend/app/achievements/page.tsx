@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { progress as progressApi, type Achievement } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Sidebar } from '@/components/sidebar'
@@ -302,13 +303,13 @@ export default function AchievementsPage() {
             <p className="text-slate-muted mb-6 max-w-sm mx-auto">
               Complete your first interview to start earning badges. Every session brings you closer to mastery.
             </p>
-            <a
+            <Link
               href="/interview"
               className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm"
             >
               <span className="material-symbols-outlined text-base">play_arrow</span>
               Start an Interview
-            </a>
+            </Link>
           </div>
         )}
       </main>

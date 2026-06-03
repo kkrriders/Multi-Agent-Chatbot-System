@@ -54,10 +54,12 @@ export default function ActiveInterviewPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [showFillerToast, setShowFillerToast] = useState(false)
   const [fillerWord, setFillerWord] = useState('')
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
 
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const startTimeRef = useRef<number>(Date.now())
   const transcriptEndRef = useRef<HTMLDivElement>(null)
+  const handleSubmitRef = useRef<() => void>(() => {})
 
   const integrityRef = useRef({
     pasteCount: 0, pastedChars: 0, tabSwitchCount: 0, tabSwitchSeconds: 0,
@@ -146,8 +148,14 @@ export default function ActiveInterviewPage() {
   }, [])
 
   useEffect(() => {
-    if (mode === 'timed' && timeLeft === 0 && !submitting && !completing) handleSubmit()
+    if (mode === 'timed' && timeLeft === 0 && !submitting && !completing) handleSubmitRef.current()
   }, [timeLeft]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (mode === 'timed') return
+    const id = setInterval(() => setElapsedSeconds(Math.round((Date.now() - startTimeRef.current) / 1000)), 1000)
+    return () => clearInterval(id)
+  }, [mode])
 
   const currentQuestion = questions[currentIdx]
   const isLastQuestion = currentIdx >= questions.length - 1
@@ -209,6 +217,8 @@ export default function ActiveInterviewPage() {
       setSubmitting(false)
     }
   }
+
+  handleSubmitRef.current = handleSubmit
 
   const toggleVoice = () => {
     if (speech.recording) { speech.stop(); setInputMode('text') }
@@ -470,7 +480,7 @@ export default function ActiveInterviewPage() {
               <div className="flex items-center gap-2 text-slate-muted">
                 <span className="material-symbols-outlined text-xl">timer</span>
                 <span className="font-mono text-xl text-on-surface tabular-nums">
-                  {formatTime(Math.round((Date.now() - startTimeRef.current) / 1000))}
+                  {formatTime(elapsedSeconds)}
                 </span>
               </div>
             )}
