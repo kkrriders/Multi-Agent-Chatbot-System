@@ -26,7 +26,7 @@ services:
       timeout: 3s
       retries: 5
 
-  # ── Backend (single Express process on :3000) ─────────────────────────────────
+  # ── Backend (Express on :3000, internal only) ─────────────────────────────────
 
   backend:
     build:
@@ -38,10 +38,8 @@ services:
       NODE_ENV: production
       MONGODB_URI: mongodb://mongodb:27017/mockprep
       REDIS_URL: redis://redis:6379
-      FRONTEND_URL: http://localhost:3002
       PORT: "3000"
-    ports:
-      - "3000:3000"
+      # Set FRONTEND_URL in .env to your actual domain e.g. https://yourdomain.com
     depends_on:
       mongodb: { condition: service_healthy }
       redis:   { condition: service_healthy }
@@ -54,27 +52,57 @@ services:
     volumes:
       - ./logs:/app/logs
 
-  # ── Frontend (Next.js on :3002) ───────────────────────────────────────────────
-  # Requires frontend/Dockerfile — see frontend/package.json for build details.
+  # ── Frontend (Next.js on :3002, internal only) ────────────────────────────────
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # Baked into the Next.js client bundle — must be reachable from the browser
-        NEXT_PUBLIC_API_URL: http://localhost:3000
+        # Must be the public domain — baked into the Next.js client bundle at build time
+        # Set this to https://yourdomain.com (nginx proxies /api/* to backend)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     restart: unless-stopped
     environment:
       NODE_ENV: production
-    ports:
-      - "3002:3002"
     depends_on:
       backend: { condition: service_healthy }
 
+  # ── Nginx reverse proxy (public: 80 + 443) ────────────────────────────────────
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - certbot_certs:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      - frontend
+      - backend
+
+  # ── Certbot (run once to issue / renew SSL cert) ──────────────────────────────
+  # Usage: docker compose run --rm certbot
+  # Renewal: docker compose run --rm certbot renew  (add to cron weekly)
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: >
+      certbot certonly --webroot
+      --webroot-path=/var/www/certbot
+      --email YOUR_EMAIL
+      --agree-tos
+      --no-eff-email
+      -d YOUR_DOMAIN
+    profiles: ["ssl"]
+
   # ── Optional: Jaeger distributed tracing ─────────────────────────────────────
-  # Enable with: docker compose --profile tracing up
-  # UI at http://localhost:16686 — set OTEL_ENABLED=true in .env to activate.
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -83,9 +111,11 @@ services:
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
-      - "4318:4318"   # OTLP HTTP receiver
-      - "16686:16686" # Jaeger web UI
+      - "4318:4318"
+      - "16686:16686"
 
 volumes:
   mongo_data:
   redis_data:
+  certbot_certs:
+  certbot_www:
