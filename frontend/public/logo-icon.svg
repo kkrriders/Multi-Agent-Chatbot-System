@@ -1,0 +1,15 @@
+<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="44" height="44" rx="11" fill="#006c49"/>
+
+  <!-- M letterform -->
+  <path d="M9 32 L9 12 L22 23.5 L35 12 L35 32"
+        stroke="white" stroke-width="3.6"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Circuit accent nodes at the M peaks -->
+  <circle cx="9"  cy="12" r="2.6" fill="#4edea3"/>
+  <circle cx="35" cy="12" r="2.6" fill="#4edea3"/>
+  <!-- Centre valley node — subtle -->
+  <circle cx="22" cy="23.5" r="1.8" fill="rgba(255,255,255,0.55)"/>
+</svg>

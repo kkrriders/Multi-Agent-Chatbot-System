@@ -9,6 +9,10 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 export const metadata: Metadata = {
   title: 'MockPrep — AI Mock Interview',
   description: 'Practice interviews with AI scoring, speech analysis, and personalised feedback.',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

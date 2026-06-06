@@ -1,12 +1,6 @@
 'use strict';
 
-/**
- * Code execution via Piston API (free, no API key required).
- * https://emkc.org/api/v2/piston
- *
- * Runs candidate code against each test case sequentially.
- * Timeout: 5s per test case (Piston enforces its own CPU/memory limits).
- */
+
 
 const { logger } = require('../../shared/logger');
 
@@ -25,10 +19,7 @@ const LANGUAGE_MAP = {
   rust:       { language: 'rust',       version: '1.50.0'  },
 };
 
-/**
- * Execute code against a single test case via Piston.
- * Returns { actualOutput, executionTimeMs, error }.
- */
+
 async function _executeOne(code, language, input) {
   const runtime = LANGUAGE_MAP[language];
   if (!runtime) throw new Error(`Unsupported language: ${language}`);
