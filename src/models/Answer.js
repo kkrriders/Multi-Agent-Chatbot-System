@@ -32,9 +32,32 @@ const answerSchema = new mongoose.Schema({
   questionId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Question',  required: true },
   userId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User',       required: true, index: true },
 
-  // Answer content
-  text:          { type: String, maxlength: 10_000 }, // typed or transcribed
-  inputMethod:   { type: String, enum: ['text', 'voice'], default: 'text' },
+  // Answer content — format depends on question type
+  text:          { type: String, maxlength: 10_000 }, // text / voice / system design explanation
+  inputMethod:   { type: String, enum: ['text', 'voice', 'diagram', 'code'], default: 'text' },
+
+  // System design: React Flow canvas state at submission (JSON string)
+  diagramSnapshot: { type: String, default: null },
+
+  // Coding: submitted code + execution results
+  code:     { type: String, maxlength: 10_000, default: null },
+  language: { type: String, maxlength: 30,     default: null },
+  testResults: [{
+    input:          String,
+    expectedOutput: String,
+    actualOutput:   String,
+    passed:         Boolean,
+    hidden:         Boolean,
+    executionTimeMs: Number,
+    _id: false,
+  }],
+  codeScore: {
+    passed:   { type: Number, default: 0 },
+    total:    { type: Number, default: 0 },
+    timeMs:   { type: Number, default: null },
+    memoryKb: { type: Number, default: null },
+    _id: false,
+  },
 
   // Scores (populated after scoring pipeline completes)
   scores:        { type: scoreBreakdownSchema, default: () => ({}) },

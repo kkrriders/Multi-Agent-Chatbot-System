@@ -11,10 +11,13 @@ export interface CandidateProfile {
   parsedAt: string
 }
 
+export type QuestionFormat = 'text' | 'coding' | 'system_design'
+export type QuestionSubtype = 'blank' | 'fix' | 'improve' | null
+
 export interface Question {
   id: string
   text: string
-  category: 'technical' | 'behavioral' | 'situational' | 'intro' | 'closing'
+  category: 'technical' | 'behavioral' | 'situational' | 'intro' | 'closing' | 'system_design' | 'coding' | 'cs_fundamentals'
   difficulty: 'easy' | 'medium' | 'hard'
   timeLimitSeconds: number | null
   interviewerName?: 'Alex' | 'Priya' | 'James' | null
@@ -22,6 +25,13 @@ export interface Question {
   expectedKeywords?: string[]
   followUpQuestions?: string[]
   active?: boolean
+  // Format-specific fields
+  questionFormat?: QuestionFormat
+  subtype?: QuestionSubtype
+  templateDiagram?: string | null   // React Flow JSON for fix/improve subtypes
+  starterCode?: string | null
+  constraints?: string | null
+  evaluationRubric?: string[]
 }
 
 export interface PanelPersonaFeedback {
@@ -108,6 +118,24 @@ function put<T>(path: string, body: unknown) {
 }
 function del<T>(path: string) { return request<T>(path, { method: 'DELETE' }) }
 
+// ── Speech ───────────────────────────────────────────────────────────────────
+
+export const speech = {
+  transcribe: async (blob: Blob): Promise<string> => {
+    const formData = new FormData()
+    formData.append('audio', blob, 'recording.webm')
+    const res = await fetch(`${API_URL}/api/speech/transcribe`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Origin: typeof window !== 'undefined' ? window.location.origin : '' },
+      body: formData,
+    })
+    const data = await res.json()
+    if (!data.success) throw new Error(data.error || `HTTP ${res.status}`)
+    return data.text as string
+  },
+}
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
 export const auth = {
@@ -153,9 +181,12 @@ export const interview = {
       `/api/interview/${sessionId}`
     ),
   submitAnswer: (sessionId: string, payload: {
-    questionId: string; questionIndex: number; answerText: string;
+    questionId: string; questionIndex: number; answerText?: string;
     inputMethod?: string; timeSpentSeconds?: number; speechDurationSeconds?: number
     integritySignals?: IntegritySignals
+    diagramSnapshot?: string | null
+    code?: string | null
+    language?: string | null
   }) => post<{ answerId: string; speechMetrics: unknown }>(`/api/interview/${sessionId}/answer`, payload),
   complete: (sessionId: string) =>
     post<{ interview: Interview; overallScore: number; categoryScores: Record<string, { overall: number }> }>(

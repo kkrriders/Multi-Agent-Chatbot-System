@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { interview as interviewApi } from '@/lib/api'
+import { interview as interviewApi, cv as cvApi } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { toast } from 'sonner'
 
@@ -62,14 +62,29 @@ export default function InterviewSetupPage() {
   const [company, setCompany] = useState('')
   const [jd, setJd] = useState('')
   const [loading, setLoading] = useState(false)
+  const [cvMissing, setCvMissing] = useState(false)
+
+  useEffect(() => {
+    cvApi.profile().catch(() => setCvMissing(true))
+  }, [])
 
   const start = async () => {
+    if (cvMissing) {
+      router.push('/upload?required=1')
+      return
+    }
     setLoading(true)
     try {
       const data = await interviewApi.start(mode, role || undefined, jd || undefined, company || undefined)
       router.push(`/interview/${data.sessionId}`)
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to start interview')
+      const msg = err instanceof Error ? err.message : 'Failed to start interview'
+      if (msg === 'cv_required') {
+        setCvMissing(true)
+        router.push('/upload?required=1')
+      } else {
+        toast.error(msg)
+      }
       setLoading(false)
     }
   }
@@ -106,6 +121,21 @@ export default function InterviewSetupPage() {
 
       <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 md:px-12 py-12">
         <div className="max-w-4xl mx-auto">
+
+          {/* CV gate banner */}
+          {cvMissing && (
+            <div className="mb-8 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
+              <span className="material-symbols-outlined text-amber-500 mt-0.5">warning</span>
+              <div className="flex-1">
+                <p className="font-semibold text-amber-900 text-sm">CV required before starting</p>
+                <p className="text-amber-700 text-sm mt-0.5">Questions are personalised from your skills and experience. Upload your CV first so the AI can tailor every question to your background.</p>
+              </div>
+              <Link href="/upload?required=1" className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                Upload CV
+              </Link>
+            </div>
+          )}
+
           <div className="mb-10 text-center md:text-left">
             <Link href="/dashboard" className="inline-flex items-center text-slate-muted hover:text-primary text-xs font-medium mb-4 transition-colors">
               <span className="material-symbols-outlined text-base mr-1">arrow_back</span>

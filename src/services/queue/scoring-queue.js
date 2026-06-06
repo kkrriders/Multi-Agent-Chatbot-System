@@ -14,28 +14,78 @@ function makeConnection() {
   });
 }
 
-// Shared 3-step pipeline: score → decision → observation
-async function runPipeline({ answerId, interviewId, questionId, questionText, questionCategory, expectedKeywords, answerText, userId, mode, integritySignals, timeSpentSeconds }) {
-  const scorer = require('../interview/answer-scorer');
+// Shared pipeline — routes to the right scorer based on question format
+async function runPipeline({ answerId, interviewId, questionId, questionText, questionCategory, questionFormat, expectedKeywords, evaluationRubric, answerText, diagramSnapshot, code, language, testCases, userId, mode, integritySignals, timeSpentSeconds }) {
+  const scorer        = require('../interview/answer-scorer');
+  const sdScorer      = require('../interview/system-design-scorer');
+  const codeExecutor  = require('../interview/code-executor');
   const decisionAgent = require('../interview/decision-agent');
-  const obsCompiler = require('../history/observation-compiler');
-  const broadcaster = require('../sse/broadcaster');
-  const Answer = require('../../models/Answer');
+  const obsCompiler   = require('../history/observation-compiler');
+  const broadcaster   = require('../sse/broadcaster');
+  const Answer        = require('../../models/Answer');
 
-  // Integrity is pure math — compute and persist before the AI call
+  // Integrity (pure math, runs for all formats)
   const { integrityScore, integrityFlag } = scorer.computeIntegrity(
     integritySignals,
-    answerText?.length || 0,
+    (answerText || code || '').length,
     timeSpentSeconds
   );
   await Answer.findByIdAndUpdate(answerId, { integrityScore, integrityFlag });
   broadcaster.emit(interviewId, 'integrity-update', { answerId, integrityScore, integrityFlag });
-
   if (integrityFlag !== 'CLEAN') {
     logger.warn(`[integrity] answer=${answerId} flag=${integrityFlag} score=${integrityScore}`);
   }
 
   let result = null;
+
+  // ── Coding: run against test cases ───────────────────────────────────────
+  if (questionFormat === 'coding' && code) {
+    try {
+      const { testResults, codeScore } = await codeExecutor.run(code, language, testCases || []);
+      const passRate = codeScore.total > 0 ? (codeScore.passed / codeScore.total) * 100 : 0;
+      const scores = {
+        relevance: Math.round(passRate),
+        depth:     Math.round(passRate * 0.9),
+        clarity:   Math.round(passRate * 0.8),
+        overall:   Math.round(passRate),
+      };
+      await Answer.findByIdAndUpdate(answerId, { testResults, codeScore, scores, scored: true });
+      broadcaster.emit(interviewId, 'score-update', { answerId, scores, testResults });
+    } catch (err) {
+      logger.error(`[scoring] code execution failed answer=${answerId}: ${err.message}`);
+      broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Code execution failed' });
+    }
+    return; // no decision agent for coding
+  }
+
+  // ── System design: evaluate diagram + explanation ─────────────────────────
+  if (questionFormat === 'system_design') {
+    try {
+      broadcaster.emit(interviewId, 'scoring-start', { answerId, timestamp: Date.now() });
+      result = await sdScorer.score({
+        questionText,
+        diagramSnapshot: diagramSnapshot || null,
+        textExplanation: answerText || '',
+        evaluationRubric: evaluationRubric || [],
+        sessionId: interviewId,
+        answerId,
+      });
+      await Answer.findByIdAndUpdate(answerId, {
+        scores:                 result.scores,
+        scored:                 true,
+        improvementSuggestions: result.improvementSuggestions,
+        keywordsHit:            result.keywordsHit,
+        keywordsMissed:         result.keywordsMissed,
+      });
+      broadcaster.emit(interviewId, 'score-update', { answerId, scores: result.scores, timestamp: Date.now() });
+    } catch (err) {
+      logger.error(`[scoring] system-design score failed answer=${answerId}: ${err.message}`);
+      broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Scoring failed' });
+    }
+    return; // no decision agent for system design
+  }
+
+  // ── Text / voice: existing AI scorer ─────────────────────────────────────
   try {
     result = await scorer.score({
       questionText,

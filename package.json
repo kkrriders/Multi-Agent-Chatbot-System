@@ -11,6 +11,7 @@
     "test:unit": "jest tests/unit --verbose",
     "test:e2e": "jest tests/e2e --verbose",
     "setup": "node src/utils/setup-env.js",
+    "seed": "node src/data/seed-questions.js",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "format": "prettier --write \"src/**/*.js\"",

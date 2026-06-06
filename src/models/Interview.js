@@ -38,10 +38,13 @@ const interviewSchema = new mongoose.Schema({
   // Score aggregates (populated on completion)
   overallScore: { type: Number, min: 0, max: 100 },
   categoryScores: {
-    technical: scoreSchema,
-    behavioral: scoreSchema,
-    situational: scoreSchema,
-    communication: scoreSchema,
+    technical:      scoreSchema,
+    behavioral:     scoreSchema,
+    situational:    scoreSchema,
+    communication:  scoreSchema,
+    system_design:  scoreSchema,
+    coding:         scoreSchema,
+    cs_fundamentals: scoreSchema,
   },
 
   // Timing

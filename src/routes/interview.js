@@ -55,15 +55,22 @@ router.post('/start',
       }
 
       const profile = await CandidateProfile.findOne({ userId: req.user._id }).lean();
+      if (!profile) {
+        return res.status(400).json({
+          success: false,
+          error: 'cv_required',
+          message: 'Please upload your CV before starting an interview. Questions are personalised from your skills and experience.',
+        });
+      }
 
       const result = await sessionManager.create({
         userId:             req.user._id,
-        candidateProfileId: profile?._id,
+        candidateProfileId: profile._id,
         mode,
-        targetRole:         targetRole || profile?.targetRole || 'Software Engineer',
-        jobDescription:     jobDescription || profile?.targetJobDescription,
-        skills:             profile?.skills || [],
-        companyName:        companyName    || null,
+        targetRole:         targetRole || profile.targetRole || 'Software Engineer',
+        jobDescription:     jobDescription || profile.targetJobDescription,
+        skills:             profile.skills || [],
+        companyName:        companyName || null,
       });
 
       res.json({
@@ -76,7 +83,13 @@ router.post('/start',
           category:         q.category,
           difficulty:       q.difficulty,
           timeLimitSeconds: q.timeLimitSeconds || result.interview.timeLimitPerQuestion,
-          interviewerName:  q.interviewerName || null,
+          interviewerName:  q.interviewerName  || null,
+          questionFormat:   q.questionFormat   || 'text',
+          subtype:          q.subtype          || null,
+          templateDiagram:  q.templateDiagram  || null,
+          starterCode:      q.starterCode      || null,
+          constraints:      q.constraints      || null,
+          evaluationRubric: q.evaluationRubric || [],
         })),
         companyResearch: result.companyResearch || null,
       });
@@ -110,9 +123,15 @@ router.get('/:sessionId', authenticate, generalLimiter, async (req, res) => {
       text:             q.text,
       category:         q.category,
       difficulty:       q.difficulty,
-      timeLimitSeconds: q.timeLimitSeconds || null,
-      interviewerName:  q.interviewerName  || null,
-      expectedKeywords: q.expectedKeywords || [],
+      timeLimitSeconds: q.timeLimitSeconds  || null,
+      interviewerName:  q.interviewerName   || null,
+      expectedKeywords: q.expectedKeywords  || [],
+      questionFormat:   q.questionFormat    || 'text',
+      subtype:          q.subtype           || null,
+      templateDiagram:  q.templateDiagram   || null,
+      starterCode:      q.starterCode       || null,
+      constraints:      q.constraints       || null,
+      evaluationRubric: q.evaluationRubric  || [],
     });
     res.json({
       success: true,
@@ -136,16 +155,29 @@ router.post('/:sessionId/answer',
     try {
       if (!_validateSessionId(req.params.sessionId, res)) return;
 
-      const { questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, speechDurationSeconds, integritySignals: rawSignals } = req.body;
+      const {
+        questionId, questionIndex, answerText, inputMethod,
+        timeSpentSeconds, speechDurationSeconds, integritySignals: rawSignals,
+        diagramSnapshot, code, language,
+      } = req.body;
 
       if (!questionId || typeof questionId !== 'string') {
         return res.status(400).json({ success: false, error: 'questionId is required' });
       }
-      if (!answerText || typeof answerText !== 'string' || answerText.trim().length === 0) {
-        return res.status(400).json({ success: false, error: 'answerText is required' });
+
+      // At least one of: text answer, diagram, or code must be present
+      const hasText    = answerText && typeof answerText === 'string' && answerText.trim().length > 0;
+      const hasDiagram = diagramSnapshot && typeof diagramSnapshot === 'string';
+      const hasCode    = code && typeof code === 'string' && code.trim().length > 0;
+
+      if (!hasText && !hasDiagram && !hasCode) {
+        return res.status(400).json({ success: false, error: 'answerText, diagramSnapshot, or code is required' });
       }
-      if (answerText.length > MAX_ANSWER_LEN) {
+      if (answerText && answerText.length > MAX_ANSWER_LEN) {
         return res.status(400).json({ success: false, error: `answerText must be ≤ ${MAX_ANSWER_LEN} chars` });
+      }
+      if (code && code.length > 10_000) {
+        return res.status(400).json({ success: false, error: 'code must be ≤ 10,000 chars' });
       }
 
       // Sanitize integrity signals — numeric fields only, no free text
@@ -167,15 +199,20 @@ router.post('/:sessionId/answer',
         speechMetrics = fillerDetector.analyze(answerText, speechDurationSeconds);
       }
 
+      const resolvedInputMethod = code ? 'code' : hasDiagram ? 'diagram' : inputMethod === 'voice' ? 'voice' : 'text';
+
       const answer = await sessionManager.submitAnswer({
         interviewId:      req.params.sessionId,
         userId:           req.user._id,
         questionId,
         questionIndex:    Number(questionIndex) || 0,
-        answerText:       answerText.trim(),
-        inputMethod:      inputMethod === 'voice' ? 'voice' : 'text',
+        answerText:       answerText?.trim() || '',
+        inputMethod:      resolvedInputMethod,
         timeSpentSeconds: Number(timeSpentSeconds) || null,
         integritySignals,
+        diagramSnapshot:  hasDiagram ? diagramSnapshot : null,
+        code:             hasCode ? code.trim() : null,
+        language:         language || null,
       });
 
       // Persist speech metrics if available

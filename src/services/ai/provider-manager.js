@@ -93,6 +93,21 @@ function generateJson(prompt, tier = 'fast', options = {}) {
 }
 
 /**
+ * Transcribe audio using Groq Whisper. Groq-only — OpenRouter has no Whisper endpoint.
+ * Returns { text, provider }
+ * @param {Buffer} audioBuffer
+ * @param {string} mimeType
+ */
+async function transcribeAudio(audioBuffer, mimeType) {
+  try {
+    return await groq.transcribeAudio(audioBuffer, mimeType);
+  } catch (err) {
+    logger.warn(`[provider-manager] transcribeAudio failed: ${err.message}`);
+    throw err;
+  }
+}
+
+/**
  * Verify at least one provider is reachable. Logs results.
  */
 async function healthCheck() {
@@ -103,4 +118,4 @@ async function healthCheck() {
   }));
 }
 
-module.exports = { generate, generateJson, healthCheck, MODELS };
+module.exports = { generate, generateJson, transcribeAudio, healthCheck, MODELS };

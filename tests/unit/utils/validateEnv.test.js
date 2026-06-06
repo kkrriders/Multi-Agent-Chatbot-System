@@ -19,11 +19,10 @@ function withEnv(overrides, fn) {
 }
 
 const VALID_ENV = {
-  JWT_SECRET:           'a'.repeat(32),
-  MONGODB_URI:          'mongodb://localhost:27017/test',
-  FRONTEND_URL:         'http://localhost:3002',
-  AGENT_SHARED_SECRET:  'b'.repeat(32),
-  GROQ_API_KEY:         'gsk_' + 'c'.repeat(50),
+  JWT_SECRET:   'a'.repeat(32),
+  MONGODB_URI:  'mongodb://localhost:27017/test',
+  FRONTEND_URL: 'http://localhost:3002',
+  GROQ_API_KEY: 'gsk_' + 'c'.repeat(50),
 };
 
 describe('validateEnv', () => {
@@ -58,12 +57,6 @@ describe('validateEnv', () => {
   test('throws when FRONTEND_URL is not a valid URL', () => {
     withEnv({ ...VALID_ENV, FRONTEND_URL: 'not-a-url' }, () =>
       expect(() => validateEnv()).toThrow(/FRONTEND_URL/)
-    );
-  });
-
-  test('throws when AGENT_SHARED_SECRET is too short', () => {
-    withEnv({ ...VALID_ENV, AGENT_SHARED_SECRET: 'short' }, () =>
-      expect(() => validateEnv()).toThrow(/AGENT_SHARED_SECRET/)
     );
   });
 

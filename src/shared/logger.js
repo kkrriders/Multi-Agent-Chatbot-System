@@ -23,7 +23,7 @@ const logger = winston.createLogger({
     winston.format.timestamp(),
     winston.format.json()
   ),
-  defaultMeta: { service: 'multi-agent-chat' },
+  defaultMeta: { service: 'mockprep' },
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(

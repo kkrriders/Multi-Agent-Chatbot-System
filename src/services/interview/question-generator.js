@@ -6,8 +6,13 @@
  *
  * For a full mock interview the distribution is:
  *   intro (1) → technical (4-6) → behavioral (3-4) → situational (2-3) → closing (1)
+ *
+ * Bank questions use $sample for randomisation and exclude questions the user
+ * has already answered (seenQuestionIds). Only source:'system' questions are
+ * eligible for the shared bank — AI-generated questions are session-specific.
  */
 
+const mongoose = require('mongoose');
 const ai = require('../ai/provider-manager');
 const Question = require('../../models/Question');
 const { assertSafe } = require('../../middleware/injection-guard');
@@ -83,24 +88,34 @@ ${RESPONSE_FORMAT}`.trim();
  * @param {string[]} [params.liveSnippets]  — sanitised live search results
  * @returns {Promise<object[]>} array of question documents
  */
-async function generate({ targetRole, mode, skills, jobDescription, interviewId, companyContext, userProfile, liveSnippets }) {
+async function generate({ targetRole, mode, skills, jobDescription, interviewId, companyContext, userProfile, liveSnippets, seenQuestionIds = [] }) {
   if (jobDescription) assertSafe(jobDescription, 'job-description');
   if (targetRole)     assertSafe(targetRole, 'target-role');
 
   const counts = CATEGORY_COUNTS[mode] || CATEGORY_COUNTS.practice;
   const allQuestions = [];
 
+  // Cast seen IDs once — Mongoose aggregate does not auto-cast strings to ObjectId
+  const seenObjIds = seenQuestionIds
+    .filter(id => mongoose.Types.ObjectId.isValid(id))
+    .map(id => new mongoose.Types.ObjectId(String(id)));
+
   for (const [category, count] of Object.entries(counts)) {
     if (count === 0) continue;
 
-    // Try question bank first
-    const bankQuestions = await Question.find({
+    // Random sample from shared bank (source:system only, excluding already-seen questions)
+    const matchFilter = {
       category,
-      active: true,
+      active:  true,
+      source:  'system',
       $or: [{ role: targetRole }, { role: 'General' }, { role: { $exists: false } }],
-    })
-      .limit(count)
-      .lean();
+    };
+    if (seenObjIds.length) matchFilter._id = { $nin: seenObjIds };
+
+    const bankQuestions = await Question.aggregate([
+      { $match: matchFilter },
+      { $sample: { size: count } },
+    ]);
 
     if (bankQuestions.length >= count) {
       allQuestions.push(...bankQuestions.slice(0, count));

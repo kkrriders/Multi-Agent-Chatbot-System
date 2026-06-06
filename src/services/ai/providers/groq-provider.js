@@ -70,6 +70,22 @@ async function generateJson(model, prompt, options = {}) {
   }
 }
 
+async function transcribeAudio(audioBuffer, mimeType = 'audio/webm') {
+  try {
+    const file = new File([audioBuffer], 'recording.webm', { type: mimeType });
+    const result = await getClient().audio.transcriptions.create({
+      file,
+      model: 'whisper-large-v3-turbo',
+      response_format: 'json',
+    });
+    return { text: result.text || '', provider: 'groq' };
+  } catch (err) {
+    err.providerErrorType = classifyError(err);
+    logger.warn(`[groq-provider] transcription ${err.providerErrorType}: ${err.message}`);
+    throw err;
+  }
+}
+
 async function isAvailable() {
   try {
     await getClient().models.list();
@@ -79,4 +95,4 @@ async function isAvailable() {
   }
 }
 
-module.exports = { generate, generateJson, isAvailable, name: 'groq' };
+module.exports = { generate, generateJson, transcribeAudio, isAvailable, name: 'groq' };

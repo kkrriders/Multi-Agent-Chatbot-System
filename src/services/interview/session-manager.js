@@ -45,18 +45,22 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
     });
   }
 
+  // Fetch question IDs the user has already answered across all sessions
+  const seenQuestionIds = await Answer.distinct('questionId', { userId: userId.toString() });
+
   // Generate questions (panel mode uses its own generator)
   const questions = mode === 'panel'
     ? await panelInterviewer.generate({ targetRole, skills: skills || [], jobDescription, interviewId: interview._id.toString() })
     : await questionGenerator.generate({
         targetRole,
         mode,
-        skills:        skills || [],
+        skills:          skills || [],
         jobDescription,
-        interviewId:   interview._id.toString(),
-        companyContext: agentContext?.companyContext || null,
-        userProfile:    agentContext?.userProfile    || null,
-        liveSnippets:   agentContext?.liveSnippets   || [],
+        interviewId:     interview._id.toString(),
+        companyContext:  agentContext?.companyContext || null,
+        userProfile:     agentContext?.userProfile    || null,
+        liveSnippets:    agentContext?.liveSnippets   || [],
+        seenQuestionIds: seenQuestionIds.map(id => id.toString()),
       });
 
   interview.questionIds = questions.map(q => q._id);
@@ -78,7 +82,7 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
 /**
  * Submit an answer to the current question in a session.
  */
-async function submitAnswer({ interviewId, userId, questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, integritySignals }) {
+async function submitAnswer({ interviewId, userId, questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, integritySignals, diagramSnapshot, code, language }) {
   const interview = await Interview.findOne({ _id: interviewId, userId, status: 'active' });
   if (!interview) throw new Error('Interview session not found or not active');
 
@@ -90,27 +94,36 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
     interviewId,
     questionId,
     userId,
-    text: answerText,
-    inputMethod: inputMethod || 'text',
+    text:            answerText,
+    inputMethod:     inputMethod || 'text',
     timeSpentSeconds,
     questionIndex,
     integritySignals: integritySignals || null,
+    diagramSnapshot:  diagramSnapshot  || null,
+    code:             code             || null,
+    language:         language         || null,
     submittedAt: new Date(),
   });
 
   // Score asynchronously via BullMQ queue (falls back to setImmediate if Redis unavailable)
   await scoringQueue.enqueue({
-    answerId:         answer._id.toString(),
-    interviewId:      interviewId.toString(),
-    questionId:       questionId.toString(),
-    questionText:     question.text,
-    questionCategory: question.category,
-    expectedKeywords: question.expectedKeywords || [],
+    answerId:          answer._id.toString(),
+    interviewId:       interviewId.toString(),
+    questionId:        questionId.toString(),
+    questionText:      question.text,
+    questionCategory:  question.category,
+    questionFormat:    question.questionFormat || 'text',
+    expectedKeywords:  question.expectedKeywords  || [],
+    evaluationRubric:  question.evaluationRubric  || [],
+    testCases:         question.testCases         || [],
     answerText,
-    userId:           userId.toString(),
-    mode:             interview.mode,
-    integritySignals: integritySignals || null,
-    timeSpentSeconds: timeSpentSeconds || null,
+    diagramSnapshot:   diagramSnapshot || null,
+    code:              code            || null,
+    language:          language        || null,
+    userId:            userId.toString(),
+    mode:              interview.mode,
+    integritySignals:  integritySignals  || null,
+    timeSpentSeconds:  timeSpentSeconds  || null,
   });
 
   return answer.toObject();
