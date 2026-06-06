@@ -62,20 +62,25 @@ export default function InterviewSetupPage() {
   const [company, setCompany] = useState('')
   const [jd, setJd] = useState('')
   const [loading, setLoading] = useState(false)
+  const [cvChecking, setCvChecking] = useState(true)
   const [cvMissing, setCvMissing] = useState(false)
+  const [roleError, setRoleError] = useState(false)
 
   useEffect(() => {
-    cvApi.profile().catch(() => setCvMissing(true))
+    cvApi.profile()
+      .then(() => { setCvMissing(false); setCvChecking(false) })
+      .catch(() => { setCvMissing(true); setCvChecking(false) })
   }, [])
 
   const start = async () => {
-    if (cvMissing) {
-      router.push('/upload?required=1')
-      return
-    }
+    if (cvMissing) { router.push('/upload?required=1'); return }
+
+    if (!role.trim()) { setRoleError(true); return }
+    setRoleError(false)
+
     setLoading(true)
     try {
-      const data = await interviewApi.start(mode, role || undefined, jd || undefined, company || undefined)
+      const data = await interviewApi.start(mode, role.trim(), jd || undefined, company || undefined)
       router.push(`/interview/${data.sessionId}`)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to start interview'
@@ -165,12 +170,25 @@ export default function InterviewSetupPage() {
                 />
               </div>
               <div className="flex flex-col">
-                <label className="text-sm font-semibold text-on-surface mb-2" htmlFor="role">Target Role</label>
+                <label className="text-sm font-semibold text-on-surface mb-2" htmlFor="role">
+                  Target Role <span className="text-error">*</span>
+                </label>
                 <input
-                  id="role" value={role} onChange={e => setRole(e.target.value)}
+                  id="role" value={role}
+                  onChange={e => { setRole(e.target.value); if (e.target.value.trim()) setRoleError(false) }}
                   placeholder="e.g. Senior Frontend Engineer"
-                  className="bg-surface-bright border border-outline-variant/50 rounded-lg px-4 py-3 text-base text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                  className={`bg-surface-bright border rounded-lg px-4 py-3 text-base text-on-surface focus:outline-none focus:ring-2 transition-all ${
+                    roleError
+                      ? 'border-error focus:ring-error/30 focus:border-error'
+                      : 'border-outline-variant/50 focus:ring-primary/50 focus:border-primary'
+                  }`}
                 />
+                {roleError && (
+                  <p className="text-xs text-error mt-1.5 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">error</span>
+                    Target Role is required to personalise your questions.
+                  </p>
+                )}
               </div>
               <div className="flex flex-col md:col-span-2">
                 <label className="text-sm font-semibold text-on-surface mb-2" htmlFor="jd">Job Description (Paste key requirements)</label>
@@ -225,10 +243,12 @@ export default function InterviewSetupPage() {
           {/* Action */}
           <div className="flex justify-end pt-6 border-t border-outline-variant/15">
             <button
-              onClick={start} disabled={loading}
+              onClick={start} disabled={loading || cvChecking}
               className="bg-primary hover:bg-emerald-deep text-white font-semibold text-lg px-8 py-3 rounded-lg shadow-sm transition-colors flex items-center gap-2 disabled:opacity-60"
             >
-              {loading ? (
+              {cvChecking ? (
+                <><span className="material-symbols-outlined animate-spin">sync</span>Checking profile…</>
+              ) : loading ? (
                 <><span className="material-symbols-outlined animate-spin">sync</span>Preparing…</>
               ) : (
                 <>Launch Session <span className="material-symbols-outlined">rocket_launch</span></>
