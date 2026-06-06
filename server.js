@@ -37,6 +37,10 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 
+// Trust the first proxy hop (Render, nginx, etc.) so express-rate-limit
+// and audit logging see the real client IP from X-Forwarded-For.
+app.set('trust proxy', 1);
+
 // ── Security headers ─────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {
