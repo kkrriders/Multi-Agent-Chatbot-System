@@ -19,6 +19,19 @@ const scoringQueue = require('../queue/scoring-queue');
 const orchestrator = require('../agents/orchestrator');
 const { logger } = require('../../shared/logger');
 
+const SESSION_MAX_ACTIVE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+async function _checkAndExpireSession(interview) {
+  if (
+    interview.status === 'active' &&
+    interview.startedAt &&
+    Date.now() - new Date(interview.startedAt).getTime() > SESSION_MAX_ACTIVE_MS
+  ) {
+    await Interview.findByIdAndUpdate(interview._id, { status: 'abandoned' });
+    throw new Error('Interview session has expired');
+  }
+}
+
 /**
  * Create a new interview session.
  */
@@ -82,28 +95,47 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
 /**
  * Submit an answer to the current question in a session.
  */
-async function submitAnswer({ interviewId, userId, questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, integritySignals, diagramSnapshot, code, language }) {
+async function submitAnswer({ interviewId, userId, questionId, questionIndex, answerText, inputMethod, timeSpentSeconds, integritySignals, diagramSnapshot, code, language, idempotencyKey }) {
   const interview = await Interview.findOne({ _id: interviewId, userId, status: 'active' });
   if (!interview) throw new Error('Interview session not found or not active');
+
+  await _checkAndExpireSession(interview);
+
+  // Return existing answer for retried requests
+  if (idempotencyKey) {
+    const existing = await Answer.findOne({ idempotencyKey }).lean();
+    if (existing) return existing;
+  }
 
   const question = await Question.findById(questionId).lean();
   if (!question) throw new Error('Question not found');
 
-  // Create answer record
-  const answer = await Answer.create({
-    interviewId,
-    questionId,
-    userId,
-    text:            answerText,
-    inputMethod:     inputMethod || 'text',
-    timeSpentSeconds,
-    questionIndex,
-    integritySignals: integritySignals || null,
-    diagramSnapshot:  diagramSnapshot  || null,
-    code:             code             || null,
-    language:         language         || null,
-    submittedAt: new Date(),
-  });
+  // Create answer record — unique index on (interviewId, questionId) prevents duplicates
+  let answer;
+  try {
+    answer = await Answer.create({
+      interviewId,
+      questionId,
+      userId,
+      text:            answerText,
+      inputMethod:     inputMethod || 'text',
+      timeSpentSeconds,
+      questionIndex,
+      integritySignals: integritySignals || null,
+      diagramSnapshot:  diagramSnapshot  || null,
+      code:             code             || null,
+      language:         language         || null,
+      idempotencyKey:   idempotencyKey   || null,
+      submittedAt: new Date(),
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      // Duplicate submission — return the existing answer rather than erroring
+      const existing = await Answer.findOne({ interviewId, questionId, userId }).lean();
+      if (existing) return existing;
+    }
+    throw err;
+  }
 
   // Score asynchronously via BullMQ queue (falls back to setImmediate if Redis unavailable)
   await scoringQueue.enqueue({
@@ -191,6 +223,8 @@ async function complete(interviewId, userId) {
 async function getState(interviewId, userId) {
   const interview = await Interview.findOne({ _id: interviewId, userId }).lean();
   if (!interview) throw new Error('Interview not found');
+
+  await _checkAndExpireSession(interview);
 
   const [questions, answers] = await Promise.all([
     Question.find({ _id: { $in: interview.questionIds } }).lean(),

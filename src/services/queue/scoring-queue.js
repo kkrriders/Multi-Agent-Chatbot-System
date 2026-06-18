@@ -188,4 +188,75 @@ async function enqueue(data) {
   );
 }
 
-module.exports = { enqueue };
+/**
+ * Re-enqueue all unscored answers for a given interview session.
+ * Used to recover answers that were stuck due to AI provider failures.
+ */
+async function requeuePending(interviewId) {
+  const Answer    = require('../../models/Answer');
+  const Question  = require('../../models/Question');
+  const Interview = require('../../models/Interview');
+
+  const [interview, pending] = await Promise.all([
+    Interview.findById(interviewId).lean(),
+    Answer.find({ interviewId, scored: false }).lean(),
+  ]);
+
+  if (!pending.length) return { requeued: 0 };
+
+  if (queue) {
+    for (const answer of pending) {
+      const question = await Question.findById(answer.questionId).lean();
+      if (!question) continue;
+      await enqueue({
+        answerId:         answer._id.toString(),
+        interviewId:      interviewId.toString(),
+        questionId:       answer.questionId.toString(),
+        questionText:     question.text,
+        questionCategory: question.category,
+        questionFormat:   question.questionFormat || 'text',
+        expectedKeywords: question.expectedKeywords  || [],
+        evaluationRubric: question.evaluationRubric  || [],
+        testCases:        question.testCases         || [],
+        answerText:       answer.text    || '',
+        diagramSnapshot:  answer.diagramSnapshot     || null,
+        code:             answer.code    || null,
+        language:         answer.language            || null,
+        userId:           answer.userId.toString(),
+        mode:             interview?.mode || 'practice',
+        integritySignals: answer.integritySignals    || null,
+        timeSpentSeconds: answer.timeSpentSeconds    || null,
+      });
+    }
+  } else {
+    // No Redis: run sequentially to avoid overwhelming the Groq rate limit
+    for (const answer of pending) {
+      const question = await Question.findById(answer.questionId).lean();
+      if (!question) continue;
+      await runPipeline({
+        answerId:         answer._id.toString(),
+        interviewId:      interviewId.toString(),
+        questionId:       answer.questionId.toString(),
+        questionText:     question.text,
+        questionCategory: question.category,
+        questionFormat:   question.questionFormat || 'text',
+        expectedKeywords: question.expectedKeywords  || [],
+        evaluationRubric: question.evaluationRubric  || [],
+        testCases:        question.testCases         || [],
+        answerText:       answer.text    || '',
+        diagramSnapshot:  answer.diagramSnapshot     || null,
+        code:             answer.code    || null,
+        language:         answer.language            || null,
+        userId:           answer.userId.toString(),
+        mode:             interview?.mode || 'practice',
+        integritySignals: answer.integritySignals    || null,
+        timeSpentSeconds: answer.timeSpentSeconds    || null,
+      }).catch(err => logger.error(`[scoring] rescore pipeline error answer=${answer._id}: ${err.message}`));
+    }
+  }
+
+  logger.info(`[queue] requeued ${pending.length} pending answers for interview ${interviewId}`);
+  return { requeued: pending.length };
+}
+
+module.exports = { enqueue, requeuePending };

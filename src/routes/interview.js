@@ -20,6 +20,7 @@ const { guard } = require('../middleware/injection-guard');
 const { generalLimiter, messageLimiter } = require('../middleware/rateLimiter');
 const sessionManager = require('../services/interview/session-manager');
 const broadcaster = require('../services/sse/broadcaster');
+const scoringQueue = require('../services/queue/scoring-queue');
 const retrieval = require('../services/history/retrieval-service');
 const fillerDetector = require('../services/speech/filler-detector');
 const Answer = require('../models/Answer');
@@ -158,8 +159,12 @@ router.post('/:sessionId/answer',
       const {
         questionId, questionIndex, answerText, inputMethod,
         timeSpentSeconds, speechDurationSeconds, integritySignals: rawSignals,
-        diagramSnapshot, code, language,
+        diagramSnapshot, code, language, idempotencyKey,
       } = req.body;
+
+      if (idempotencyKey !== undefined && (typeof idempotencyKey !== 'string' || idempotencyKey.length > 64)) {
+        return res.status(400).json({ success: false, error: 'idempotencyKey must be a string ≤ 64 chars' });
+      }
 
       if (!questionId || typeof questionId !== 'string') {
         return res.status(400).json({ success: false, error: 'questionId is required' });
@@ -213,6 +218,7 @@ router.post('/:sessionId/answer',
         diagramSnapshot:  hasDiagram ? diagramSnapshot : null,
         code:             hasCode ? code.trim() : null,
         language:         language || null,
+        idempotencyKey:   idempotencyKey || null,
       });
 
       // Persist speech metrics if available
@@ -268,6 +274,20 @@ router.get('/:sessionId/summary', authenticate, generalLimiter, async (req, res)
   } catch (err) {
     logger.error(`[interview/summary] ${err.message}`);
     res.status(500).json({ success: false, error: 'Failed to fetch summary' });
+  }
+});
+
+// ── Re-score pending answers ─────────────────────────────────────────────────
+router.post('/:sessionId/rescore-pending', authenticate, generalLimiter, async (req, res) => {
+  try {
+    if (!_validateSessionId(req.params.sessionId, res)) return;
+    const interview = await Interview.findOne({ _id: req.params.sessionId, userId: req.user._id }).lean();
+    if (!interview) return res.status(404).json({ success: false, error: 'Session not found' });
+    const { requeued } = await scoringQueue.requeuePending(req.params.sessionId);
+    res.json({ success: true, requeued, message: `${requeued} answer(s) queued for re-scoring` });
+  } catch (err) {
+    logger.error(`[interview/rescore] ${err.message}`);
+    res.status(500).json({ success: false, error: 'Failed to requeue pending answers' });
   }
 });
 

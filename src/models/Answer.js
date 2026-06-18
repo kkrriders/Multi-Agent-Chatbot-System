@@ -32,6 +32,9 @@ const answerSchema = new mongoose.Schema({
   questionId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Question',  required: true },
   userId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User',       required: true, index: true },
 
+  // Idempotency key — client-generated UUID to deduplicate network retries
+  idempotencyKey: { type: String, default: null },
+
   // Answer content — format depends on question type
   text:          { type: String, maxlength: 10_000 }, // text / voice / system design explanation
   inputMethod:   { type: String, enum: ['text', 'voice', 'diagram', 'code'], default: 'text' },
@@ -94,5 +97,9 @@ const answerSchema = new mongoose.Schema({
 });
 
 answerSchema.index({ interviewId: 1, questionIndex: 1 });
+// One answer per question per interview — prevents duplicate submissions and race conditions
+answerSchema.index({ interviewId: 1, questionId: 1 }, { unique: true });
+// Sparse unique index — deduplicates network retries without forcing clients to send a key
+answerSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Answer', answerSchema);

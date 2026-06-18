@@ -16,6 +16,7 @@ const connectDB = async () => {
       maxPoolSize: 20,
       serverSelectionTimeoutMS: 30000,
       socketTimeoutMS: 45000,
+      writeConcern: { w: 'majority', j: true },
     });
 
     isConnected = true;
