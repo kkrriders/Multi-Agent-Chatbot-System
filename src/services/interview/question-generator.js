@@ -24,6 +24,13 @@ const CATEGORY_COUNTS = {
   full:     { intro: 1, technical: 5, behavioral: 4, situational: 3, closing: 1 },
 };
 
+function _computeCountsForN(n) {
+  const technical  = Math.round(n * 0.5);
+  const behavioral = Math.round(n * 0.3);
+  const situational = Math.max(1, n - technical - behavioral);
+  return { technical, behavioral, situational, intro: 0, closing: 0 };
+}
+
 const RESPONSE_FORMAT = `
 Respond with valid JSON:
 {
@@ -88,11 +95,14 @@ ${RESPONSE_FORMAT}`.trim();
  * @param {string[]} [params.liveSnippets]  — sanitised live search results
  * @returns {Promise<object[]>} array of question documents
  */
-async function generate({ targetRole, mode, skills, jobDescription, interviewId, companyContext, userProfile, liveSnippets, seenQuestionIds = [] }) {
+async function generate({ targetRole, mode, skills, jobDescription, interviewId, companyContext, userProfile, liveSnippets, seenQuestionIds = [], numQuestions }) {
   if (jobDescription) assertSafe(jobDescription, 'job-description');
   if (targetRole)     assertSafe(targetRole, 'target-role');
 
-  const counts = CATEGORY_COUNTS[mode] || CATEGORY_COUNTS.practice;
+  const defaultCounts = CATEGORY_COUNTS[mode] || CATEGORY_COUNTS.practice;
+  const counts = (numQuestions && ['practice', 'timed'].includes(mode))
+    ? _computeCountsForN(numQuestions)
+    : defaultCounts;
   const allQuestions = [];
 
   // Cast seen IDs once — Mongoose aggregate does not auto-cast strings to ObjectId

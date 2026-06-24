@@ -35,7 +35,7 @@ async function _checkAndExpireSession(interview) {
 /**
  * Create a new interview session.
  */
-async function create({ userId, candidateProfileId, mode, targetRole, jobDescription, skills, companyName }) {
+async function create({ userId, candidateProfileId, mode, targetRole, jobDescription, skills, companyName, numQuestions, timeLimitPerQuestion }) {
   // Prevent double-submission / concurrent session creation
   const activeSession = await Interview.findOne({ userId, status: 'active' }).lean();
   if (activeSession) throw new Error('You already have an active interview session');
@@ -47,6 +47,7 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
     targetRole,
     jobDescription,
     status: 'pending',
+    ...(timeLimitPerQuestion ? { timeLimitPerQuestion } : {}),
   });
 
   // Run research pipeline when a company is specified (10s max — session must always start)
@@ -93,6 +94,7 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
         userProfile:     agentContext?.userProfile    || null,
         liveSnippets:    agentContext?.liveSnippets   || [],
         seenQuestionIds: seenQuestionIds.map(id => id.toString()),
+        numQuestions,
       });
 
   if (questions.length === 0) {

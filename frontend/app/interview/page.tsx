@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { interview as interviewApi, cv as cvApi } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { Sidebar } from '@/components/sidebar'
 import { toast } from 'sonner'
 
 const MODES = [
@@ -26,8 +27,8 @@ const MODES = [
     iconBg: 'bg-amber-light text-tertiary-container',
     desc: 'Train your concise answering skills. Strict time limits per question with no pausing allowed.',
     features: [
-      { icon: 'schedule', text: '2 mins / question' },
-      { icon: 'list', text: '5–10 questions' },
+      { icon: 'schedule', text: 'Adjustable time limit' },
+      { icon: 'list', text: 'Adjustable question count' },
     ],
   },
   {
@@ -54,11 +55,13 @@ const MODES = [
   },
 ]
 
-const NAV_LINKS = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/progress', label: 'History' },
-  { href: '/upload', label: 'Resources' },
-  { href: '/profile', label: 'Profile' },
+const QUESTION_COUNTS = [5, 8, 10, 12, 15]
+const TIME_LIMITS = [
+  { value: 60, label: '1 min' },
+  { value: 90, label: '1.5 min' },
+  { value: 120, label: '2 min' },
+  { value: 150, label: '2.5 min' },
+  { value: 180, label: '3 min' },
 ]
 
 export default function InterviewSetupPage() {
@@ -74,9 +77,12 @@ export default function InterviewSetupPage() {
   const [cvChecking, setCvChecking] = useState(true)
   const [cvMissing, setCvMissing] = useState(false)
   const [roleError, setRoleError] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Inline CV upload states
+  // Practice / timed config
+  const [numQuestions, setNumQuestions] = useState(10)
+  const [timeLimitPerQuestion, setTimeLimitPerQuestion] = useState(120)
+
+  // Inline CV upload
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvUploading, setCvUploading] = useState(false)
   const [cvDragging, setCvDragging] = useState(false)
@@ -113,7 +119,9 @@ export default function InterviewSetupPage() {
     setRoleError(false)
     setLoading(true)
     try {
-      const data = await interviewApi.start(mode, role.trim(), jd || undefined, company || undefined)
+      const useNumQ = ['practice', 'timed'].includes(mode) ? numQuestions : undefined
+      const useTimeLimit = mode === 'timed' ? timeLimitPerQuestion : undefined
+      const data = await interviewApi.start(mode, role.trim(), jd || undefined, company || undefined, useNumQ, useTimeLimit)
       router.push(`/interview/${data.sessionId}`)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to start interview'
@@ -126,6 +134,9 @@ export default function InterviewSetupPage() {
     }
   }
 
+  const showConfig = mode === 'practice' || mode === 'timed'
+  const sectionOffset = showConfig ? 1 : 0
+
   if (authLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <span className="material-symbols-outlined text-primary text-4xl animate-spin">sync</span>
@@ -133,53 +144,13 @@ export default function InterviewSetupPage() {
   )
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex flex-col font-sans">
+    <div className="bg-background text-on-background min-h-screen flex font-sans antialiased">
+      <Sidebar />
 
-      {/* Top nav — sticky wrapper so mobile menu sticks too */}
-      <div className="sticky top-0 z-50">
-        <header className="bg-surface border-b border-outline-variant/15 w-full">
-          <div className="px-4 md:px-12 max-w-[1280px] mx-auto h-16 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="font-geist font-bold text-emerald-deep text-xl">MockPrep</span>
-            </div>
-            <nav className="hidden md:flex gap-8 h-full">
-              {NAV_LINKS.map(item => (
-                <Link key={item.href} href={item.href} className="flex items-center text-slate-muted text-sm font-semibold hover:text-primary transition-colors">
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <button
-              onClick={() => setMobileMenuOpen(o => !o)}
-              className="flex md:hidden items-center text-on-surface p-1"
-              aria-label="Toggle menu"
-            >
-              <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
-            </button>
-          </div>
-        </header>
-
-        {/* Mobile dropdown menu */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden bg-surface border-b border-outline-variant/15 px-4 py-2 flex flex-col">
-            {NAV_LINKS.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3 py-3 rounded-lg text-slate-muted hover:bg-surface-container hover:text-primary font-medium text-sm transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        )}
-      </div>
-
-      <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 md:px-12 py-8 md:py-12">
+      <main className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-12 pb-24 md:pb-12 w-full overflow-x-hidden">
         <div className="max-w-4xl mx-auto">
 
-          <div className="mb-8 md:mb-10 text-center md:text-left">
+          <div className="mb-8 md:mb-10">
             <Link href="/dashboard" className="inline-flex items-center text-slate-muted hover:text-primary text-xs font-medium mb-4 transition-colors">
               <span className="material-symbols-outlined text-base mr-1">arrow_back</span>
               Back to Dashboard
@@ -190,12 +161,11 @@ export default function InterviewSetupPage() {
             </p>
           </div>
 
-          {/* CV section — always visible once check completes */}
+          {/* CV section */}
           {!cvChecking && (
             <div className={`bg-white rounded-2xl border mb-8 shadow-sm transition-all ${
               cvMissing ? 'border-2 border-amber-200' : 'border border-outline-variant/15'
             }`}>
-              {/* Header row */}
               <div className="flex items-center justify-between p-5 md:p-6">
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
@@ -218,15 +188,13 @@ export default function InterviewSetupPage() {
                 </div>
                 <button
                   onClick={() => { setCvExpandUpload(o => !o); setCvFile(null) }}
-                  className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 ml-4
-                    text-primary border-primary/30 hover:bg-primary-container/10"
+                  className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 ml-4 text-primary border-primary/30 hover:bg-primary-container/10"
                 >
                   <span className="material-symbols-outlined text-sm">upload_file</span>
                   {cvExpandUpload ? 'Cancel' : cvMissing ? 'Upload CV' : 'Update CV'}
                 </button>
               </div>
 
-              {/* Upload form — always expanded when CV missing, or toggled when CV exists */}
               {(cvMissing || cvExpandUpload) && (
                 <div className="px-5 md:px-6 pb-5 md:pb-6 border-t border-outline-variant/15 pt-4">
                   <div
@@ -335,7 +303,7 @@ export default function InterviewSetupPage() {
           </div>
 
           {/* Section 2: Mode Selection */}
-          <div className="mb-10">
+          <div className="mb-8">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">2</span>
@@ -372,34 +340,100 @@ export default function InterviewSetupPage() {
             </div>
           </div>
 
+          {/* Section 3: Session Settings (practice / timed only) */}
+          {showConfig && (
+            <div className="bg-white rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
+              <div className="flex items-center mb-6">
+                <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
+                  <span className="text-sm font-semibold text-primary">3</span>
+                </div>
+                <h2 className="font-geist font-semibold text-xl md:text-2xl text-on-background">Session Settings</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Question count */}
+                <div>
+                  <label className="text-sm font-semibold text-on-surface mb-1 block">
+                    Number of Questions
+                    <span className="ml-2 text-slate-muted font-normal">({numQuestions} selected)</span>
+                  </label>
+                  <p className="text-xs text-slate-muted mb-3">More questions = longer session but broader coverage.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {QUESTION_COUNTS.map(n => (
+                      <button
+                        key={n}
+                        onClick={() => setNumQuestions(n)}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${
+                          numQuestions === n
+                            ? 'border-primary bg-primary-container/10 text-primary'
+                            : 'border-outline-variant/30 text-slate-muted hover:border-primary/40 hover:text-primary'
+                        }`}
+                      >
+                        {n} questions
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Time limit (timed only) */}
+                {mode === 'timed' && (
+                  <div>
+                    <label className="text-sm font-semibold text-on-surface mb-1 block">
+                      Time per Question
+                      <span className="ml-2 text-slate-muted font-normal">
+                        ({TIME_LIMITS.find(t => t.value === timeLimitPerQuestion)?.label})
+                      </span>
+                    </label>
+                    <p className="text-xs text-slate-muted mb-3">Strict cutoff — answer must be submitted before time runs out.</p>
+                    <div className="flex flex-wrap gap-2">
+                      {TIME_LIMITS.map(t => (
+                        <button
+                          key={t.value}
+                          onClick={() => setTimeLimitPerQuestion(t.value)}
+                          className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${
+                            timeLimitPerQuestion === t.value
+                              ? 'border-primary bg-primary-container/10 text-primary'
+                              : 'border-outline-variant/30 text-slate-muted hover:border-primary/40 hover:text-primary'
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Action */}
           <div className="flex justify-end pt-6 border-t border-outline-variant/15">
-            <button
-              onClick={start} disabled={loading || cvChecking}
-              className="w-full sm:w-auto bg-primary hover:bg-emerald-deep text-white font-semibold text-base md:text-lg px-8 py-3 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
-            >
-              {cvChecking ? (
-                <><span className="material-symbols-outlined animate-spin">sync</span>Checking profile…</>
-              ) : loading ? (
-                <><span className="material-symbols-outlined animate-spin">sync</span>Preparing…</>
-              ) : (
-                <>Launch Session <span className="material-symbols-outlined">rocket_launch</span></>
+            <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {showConfig && (
+                <p className="text-xs text-slate-muted">
+                  Session: <span className="font-medium text-on-surface">{numQuestions} questions</span>
+                  {mode === 'timed' && (
+                    <> · <span className="font-medium text-on-surface">{TIME_LIMITS.find(t => t.value === timeLimitPerQuestion)?.label} each</span></>
+                  )}
+                </p>
               )}
-            </button>
+              <button
+                onClick={start} disabled={loading || cvChecking}
+                className="w-full sm:w-auto bg-primary hover:bg-emerald-deep text-white font-semibold text-base md:text-lg px-8 py-3 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 sm:ml-auto"
+              >
+                {cvChecking ? (
+                  <><span className="material-symbols-outlined animate-spin">sync</span>Checking profile…</>
+                ) : loading ? (
+                  <><span className="material-symbols-outlined animate-spin">sync</span>Preparing…</>
+                ) : (
+                  <>Launch Session <span className="material-symbols-outlined">rocket_launch</span></>
+                )}
+              </button>
+            </div>
           </div>
+
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-background w-full py-4 px-4 md:px-12 flex flex-col md:flex-row justify-between items-center max-w-[1280px] mx-auto border-t border-outline-variant/15 mt-auto gap-3 md:gap-0">
-        <span className="text-sm font-bold text-emerald-deep">MockPrep AI</span>
-        <span className="text-xs text-slate-muted">© 2024 MockPrep AI. All rights reserved.</span>
-        <div className="flex gap-4">
-          {['Privacy Policy', 'Terms of Service', 'Support'].map(l => (
-            <span key={l} className="text-xs text-slate-muted hover:text-emerald-deep transition-colors cursor-pointer">{l}</span>
-          ))}
-        </div>
-      </footer>
     </div>
   )
 }

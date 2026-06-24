@@ -64,8 +64,15 @@ router.post('/upload', authenticate, (req, res, next) => {
       return res.status(400).json({ success: false, error: 'Could not extract text from CV — ensure it is not a scanned image' });
     }
 
-    // AI extraction
-    const extracted = await extractSkills(cvText);
+    // AI extraction — fall back to empty fields if AI is unavailable
+    let extracted = { name: null, skills: [], experience: [], education: [] };
+    let aiPartial = false;
+    try {
+      extracted = await extractSkills(cvText);
+    } catch (aiErr) {
+      aiPartial = true;
+      logger.error(`[cv/upload] AI extraction failed (saving raw text): ${aiErr.message}`, { stack: aiErr.stack });
+    }
 
     // Upsert candidate profile
     const profile = await CandidateProfile.findOneAndUpdate(
@@ -85,6 +92,7 @@ router.post('/upload', authenticate, (req, res, next) => {
 
     res.json({
       success: true,
+      partial: aiPartial,
       profile: {
         id:         profile._id,
         name:       profile.name,
@@ -95,10 +103,24 @@ router.post('/upload', authenticate, (req, res, next) => {
       },
     });
   } catch (err) {
-    logger.error(`[cv/upload] ${err.message}`);
+    logger.error(`[cv/upload] ${err.message}`, { stack: err.stack });
     res.status(500).json({ success: false, error: 'CV processing failed. Please try again.' });
   } finally {
     fs.unlink(file.path, () => {}); // clean up temp file
+  }
+});
+
+// Delete CV profile
+router.delete('/profile', authenticate, async (req, res) => {
+  try {
+    const result = await CandidateProfile.deleteOne({ userId: req.user._id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, error: 'No CV profile found' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    logger.error(`[cv/delete] ${err.message}`);
+    res.status(500).json({ success: false, error: 'Failed to delete CV' });
   }
 });
 

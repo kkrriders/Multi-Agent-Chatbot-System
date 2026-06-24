@@ -149,7 +149,7 @@ export const auth = {
 // ── CV ───────────────────────────────────────────────────────────────────────
 
 export const cv = {
-  upload: async (file: File): Promise<{ profile: CandidateProfile }> => {
+  upload: async (file: File): Promise<{ profile: CandidateProfile; partial?: boolean }> => {
     const form = new FormData()
     form.append('cv', file)
     const res = await fetch(`${API_URL}/api/cv/upload`, {
@@ -163,6 +163,7 @@ export const cv = {
     return data
   },
   profile: () => get<{ profile: CandidateProfile }>('/api/cv/profile'),
+  deleteProfile: () => del<{ success: boolean }>('/api/cv/profile'),
   analyzeGap: (jobDescription: string) =>
     post<{ missingSkills: string[]; matchedSkills: string[]; fitScore: number | null }>(
       '/api/cv/analyze-gap', { jobDescription }
@@ -172,9 +173,9 @@ export const cv = {
 // ── Interview ────────────────────────────────────────────────────────────────
 
 export const interview = {
-  start: (mode: string, targetRole?: string, jobDescription?: string, companyName?: string) =>
+  start: (mode: string, targetRole?: string, jobDescription?: string, companyName?: string, numQuestions?: number, timeLimitPerQuestion?: number) =>
     post<{ sessionId: string; interview: Interview; questions: Question[] }>(
-      '/api/interview/start', { mode, targetRole, jobDescription, companyName }
+      '/api/interview/start', { mode, targetRole, jobDescription, companyName, numQuestions, timeLimitPerQuestion }
     ),
   state: (sessionId: string) =>
     get<{ interview: Interview; questions: Question[]; answers: Answer[]; nextQuestion: Question | null }>(

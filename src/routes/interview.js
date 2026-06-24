@@ -43,7 +43,7 @@ router.post('/start',
   guard(['jobDescription', 'companyName', 'targetRole']),
   async (req, res) => {
     try {
-      const { mode, targetRole, jobDescription, companyName } = req.body;
+      const { mode, targetRole, jobDescription, companyName, numQuestions, timeLimitPerQuestion } = req.body;
 
       if (!VALID_MODES.includes(mode)) {
         return res.status(400).json({ success: false, error: `mode must be one of: ${VALID_MODES.join(', ')}` });
@@ -54,6 +54,8 @@ router.post('/start',
       if (companyName && (typeof companyName !== 'string' || companyName.length > 100)) {
         return res.status(400).json({ success: false, error: 'companyName must be a string under 100 characters' });
       }
+      const parsedNumQuestions = numQuestions ? Math.max(5, Math.min(15, parseInt(numQuestions, 10) || 10)) : undefined;
+      const parsedTimeLimit = timeLimitPerQuestion ? Math.max(30, Math.min(300, parseInt(timeLimitPerQuestion, 10) || 120)) : undefined;
 
       const profile = await CandidateProfile.findOne({ userId: req.user._id }).lean();
       if (!profile) {
@@ -65,13 +67,15 @@ router.post('/start',
       }
 
       const result = await sessionManager.create({
-        userId:             req.user._id,
-        candidateProfileId: profile._id,
+        userId:               req.user._id,
+        candidateProfileId:   profile._id,
         mode,
-        targetRole:         targetRole || profile.targetRole || 'Software Engineer',
-        jobDescription:     jobDescription || profile.targetJobDescription,
-        skills:             profile.skills || [],
-        companyName:        companyName || null,
+        targetRole:           targetRole || profile.targetRole || 'Software Engineer',
+        jobDescription:       jobDescription || profile.targetJobDescription,
+        skills:               profile.skills || [],
+        companyName:          companyName || null,
+        numQuestions:         parsedNumQuestions,
+        timeLimitPerQuestion: parsedTimeLimit,
       });
 
       res.json({

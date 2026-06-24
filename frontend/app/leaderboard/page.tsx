@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { progress as progressApi, type Achievement } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { Nav } from '@/components/nav'
+import { Sidebar } from '@/components/sidebar'
 import { Trophy, Medal, Award, Flame, TrendingUp } from 'lucide-react'
 
 const BADGE_ICON: Record<string, React.ReactNode> = {
@@ -41,10 +41,10 @@ export default function LeaderboardPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background">
-      <Nav />
-      <div className="pt-14">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background flex antialiased">
+      <Sidebar />
+      <div className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-12 pb-24 md:pb-12 overflow-x-hidden">
+        <div className="max-w-4xl mx-auto py-4 md:py-8">
           <h1 className="text-2xl font-bold mb-6">Rankings & Badges</h1>
 
           {streak > 0 && (

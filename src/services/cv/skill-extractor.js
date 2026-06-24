@@ -36,7 +36,7 @@ Rules:
 async function extract(cvText) {
   assertSafe(cvText, 'cv-text');
 
-  const { data } = await ai.generateJson(EXTRACT_PROMPT(cvText), 'balanced');
+  const { data } = await ai.generateJson(EXTRACT_PROMPT(cvText), 'balanced', { maxTokens: 2000 });
 
   return {
     name: typeof data.name === 'string' ? data.name.slice(0, 200) : null,

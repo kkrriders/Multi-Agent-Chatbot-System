@@ -17,8 +17,8 @@ const { auditLog } = require('./auditLog');
 const INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?(previous|prior|above)\s+instructions?/i,
   /forget\s+(everything|all|your|previous)/i,
-  /you\s+are\s+now\s+(a|an)\s+/i,
-  /act\s+as\s+(a|an)\s+/i,
+  /you\s+are\s+now\s+(a|an)\s+(new\s+)?(ai|assistant|bot|chatbot|gpt|llm|model|system)\b/i,
+  /\bact\s+as\s+(a|an)\s+(new\s+)?(ai|assistant|bot|chatbot|gpt|llm|model|system)\b/i,
   /pretend\s+(you\s+are|to\s+be)\s+/i,
   /your\s+new\s+(instructions?|role|task|purpose)\s+(are|is)/i,
   /disregard\s+(all\s+)?(previous|prior)/i,

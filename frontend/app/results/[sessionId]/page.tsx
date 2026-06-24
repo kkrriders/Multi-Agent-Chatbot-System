@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { interview as interviewApi, type Answer, type Interview, type PanelPersonaFeedback } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { Sidebar } from '@/components/sidebar'
 
 interface ResultData {
   interview: Interview
@@ -21,7 +22,6 @@ export default function ResultsPage() {
   const [data, setData] = useState<ResultData | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     interviewApi.summary(sessionId)
@@ -48,62 +48,10 @@ export default function ResultsPage() {
     : 'text-error bg-error-container/20 border-error-container'
 
   return (
-    <div className="bg-background text-on-surface min-h-screen flex flex-col font-sans">
-      {/* Top nav */}
-      <div className="sticky top-0 z-50">
-        <header className="bg-surface border-b border-outline-variant/15 w-full">
-          <div className="flex justify-between items-center w-full px-4 md:px-12 max-w-[1280px] mx-auto h-16">
-            <div className="font-geist font-bold text-emerald-deep text-xl cursor-pointer">MockPrep</div>
-            <nav className="hidden md:flex gap-8 items-center h-full">
-              {[
-                { href: '/dashboard', label: 'Dashboard' },
-                { href: '/progress',  label: 'History',   active: true },
-                { href: '/upload',    label: 'Resources' },
-                { href: '/profile',   label: 'Profile' },
-              ].map(item => (
-                <Link
-                  key={item.href} href={item.href}
-                  className={`text-sm font-semibold h-full flex items-center border-b-2 transition-colors cursor-pointer ${
-                    item.active
-                      ? 'text-primary border-primary pt-1'
-                      : 'text-slate-muted border-transparent hover:text-primary'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <button
-              onClick={() => setMobileMenuOpen(o => !o)}
-              className="flex md:hidden items-center text-on-surface p-1"
-              aria-label="Toggle menu"
-            >
-              <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
-            </button>
-          </div>
-        </header>
-        {mobileMenuOpen && (
-          <nav className="md:hidden bg-surface border-b border-outline-variant/15 px-4 py-2 flex flex-col">
-            {[
-              { href: '/dashboard', label: 'Dashboard' },
-              { href: '/progress',  label: 'History' },
-              { href: '/upload',    label: 'Resources' },
-              { href: '/profile',   label: 'Profile' },
-            ].map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3 py-3 rounded-lg text-slate-muted hover:bg-surface-container hover:text-primary font-medium text-sm transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        )}
-      </div>
+    <div className="bg-background text-on-surface min-h-screen flex font-sans antialiased">
+      <Sidebar />
 
-      <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 md:px-12 py-12 md:py-16">
+      <main className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-12 pb-24 md:pb-12 w-full overflow-x-hidden">
         {/* Page header */}
         <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
@@ -331,18 +279,6 @@ export default function ResultsPage() {
           </div>
         </div>
       </main>
-
-      <footer className="bg-background border-t border-outline-variant/15 w-full mt-auto">
-        <div className="w-full py-3 px-4 md:px-12 flex flex-col sm:flex-row justify-between items-center max-w-[1280px] mx-auto gap-4">
-          <div className="text-sm font-bold text-emerald-deep">MockPrep</div>
-          <div className="text-xs text-slate-muted">© 2024 MockPrep AI. All rights reserved.</div>
-          <div className="flex gap-6">
-            {['Privacy Policy', 'Terms of Service', 'Support'].map(l => (
-              <span key={l} className="text-xs text-slate-muted hover:text-emerald-deep transition-colors cursor-pointer">{l}</span>
-            ))}
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
