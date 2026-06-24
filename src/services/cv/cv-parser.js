@@ -32,17 +32,30 @@ async function extractText(filePath, mimeType) {
 }
 
 async function _parsePdf(filePath) {
-  let pdfParse;
+  let PDFParse;
   try {
-    pdfParse = require('pdf-parse');
+    const pkg = require('pdf-parse');
+    // v1 exports a function directly; v2 exports { PDFParse, ... }
+    if (typeof pkg === 'function') {
+      const fs = require('fs').promises;
+      const buffer = await fs.readFile(filePath);
+      const result = await pkg(buffer);
+      logger.debug(`[cv-parser] PDF extracted ${result.numpages} pages, ${result.text.length} chars`);
+      return result.text;
+    }
+    PDFParse = pkg.PDFParse;
   } catch {
     throw new Error('pdf-parse not installed — run: npm install pdf-parse');
   }
-  const fs = require('fs').promises;
-  const buffer = await fs.readFile(filePath);
-  const result = await pdfParse(buffer);
-  logger.debug(`[cv-parser] PDF extracted ${result.numpages} pages, ${result.text.length} chars`);
-  return result.text;
+
+  // v2 API: load via file:// URL
+  const normalized = filePath.split(path.sep).join('/');
+  const fileUrl = 'file:///' + normalized.replace(/^\//, '');
+  const parser = new PDFParse({ url: fileUrl });
+  const result = await parser.getText();
+  const text = result.text || '';
+  logger.debug(`[cv-parser] PDF extracted ${text.length} chars (v2)`);
+  return text;
 }
 
 async function _parseDocx(filePath) {
