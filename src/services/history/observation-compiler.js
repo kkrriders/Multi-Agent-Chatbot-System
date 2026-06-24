@@ -63,8 +63,8 @@ async function queryIndex(userId, { types, concepts, limit = 50 } = {}) {
   if (concepts?.length) filter.concept = { $in: concepts };
 
   const docs = await Observation.find(filter)
-    .select('_id type concept score summary timestamp')
-    .sort({ timestamp: -1 })
+    .select('_id type concept score summary createdAt')
+    .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
 
@@ -74,7 +74,7 @@ async function queryIndex(userId, { types, concepts, limit = 50 } = {}) {
     concept: d.concept,
     score: d.score,
     summary: d.summary,
-    timestamp: d.timestamp,
+    timestamp: d.createdAt,
   }));
 }
 
@@ -84,8 +84,8 @@ async function queryIndex(userId, { types, concepts, limit = 50 } = {}) {
  */
 async function buildTimeline(userId, { limit = 100 } = {}) {
   const docs = await Observation.find({ userId })
-    .select('_id type concept score summary interviewId timestamp')
-    .sort({ timestamp: 1 })
+    .select('_id type concept score summary interviewId createdAt')
+    .sort({ createdAt: 1 })
     .limit(limit)
     .lean();
 
@@ -100,7 +100,7 @@ async function buildTimeline(userId, { limit = 100 } = {}) {
       concept: d.concept,
       score: d.score,
       summary: d.summary,
-      timestamp: d.timestamp,
+      timestamp: d.createdAt,
     });
   }
 
@@ -121,13 +121,13 @@ async function getDetail(ids) {
  */
 async function trend(userId, concept) {
   const docs = await Observation.find({ userId, concept, score: { $exists: true } })
-    .select('interviewId score timestamp')
-    .sort({ timestamp: 1 })
+    .select('interviewId score createdAt')
+    .sort({ createdAt: 1 })
     .lean();
 
   return docs.map(d => ({
     interviewId: d.interviewId?.toString(),
-    date: d.timestamp,
+    date: d.createdAt,
     score: d.score,
   }));
 }

@@ -36,6 +36,10 @@ async function _checkAndExpireSession(interview) {
  * Create a new interview session.
  */
 async function create({ userId, candidateProfileId, mode, targetRole, jobDescription, skills, companyName }) {
+  // Prevent double-submission / concurrent session creation
+  const activeSession = await Interview.findOne({ userId, status: 'active' }).lean();
+  if (activeSession) throw new Error('You already have an active interview session');
+
   const interview = await Interview.create({
     userId,
     candidateProfileId,
@@ -58,8 +62,23 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
     });
   }
 
-  // Fetch question IDs the user has already answered across all sessions
-  const seenQuestionIds = await Answer.distinct('questionId', { userId: userId.toString() });
+  // Collect seen question IDs from both answers AND previous session assignments.
+  // Using only Answer.distinct misses questions from sessions the user started but abandoned
+  // before answering, causing the same bank questions to appear again.
+  const [seenFromAnswers, recentSessions] = await Promise.all([
+    Answer.distinct('questionId', { userId: userId.toString() }),
+    Interview.find(
+      { userId, status: { $in: ['completed', 'abandoned'] } },
+      { questionIds: 1 }
+    ).sort({ createdAt: -1 }).limit(10).lean(),
+  ]);
+
+  const seenQuestionIds = [
+    ...new Set([
+      ...seenFromAnswers.map(id => id.toString()),
+      ...recentSessions.flatMap(s => (s.questionIds || []).map(id => id.toString())),
+    ]),
+  ];
 
   // Generate questions (panel mode uses its own generator)
   const questions = mode === 'panel'
@@ -75,6 +94,11 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
         liveSnippets:    agentContext?.liveSnippets   || [],
         seenQuestionIds: seenQuestionIds.map(id => id.toString()),
       });
+
+  if (questions.length === 0) {
+    await Interview.findByIdAndUpdate(interview._id, { status: 'abandoned' });
+    throw new Error('Could not generate questions for this interview. Please try again.');
+  }
 
   interview.questionIds = questions.map(q => q._id);
   interview.status = 'active';
@@ -101,6 +125,16 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
 
   await _checkAndExpireSession(interview);
 
+  // Verify the question belongs to this interview
+  const isOwned = interview.questionIds.some(id => id.toString() === questionId);
+  if (!isOwned) throw new Error('Question does not belong to this interview');
+
+  // Validate questionIndex is in bounds
+  const resolvedIndex = Number(questionIndex) || 0;
+  if (resolvedIndex < 0 || resolvedIndex >= interview.questionIds.length) {
+    throw new Error('questionIndex out of bounds');
+  }
+
   // Return existing answer for retried requests
   if (idempotencyKey) {
     const existing = await Answer.findOne({ idempotencyKey }).lean();
@@ -109,6 +143,14 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
 
   const question = await Question.findById(questionId).lean();
   if (!question) throw new Error('Question not found');
+
+  // Enforce per-question time limit in timed mode (5s grace for network latency)
+  if (interview.mode === 'timed') {
+    const limit = question.timeLimitSeconds || interview.timeLimitPerQuestion;
+    if (limit && timeSpentSeconds && timeSpentSeconds > limit + 5) {
+      throw new Error('Answer submitted after the time limit expired');
+    }
+  }
 
   // Create answer record — unique index on (interviewId, questionId) prevents duplicates
   let answer;
@@ -120,7 +162,7 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
       text:            answerText,
       inputMethod:     inputMethod || 'text',
       timeSpentSeconds,
-      questionIndex,
+      questionIndex:   resolvedIndex,
       integritySignals: integritySignals || null,
       diagramSnapshot:  diagramSnapshot  || null,
       code:             code             || null,
@@ -168,6 +210,15 @@ async function complete(interviewId, userId) {
   const interview = await Interview.findOne({ _id: interviewId, userId });
   if (!interview) throw new Error('Interview not found');
 
+  // Idempotent — return existing result without re-running side effects
+  if (interview.status === 'completed') {
+    const answers = await Answer.find({ interviewId }).lean();
+    return { interview: interview.toObject(), answers, overallScore: interview.overallScore, categoryScores: interview.categoryScores };
+  }
+  if (interview.status === 'abandoned') throw new Error('Interview session has expired');
+
+  await _checkAndExpireSession(interview);
+
   const answers = await Answer.find({ interviewId }).lean();
   const questions = await Question.find({ _id: { $in: interview.questionIds } }).lean();
 
@@ -212,9 +263,10 @@ async function complete(interviewId, userId) {
   // Close SSE connections
   broadcaster.close(interviewId.toString());
 
-  logger.info(`[session] completed interview ${interviewId} — score: ${overallScore}`);
+  const pendingScoringCount = answers.filter(a => !a.scored).length;
+  logger.info(`[session] completed interview ${interviewId} — score: ${overallScore}${pendingScoringCount ? ` (${pendingScoringCount} answers still scoring)` : ''}`);
 
-  return { interview: interview.toObject(), answers, overallScore, categoryScores };
+  return { interview: interview.toObject(), answers, overallScore, categoryScores, pendingScoringCount };
 }
 
 /**
@@ -227,7 +279,7 @@ async function getState(interviewId, userId) {
   await _checkAndExpireSession(interview);
 
   const [questions, answers] = await Promise.all([
-    Question.find({ _id: { $in: interview.questionIds } }).lean(),
+    Question.find({ _id: { $in: interview.questionIds || [] } }).lean(),
     Answer.find({ interviewId }).sort({ questionIndex: 1 }).lean(),
   ]);
 

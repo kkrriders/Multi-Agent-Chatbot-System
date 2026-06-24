@@ -26,8 +26,8 @@ const observationSchema = new mongoose.Schema({
 });
 
 // Compound indexes for the 3-layer retrieval queries
-observationSchema.index({ userId: 1, type: 1, timestamp: -1 });
-observationSchema.index({ userId: 1, concept: 1, timestamp: 1 });
+observationSchema.index({ userId: 1, type: 1, createdAt: -1 });
+observationSchema.index({ userId: 1, concept: 1, createdAt: 1 });
 observationSchema.index({ userId: 1, interviewId: 1 });
 
 // Virtual alias for consistent naming

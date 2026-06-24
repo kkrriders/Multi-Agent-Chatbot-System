@@ -96,6 +96,12 @@ router.post('/start',
       });
     } catch (err) {
       logger.error(`[interview/start] ${err.message}`);
+      if (err.message.includes('active interview session')) {
+        return res.status(409).json({ success: false, error: err.message });
+      }
+      if (err.message.includes('Could not generate questions')) {
+        return res.status(422).json({ success: false, error: err.message });
+      }
       res.status(500).json({ success: false, error: 'Failed to start interview session' });
     }
   }
@@ -143,7 +149,10 @@ router.get('/:sessionId', authenticate, generalLimiter, async (req, res) => {
     });
   } catch (err) {
     logger.error(`[interview/state] ${err.message}`);
-    res.status(err.message.includes('not found') ? 404 : 500).json({ success: false, error: err.message });
+    const status = err.message.includes('not found') ? 404
+                 : err.message.includes('expired')   ? 410
+                 : 500;
+    res.status(status).json({ success: false, error: err.message });
   }
 });
 
@@ -234,7 +243,11 @@ router.post('/:sessionId/answer',
       });
     } catch (err) {
       logger.error(`[interview/answer] ${err.message}`);
-      res.status(err.message.includes('not found') ? 404 : 500).json({ success: false, error: err.message });
+      const status = err.message.includes('not found') ? 404
+                   : err.message.includes('expired') || err.message.includes('time limit') ? 410
+                   : err.message.includes('does not belong') || err.message.includes('out of bounds') ? 422
+                   : 500;
+      res.status(status).json({ success: false, error: err.message });
     }
   }
 );
@@ -247,7 +260,10 @@ router.post('/:sessionId/complete', authenticate, messageLimiter, async (req, re
     res.json({ success: true, ...result });
   } catch (err) {
     logger.error(`[interview/complete] ${err.message}`);
-    res.status(err.message.includes('not found') ? 404 : 500).json({ success: false, error: err.message });
+    const status = err.message.includes('not found') ? 404
+                 : err.message.includes('expired')   ? 410
+                 : 500;
+    res.status(status).json({ success: false, error: err.message });
   }
 });
 

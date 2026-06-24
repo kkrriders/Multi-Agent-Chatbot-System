@@ -36,6 +36,7 @@ const answerSchema = new mongoose.Schema({
   idempotencyKey: { type: String, default: null },
 
   // Answer content — format depends on question type
+  // Schema allows 10k chars; interview.js route enforces a stricter 5k ceiling on inbound requests.
   text:          { type: String, maxlength: 10_000 }, // text / voice / system design explanation
   inputMethod:   { type: String, enum: ['text', 'voice', 'diagram', 'code'], default: 'text' },
 

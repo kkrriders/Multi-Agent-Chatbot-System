@@ -40,6 +40,7 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
 
   // ── Coding: run against test cases ───────────────────────────────────────
   if (questionFormat === 'coding' && code) {
+    broadcaster.emit(interviewId, 'scoring-start', { answerId, timestamp: Date.now() });
     try {
       const { testResults, codeScore } = await codeExecutor.run(code, language, testCases || []);
       const passRate = codeScore.total > 0 ? (codeScore.passed / codeScore.total) * 100 : 0;
@@ -101,6 +102,8 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
       keywordsHit:            result.keywordsHit,
       keywordsMissed:         result.keywordsMissed,
     });
+    // Emit after DB write so an immediate GET sees scored:true
+    broadcaster.emit(interviewId, 'score-update', { answerId, scores: result.scores, timestamp: Date.now() });
   } catch (err) {
     logger.error(`[scoring] score failed answer=${answerId}: ${err.message}`);
   }
@@ -152,6 +155,7 @@ if (process.env.REDIS_URL) {
       backoff:          { type: 'exponential', delay: 2000 },
       removeOnComplete: 100,
       removeOnFail:     200,
+      timeout:          25_000, // kill after 25s — inside the 30s lock window
     },
   });
 

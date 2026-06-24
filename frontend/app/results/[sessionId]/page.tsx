@@ -21,6 +21,7 @@ export default function ResultsPage() {
   const [data, setData] = useState<ResultData | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     interviewApi.summary(sessionId)
@@ -49,33 +50,58 @@ export default function ResultsPage() {
   return (
     <div className="bg-background text-on-surface min-h-screen flex flex-col font-sans">
       {/* Top nav */}
-      <header className="bg-surface border-b border-outline-variant/15 w-full sticky top-0 z-50">
-        <div className="flex justify-between items-center w-full px-4 md:px-12 max-w-[1280px] mx-auto h-16">
-          <div className="font-geist font-bold text-emerald-deep text-xl cursor-pointer">MockPrep</div>
-          <nav className="hidden md:flex gap-8 items-center h-full">
+      <div className="sticky top-0 z-50">
+        <header className="bg-surface border-b border-outline-variant/15 w-full">
+          <div className="flex justify-between items-center w-full px-4 md:px-12 max-w-[1280px] mx-auto h-16">
+            <div className="font-geist font-bold text-emerald-deep text-xl cursor-pointer">MockPrep</div>
+            <nav className="hidden md:flex gap-8 items-center h-full">
+              {[
+                { href: '/dashboard', label: 'Dashboard' },
+                { href: '/progress',  label: 'History',   active: true },
+                { href: '/upload',    label: 'Resources' },
+                { href: '/profile',   label: 'Profile' },
+              ].map(item => (
+                <Link
+                  key={item.href} href={item.href}
+                  className={`text-sm font-semibold h-full flex items-center border-b-2 transition-colors cursor-pointer ${
+                    item.active
+                      ? 'text-primary border-primary pt-1'
+                      : 'text-slate-muted border-transparent hover:text-primary'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <button
+              onClick={() => setMobileMenuOpen(o => !o)}
+              className="flex md:hidden items-center text-on-surface p-1"
+              aria-label="Toggle menu"
+            >
+              <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
+            </button>
+          </div>
+        </header>
+        {mobileMenuOpen && (
+          <nav className="md:hidden bg-surface border-b border-outline-variant/15 px-4 py-2 flex flex-col">
             {[
               { href: '/dashboard', label: 'Dashboard' },
-              { href: '/progress',  label: 'History',   active: true },
+              { href: '/progress',  label: 'History' },
               { href: '/upload',    label: 'Resources' },
               { href: '/profile',   label: 'Profile' },
             ].map(item => (
               <Link
-                key={item.href} href={item.href}
-                className={`text-sm font-semibold h-full flex items-center border-b-2 transition-colors cursor-pointer ${
-                  item.active
-                    ? 'text-primary border-primary pt-1'
-                    : 'text-slate-muted border-transparent hover:text-primary'
-                }`}
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center px-3 py-3 rounded-lg text-slate-muted hover:bg-surface-container hover:text-primary font-medium text-sm transition-colors"
               >
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="md:hidden flex items-center">
-            <span className="material-symbols-outlined text-on-surface cursor-pointer">menu</span>
-          </div>
-        </div>
-      </header>
+        )}
+      </div>
 
       <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 md:px-12 py-12 md:py-16">
         {/* Page header */}

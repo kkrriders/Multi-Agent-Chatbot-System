@@ -83,7 +83,8 @@ async function score({ questionText, expectedKeywords, answerText, sessionId, an
     overall:   clamp((data.relevance + data.depth + data.clarity) / 3),
   };
 
-  broadcaster.emit(sessionId, 'score-update', { answerId, scores, timestamp: Date.now() });
+  // score-update is emitted by scoring-queue.js AFTER the DB write completes,
+  // so a client that refetches immediately does not see stale scored:false data.
 
   return {
     scores,

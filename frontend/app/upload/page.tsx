@@ -7,6 +7,13 @@ import { cv as cvApi, type CandidateProfile } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { toast } from 'sonner'
 
+const NAV_LINKS = [
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/progress',  label: 'History' },
+  { href: '/upload',    label: 'Resources', active: true },
+  { href: '/profile',   label: 'Profile' },
+]
+
 export default function UploadPage() {
   const { loading: authLoading } = useRequireAuth()
   const router = useRouter()
@@ -18,6 +25,7 @@ export default function UploadPage() {
   const [analyzing, setAnalyzing] = useState(false)
   const [gaps, setGaps] = useState<{ fitScore: number | null; missingSkills: string[]; matchedSkills: string[] } | null>(null)
   const [dragging, setDragging] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -66,29 +74,49 @@ export default function UploadPage() {
 
   return (
     <div className="bg-background text-on-background antialiased min-h-screen flex flex-col">
-      {/* Top nav */}
-      <nav className="bg-surface sticky top-0 border-b border-outline-variant/15 hidden md:flex z-50">
-        <div className="flex justify-between items-center w-full px-12 max-w-[1280px] mx-auto h-16">
-          <div className="font-geist font-bold text-emerald-deep text-xl">MockPrep</div>
-          <div className="flex space-x-8">
-            {[
-              { href: '/dashboard', label: 'Dashboard' },
-              { href: '/progress',  label: 'History' },
-              { href: '/upload',    label: 'Resources', active: true },
-              { href: '/profile',   label: 'Profile' },
-            ].map(item => (
+      {/* Top nav — sticky wrapper includes mobile dropdown */}
+      <div className="sticky top-0 z-50">
+        <nav className="bg-surface border-b border-outline-variant/15">
+          <div className="flex justify-between items-center w-full px-4 md:px-12 max-w-[1280px] mx-auto h-16">
+            <div className="font-geist font-bold text-emerald-deep text-xl">MockPrep</div>
+            <div className="hidden md:flex space-x-8">
+              {NAV_LINKS.map(item => (
+                <Link
+                  key={item.href} href={item.href}
+                  className={`text-sm font-semibold transition-colors cursor-pointer ${
+                    item.active ? 'text-primary border-b-2 border-primary pb-1' : 'text-slate-muted hover:text-primary'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(o => !o)}
+              className="flex md:hidden items-center text-on-surface p-1"
+              aria-label="Toggle menu"
+            >
+              <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
+            </button>
+          </div>
+        </nav>
+        {mobileMenuOpen && (
+          <nav className="md:hidden bg-surface border-b border-outline-variant/15 px-4 py-2 flex flex-col">
+            {NAV_LINKS.map(item => (
               <Link
-                key={item.href} href={item.href}
-                className={`text-sm font-semibold transition-colors cursor-pointer ${
-                  item.active ? 'text-primary border-b-2 border-primary pb-1' : 'text-slate-muted hover:text-primary'
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center px-3 py-3 rounded-lg font-medium text-sm transition-colors ${
+                  item.active ? 'text-primary bg-primary-container/10' : 'text-slate-muted hover:bg-surface-container hover:text-primary'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
-          </div>
-        </div>
-      </nav>
+          </nav>
+        )}
+      </div>
 
       <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 md:px-12 py-8 md:py-12">
         {/* Header */}
@@ -320,7 +348,7 @@ export default function UploadPage() {
 
       {/* Footer */}
       <footer className="bg-background border-t border-outline-variant/15 mt-auto">
-        <div className="w-full py-3 px-12 flex justify-between items-center max-w-[1280px] mx-auto h-16">
+        <div className="w-full py-4 px-4 md:px-12 flex flex-col md:flex-row justify-between items-center max-w-[1280px] mx-auto gap-3 md:gap-0 md:h-16">
           <div className="text-sm font-bold text-emerald-deep">MockPrep</div>
           <div className="text-xs text-slate-muted">© 2024 MockPrep AI. All rights reserved.</div>
           <div className="flex space-x-6">

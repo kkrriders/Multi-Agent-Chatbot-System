@@ -378,11 +378,29 @@ export default function ActiveInterviewPage() {
         </div>
       </header>
 
-      {/* Main workspace */}
-      <main className="flex-1 overflow-hidden flex flex-col md:flex-row max-w-[1400px] mx-auto w-full p-4 md:p-6 gap-6">
+      {/* Mobile-only question banner — visible instead of the left pane on small screens */}
+      <div className="md:hidden bg-surface-container-lowest border-b border-outline-variant/20 px-4 py-2.5 shrink-0">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-semibold text-slate-muted shrink-0">
+              {interviewerName} · Q{currentIdx + 1}/{questions.length}
+            </span>
+            {scoringIds.size > 0 && <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />}
+          </div>
+          {mode === 'timed' && timeLeft != null && (
+            <span className={`text-xs font-mono font-bold shrink-0 ${timeLeft <= 30 ? 'text-error' : 'text-on-surface'}`}>
+              ⏱ {formatTime(timeLeft)}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-on-surface mt-1 line-clamp-2 leading-snug">{currentQuestion?.text}</p>
+      </div>
 
-        {/* Left pane: AI Persona */}
-        <section className="w-full md:w-56 lg:w-64 shrink-0 flex flex-col gap-4">
+      {/* Main workspace */}
+      <main className="flex-1 overflow-hidden flex flex-col md:flex-row max-w-[1400px] mx-auto w-full p-3 md:p-6 gap-3 md:gap-6">
+
+        {/* Left pane: AI Persona — hidden on mobile (replaced by compact banner above) */}
+        <section className="hidden md:flex w-full md:w-56 lg:w-64 shrink-0 flex-col gap-4">
           <div className={`bg-gradient-to-br ${persona.color} rounded-2xl border border-outline-variant/40 p-5 flex flex-col items-center`}>
             <div className="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center mb-3 text-5xl">
               {interviewerName === 'Alex' ? '👨' : interviewerName === 'Priya' ? '👩' : '🧔'}
@@ -719,9 +737,9 @@ export default function ActiveInterviewPage() {
       {/* Bottom bar */}
       <div className="w-full bg-surface border-t border-outline-variant/30 shrink-0 z-20">
         <div className="max-w-[1400px] mx-auto px-4 md:px-12 py-3 flex items-center justify-between gap-4">
-          <div className="flex-1 truncate">
-            <p className="text-xs text-slate-muted uppercase tracking-wider mb-0.5">Current Question</p>
-            <p className="text-sm font-medium text-on-surface truncate pr-4">{currentQuestion?.text || 'Loading…'}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-muted uppercase tracking-wider mb-0.5 hidden md:block">Current Question</p>
+            <p className="text-sm font-medium text-on-surface line-clamp-2 md:line-clamp-1 pr-2">{currentQuestion?.text || 'Loading…'}</p>
           </div>
           {questionFormat === 'text' && (
             <button onClick={toggleVoice} disabled={!speech.supported} className="relative group cursor-pointer disabled:opacity-40 shrink-0">
