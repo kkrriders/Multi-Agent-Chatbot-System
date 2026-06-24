@@ -80,6 +80,7 @@ export default function InterviewSetupPage() {
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvUploading, setCvUploading] = useState(false)
   const [cvDragging, setCvDragging] = useState(false)
+  const [cvExpandUpload, setCvExpandUpload] = useState(false)
 
   useEffect(() => {
     cvApi.profile()
@@ -94,6 +95,7 @@ export default function InterviewSetupPage() {
       await cvApi.upload(cvFile)
       setCvMissing(false)
       setCvFile(null)
+      setCvExpandUpload(false)
       toast.success('CV uploaded — questions will be personalised to your background')
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Upload failed')
@@ -188,74 +190,102 @@ export default function InterviewSetupPage() {
             </p>
           </div>
 
-          {/* CV Upload section — shown only when CV is missing */}
-          {!cvChecking && cvMissing && (
-            <div className="bg-white rounded-2xl border-2 border-amber-200 p-6 md:p-8 mb-8 shadow-sm">
-              <div className="flex items-start gap-3 mb-6">
-                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-amber-600 text-lg">description</span>
+          {/* CV section — always visible once check completes */}
+          {!cvChecking && (
+            <div className={`bg-white rounded-2xl border mb-8 shadow-sm transition-all ${
+              cvMissing ? 'border-2 border-amber-200' : 'border border-outline-variant/15'
+            }`}>
+              {/* Header row */}
+              <div className="flex items-center justify-between p-5 md:p-6">
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                    cvMissing ? 'bg-amber-100' : 'bg-primary-container/20'
+                  }`}>
+                    <span className={`material-symbols-outlined icon-fill text-lg ${cvMissing ? 'text-amber-600' : 'text-primary'}`}>
+                      {cvMissing ? 'warning' : 'check_circle'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-on-background">
+                      {cvMissing ? 'CV required — upload to continue' : 'CV on file'}
+                    </p>
+                    <p className="text-xs text-slate-muted mt-0.5">
+                      {cvMissing
+                        ? 'Questions are personalised from your background.'
+                        : 'Your questions are tailored to your skills and experience.'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="font-geist font-semibold text-xl text-on-background mb-1">Upload Your CV to Continue</h2>
-                  <p className="text-sm text-slate-muted">Questions are personalised from your skills and experience. Upload your CV so the AI can tailor every question to your background.</p>
-                </div>
+                <button
+                  onClick={() => { setCvExpandUpload(o => !o); setCvFile(null) }}
+                  className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 ml-4
+                    text-primary border-primary/30 hover:bg-primary-container/10"
+                >
+                  <span className="material-symbols-outlined text-sm">upload_file</span>
+                  {cvExpandUpload ? 'Cancel' : cvMissing ? 'Upload CV' : 'Update CV'}
+                </button>
               </div>
 
-              {/* Drop zone */}
-              <div
-                onDrop={e => { e.preventDefault(); setCvDragging(false); const f = e.dataTransfer.files[0]; if (f) setCvFile(f) }}
-                onDragOver={e => { e.preventDefault(); setCvDragging(true) }}
-                onDragLeave={() => setCvDragging(false)}
-                onClick={() => cvFileRef.current?.click()}
-                className={`flex flex-col items-center justify-center w-full min-h-[140px] border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-                  cvDragging
-                    ? 'border-primary bg-primary-container/10'
-                    : cvFile
-                    ? 'border-primary bg-primary-container/5'
-                    : 'border-slate-muted/40 bg-surface-bright hover:bg-surface-container-low hover:border-slate-muted/60'
-                }`}
-              >
-                <input
-                  ref={cvFileRef}
-                  type="file"
-                  accept=".pdf,.docx,.txt"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) setCvFile(f) }}
-                  className="hidden"
-                />
-                <span className={`material-symbols-outlined text-4xl mb-2 ${cvFile ? 'text-primary' : 'text-slate-muted'}`}>description</span>
-                {cvFile ? (
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-emerald-deep">{cvFile.name}</p>
-                    <p className="text-xs text-slate-muted mt-1">{(cvFile.size / 1024).toFixed(0)} KB — ready to upload</p>
+              {/* Upload form — always expanded when CV missing, or toggled when CV exists */}
+              {(cvMissing || cvExpandUpload) && (
+                <div className="px-5 md:px-6 pb-5 md:pb-6 border-t border-outline-variant/15 pt-4">
+                  <div
+                    onDrop={e => { e.preventDefault(); setCvDragging(false); const f = e.dataTransfer.files[0]; if (f) setCvFile(f) }}
+                    onDragOver={e => { e.preventDefault(); setCvDragging(true) }}
+                    onDragLeave={() => setCvDragging(false)}
+                    onClick={() => cvFileRef.current?.click()}
+                    className={`flex flex-col items-center justify-center w-full min-h-[130px] border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+                      cvDragging
+                        ? 'border-primary bg-primary-container/10'
+                        : cvFile
+                        ? 'border-primary bg-primary-container/5'
+                        : 'border-slate-muted/40 bg-surface-bright hover:bg-surface-container-low hover:border-slate-muted/60'
+                    }`}
+                  >
+                    <input
+                      ref={cvFileRef}
+                      type="file"
+                      accept=".pdf,.docx,.txt"
+                      onChange={e => { const f = e.target.files?.[0]; if (f) setCvFile(f) }}
+                      className="hidden"
+                    />
+                    <span className={`material-symbols-outlined text-4xl mb-2 ${cvFile ? 'text-primary' : 'text-slate-muted'}`}>description</span>
+                    {cvFile ? (
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-emerald-deep">{cvFile.name}</p>
+                        <p className="text-xs text-slate-muted mt-1">{(cvFile.size / 1024).toFixed(0)} KB — ready to upload</p>
+                      </div>
+                    ) : (
+                      <div className="text-center px-4">
+                        <p className="text-sm font-semibold text-ink"><span className="text-emerald-deep">Click to upload</span> or drag and drop</p>
+                        <p className="text-xs text-slate-muted mt-1">Supported: .pdf, .docx, .txt</p>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center px-4">
-                    <p className="text-sm font-semibold text-ink"><span className="text-emerald-deep">Click to upload</span> or drag and drop</p>
-                    <p className="text-xs text-slate-muted mt-1">Supported: .pdf, .docx, .txt</p>
-                  </div>
-                )}
-              </div>
 
-              <button
-                onClick={uploadCvInline}
-                disabled={!cvFile || cvUploading}
-                className="mt-4 w-full bg-primary text-white font-semibold py-3 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-emerald-deep transition-colors shadow-sm"
-              >
-                {cvUploading ? (
-                  <><span className="material-symbols-outlined animate-spin text-base">sync</span>Parsing CV…</>
-                ) : (
-                  <><span className="material-symbols-outlined">upload</span>Upload &amp; Continue</>
-                )}
-              </button>
+                  <button
+                    onClick={uploadCvInline}
+                    disabled={!cvFile || cvUploading}
+                    className="mt-3 w-full bg-primary text-white font-semibold py-2.5 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-emerald-deep transition-colors shadow-sm text-sm"
+                  >
+                    {cvUploading ? (
+                      <><span className="material-symbols-outlined animate-spin text-base">sync</span>Parsing CV…</>
+                    ) : (
+                      <><span className="material-symbols-outlined text-base">upload</span>{cvMissing ? 'Upload & Continue' : 'Upload & Replace'}</>
+                    )}
+                  </button>
 
-              <p className="mt-3 text-center text-xs text-slate-muted">
-                Or <Link href="/upload?required=1" className="text-primary hover:underline font-medium">go to the full CV Analysis page</Link> for gap analysis and skill matching.
-              </p>
+                  <p className="mt-2.5 text-center text-xs text-slate-muted">
+                    <Link href="/upload" className="text-primary hover:underline font-medium">Full CV Analysis page</Link>
+                    {' '}— gap analysis and skill matching
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
           {/* Section 1: Context */}
-          <div className={`bg-white rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm transition-opacity ${cvMissing ? 'opacity-60 pointer-events-none select-none' : ''}`}>
+          <div className="bg-white rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">1</span>
@@ -305,7 +335,7 @@ export default function InterviewSetupPage() {
           </div>
 
           {/* Section 2: Mode Selection */}
-          <div className={`mb-10 transition-opacity ${cvMissing ? 'opacity-60 pointer-events-none select-none' : ''}`}>
+          <div className="mb-10">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">2</span>
