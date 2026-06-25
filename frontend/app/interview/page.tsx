@@ -137,6 +137,13 @@ export default function InterviewSetupPage() {
   const showConfig = mode === 'practice' || mode === 'timed'
   const sectionOffset = showConfig ? 1 : 0
 
+  const detectedFormat = (() => {
+    const lower = role.toLowerCase()
+    if (lower.includes('system design') || lower.includes('distributed') || lower.includes('architecture') || lower.includes('infrastructure')) return 'system_design'
+    if (lower.includes('dsa') || lower.includes('algorithm') || lower.includes('data structure') || lower.includes('leetcode') || lower.includes('competitive')) return 'coding'
+    return null
+  })()
+
   if (authLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <span className="material-symbols-outlined text-primary text-4xl animate-spin">sync</span>
@@ -301,6 +308,73 @@ export default function InterviewSetupPage() {
               </div>
             </div>
           </div>
+
+          {/* Format preview — shown when role implies a specific question format */}
+          {detectedFormat && (
+            <div className={`rounded-2xl border mb-8 p-5 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 items-start ${
+              detectedFormat === 'coding'
+                ? 'bg-blue-50/60 border-blue-200'
+                : 'bg-purple-50/60 border-purple-200'
+            }`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                detectedFormat === 'coding' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
+              }`}>
+                <span className="material-symbols-outlined">{detectedFormat === 'coding' ? 'code' : 'schema'}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-semibold mb-0.5 ${detectedFormat === 'coding' ? 'text-blue-700' : 'text-purple-700'}`}>
+                  {detectedFormat === 'coding' ? 'Coding questions detected' : 'System design questions detected'}
+                </p>
+                <p className="text-xs text-slate-600 mb-3">
+                  {detectedFormat === 'coding'
+                    ? "This interview will include DSA/coding problems. You'll write code directly in a Monaco editor with syntax highlighting."
+                    : "This interview will include system design problems. You'll use a drag-and-drop canvas to draw your architecture."}
+                </p>
+                {/* Lightweight mockup */}
+                {detectedFormat === 'coding' ? (
+                  <div className="rounded-lg border border-blue-200 bg-white overflow-hidden text-[10px] font-mono leading-relaxed">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 border-b border-blue-100">
+                      <span className="w-2 h-2 rounded-full bg-red-400" />
+                      <span className="w-2 h-2 rounded-full bg-yellow-400" />
+                      <span className="w-2 h-2 rounded-full bg-green-400" />
+                      <span className="ml-2 text-gray-400">solution.js</span>
+                    </div>
+                    <div className="px-3 py-2 text-gray-600 space-y-0.5">
+                      <div><span className="text-blue-600">function</span> <span className="text-yellow-700">twoSum</span>(nums, target) &#123;</div>
+                      <div className="pl-4 text-gray-400">{'// your solution here'}</div>
+                      <div>&#125;</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-purple-200 bg-white overflow-hidden p-3">
+                    <div className="flex gap-2 flex-wrap">
+                      {['Client', 'API Gateway', 'Service', 'Cache', 'SQL DB'].map(label => (
+                        <div key={label} className="text-[10px] font-semibold px-2 py-1 rounded border border-gray-200 bg-gray-50 text-gray-600">
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-[10px] text-gray-400 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                      Drag components · Connect with edges
+                    </div>
+                  </div>
+                )}
+              </div>
+              <a
+                href={detectedFormat === 'coding' ? '/practice/coding' : '/practice/system-design'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                  detectedFormat === 'coding'
+                    ? 'border-blue-300 text-blue-600 hover:bg-blue-100'
+                    : 'border-purple-300 text-purple-600 hover:bg-purple-100'
+                }`}
+              >
+                Try sandbox
+              </a>
+            </div>
+          )}
 
           {/* Section 2: Mode Selection */}
           <div className="mb-8">

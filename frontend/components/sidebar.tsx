@@ -7,12 +7,13 @@ import { clearAuth } from '@/lib/auth'
 import { toast } from 'sonner'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',     label: 'Overview',          icon: 'dashboard' },
-  { href: '/interview',     label: 'Start Interview',   icon: 'play_arrow' },
-  { href: '/progress',      label: 'Performance',       icon: 'insights' },
-  { href: '/achievements',  label: 'Achievements',      icon: 'emoji_events' },
-  { href: '/upload',        label: 'CV Analysis',       icon: 'description' },
-  { href: '/profile',       label: 'Settings',          icon: 'settings' },
+  { href: '/dashboard',              label: 'Overview',          icon: 'dashboard' },
+  { href: '/interview',              label: 'Start Interview',   icon: 'play_arrow' },
+  { href: '/practice/coding',        label: 'Practice',          icon: 'code',        activePrefix: '/practice' },
+  { href: '/progress',               label: 'Performance',       icon: 'insights' },
+  { href: '/achievements',           label: 'Achievements',      icon: 'emoji_events' },
+  { href: '/upload',                 label: 'CV Analysis',       icon: 'description' },
+  { href: '/profile',                label: 'Settings',          icon: 'settings' },
 ]
 
 export function Sidebar() {
@@ -44,7 +45,7 @@ export function Sidebar() {
 
         <nav className="flex-1 flex flex-col gap-1 px-2">
           {NAV_ITEMS.map(item => {
-            const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+            const active = pathname === item.href || (item.href !== '/dashboard' && (item.activePrefix ? pathname.startsWith(item.activePrefix) : pathname.startsWith(item.href)))
             return (
               <Link
                 key={item.href}
@@ -84,7 +85,8 @@ export function Sidebar() {
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 w-full bg-surface border-t border-outline-variant/15 flex justify-around items-center h-16 z-50 px-2 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
         {[NAV_ITEMS[0], NAV_ITEMS[1], NAV_ITEMS[2], NAV_ITEMS[3]].map(item => {
-          const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+          // Shows: Overview, Start Interview, Practice, Performance
+          const active = pathname === item.href || (item.href !== '/dashboard' && (item.activePrefix ? pathname.startsWith(item.activePrefix) : pathname.startsWith(item.href)))
           return (
             <Link
               key={item.href}
