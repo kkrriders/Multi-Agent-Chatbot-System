@@ -1,200 +1,74 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Sidebar } from '@/components/sidebar'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { questions as questionsApi, type Question } from '@/lib/api'
 
 const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false })
 
-const PROBLEMS = [
-  {
-    id: 'two-sum',
-    title: 'Two Sum',
-    difficulty: 'Easy',
-    description: 'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution.',
-    constraints: 'O(n) time, O(n) space',
-    starterCode: {
-      javascript: `function twoSum(nums, target) {
-  // Your solution here
-};`,
-      python: `def two_sum(nums: list[int], target: int) -> list[int]:
-    # Your solution here
-    pass`,
-      java: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        // Your solution here
-    }
-}`,
-      cpp: `class Solution {
-public:
-    vector<int> twoSum(vector<int>& nums, int target) {
-        // Your solution here
-    }
-};`,
-      typescript: `function twoSum(nums: number[], target: number): number[] {
-  // Your solution here
-};`,
-      go: `func twoSum(nums []int, target int) []int {
-    // Your solution here
-}`,
-    },
-  },
-  {
-    id: 'valid-parentheses',
-    title: 'Valid Parentheses',
-    difficulty: 'Easy',
-    description: 'Given a string s containing just the characters \'(\', \')\', \'{\', \'}\', \'[\' and \']\', determine if the input string is valid. An input string is valid if brackets are closed in the correct order.',
-    constraints: 'O(n) time, O(n) space',
-    starterCode: {
-      javascript: `function isValid(s) {
-  // Your solution here
-};`,
-      python: `def is_valid(s: str) -> bool:
-    # Your solution here
-    pass`,
-      java: `class Solution {
-    public boolean isValid(String s) {
-        // Your solution here
-    }
-}`,
-      cpp: `class Solution {
-public:
-    bool isValid(string s) {
-        // Your solution here
-    }
-};`,
-      typescript: `function isValid(s: string): boolean {
-  // Your solution here
-};`,
-      go: `func isValid(s string) bool {
-    // Your solution here
-}`,
-    },
-  },
-  {
-    id: 'binary-search',
-    title: 'Binary Search',
-    difficulty: 'Easy',
-    description: 'Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, return its index. Otherwise, return -1.',
-    constraints: 'O(log n) time, O(1) space',
-    starterCode: {
-      javascript: `function search(nums, target) {
-  // Your solution here
-};`,
-      python: `def search(nums: list[int], target: int) -> int:
-    # Your solution here
-    pass`,
-      java: `class Solution {
-    public int search(int[] nums, int target) {
-        // Your solution here
-    }
-}`,
-      cpp: `class Solution {
-public:
-    int search(vector<int>& nums, int target) {
-        // Your solution here
-    }
-};`,
-      typescript: `function search(nums: number[], target: number): number {
-  // Your solution here
-};`,
-      go: `func search(nums []int, target int) int {
-    // Your solution here
-}`,
-    },
-  },
-  {
-    id: 'reverse-linked-list',
-    title: 'Reverse Linked List',
-    difficulty: 'Easy',
-    description: 'Given the head of a singly linked list, reverse the list, and return the reversed list.',
-    constraints: 'O(n) time, O(1) space',
-    starterCode: {
-      javascript: `function reverseList(head) {
-  // Your solution here
-};`,
-      python: `def reverse_list(head):
-    # Your solution here
-    pass`,
-      java: `class Solution {
-    public ListNode reverseList(ListNode head) {
-        // Your solution here
-    }
-}`,
-      cpp: `class Solution {
-public:
-    ListNode* reverseList(ListNode* head) {
-        // Your solution here
-    }
-};`,
-      typescript: `function reverseList(head: ListNode | null): ListNode | null {
-  // Your solution here
-};`,
-      go: `func reverseList(head *ListNode) *ListNode {
-    // Your solution here
-}`,
-    },
-  },
-  {
-    id: 'maximum-subarray',
-    title: 'Maximum Subarray',
-    difficulty: 'Medium',
-    description: 'Given an integer array nums, find the subarray with the largest sum, and return its sum. (Kadane\'s Algorithm)',
-    constraints: 'O(n) time, O(1) space',
-    starterCode: {
-      javascript: `function maxSubArray(nums) {
-  // Your solution here
-};`,
-      python: `def max_sub_array(nums: list[int]) -> int:
-    # Your solution here
-    pass`,
-      java: `class Solution {
-    public int maxSubArray(int[] nums) {
-        // Your solution here
-    }
-}`,
-      cpp: `class Solution {
-public:
-    int maxSubArray(vector<int>& nums) {
-        // Your solution here
-    }
-};`,
-      typescript: `function maxSubArray(nums: number[]): number {
-  // Your solution here
-};`,
-      go: `func maxSubArray(nums []int) int {
-    // Your solution here
-}`,
-    },
-  },
-]
-
 const DIFFICULTY_COLOR: Record<string, string> = {
-  Easy: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-  Medium: 'text-amber-600 bg-amber-50 border-amber-200',
-  Hard: 'text-red-600 bg-red-50 border-red-200',
+  easy:   'text-emerald-600 bg-emerald-50 border-emerald-200',
+  medium: 'text-amber-600 bg-amber-50 border-amber-200',
+  hard:   'text-red-600 bg-red-50 border-red-200',
+}
+
+function extractTitle(text: string): string {
+  // "Two Sum — Given an array..." → "Two Sum"
+  const dashIdx = text.indexOf(' — ')
+  if (dashIdx !== -1) return text.slice(0, dashIdx).trim()
+  // Fallback: first 50 chars
+  return text.length > 50 ? text.slice(0, 50).trim() + '…' : text.trim()
+}
+
+function makeStarterCode(q: Question, lang: string): string {
+  const js = q.starterCode || '// Your solution here'
+  if (lang === 'javascript') return js
+  if (lang === 'typescript') return js.replace(/function (\w+)\(([^)]*)\)/, 'function $1($2): unknown')
+  if (lang === 'python') {
+    const match = js.match(/function (\w+)\(([^)]*)\)/)
+    if (match) {
+      const name = match[1].replace(/([A-Z])/g, '_$1').toLowerCase()
+      return `def ${name}(${match[2]}):\n    # Your solution here\n    pass`
+    }
+    return '# Your solution here\npass'
+  }
+  if (lang === 'java') return `class Solution {\n    public Object solve() {\n        // Your solution here\n        return null;\n    }\n}`
+  if (lang === 'cpp') return `class Solution {\npublic:\n    // Your solution here\n};`
+  if (lang === 'go') return `func solve() interface{} {\n    // Your solution here\n    return nil\n}`
+  return js
 }
 
 type Language = 'javascript' | 'python' | 'java' | 'cpp' | 'typescript' | 'go'
 
 export default function CodingPracticePage() {
   const { loading: authLoading } = useRequireAuth()
-  const [selectedProblem, setSelectedProblem] = useState(PROBLEMS[0])
-  const [language, setLanguage] = useState<Language>('javascript')
-  const [output, setOutput] = useState<string | null>(null)
-  const [editorKey, setEditorKey] = useState(0)
+  const [problems, setProblems]           = useState<Question[]>([])
+  const [loading, setLoading]             = useState(true)
+  const [selected, setSelected]           = useState<Question | null>(null)
+  const [language, setLanguage]           = useState<Language>('javascript')
+  const [editorKey, setEditorKey]         = useState(0)
+  const [filterDiff, setFilterDiff]       = useState('')
 
-  const selectProblem = (p: typeof PROBLEMS[0]) => {
-    setSelectedProblem(p)
-    setOutput(null)
+  useEffect(() => {
+    questionsApi.list({ category: 'coding', limit: 100 })
+      .then(data => {
+        setProblems(data.questions)
+        if (data.questions.length > 0) setSelected(data.questions[0])
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const selectProblem = (q: Question) => {
+    setSelected(q)
     setEditorKey(k => k + 1)
   }
 
-  const handleRun = () => {
-    setOutput(`// Output panel (execution not available in practice mode)\n// Tip: Walk through your solution mentally or paste into a local environment.\n\n// Selected language: ${language}\n// Problem: ${selectedProblem.title}`)
-  }
+  const visible = filterDiff
+    ? problems.filter(p => p.difficulty === filterDiff)
+    : problems
 
   if (authLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -234,86 +108,102 @@ export default function CodingPracticePage() {
         <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0">
           {/* Problem panel */}
           <div className="md:w-72 shrink-0 flex flex-col gap-3">
+            {/* Difficulty filter */}
+            <div className="flex gap-2">
+              {['', 'easy', 'medium', 'hard'].map(d => (
+                <button
+                  key={d}
+                  onClick={() => setFilterDiff(d)}
+                  className={`text-xs px-3 py-1 rounded-full border font-semibold transition-all ${
+                    filterDiff === d
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-white text-slate-muted border-outline-variant/30 hover:border-primary/50'
+                  }`}
+                >
+                  {d === '' ? 'All' : d.charAt(0).toUpperCase() + d.slice(1)}
+                </button>
+              ))}
+            </div>
+
             {/* Problem list */}
-            <div className="bg-white rounded-xl border border-outline-variant/15 overflow-hidden shadow-sm">
-              <div className="px-4 py-3 border-b border-outline-variant/10 bg-surface-container-lowest/50">
+            <div className="bg-white rounded-xl border border-outline-variant/15 overflow-hidden shadow-sm flex-1 flex flex-col min-h-0">
+              <div className="px-4 py-3 border-b border-outline-variant/10 bg-surface-container-lowest/50 shrink-0 flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Problems</p>
+                <span className="text-xs text-slate-400">{visible.length}</span>
               </div>
-              <div className="divide-y divide-outline-variant/10">
-                {PROBLEMS.map(p => (
+              <div className="overflow-y-auto flex-1 divide-y divide-outline-variant/10">
+                {loading ? (
+                  <div className="flex items-center justify-center py-10">
+                    <span className="material-symbols-outlined text-primary animate-spin">sync</span>
+                  </div>
+                ) : visible.length === 0 ? (
+                  <p className="text-xs text-slate-muted text-center py-8">No problems found</p>
+                ) : visible.map(p => (
                   <button
                     key={p.id}
                     onClick={() => selectProblem(p)}
                     className={`w-full text-left px-4 py-3 flex items-center justify-between gap-2 transition-colors ${
-                      selectedProblem.id === p.id
+                      selected?.id === p.id
                         ? 'bg-primary-container/10 text-primary'
                         : 'hover:bg-surface-container-lowest/50 text-on-surface'
                     }`}
                   >
-                    <span className="text-sm font-medium">{p.title}</span>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${DIFFICULTY_COLOR[p.difficulty]}`}>
-                      {p.difficulty}
+                    <span className="text-sm font-medium truncate">{extractTitle(p.text)}</span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${DIFFICULTY_COLOR[p.difficulty] ?? ''}`}>
+                      {p.difficulty.charAt(0).toUpperCase() + p.difficulty.slice(1)}
                     </span>
                   </button>
                 ))}
               </div>
             </div>
-
-            {/* Problem description */}
-            <div className="bg-white rounded-xl border border-outline-variant/15 p-4 shadow-sm flex-1 overflow-y-auto">
-              <div className="flex items-center gap-2 mb-3">
-                <h2 className="font-geist font-semibold text-base text-on-surface">{selectedProblem.title}</h2>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${DIFFICULTY_COLOR[selectedProblem.difficulty]}`}>
-                  {selectedProblem.difficulty}
-                </span>
-              </div>
-              <p className="text-sm text-slate-muted leading-relaxed mb-3">{selectedProblem.description}</p>
-              {selectedProblem.constraints && (
-                <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-surface-container-lowest rounded-lg px-3 py-2">
-                  <span className="material-symbols-outlined text-sm">timer</span>
-                  {selectedProblem.constraints}
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Editor panel */}
+          {/* Right pane */}
           <div className="flex-1 flex flex-col gap-3 min-h-0">
-            <div className="bg-white rounded-xl border border-outline-variant/15 shadow-sm flex-1 p-4 flex flex-col min-h-0" style={{ minHeight: 400 }}>
-              <div className="flex items-center justify-between mb-3 shrink-0">
-                <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Editor</p>
-                <button
-                  onClick={handleRun}
-                  className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-semibold px-4 py-1.5 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm"
-                >
-                  <span className="material-symbols-outlined text-sm">play_arrow</span>
-                  Run
-                </button>
-              </div>
-              <div className="flex-1 min-h-0">
-                <CodeEditor
-                  key={`${selectedProblem.id}-${editorKey}`}
-                  starterCode={selectedProblem.starterCode[language] || selectedProblem.starterCode.javascript}
-                  constraints={selectedProblem.constraints}
-                  onChange={(_, lang) => setLanguage(lang as Language)}
-                />
-              </div>
-            </div>
-
-            {/* Output panel */}
-            {output !== null && (
-              <div className="bg-gray-950 rounded-xl border border-gray-800 p-4 shrink-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Output</p>
-                  <button
-                    onClick={() => setOutput(null)}
-                    className="ml-auto text-gray-600 hover:text-gray-400 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-sm">close</span>
-                  </button>
+            {selected ? (
+              <>
+                {/* Problem description */}
+                <div className="bg-white rounded-xl border border-outline-variant/15 p-4 shadow-sm shrink-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h2 className="font-geist font-semibold text-base text-on-surface">{extractTitle(selected.text)}</h2>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${DIFFICULTY_COLOR[selected.difficulty] ?? ''}`}>
+                      {selected.difficulty.charAt(0).toUpperCase() + selected.difficulty.slice(1)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-muted leading-relaxed">{selected.text}</p>
+                  {selected.constraints && (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-surface-container-lowest rounded-lg px-3 py-2 mt-3">
+                      <span className="material-symbols-outlined text-sm">timer</span>
+                      {selected.constraints}
+                    </div>
+                  )}
+                  {selected.expectedKeywords && selected.expectedKeywords.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {selected.expectedKeywords.map(kw => (
+                        <span key={kw} className="text-[10px] bg-surface-container px-2 py-0.5 rounded-full text-slate-muted border border-outline-variant/20">{kw}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap leading-relaxed">{output}</pre>
+
+                {/* Editor */}
+                <div className="bg-white rounded-xl border border-outline-variant/15 shadow-sm flex-1 p-4 flex flex-col min-h-0" style={{ minHeight: 360 }}>
+                  <div className="flex items-center justify-between mb-3 shrink-0">
+                    <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Editor</p>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    <CodeEditor
+                      key={`${selected.id}-${editorKey}`}
+                      starterCode={makeStarterCode(selected, language)}
+                      constraints={selected.constraints ?? undefined}
+                      onChange={(_, lang) => setLanguage(lang as Language)}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : !loading && (
+              <div className="flex-1 flex items-center justify-center text-slate-muted text-sm">
+                Select a problem to start
               </div>
             )}
           </div>

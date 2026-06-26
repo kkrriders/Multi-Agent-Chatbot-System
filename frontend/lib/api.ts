@@ -173,9 +173,9 @@ export const cv = {
 // ── Interview ────────────────────────────────────────────────────────────────
 
 export const interview = {
-  start: (mode: string, targetRole?: string, jobDescription?: string, companyName?: string, numQuestions?: number, timeLimitPerQuestion?: number) =>
+  start: (mode: string, targetRole?: string, jobDescription?: string, companyName?: string, numQuestions?: number, timeLimitPerQuestion?: number, questionFormat?: string) =>
     post<{ sessionId: string; interview: Interview; questions: Question[] }>(
-      '/api/interview/start', { mode, targetRole, jobDescription, companyName, numQuestions, timeLimitPerQuestion }
+      '/api/interview/start', { mode, targetRole, jobDescription, companyName, numQuestions, timeLimitPerQuestion, questionFormat }
     ),
   state: (sessionId: string) =>
     get<{ interview: Interview; questions: Question[]; answers: Answer[]; nextQuestion: Question | null }>(
