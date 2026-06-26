@@ -20,7 +20,9 @@
     "eval:questions": "node tests/evals/runner.js --agent question-generator",
     "eval:scorer": "node tests/evals/runner.js --agent answer-scorer",
     "eval:decision": "node tests/evals/runner.js --agent decision-agent",
-    "eval:panel": "node tests/evals/runner.js --agent panel-interviewer"
+    "eval:panel": "node tests/evals/runner.js --agent panel-interviewer",
+    "eval:code": "node tests/evals/runner.js --agent code-executor",
+    "eval:sdesign": "node tests/evals/runner.js --agent system-design-scorer"
   },
   "repository": {
     "type": "git",

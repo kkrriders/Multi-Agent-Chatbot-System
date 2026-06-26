@@ -22,7 +22,8 @@
       "Bash(node test-pdf-temp.js)",
       "PowerShell(Get-ChildItem \"c:\\\\Users\\\\karti\" -Directory | Select-Object -First 30 | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem \"c:\\\\Users\\\\karti\" -Directory | Select-Object -Skip 30 | ForEach-Object { $_.Name })",
-      "Bash(node tests/evals/runner.js)"
+      "Bash(node tests/evals/runner.js)",
+      "Bash(node *)"
     ],
     "deny": []
   }

@@ -21,7 +21,7 @@ const questionGenerator = require('../services/interview/question-generator');
 const CandidateProfile = require('../models/CandidateProfile');
 const { logger } = require('../shared/logger');
 
-const VALID_CATEGORIES = ['technical', 'behavioral', 'situational', 'closing', 'intro'];
+const VALID_CATEGORIES = ['technical', 'behavioral', 'situational', 'closing', 'intro', 'coding', 'system_design', 'cs_fundamentals'];
 const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
 
 function requireAdmin(req, res, next) {

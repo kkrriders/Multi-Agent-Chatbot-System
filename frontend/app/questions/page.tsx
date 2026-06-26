@@ -7,7 +7,7 @@ import { Nav } from '@/components/nav'
 import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-const CATEGORIES = ['technical', 'behavioral', 'situational', 'intro', 'closing'] as const
+const CATEGORIES = ['technical', 'behavioral', 'situational', 'intro', 'closing', 'coding', 'system_design', 'cs_fundamentals'] as const
 const DIFFICULTIES = ['easy', 'medium', 'hard'] as const
 const ROLES = ['General', 'Frontend Dev', 'Backend Dev', 'Full Stack Dev', 'Data Scientist', 'Product Manager', 'DevOps Engineer']
 
@@ -31,7 +31,7 @@ export default function QuestionsPage() {
         category: filter.category || undefined,
         difficulty: filter.difficulty || undefined,
         role: filter.role || undefined,
-        limit: 50,
+        limit: 100,
       })
       setItems(data.questions)
       setTotal(data.total)
