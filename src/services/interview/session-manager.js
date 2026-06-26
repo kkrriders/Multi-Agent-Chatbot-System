@@ -35,7 +35,7 @@ async function _checkAndExpireSession(interview) {
 /**
  * Create a new interview session.
  */
-async function create({ userId, candidateProfileId, mode, targetRole, jobDescription, skills, companyName, numQuestions, timeLimitPerQuestion, questionFormat }) {
+async function create({ userId, candidateProfileId, mode, targetRole, jobDescription, skills, companyName, numQuestions, timeLimitPerQuestion }) {
   // Prevent double-submission / concurrent session creation
   const activeSession = await Interview.findOne({ userId, status: 'active' }).lean();
   if (activeSession) throw new Error('You already have an active interview session');
@@ -95,7 +95,6 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
         liveSnippets:    agentContext?.liveSnippets   || [],
         seenQuestionIds: seenQuestionIds.map(id => id.toString()),
         numQuestions,
-        questionFormat,
       });
 
   if (questions.length === 0) {

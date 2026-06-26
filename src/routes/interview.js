@@ -43,7 +43,7 @@ router.post('/start',
   guard(['jobDescription', 'companyName', 'targetRole']),
   async (req, res) => {
     try {
-      const { mode, targetRole, jobDescription, companyName, numQuestions, timeLimitPerQuestion, questionFormat } = req.body;
+      const { mode, targetRole, jobDescription, companyName, numQuestions, timeLimitPerQuestion } = req.body;
 
       if (!VALID_MODES.includes(mode)) {
         return res.status(400).json({ success: false, error: `mode must be one of: ${VALID_MODES.join(', ')}` });
@@ -76,7 +76,6 @@ router.post('/start',
         companyName:          companyName || null,
         numQuestions:         parsedNumQuestions,
         timeLimitPerQuestion: parsedTimeLimit,
-        questionFormat:       ['coding', 'system_design'].includes(questionFormat) ? questionFormat : undefined,
       });
 
       res.json({

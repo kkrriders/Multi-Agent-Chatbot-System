@@ -121,7 +121,7 @@ export default function InterviewSetupPage() {
     try {
       const useNumQ = ['practice', 'timed'].includes(mode) ? numQuestions : undefined
       const useTimeLimit = mode === 'timed' ? timeLimitPerQuestion : undefined
-      const data = await interviewApi.start(mode, role.trim(), jd || undefined, company || undefined, useNumQ, useTimeLimit, detectedFormat || undefined)
+      const data = await interviewApi.start(mode, role.trim(), jd || undefined, company || undefined, useNumQ, useTimeLimit)
       router.push(`/interview/${data.sessionId}`)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to start interview'
