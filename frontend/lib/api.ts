@@ -215,6 +215,41 @@ export const progress = {
   leaderboard: () => get<{ leaderboard: Interview[] }>('/api/progress/leaderboard'),
 }
 
+// ── Practice ─────────────────────────────────────────────────────────────────
+
+export interface CodingEvalResult {
+  score: number
+  verdict: 'correct' | 'partial' | 'incorrect'
+  feedback: string
+  strengths: string[]
+  issues: string[]
+  approachUsed: string
+}
+
+export interface RubricResult {
+  item: string
+  status: 'covered' | 'partial' | 'missing'
+  note: string
+}
+
+export interface SystemDesignEvalResult {
+  score: number
+  rubricResults: RubricResult[]
+  feedback: string
+  topMissing: string[]
+}
+
+export const practice = {
+  evaluateCoding: (questionId: string, code: string, language: string) =>
+    post<CodingEvalResult & { success: boolean }>('/api/practice/evaluate', {
+      type: 'coding', questionId, code, language,
+    }),
+  evaluateSystemDesign: (questionId: string, nodes: unknown[], edges: unknown[]) =>
+    post<SystemDesignEvalResult & { success: boolean }>('/api/practice/evaluate', {
+      type: 'system_design', questionId, nodes, edges,
+    }),
+}
+
 // ── Questions ────────────────────────────────────────────────────────────────
 
 export const questions = {

@@ -23,6 +23,7 @@ const interviewRoutes = require('./src/routes/interview');
 const progressRoutes  = require('./src/routes/progress');
 const questionRoutes  = require('./src/routes/questions');
 const speechRoutes    = require('./src/routes/speech');
+const practiceRoutes  = require('./src/routes/practice');
 
 const { authenticate } = require('./src/middleware/auth');
 const { auditLog }     = require('./src/middleware/auditLog');
@@ -116,6 +117,7 @@ app.use('/api/interview', messageLimiter, csrfProtection, interviewRoutes);
 app.use('/api/progress',  generalLimiter, csrfProtection, progressRoutes);
 app.use('/api/questions', generalLimiter, csrfProtection, questionRoutes);
 app.use('/api/speech',    generalLimiter, csrfProtection, speechRoutes);
+app.use('/api/practice',  messageLimiter, csrfProtection, practiceRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {

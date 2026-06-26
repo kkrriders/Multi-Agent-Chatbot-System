@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Sidebar } from '@/components/sidebar'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { questions as questionsApi } from '@/lib/api'
+import { questions as questionsApi, practice as practiceApi, type CodingEvalResult } from '@/lib/api'
 
 const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false })
 
@@ -55,9 +55,12 @@ export default function CodingPracticePage() {
   const [fetching, setFetching] = useState(true)
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null)
   const [language, setLanguage] = useState<Language>('javascript')
-  const [output, setOutput] = useState<string | null>(null)
   const [editorKey, setEditorKey] = useState(0)
   const [difficultyFilter, setDifficultyFilter] = useState('All')
+  const [evalResult, setEvalResult] = useState<CodingEvalResult | null>(null)
+  const [evaluating, setEvaluating] = useState(false)
+  const [evalError, setEvalError] = useState<string | null>(null)
+  const codeRef = useRef<string>('')
 
   useEffect(() => {
     questionsApi.list({ category: 'coding', limit: 100 })
@@ -83,13 +86,30 @@ export default function CodingPracticePage() {
 
   const selectProblem = (p: Problem) => {
     setSelectedProblem(p)
-    setOutput(null)
+    setEvalResult(null)
+    setEvalError(null)
     setEditorKey(k => k + 1)
+    codeRef.current = p.starterCode[language] || p.starterCode.javascript
   }
 
-  const handleRun = () => {
+  const handleGetFeedback = async () => {
     if (!selectedProblem) return
-    setOutput(`// Output panel (execution not available in practice mode)\n// Tip: Walk through your solution mentally or paste into a local environment.\n\n// Selected language: ${language}\n// Problem: ${selectedProblem.title}`)
+    const code = codeRef.current
+    if (!code || code.trim().length < 5) {
+      setEvalError('Write some code before requesting feedback.')
+      return
+    }
+    setEvaluating(true)
+    setEvalResult(null)
+    setEvalError(null)
+    try {
+      const result = await practiceApi.evaluateCoding(selectedProblem.id, code, language)
+      setEvalResult(result)
+    } catch (err: unknown) {
+      setEvalError(err instanceof Error ? err.message : 'Evaluation failed. Try again.')
+    } finally {
+      setEvaluating(false)
+    }
   }
 
   if (authLoading) return (
@@ -206,11 +226,16 @@ export default function CodingPracticePage() {
                   <div className="flex items-center justify-between mb-3 shrink-0">
                     <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Editor</p>
                     <button
-                      onClick={handleRun}
-                      className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-semibold px-4 py-1.5 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm"
+                      onClick={handleGetFeedback}
+                      disabled={evaluating}
+                      className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-semibold px-4 py-1.5 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      <span className="material-symbols-outlined text-sm">play_arrow</span>
-                      Run
+                      {evaluating ? (
+                        <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+                      ) : (
+                        <span className="material-symbols-outlined text-sm">smart_toy</span>
+                      )}
+                      {evaluating ? 'Evaluating…' : 'Get Feedback'}
                     </button>
                   </div>
                   <div className="flex-1 min-h-0">
@@ -218,24 +243,82 @@ export default function CodingPracticePage() {
                       key={`${selectedProblem.id}-${editorKey}`}
                       starterCode={selectedProblem.starterCode[language] || selectedProblem.starterCode.javascript}
                       constraints={selectedProblem.constraints}
-                      onChange={(_, lang) => setLanguage(lang as Language)}
+                      onChange={(code, lang) => {
+                        codeRef.current = code
+                        setLanguage(lang as Language)
+                      }}
                     />
                   </div>
                 </div>
 
-                {output !== null && (
-                  <div className="bg-gray-950 rounded-xl border border-gray-800 p-4 shrink-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Output</p>
-                      <button
-                        onClick={() => setOutput(null)}
-                        className="ml-auto text-gray-600 hover:text-gray-400 transition-colors"
-                      >
+                {evalError && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 shrink-0 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-red-500 text-sm">error</span>
+                    <p className="text-xs text-red-600">{evalError}</p>
+                    <button onClick={() => setEvalError(null)} className="ml-auto text-red-400 hover:text-red-600">
+                      <span className="material-symbols-outlined text-sm">close</span>
+                    </button>
+                  </div>
+                )}
+
+                {evalResult && (
+                  <div className="bg-white rounded-xl border border-outline-variant/15 shadow-sm shrink-0 overflow-hidden">
+                    {/* Score header */}
+                    <div className={`px-4 py-3 flex items-center gap-3 ${
+                      evalResult.verdict === 'correct' ? 'bg-emerald-50 border-b border-emerald-100' :
+                      evalResult.verdict === 'partial' ? 'bg-amber-50 border-b border-amber-100' :
+                      'bg-red-50 border-b border-red-100'
+                    }`}>
+                      <span className={`material-symbols-outlined text-xl ${
+                        evalResult.verdict === 'correct' ? 'text-emerald-600' :
+                        evalResult.verdict === 'partial' ? 'text-amber-600' : 'text-red-500'
+                      }`}>
+                        {evalResult.verdict === 'correct' ? 'check_circle' : evalResult.verdict === 'partial' ? 'pending' : 'cancel'}
+                      </span>
+                      <div>
+                        <p className="text-sm font-bold text-on-surface capitalize">{evalResult.verdict}</p>
+                        <p className="text-xs text-slate-muted">{evalResult.approachUsed}</p>
+                      </div>
+                      <div className="ml-auto text-right">
+                        <p className="text-2xl font-bold text-on-surface">{evalResult.score}</p>
+                        <p className="text-[10px] text-slate-muted uppercase tracking-wider">/ 100</p>
+                      </div>
+                      <button onClick={() => setEvalResult(null)} className="text-slate-400 hover:text-slate-600 ml-2">
                         <span className="material-symbols-outlined text-sm">close</span>
                       </button>
                     </div>
-                    <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap leading-relaxed">{output}</pre>
+
+                    <div className="px-4 py-3 space-y-3">
+                      <p className="text-xs text-slate-muted leading-relaxed">{evalResult.feedback}</p>
+
+                      {evalResult.strengths.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1.5">Strengths</p>
+                          <ul className="space-y-1">
+                            {evalResult.strengths.map((s, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs text-on-surface">
+                                <span className="material-symbols-outlined text-emerald-500 text-sm mt-0.5 shrink-0">check</span>
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {evalResult.issues.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1.5">Issues / Improvements</p>
+                          <ul className="space-y-1">
+                            {evalResult.issues.map((issue, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs text-on-surface">
+                                <span className="material-symbols-outlined text-amber-500 text-sm mt-0.5 shrink-0">warning</span>
+                                {issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </>

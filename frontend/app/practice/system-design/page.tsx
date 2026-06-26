@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Sidebar } from '@/components/sidebar'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { questions as questionsApi } from '@/lib/api'
+import { questions as questionsApi, practice as practiceApi, type SystemDesignEvalResult } from '@/lib/api'
 
 const SystemDesignCanvas = dynamic(() => import('@/components/SystemDesignCanvas'), { ssr: false })
 
@@ -41,6 +41,9 @@ export default function SystemDesignPracticePage() {
   const [canvasJson, setCanvasJson] = useState<string | null>(null)
   const [canvasKey, setCanvasKey] = useState(0)
   const [difficultyFilter, setDifficultyFilter] = useState('All')
+  const [evalResult, setEvalResult] = useState<SystemDesignEvalResult | null>(null)
+  const [evaluating, setEvaluating] = useState(false)
+  const [evalError, setEvalError] = useState<string | null>(null)
 
   useEffect(() => {
     questionsApi.list({ category: 'system_design', limit: 100 })
@@ -86,6 +89,38 @@ export default function SystemDesignPracticePage() {
     setSelectedPrompt(p)
     setCanvasJson(null)
     setCanvasKey(k => k + 1)
+    setEvalResult(null)
+    setEvalError(null)
+  }
+
+  const handleCheckDesign = async () => {
+    if (!selectedPrompt || !canvasJson) {
+      setEvalError('Add some components to the canvas first.')
+      return
+    }
+    let parsed: { nodes?: unknown[]; edges?: unknown[] }
+    try {
+      parsed = JSON.parse(canvasJson)
+    } catch {
+      setEvalError('Canvas data is invalid.')
+      return
+    }
+    const nodes = parsed.nodes || []
+    if (nodes.length === 0) {
+      setEvalError('Add some components to the canvas first.')
+      return
+    }
+    setEvaluating(true)
+    setEvalResult(null)
+    setEvalError(null)
+    try {
+      const result = await practiceApi.evaluateSystemDesign(selectedPrompt.id, nodes, parsed.edges || [])
+      setEvalResult(result)
+    } catch (err: unknown) {
+      setEvalError(err instanceof Error ? err.message : 'Evaluation failed. Try again.')
+    } finally {
+      setEvaluating(false)
+    }
   }
 
   if (authLoading) return (
@@ -113,6 +148,18 @@ export default function SystemDesignPracticePage() {
             <h1 className="font-geist font-bold text-2xl md:text-3xl text-on-background">System Design Practice</h1>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleCheckDesign}
+              disabled={evaluating}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-white hover:bg-emerald-deep transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {evaluating ? (
+                <span className="material-symbols-outlined text-base animate-spin">sync</span>
+              ) : (
+                <span className="material-symbols-outlined text-base">smart_toy</span>
+              )}
+              <span className="hidden sm:inline">{evaluating ? 'Evaluating…' : 'Check Design'}</span>
+            </button>
             <button
               onClick={handleExport}
               className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg border border-outline-variant/30 text-slate-muted hover:text-primary hover:border-primary/40 transition-colors"
@@ -211,19 +258,87 @@ export default function SystemDesignPracticePage() {
             )}
           </div>
 
-          {/* Canvas panel */}
-          <div className="flex-1 bg-white rounded-xl border border-outline-variant/15 shadow-sm p-4 flex flex-col min-h-0" style={{ minHeight: 500 }}>
-            <div className="flex items-center justify-between mb-3 shrink-0">
-              <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Canvas</p>
-              <p className="text-xs text-slate-400">Drag components from the palette · Connect nodes by dragging from handles</p>
+          {/* Canvas + feedback column */}
+          <div className="flex-1 flex flex-col gap-3 min-h-0">
+            <div className="bg-white rounded-xl border border-outline-variant/15 shadow-sm p-4 flex flex-col" style={{ minHeight: 500 }}>
+              <div className="flex items-center justify-between mb-3 shrink-0">
+                <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Canvas</p>
+                <p className="text-xs text-slate-400">Drag components from the palette · Connect nodes by dragging from handles</p>
+              </div>
+              <div className="flex-1 min-h-0">
+                <SystemDesignCanvas
+                  key={canvasKey}
+                  onChange={handleCanvasChange}
+                  {...(selectedPrompt?.templateDiagram ? { initialJson: selectedPrompt.templateDiagram } : {})}
+                />
+              </div>
             </div>
-            <div className="flex-1 min-h-0">
-              <SystemDesignCanvas
-                key={canvasKey}
-                onChange={handleCanvasChange}
-                {...(selectedPrompt?.templateDiagram ? { initialJson: selectedPrompt.templateDiagram } : {})}
-              />
-            </div>
+
+            {evalError && (
+              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 shrink-0 flex items-center gap-2">
+                <span className="material-symbols-outlined text-red-500 text-sm">error</span>
+                <p className="text-xs text-red-600">{evalError}</p>
+                <button onClick={() => setEvalError(null)} className="ml-auto text-red-400 hover:text-red-600">
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+            )}
+
+            {evalResult && (
+              <div className="bg-white rounded-xl border border-outline-variant/15 shadow-sm shrink-0 overflow-hidden">
+                {/* Score header */}
+                <div className="px-4 py-3 border-b border-outline-variant/10 flex items-center gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-on-surface">AI Feedback</p>
+                    <p className="text-xs text-slate-muted leading-relaxed mt-0.5">{evalResult.feedback}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className={`text-3xl font-bold ${evalResult.score >= 70 ? 'text-emerald-600' : evalResult.score >= 40 ? 'text-amber-600' : 'text-red-500'}`}>
+                      {evalResult.score}
+                    </p>
+                    <p className="text-[10px] text-slate-muted uppercase tracking-wider">/ 100</p>
+                  </div>
+                  <button onClick={() => setEvalResult(null)} className="text-slate-400 hover:text-slate-600 ml-1">
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
+                </div>
+
+                {/* Rubric results */}
+                <div className="px-4 py-3">
+                  <p className="text-[10px] font-bold text-slate-muted uppercase tracking-wider mb-2">Rubric Checklist</p>
+                  <ul className="space-y-2">
+                    {evalResult.rubricResults.map((r, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <span className={`material-symbols-outlined text-sm mt-0.5 shrink-0 ${
+                          r.status === 'covered' ? 'text-emerald-500' :
+                          r.status === 'partial' ? 'text-amber-500' : 'text-red-400'
+                        }`}>
+                          {r.status === 'covered' ? 'check_circle' : r.status === 'partial' ? 'pending' : 'cancel'}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-xs text-on-surface">{r.item}</p>
+                          {r.note && <p className="text-[11px] text-slate-muted mt-0.5">{r.note}</p>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {evalResult.topMissing.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-outline-variant/10">
+                      <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider mb-1.5">Key gaps to address</p>
+                      <ul className="space-y-1">
+                        {evalResult.topMissing.map((m, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs text-slate-muted">
+                            <span className="material-symbols-outlined text-amber-500 text-sm mt-0.5 shrink-0">arrow_right</span>
+                            {m}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
