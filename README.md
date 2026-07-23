@@ -315,6 +315,5 @@ npm run type-check       # tsc --noEmit
 - **More question content** — additional system design templates (Twitter, Uber, YouTube) and harder DSA problems (LRU Cache, Course Schedule, Word Break)
 - **Results page** — display `diagramSnapshot` in read-only canvas and `testResults` for completed coding answers
 - **Admin role guard** — question CRUD currently requires only `isAdmin` flag; no admin UI yet
-- **Email verification / password reset** — auth works but no email flow
+- **Password reset delivery** — `/api/auth/forgot-password` generates and stores a reset token, but no email provider is wired up, so the link never actually reaches the user
 - **Adaptive difficulty** — bump question difficulty after 3 consecutive high scores
-- **frontend/Dockerfile** — needed for `docker compose up`; Next.js standalone output recommended

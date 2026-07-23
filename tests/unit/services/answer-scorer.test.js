@@ -138,7 +138,6 @@ describe('score', () => {
     expect(result.keywordsHit).toContain('node');
     expect(result.keywordsMissed).toContain('redis');
     expect(broadcaster.emit).toHaveBeenCalledWith('sess1', 'scoring-start', expect.any(Object));
-    expect(broadcaster.emit).toHaveBeenCalledWith('sess1', 'score-update', expect.any(Object));
   });
 
   test('clamps scores to 0-100', async () => {

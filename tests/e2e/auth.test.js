@@ -7,8 +7,6 @@ jest.mock('../../src/models/User', () => ({
   create:          jest.fn(),
   findByIdAndUpdate: jest.fn(),
 }));
-jest.mock('../../src/models/Conversation', () => ({}));
-jest.mock('../../src/models/PromptVersion', () => ({}));
 jest.mock('../../src/config/redis', () => null);
 jest.mock('../../src/shared/logger', () => ({
   logger: { info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() },
@@ -20,10 +18,6 @@ jest.mock('../../src/middleware/auditLog', () => ({
 jest.mock('../../src/shared/summarizer', () => ({
   summarizeConversation: jest.fn(),
   SUMMARIZE_THRESHOLD: 20,
-}));
-jest.mock('../../src/shared/agent-config', () => ({
-  invalidatePromptCache: jest.fn(),
-  getActiveSystemPrompt: jest.fn().mockResolvedValue(null),
 }));
 
 const request = require('supertest');
@@ -83,7 +77,7 @@ describe('Auth Routes', () => {
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
       expect(res.body.data.user.email).toBe('test@example.com');
-      expect(res.body.data.token).toBeDefined();
+      expect(res.headers['set-cookie'][0]).toMatch(/^token=/);
     });
 
     test('400 — missing fullName', async () => {
@@ -188,8 +182,8 @@ describe('Auth Routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.token).toBeDefined();
       expect(res.body.data.user.email).toBe('test@example.com');
+      expect(res.headers['set-cookie'][0]).toMatch(/^token=/);
     });
 
     test('400 — missing email', async () => {
