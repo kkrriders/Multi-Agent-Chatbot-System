@@ -88,4 +88,23 @@ describe('decide', () => {
     expect(result.reason.length).toBeLessThanOrEqual(300);
     expect(result.response.length).toBeLessThanOrEqual(500);
   });
+
+  test('practice mode prompts the AI to teach the concept, not just ask another question', async () => {
+    ai.generateJson.mockResolvedValue({
+      data: { action: 'probe_deeper', reason: 'missed libuv', response: 'libuv handles the event loop...' },
+    });
+    await decide({ ...BASE, mode: 'practice' });
+    const prompt = ai.generateJson.mock.calls[0][0];
+    expect(prompt).toMatch(/teaches the missed concept/i);
+  });
+
+  test('full mode keeps the realistic-interviewer prompt (no teaching instruction)', async () => {
+    ai.generateJson.mockResolvedValue({
+      data: { action: 'probe_deeper', reason: 'missed libuv', response: 'What role does libuv play?' },
+    });
+    await decide({ ...BASE, mode: 'full' });
+    const prompt = ai.generateJson.mock.calls[0][0];
+    expect(prompt).not.toMatch(/teaches the missed concept/i);
+    expect(prompt).toMatch(/do not give away the answer/i);
+  });
 });

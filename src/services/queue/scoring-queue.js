@@ -102,8 +102,16 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
       keywordsHit:            result.keywordsHit,
       keywordsMissed:         result.keywordsMissed,
     });
-    // Emit after DB write so an immediate GET sees scored:true
-    broadcaster.emit(interviewId, 'score-update', { answerId, scores: result.scores, timestamp: Date.now() });
+    // Emit after DB write so an immediate GET sees scored:true.
+    // improvementSuggestions/keywordsMissed ride along so practice mode can show
+    // actionable feedback per-answer instead of only in the end-of-session summary.
+    broadcaster.emit(interviewId, 'score-update', {
+      answerId,
+      scores: result.scores,
+      improvementSuggestions: result.improvementSuggestions,
+      keywordsMissed: result.keywordsMissed,
+      timestamp: Date.now(),
+    });
   } catch (err) {
     logger.error(`[scoring] score failed answer=${answerId}: ${err.message}`);
   }

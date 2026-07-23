@@ -30,6 +30,10 @@ interface FollowUpState {
   action: 'follow_up' | 'probe_deeper' | 'challenge'
   response: string
 }
+interface PracticeFeedbackState {
+  keywordsMissed: string[]
+  suggestion: string
+}
 interface Message {
   id: string
   role: 'ai' | 'user'
@@ -84,6 +88,7 @@ export default function ActiveInterviewPage() {
   const [testResultMap, setTestResultMap] = useState<TestResultState>({})
   const [scoringIds, setScoringIds]   = useState<Set<string>>(new Set())
   const [followUp, setFollowUp]       = useState<FollowUpState | null>(null)
+  const [practiceFeedback, setPracticeFeedback] = useState<PracticeFeedbackState | null>(null)
 
   // Transcript (text/voice only)
   const [messages, setMessages]               = useState<Message[]>([])
@@ -121,6 +126,14 @@ export default function ActiveInterviewPage() {
           },
         }))
       }
+      // Practice mode only — show what to improve right after this answer instead
+      // of waiting for the end-of-session summary. Other modes stay uninterrupted.
+      if (mode === 'practice' && (event.keywordsMissed?.length || event.improvementSuggestions?.length)) {
+        setPracticeFeedback({
+          keywordsMissed: event.keywordsMissed || [],
+          suggestion: event.improvementSuggestions?.[0] || '',
+        })
+      }
     }
     if (event.type === 'scoring-start') setScoringIds(s => new Set([...s, event.answerId]))
     if (event.type === 'scoring-error') {
@@ -136,7 +149,7 @@ export default function ActiveInterviewPage() {
         setTimeout(() => setShowFillerToast(false), 5000)
       }
     }
-  }, []))
+  }, [mode]))
 
   // ── Load session ─────────────────────────────────────────────────────────────
 
@@ -184,7 +197,7 @@ export default function ActiveInterviewPage() {
       timeToFirstKeystroke: null, questionDisplayedAt: Date.now(), tabHiddenAt: null,
     }
     // Reset answer state for new question
-    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null)
+    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setPracticeFeedback(null)
   }, [currentIdx])
 
   useEffect(() => {
@@ -235,7 +248,7 @@ export default function ActiveInterviewPage() {
 
   const advanceQuestion = useCallback((submittedText: string) => {
     speech.reset()
-    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null)
+    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setPracticeFeedback(null)
     if (isLastQuestion) { handleComplete(); return }
     const nextIdx = currentIdx + 1
     setCurrentIdx(nextIdx)
@@ -653,6 +666,21 @@ export default function ActiveInterviewPage() {
                         {followUp.action === 'follow_up' ? 'Follow-up' : followUp.action === 'probe_deeper' ? 'Probe Deeper' : 'Challenge'}
                       </p>
                       <p className="text-sm text-on-surface">{followUp.response}</p>
+                    </div>
+                  </div>
+                )}
+                {mode === 'practice' && practiceFeedback && (
+                  <div className="self-start max-w-[85%]">
+                    <div className="p-4 rounded-xl border border-primary/20 bg-primary-container/10">
+                      <p className="text-xs font-bold uppercase tracking-wide mb-2 text-primary">Feedback on that answer</p>
+                      {practiceFeedback.suggestion && (
+                        <p className="text-sm text-on-surface mb-2">{practiceFeedback.suggestion}</p>
+                      )}
+                      {practiceFeedback.keywordsMissed.length > 0 && (
+                        <p className="text-xs text-slate-muted">
+                          Didn&apos;t come up: <span className="text-tertiary-container font-medium">{practiceFeedback.keywordsMissed.join(', ')}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}

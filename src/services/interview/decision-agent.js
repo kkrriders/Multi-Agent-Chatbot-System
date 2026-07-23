@@ -19,8 +19,8 @@ const { logger } = require('../../shared/logger');
 
 const VALID_ACTIONS = new Set(['next_question', 'follow_up', 'probe_deeper', 'challenge']);
 
-const DECISION_PROMPT = ({ questionText, answerText, scores, keywordsMissed, improvementSuggestion }) => `
-You are a senior technical interviewer deciding your next move after hearing a candidate's answer.
+const DECISION_PROMPT = ({ questionText, answerText, scores, keywordsMissed, improvementSuggestion, coaching }) => `
+You are a ${coaching ? 'technical interview coach helping a candidate practice and learn' : "senior technical interviewer deciding your next move after hearing a candidate's answer"}.
 
 QUESTION: ${questionText.slice(0, 400)}
 SCORES: Relevance=${scores.relevance} Depth=${scores.depth} Clarity=${scores.clarity} Overall=${scores.overall}/100
@@ -28,17 +28,21 @@ ANSWER: ${answerText.slice(0, 600)}
 ${keywordsMissed.length ? `CONCEPTS NOT COVERED: ${keywordsMissed.slice(0, 5).join(', ')}` : ''}
 ${improvementSuggestion ? `MAIN GAP: ${improvementSuggestion.slice(0, 200)}` : ''}
 
-Choose one action and write a short follow-up if needed:
+Choose one action:
 - "next_question": answer was sufficient (use when overall >= 72 or no clear gap)
 - "follow_up": answer was too vague or missed the point entirely
 - "probe_deeper": good answer but skipped an important concept worth exploring
 - "challenge": answer contained a technical inaccuracy you want to address
 
+${coaching
+    ? 'For "probe_deeper" or "challenge": write a short EXPLANATION in "response" that teaches the missed concept or corrects the inaccuracy (2-3 sentences, give the answer, don\'t just ask another question) so the candidate learns it before moving on. For "follow_up", ask a short clarifying question as normal.'
+    : 'Write a short follow-up question or challenge in "response" as a real interviewer would — do not give away the answer.'}
+
 Respond with valid JSON only:
 {
   "action": "next_question|follow_up|probe_deeper|challenge",
   "reason": "one sentence why",
-  "response": "the follow-up question or challenge to show the candidate (empty string if next_question)"
+  "response": "the follow-up/challenge/explanation to show the candidate (empty string if next_question)"
 }
 `.trim();
 
@@ -78,6 +82,7 @@ async function decide({ questionText, answerText, scores, keywordsMissed, improv
     scores,
     keywordsMissed: keywordsMissed || [],
     improvementSuggestion: (improvementSuggestions || [])[0] || '',
+    coaching: mode === 'practice',
   });
 
   let data;

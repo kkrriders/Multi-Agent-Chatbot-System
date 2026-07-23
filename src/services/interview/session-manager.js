@@ -17,6 +17,7 @@ const broadcaster = require('../sse/broadcaster');
 const achievementService = require('../gamification/achievement-service');
 const scoringQueue = require('../queue/scoring-queue');
 const orchestrator = require('../agents/orchestrator');
+const profileAgent = require('../agents/profile-agent');
 const { logger } = require('../../shared/logger');
 
 const SESSION_MAX_ACTIVE_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -50,7 +51,12 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
     ...(timeLimitPerQuestion ? { timeLimitPerQuestion } : {}),
   });
 
-  // Run research pipeline when a company is specified (10s max — session must always start)
+  // Always build the candidate's weak/strong-area profile — pure DB reads, no AI call —
+  // so question generation can target it even when no company is specified.
+  const userProfile = await profileAgent.build(userId.toString());
+
+  // Run the (expensive, AI + optional Tavily) research pipeline only when a company is
+  // specified (10s max — session must always start).
   let agentContext = null;
   if (companyName) {
     const researchTimeout = new Promise(resolve => setTimeout(() => resolve(null), 10_000));
@@ -91,7 +97,7 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
         jobDescription,
         interviewId:     interview._id.toString(),
         companyContext:  agentContext?.companyContext || null,
-        userProfile:     agentContext?.userProfile    || null,
+        userProfile:     agentContext?.userProfile    || userProfile,
         liveSnippets:    agentContext?.liveSnippets   || [],
         seenQuestionIds: seenQuestionIds.map(id => id.toString()),
         numQuestions,
