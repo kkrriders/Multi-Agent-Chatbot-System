@@ -6,6 +6,7 @@
  */
 
 const ai = require('../ai/provider-manager');
+const schemas = require('../ai/schemas');
 const { assertSafe } = require('../../middleware/injection-guard');
 
 const EXTRACT_PROMPT = (cvText) => `
@@ -36,7 +37,11 @@ Rules:
 async function extract(cvText) {
   assertSafe(cvText, 'cv-text');
 
-  const { data } = await ai.generateJson(EXTRACT_PROMPT(cvText), 'balanced', { maxTokens: 2000 });
+  const { data } = await ai.generateJson(EXTRACT_PROMPT(cvText), 'balanced', {
+    maxTokens: 2000,
+    schema: schemas.skillExtraction,
+    callSite: 'skill-extractor:extract',
+  });
 
   return {
     name: typeof data.name === 'string' ? data.name.slice(0, 200) : null,

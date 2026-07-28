@@ -56,7 +56,7 @@ async function runEvals() {
   // ── Structural evals (mocked AI) ─────────────────────────────────────────
 
   await check('returns_required_fields', async () => {
-    ai.generateJson = async () => buildAIResponse({ relevance: 80, depth: 75, clarity: 70, keywordsHit: ['schema'], keywordsMissed: ['ACID'] });
+    ai.generateJsonWithEscalation = async () => buildAIResponse({ relevance: 80, depth: 75, clarity: 70, keywordsHit: ['schema'], keywordsMissed: ['ACID'] });
     const result = await score({ ...BASE_SCORE_PARAMS, answerText: SAMPLE_ANSWERS.strong.answer });
     const required = ['scores', 'improvementSuggestions', 'keywordsHit', 'keywordsMissed', 'evidence'];
     for (const field of required) {
@@ -69,7 +69,7 @@ async function runEvals() {
   });
 
   await check('clamps_scores_to_0_100', async () => {
-    ai.generateJson = async () => buildAIResponse({ relevance: 150, depth: -10, clarity: 200 });
+    ai.generateJsonWithEscalation = async () => buildAIResponse({ relevance: 150, depth: -10, clarity: 200 });
     const result = await score({ ...BASE_SCORE_PARAMS, answerText: 'test' });
     if (result.scores.relevance !== 100) throw new Error(`relevance should be clamped to 100, got ${result.scores.relevance}`);
     if (result.scores.depth !== 0)      throw new Error(`depth should be clamped to 0, got ${result.scores.depth}`);
@@ -77,7 +77,7 @@ async function runEvals() {
   });
 
   await check('overall_is_average_of_three_dimensions', async () => {
-    ai.generateJson = async () => buildAIResponse({ relevance: 80, depth: 70, clarity: 75 });
+    ai.generateJsonWithEscalation = async () => buildAIResponse({ relevance: 80, depth: 70, clarity: 75 });
     const result = await score({ ...BASE_SCORE_PARAMS, answerText: 'test' });
     const expected = Math.round((80 + 70 + 75) / 3);
     if (result.scores.overall !== expected) {
@@ -85,28 +85,26 @@ async function runEvals() {
     }
   });
 
-  await check('throws_when_evidence_missing', async () => {
-    ai.generateJson = async () => ({ data: { relevance: 80, depth: 70, clarity: 75 } }); // no evidence
-    let threw = false;
-    try {
-      await score({ ...BASE_SCORE_PARAMS, answerText: 'test' });
-    } catch (err) {
-      threw = true;
-      if (!err.message.includes('evidence') && !err.message.includes('invalid')) {
-        throw new Error(`Unexpected error: ${err.message}`);
-      }
-    }
-    if (!threw) throw new Error('Expected score() to throw when evidence is missing');
+  // Evidence/shape enforcement now lives in provider-manager (schema + retry,
+  // covered by tests/unit/services/provider-manager.test.js), not in
+  // answer-scorer itself. This checks answer-scorer holds up its end of that
+  // contract: it must request schema-validated JSON, tagged with a callSite.
+  await check('requests_schema_validated_json', async () => {
+    let seenOptions = null;
+    ai.generateJsonWithEscalation = async (prompt, options) => { seenOptions = options; return buildAIResponse({ relevance: 80, depth: 70, clarity: 75 }); };
+    await score({ ...BASE_SCORE_PARAMS, answerText: 'test' });
+    if (!seenOptions?.schema) throw new Error('Expected score() to pass a schema to ai.generateJsonWithEscalation');
+    if (seenOptions.callSite !== 'answer-scorer:score') throw new Error(`Unexpected callSite: ${seenOptions.callSite}`);
   });
 
   await check('mocked_strong_answer_scores_high', async () => {
-    ai.generateJson = async () => buildAIResponse({ relevance: 88, depth: 85, clarity: 82, keywordsHit: ['ACID', 'schema', 'relational'] });
+    ai.generateJsonWithEscalation = async () => buildAIResponse({ relevance: 88, depth: 85, clarity: 82, keywordsHit: ['ACID', 'schema', 'relational'] });
     const result = await score({ ...BASE_SCORE_PARAMS, answerText: SAMPLE_ANSWERS.strong.answer });
     if (result.scores.overall < 70) throw new Error(`Strong answer scored too low: ${result.scores.overall}/100`);
   });
 
   await check('mocked_weak_answer_scores_low', async () => {
-    ai.generateJson = async () => buildAIResponse({ relevance: 20, depth: 15, clarity: 25, keywordsMissed: ['ACID', 'schema', 'relational', 'consistency'] });
+    ai.generateJsonWithEscalation = async () => buildAIResponse({ relevance: 20, depth: 15, clarity: 25, keywordsMissed: ['ACID', 'schema', 'relational', 'consistency'] });
     const result = await score({ ...BASE_SCORE_PARAMS, answerText: SAMPLE_ANSWERS.weak.answer });
     if (result.scores.overall > 40) throw new Error(`Weak answer scored too high: ${result.scores.overall}/100`);
   });

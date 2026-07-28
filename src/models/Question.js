@@ -66,6 +66,10 @@ const questionSchema = new mongoose.Schema({
   interviewId:     { type: mongoose.Schema.Types.ObjectId, ref: 'Interview', default: null },
   interviewerName: { type: String, enum: ['Alex', 'Priya', 'James'], default: null },
   active:          { type: Boolean, default: true, index: true },
+
+  // 384-dim local embedding of `text`, for semantic bank retrieval (question-generator.js).
+  // select:false — large array, never needed in normal question fetches/API responses.
+  embedding: { type: [Number], select: false, default: undefined },
 }, {
   timestamps: true,
 });

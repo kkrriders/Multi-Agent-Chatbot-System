@@ -67,6 +67,56 @@ async function generateJson(model, prompt, options = {}) {
   }
 }
 
+async function generateWithTools(model, prompt, options = {}) {
+  const resolvedModel = model || process.env.OPENROUTER_DEFAULT_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
+  try {
+    const res = await axios.post(
+      `${BASE_URL}/chat/completions`,
+      {
+        model: resolvedModel,
+        messages: [{ role: 'user', content: prompt }],
+        tools: options.tools,
+        tool_choice: 'auto',
+        max_tokens: options.maxTokens ?? 500,
+        temperature: options.temperature ?? 0.2,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${getKey()}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:3002',
+          'X-Title': 'MockPrep',
+        },
+        timeout: 30_000,
+      }
+    );
+    const message = res.data.choices[0]?.message;
+    const toolCalls = (message?.tool_calls || []).map(tc => ({
+      name: tc.function?.name,
+      arguments: _safeParseArgs(tc.function?.arguments),
+    }));
+    return {
+      toolCalls,
+      text: message?.content?.trim() || '',
+      inputTokens: res.data.usage?.prompt_tokens ?? 0,
+      outputTokens: res.data.usage?.completion_tokens ?? 0,
+      provider: 'openrouter',
+    };
+  } catch (err) {
+    err.providerErrorType = classifyError(err);
+    logger.warn(`[openrouter-provider] ${err.providerErrorType}: ${err.message}`);
+    throw err;
+  }
+}
+
+function _safeParseArgs(raw) {
+  try {
+    return JSON.parse(raw || '{}');
+  } catch {
+    return {};
+  }
+}
+
 async function isAvailable() {
   if (!process.env.OPENROUTER_API_KEY) return false;
   try {
@@ -80,4 +130,4 @@ async function isAvailable() {
   }
 }
 
-module.exports = { generate, generateJson, isAvailable, name: 'openrouter' };
+module.exports = { generate, generateJson, generateWithTools, isAvailable, name: 'openrouter' };

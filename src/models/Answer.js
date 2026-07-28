@@ -3,10 +3,12 @@
 const mongoose = require('mongoose');
 
 const scoreBreakdownSchema = new mongoose.Schema({
-  relevance: { type: Number, min: 0, max: 100, default: 0 },
-  depth:     { type: Number, min: 0, max: 100, default: 0 },
-  clarity:   { type: Number, min: 0, max: 100, default: 0 },
-  overall:   { type: Number, min: 0, max: 100, default: 0 },
+  relevance:  { type: Number, min: 0, max: 100, default: 0 },
+  depth:      { type: Number, min: 0, max: 100, default: 0 },
+  clarity:    { type: Number, min: 0, max: 100, default: 0 },
+  overall:    { type: Number, min: 0, max: 100, default: 0 },
+  // How sure the AI grader was in this score (0-1), not a measure of answer quality.
+  confidence: { type: Number, min: 0, max: 1, default: null },
 }, { _id: false });
 
 const speechMetricsSchema = new mongoose.Schema({

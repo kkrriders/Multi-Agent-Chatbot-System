@@ -17,6 +17,7 @@
  */
 
 const ai = require('../ai/provider-manager');
+const schemas = require('../ai/schemas');
 const { assertSafe } = require('../../middleware/injection-guard');
 const { logger } = require('../../shared/logger');
 
@@ -57,6 +58,7 @@ Respond with valid JSON only:
   "relevance": 0-100,
   "depth": 0-100,
   "clarity": 0-100,
+  "confidence": 0-1 (how sure YOU are in this score — lower if the diagram or explanation was too sparse to judge well),
   "componentsMissing": ["component or pattern that was absent"],
   "strengths": ["specific strength 1", "specific strength 2"],
   "improvements": ["specific actionable improvement 1", "specific actionable improvement 2"],
@@ -86,16 +88,13 @@ async function score({ questionText, diagramSnapshot, textExplanation, evaluatio
   try {
     const result = await ai.generateJson(
       PROMPT({ questionText, diagramSummary, textExplanation: textExplanation || '', rubric }),
-      'balanced'
+      'balanced',
+      { schema: schemas.systemDesignScore, callSite: 'system-design-scorer:score' }
     );
     data = result.data;
   } catch (err) {
     logger.warn(`[system-design-scorer] AI call failed answer=${answerId}: ${err.message}`);
     throw err;
-  }
-
-  if (!data.evidence) {
-    throw new Error('System design scorer returned invalid JSON — missing evidence');
   }
 
   const clamp = v => (typeof v === 'number' ? Math.min(100, Math.max(0, Math.round(v))) : 0);
@@ -116,6 +115,7 @@ async function score({ questionText, diagramSnapshot, textExplanation, evaluatio
     keywordsHit:            [],
     keywordsMissed:         Array.isArray(data.componentsMissing) ? data.componentsMissing.slice(0, 5) : [],
     evidence:               String(data.evidence || '').slice(0, 500),
+    confidence:             data.confidence,
   };
 }
 

@@ -1,7 +1,9 @@
 'use strict';
 
 /**
- * Answer scorer — evaluates a text answer on 3 dimensions in parallel.
+ * Answer scorer — Evaluator agent in the scoring pipeline (see scoring-queue.js
+ * runPipeline() for the full Evaluator → Interviewer → Judge hand-off).
+ * Evaluates a text answer on 3 dimensions in parallel.
  *
  * Dimensions:
  *   relevance (0-100): Does the answer address the question?
@@ -13,6 +15,7 @@
  */
 
 const ai = require('../ai/provider-manager');
+const schemas = require('../ai/schemas');
 const broadcaster = require('../sse/broadcaster');
 const { assertSafe } = require('../../middleware/injection-guard');
 
@@ -34,6 +37,7 @@ Respond with valid JSON:
   "relevance": 0-100,
   "depth": 0-100,
   "clarity": 0-100,
+  "confidence": 0-1 (how sure YOU are in this score — lower if the answer was ambiguous or too short to judge well),
   "keywordsHit": ["keywords the candidate mentioned"],
   "keywordsMissed": ["expected keywords not mentioned"],
   "improvementSuggestions": ["1-2 specific actionable improvements"],
@@ -58,20 +62,16 @@ async function score({ questionText, expectedKeywords, answerText, sessionId, an
 
   let data;
   try {
-    const result = await ai.generateJson(
+    // Starts on the fast model; escalates once to the balanced model if the
+    // fast model itself reports low confidence in its own score.
+    const result = await ai.generateJsonWithEscalation(
       SCORE_PROMPT(questionText, answerText, expectedKeywords),
-      'fast' // scoring workers use fast model
+      { schema: schemas.answerScore, callSite: 'answer-scorer:score' }
     );
     data = result.data;
   } catch (err) {
     broadcaster.emit(sessionId, 'scoring-error', { answerId, error: 'Scoring failed' });
     throw err;
-  }
-
-  // Verification gate: reject if evidence is missing (hallucination guard)
-  if (!data.evidence || typeof data.relevance !== 'number') {
-    broadcaster.emit(sessionId, 'scoring-error', { answerId, error: 'Invalid score format' });
-    throw new Error('Scorer returned invalid JSON — missing evidence field');
   }
 
   const clamp = v => (typeof v === 'number' ? Math.min(100, Math.max(0, Math.round(v))) : 0);
@@ -94,6 +94,7 @@ async function score({ questionText, expectedKeywords, answerText, sessionId, an
     keywordsHit:   Array.isArray(data.keywordsHit)   ? data.keywordsHit.slice(0, 20)   : [],
     keywordsMissed: Array.isArray(data.keywordsMissed) ? data.keywordsMissed.slice(0, 20) : [],
     evidence: String(data.evidence || '').slice(0, 500),
+    confidence: data.confidence,
   };
 }
 

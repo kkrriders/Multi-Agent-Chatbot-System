@@ -70,6 +70,43 @@ async function generateJson(model, prompt, options = {}) {
   }
 }
 
+async function generateWithTools(model, prompt, options = {}) {
+  try {
+    const res = await getClient().chat.completions.create({
+      model: model || process.env.MANAGER_MODEL || 'llama-3.1-8b-instant',
+      messages: [{ role: 'user', content: prompt }],
+      tools: options.tools,
+      tool_choice: 'auto',
+      max_tokens: options.maxTokens ?? 500,
+      temperature: options.temperature ?? 0.2,
+    });
+    const message = res.choices[0]?.message;
+    const toolCalls = (message?.tool_calls || []).map(tc => ({
+      name: tc.function?.name,
+      arguments: _safeParseArgs(tc.function?.arguments),
+    }));
+    return {
+      toolCalls,
+      text: stripThink(message?.content?.trim() || ''),
+      inputTokens: res.usage?.prompt_tokens ?? 0,
+      outputTokens: res.usage?.completion_tokens ?? 0,
+      provider: 'groq',
+    };
+  } catch (err) {
+    err.providerErrorType = classifyError(err);
+    logger.warn(`[groq-provider] ${err.providerErrorType}: ${err.message}`);
+    throw err;
+  }
+}
+
+function _safeParseArgs(raw) {
+  try {
+    return JSON.parse(raw || '{}');
+  } catch {
+    return {};
+  }
+}
+
 async function transcribeAudio(audioBuffer, mimeType = 'audio/webm') {
   try {
     const file = new File([audioBuffer], 'recording.webm', { type: mimeType });
@@ -95,4 +132,4 @@ async function isAvailable() {
   }
 }
 
-module.exports = { generate, generateJson, transcribeAudio, isAvailable, name: 'groq' };
+module.exports = { generate, generateJson, generateWithTools, transcribeAudio, isAvailable, name: 'groq' };

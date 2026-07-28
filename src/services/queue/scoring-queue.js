@@ -5,6 +5,31 @@ const { logger } = require('../../shared/logger');
 
 const QUEUE_NAME = 'answer-scoring';
 
+/**
+ * runPipeline() is the orchestrator for a genuine (if small) multi-agent
+ * hand-off, not a single monolithic call. Each stage below is a separate
+ * agent — its own prompt, its own schema-validated structured output
+ * (src/services/ai/schemas.js), its own retry/escalation (provider-manager),
+ * and its own tagged usage log (AiUsageLog callSite):
+ *
+ *   Evaluator  (answer-scorer.js / system-design-scorer.js)
+ *              scores the answer just submitted — relevance/depth/clarity + confidence
+ *        ↓
+ *   Interviewer (decision-agent.js)
+ *              reads the Evaluator's score and decides what happens next —
+ *              advance, follow up, probe deeper, or challenge
+ *        ↓
+ *   Judge      (session-feedback.js, panel mode only, end of session)
+ *              synthesises all of the Evaluator's scores into final
+ *              per-persona feedback
+ *
+ * Each stage runs sequentially (never Promise.all — the Groq free tier is a
+ * shared 30 req/min budget), and each is independently callable/testable.
+ * This is intentionally NOT built on a graph-orchestration framework
+ * (LangGraph/CrewAI/etc.) — the hand-off is linear, so a graph scheduler
+ * would add indirection without adding capability at this call volume.
+ */
+
 // BullMQ requires its own ioredis connections with maxRetriesPerRequest: null
 function makeConnection() {
   const IORedis = require('ioredis');
@@ -72,13 +97,13 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
         answerId,
       });
       await Answer.findByIdAndUpdate(answerId, {
-        scores:                 result.scores,
+        scores:                 { ...result.scores, confidence: result.confidence },
         scored:                 true,
         improvementSuggestions: result.improvementSuggestions,
         keywordsHit:            result.keywordsHit,
         keywordsMissed:         result.keywordsMissed,
       });
-      broadcaster.emit(interviewId, 'score-update', { answerId, scores: result.scores, timestamp: Date.now() });
+      broadcaster.emit(interviewId, 'score-update', { answerId, scores: { ...result.scores, confidence: result.confidence }, timestamp: Date.now() });
     } catch (err) {
       logger.error(`[scoring] system-design score failed answer=${answerId}: ${err.message}`);
       broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Scoring failed' });
@@ -96,7 +121,7 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
       answerId,
     });
     await Answer.findByIdAndUpdate(answerId, {
-      scores:                 result.scores,
+      scores:                 { ...result.scores, confidence: result.confidence },
       scored:                 true,
       improvementSuggestions: result.improvementSuggestions,
       keywordsHit:            result.keywordsHit,
@@ -107,7 +132,7 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
     // actionable feedback per-answer instead of only in the end-of-session summary.
     broadcaster.emit(interviewId, 'score-update', {
       answerId,
-      scores: result.scores,
+      scores: { ...result.scores, confidence: result.confidence },
       improvementSuggestions: result.improvementSuggestions,
       keywordsMissed: result.keywordsMissed,
       timestamp: Date.now(),

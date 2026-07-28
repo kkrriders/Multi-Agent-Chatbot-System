@@ -124,7 +124,7 @@ describe('score', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('returns normalised scores and metadata', async () => {
-    ai.generateJson.mockResolvedValue(validAIResponse);
+    ai.generateJsonWithEscalation.mockResolvedValue(validAIResponse);
     const result = await score({
       questionText: 'Explain Node.js event loop',
       expectedKeywords: ['node', 'express', 'redis'],
@@ -141,7 +141,7 @@ describe('score', () => {
   });
 
   test('clamps scores to 0-100', async () => {
-    ai.generateJson.mockResolvedValue({
+    ai.generateJsonWithEscalation.mockResolvedValue({
       data: { ...validAIResponse.data, relevance: 150, depth: -10, clarity: 200 },
     });
     const result = await score({ questionText: 'Q', expectedKeywords: [], answerText: 'A', sessionId: 's', answerId: 'a' });
@@ -150,15 +150,19 @@ describe('score', () => {
     expect(result.scores.clarity).toBe(100);
   });
 
-  test('throws and emits scoring-error when AI returns no evidence', async () => {
-    ai.generateJson.mockResolvedValue({ data: { relevance: 80, depth: 70, clarity: 75 } }); // no evidence
-    await expect(score({ questionText: 'Q', expectedKeywords: [], answerText: 'A', sessionId: 's', answerId: 'a' }))
-      .rejects.toThrow('missing evidence');
-    expect(broadcaster.emit).toHaveBeenCalledWith('s', 'scoring-error', expect.any(Object));
+  test('requests schema-validated JSON tagged with a callSite', async () => {
+    // Evidence/shape enforcement now happens in provider-manager (schema + retry),
+    // not in answer-scorer itself — this asserts answer-scorer holds up its end
+    // of that contract by passing a schema and a callSite tag.
+    ai.generateJsonWithEscalation.mockResolvedValue(validAIResponse);
+    await score({ questionText: 'Q', expectedKeywords: [], answerText: 'A', sessionId: 's', answerId: 'a' });
+    const [, options] = ai.generateJsonWithEscalation.mock.calls[0];
+    expect(options.schema).toBeDefined();
+    expect(options.callSite).toBe('answer-scorer:score');
   });
 
   test('re-throws AI errors and emits scoring-error', async () => {
-    ai.generateJson.mockRejectedValue(new Error('Groq timeout'));
+    ai.generateJsonWithEscalation.mockRejectedValue(new Error('Groq timeout'));
     await expect(score({ questionText: 'Q', expectedKeywords: [], answerText: 'A', sessionId: 's', answerId: 'a' }))
       .rejects.toThrow('Groq timeout');
     expect(broadcaster.emit).toHaveBeenCalledWith('s', 'scoring-error', expect.any(Object));

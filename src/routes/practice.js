@@ -13,6 +13,7 @@ const { authenticate } = require('../middleware/auth');
 const { messageLimiter } = require('../middleware/rateLimiter');
 const Question = require('../models/Question');
 const ai = require('../services/ai/provider-manager');
+const schemas = require('../services/ai/schemas');
 const { logger } = require('../shared/logger');
 
 // POST /api/practice/evaluate
@@ -72,12 +73,16 @@ Respond ONLY with a valid JSON object — no explanation outside it:
   "feedback": "<2-3 sentence overall assessment>",
   "strengths": ["<strength 1>", "<strength 2>"],
   "issues": ["<issue or improvement 1>", "<issue or improvement 2>"],
-  "approachUsed": "<one sentence describing the approach used>"
+  "approachUsed": "<one sentence describing the approach used>",
+  "confidence": <0-1, how sure YOU are in this score>
 }
 
 Score guide: 90-100 = correct and optimal, 70-89 = correct but suboptimal complexity, 50-69 = partially correct, 0-49 = incorrect or incomplete.`;
 
-  const { data } = await ai.generateJson(prompt, 'fast');
+  const { data } = await ai.generateJsonWithEscalation(prompt, {
+    schema: schemas.codingEval,
+    callSite: 'practice:evaluateCoding',
+  });
   return {
     score: Number(data.score) || 0,
     verdict: data.verdict || 'incorrect',
@@ -85,6 +90,7 @@ Score guide: 90-100 = correct and optimal, 70-89 = correct but suboptimal comple
     strengths: Array.isArray(data.strengths) ? data.strengths : [],
     issues: Array.isArray(data.issues) ? data.issues : [],
     approachUsed: data.approachUsed || '',
+    confidence: data.confidence,
   };
 }
 
@@ -134,15 +140,20 @@ Respond ONLY with a valid JSON object — no explanation outside it:
     { "item": "<rubric item text>", "status": "<covered|partial|missing>", "note": "<one sentence>" }
   ],
   "feedback": "<2-3 sentence overall assessment>",
-  "topMissing": ["<most important missing component 1>", "<most important missing component 2>"]
+  "topMissing": ["<most important missing component 1>", "<most important missing component 2>"],
+  "confidence": <0-1, how sure YOU are in this score>
 }`;
 
-  const { data } = await ai.generateJson(prompt, 'balanced');
+  const { data } = await ai.generateJson(prompt, 'balanced', {
+    schema: schemas.systemDesignEval,
+    callSite: 'practice:evaluateSystemDesign',
+  });
   return {
     score: Number(data.score) || 0,
     rubricResults: Array.isArray(data.rubricResults) ? data.rubricResults : [],
     feedback: data.feedback || '',
     topMissing: Array.isArray(data.topMissing) ? data.topMissing : [],
+    confidence: data.confidence,
   };
 }
 

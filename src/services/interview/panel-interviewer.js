@@ -15,6 +15,7 @@
  */
 
 const ai = require('../ai/provider-manager');
+const schemas = require('../ai/schemas');
 const Question = require('../../models/Question');
 const { assertSafe } = require('../../middleware/injection-guard');
 const { logger } = require('../../shared/logger');
@@ -65,7 +66,8 @@ async function generate({ targetRole, skills, jobDescription, interviewId }) {
   try {
     const { data } = await ai.generateJson(
       PANEL_PROMPT(targetRole || 'Software Engineer', skills || [], jobDescription),
-      'balanced'
+      'balanced',
+      { schema: schemas.panelQuestions, callSite: 'panel-interviewer:generate' }
     );
 
     const raw = Array.isArray(data.questions) ? data.questions.slice(0, 12) : [];

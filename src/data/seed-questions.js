@@ -12,6 +12,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Question = require('../models/Question');
+const { embed } = require('../services/ai/embedding-service');
 
 // ── CS Fundamentals ───────────────────────────────────────────────────────────
 
@@ -1454,6 +1455,52 @@ const CODING_QUESTIONS = [
   },
 ];
 
+// ── General bank (technical / behavioral / situational) ───────────────────────
+//
+// This is the pool question-generator.js's $sample bank query actually reads
+// for practice/timed/full modes. Generic on purpose — never CV-specific — so
+// it's safe to share across every candidate. Before this, that pool was empty
+// (seeding only covered cs_fundamentals/system_design/coding), so the bank
+// mechanism never fired for the main interview flow and every question was
+// freshly AI-generated every session.
+
+const GENERAL_TECHNICAL = [
+  { text: 'What principles do you follow when designing a REST API? Discuss resource naming, status codes, and versioning.', category: 'technical', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['resource', 'idempotent', 'status code', 'versioning', 'HATEOAS'] },
+  { text: 'Explain different caching strategies (cache-aside, write-through, write-behind) and when you would use each.', category: 'technical', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['cache-aside', 'write-through', 'write-behind', 'TTL', 'invalidation', 'stale data'] },
+  { text: 'What does it mean for an API endpoint to be idempotent, and why does it matter for retries?', category: 'technical', difficulty: 'easy', questionFormat: 'text', role: 'General', expectedKeywords: ['idempotency key', 'retry', 'PUT', 'exactly-once', 'network failure'] },
+  { text: 'How would you design a rate limiter for a public API? Compare token bucket and sliding window approaches.', category: 'technical', difficulty: 'hard', questionFormat: 'text', role: 'General', expectedKeywords: ['token bucket', 'sliding window', 'burst', 'distributed', 'Redis'] },
+  { text: 'What are the trade-offs between a microservices architecture and a monolith? When would you choose each?', category: 'technical', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['deployment', 'coupling', 'operational complexity', 'scaling', 'team size'] },
+  { text: 'Describe your approach to testing a new feature — what mix of unit, integration, and end-to-end tests would you write?', category: 'technical', difficulty: 'easy', questionFormat: 'text', role: 'General', expectedKeywords: ['test pyramid', 'unit test', 'integration test', 'e2e', 'mocking', 'coverage'] },
+  { text: 'Explain the difference between concurrency and parallelism with a concrete example from a system you have worked on.', category: 'technical', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['concurrency', 'parallelism', 'threads', 'event loop', 'multi-core'] },
+  { text: 'When would you introduce a message queue between two services instead of a direct synchronous call?', category: 'technical', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['decoupling', 'backpressure', 'async', 'retry', 'dead letter queue', 'throughput'] },
+  { text: 'How do you approach versioning a public API that already has active clients, without breaking them?', category: 'technical', difficulty: 'hard', questionFormat: 'text', role: 'General', expectedKeywords: ['backward compatible', 'deprecation', 'URI versioning', 'header versioning', 'semantic versioning'] },
+  { text: 'What would you instrument in a production service to be confident you would know about a problem before a customer reports it?', category: 'technical', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['logging', 'metrics', 'tracing', 'alerting', 'SLO', 'observability'] },
+];
+
+const GENERAL_BEHAVIORAL = [
+  { text: 'Describe a time you disagreed with a technical decision made by your team or manager. How did you handle it?', category: 'behavioral', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['disagree and commit', 'data', 'communication', 'compromise', 'outcome'] },
+  { text: 'Tell me about a time you missed a deadline or delivered something late. What happened and what did you learn?', category: 'behavioral', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['accountability', 'root cause', 'communication', 'estimate', 'learning'] },
+  { text: 'Describe a time you had to learn an unfamiliar technology or domain quickly to get a task done.', category: 'behavioral', difficulty: 'easy', questionFormat: 'text', role: 'General', expectedKeywords: ['learning', 'resourcefulness', 'timeline', 'outcome'] },
+  { text: 'Tell me about a mistake you made that had real impact. How did you handle it afterward?', category: 'behavioral', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['ownership', 'root cause', 'communication', 'prevention', 'blameless'] },
+  { text: 'Describe a time you received difficult or critical feedback. How did you respond to it?', category: 'behavioral', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['feedback', 'growth mindset', 'self-awareness', 'action taken'] },
+  { text: 'Tell me about a time you mentored or helped a struggling teammate. What was the outcome?', category: 'behavioral', difficulty: 'easy', questionFormat: 'text', role: 'General', expectedKeywords: ['mentorship', 'patience', 'communication', 'outcome'] },
+  { text: 'Describe a time you had to prioritize between several competing tasks with limited time. How did you decide?', category: 'behavioral', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['prioritization', 'impact', 'trade-off', 'stakeholders', 'communication'] },
+  { text: 'Tell me about a time you took initiative on something outside your explicit job responsibilities.', category: 'behavioral', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['initiative', 'ownership', 'impact', 'proactive'] },
+  { text: 'Describe a time you had to work with an underperforming teammate on a shared deliverable. What did you do?', category: 'behavioral', difficulty: 'hard', questionFormat: 'text', role: 'General', expectedKeywords: ['empathy', 'communication', 'escalation', 'outcome', 'collaboration'] },
+  { text: 'Tell me about a time you influenced a decision without having direct authority over the people involved.', category: 'behavioral', difficulty: 'hard', questionFormat: 'text', role: 'General', expectedKeywords: ['influence', 'persuasion', 'data', 'relationship building', 'outcome'] },
+];
+
+const GENERAL_SITUATIONAL = [
+  { text: 'You get paged at 2am because a production service is returning errors for 10% of requests. Walk me through your approach.', category: 'situational', difficulty: 'hard', questionFormat: 'text', role: 'General', expectedKeywords: ['triage', 'rollback', 'logs', 'metrics', 'mitigation', 'root cause', 'postmortem'] },
+  { text: 'You are asked to estimate a project with unclear or incomplete requirements. How do you approach the estimate?', category: 'situational', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['clarifying questions', 'assumptions', 'ranges', 'risk', 'scoping'] },
+  { text: 'A stakeholder keeps adding scope to a project that is already behind schedule. How do you handle this?', category: 'situational', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['scope creep', 'trade-off', 'communication', 'prioritization', 'stakeholder management'] },
+  { text: 'You have to choose between paying down significant tech debt or shipping a requested feature this sprint. How do you decide?', category: 'situational', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['trade-off', 'risk', 'business impact', 'communication', 'incremental'] },
+  { text: 'A teammate keeps blocking your pull requests with feedback you believe is unnecessary. How do you resolve this?', category: 'situational', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['communication', 'conflict resolution', 'code review', 'compromise', 'escalation'] },
+  { text: 'You inherit a legacy system with no tests and unclear ownership. How do you decide whether to refactor incrementally or rewrite it?', category: 'situational', difficulty: 'hard', questionFormat: 'text', role: 'General', expectedKeywords: ['risk', 'incremental', 'strangler pattern', 'test coverage', 'business continuity'] },
+  { text: 'A security researcher reports a critical vulnerability in production. Walk me through how you would respond.', category: 'situational', difficulty: 'hard', questionFormat: 'text', role: 'General', expectedKeywords: ['triage', 'severity', 'patch', 'disclosure', 'communication', 'rollback'] },
+  { text: 'You are under a tight deadline and see a way to ship faster by cutting corners on quality. How do you handle this?', category: 'situational', difficulty: 'medium', questionFormat: 'text', role: 'General', expectedKeywords: ['trade-off', 'communication', 'risk', 'technical debt', 'transparency'] },
+];
+
 // ── Seed runner ───────────────────────────────────────────────────────────────
 
 async function seed() {
@@ -1464,13 +1511,22 @@ async function seed() {
     ...CS_FUNDAMENTALS.map(q => ({ ...q, source: 'system', active: true })),
     ...SYSTEM_DESIGN_QUESTIONS.map(q => ({ ...q, source: 'system', active: true })),
     ...CODING_QUESTIONS.map(q => ({ ...q, source: 'system', active: true })),
+    ...GENERAL_TECHNICAL.map(q => ({ ...q, source: 'system', active: true })),
+    ...GENERAL_BEHAVIORAL.map(q => ({ ...q, source: 'system', active: true })),
+    ...GENERAL_SITUATIONAL.map(q => ({ ...q, source: 'system', active: true })),
   ];
 
   let inserted = 0;
   for (const q of allQuestions) {
     const exists = await Question.findOne({ text: q.text }).lean();
     if (!exists) {
-      await Question.create(q);
+      let embedding;
+      try {
+        embedding = await embed(q.text);
+      } catch (err) {
+        console.warn(`Embedding failed for "${q.text.slice(0, 50)}...": ${err.message} (question saved without it)`);
+      }
+      await Question.create({ ...q, ...(embedding ? { embedding } : {}) });
       inserted++;
     }
   }

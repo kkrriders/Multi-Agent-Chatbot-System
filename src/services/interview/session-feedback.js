@@ -1,8 +1,9 @@
 'use strict';
 
 /**
- * Session feedback — generates multi-perspective end-of-session feedback
- * for panel interview mode.
+ * Session feedback — Judge agent in the scoring pipeline (see scoring-queue.js
+ * runPipeline() for the full Evaluator → Interviewer → Judge hand-off).
+ * Generates multi-perspective end-of-session feedback for panel interview mode.
  *
  * ONE AI call returns feedback from all 3 personas simultaneously.
  * Uses balanced tier to avoid burning qwen3-32b tokens/min limit.
@@ -11,6 +12,7 @@
  */
 
 const ai = require('../ai/provider-manager');
+const schemas = require('../ai/schemas');
 const { logger } = require('../../shared/logger');
 
 const FEEDBACK_PROMPT = (targetRole, answerSummaries) => `
@@ -90,7 +92,8 @@ async function generate({ targetRole, answers, questions }) {
   try {
     const { data } = await ai.generateJson(
       FEEDBACK_PROMPT(targetRole || 'the candidate', summaries),
-      'balanced'
+      'balanced',
+      { schema: schemas.sessionFeedback, callSite: 'session-feedback:generate' }
     );
 
     return {

@@ -24,6 +24,7 @@ const progressRoutes  = require('./src/routes/progress');
 const questionRoutes  = require('./src/routes/questions');
 const speechRoutes    = require('./src/routes/speech');
 const practiceRoutes  = require('./src/routes/practice');
+const adminRoutes     = require('./src/routes/admin');
 
 const { authenticate } = require('./src/middleware/auth');
 const { auditLog }     = require('./src/middleware/auditLog');
@@ -118,6 +119,7 @@ app.use('/api/progress',  generalLimiter, csrfProtection, progressRoutes);
 app.use('/api/questions', generalLimiter, csrfProtection, questionRoutes);
 app.use('/api/speech',    generalLimiter, csrfProtection, speechRoutes);
 app.use('/api/practice',  messageLimiter, csrfProtection, practiceRoutes);
+app.use('/api/admin',     generalLimiter, csrfProtection, adminRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {

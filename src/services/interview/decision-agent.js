@@ -1,7 +1,9 @@
 'use strict';
 
 /**
- * Decision agent — runs after every scored answer to decide what happens next.
+ * Decision agent — Interviewer agent in the scoring pipeline (see
+ * scoring-queue.js runPipeline() for the full Evaluator → Interviewer → Judge
+ * hand-off). Runs after every scored answer to decide what happens next.
  *
  * Actions:
  *   next_question  — answer sufficient, advance
@@ -14,6 +16,7 @@
  */
 
 const ai = require('../ai/provider-manager');
+const schemas = require('../ai/schemas');
 const { assertSafe } = require('../../middleware/injection-guard');
 const { logger } = require('../../shared/logger');
 
@@ -87,7 +90,7 @@ async function decide({ questionText, answerText, scores, keywordsMissed, improv
 
   let data;
   try {
-    const result = await ai.generateJson(prompt, 'balanced');
+    const result = await ai.generateJson(prompt, 'balanced', { schema: schemas.decision, callSite: 'decision-agent:decide' });
     data = result.data;
   } catch (err) {
     logger.warn(`[decision-agent] AI call failed, defaulting to next_question: ${err.message}`);

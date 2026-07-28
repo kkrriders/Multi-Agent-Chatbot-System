@@ -2,8 +2,25 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { scan } = require('../../middleware/injection-guard');
+const { scan, assertSafe } = require('../../middleware/injection-guard');
 const { logger } = require('../../shared/logger');
+const ai = require('../ai/provider-manager');
+
+// Native tool-calling: the model decides whether curated data already covers
+// the company well enough, or whether a live search would add value — and if
+// so, what to search for. Replaces a fixed 2-query template with a judgment call.
+const WEB_SEARCH_TOOL = {
+  type: 'function',
+  function: {
+    name: 'web_search',
+    description: 'Search the live web for current interview experiences or company-specific info. Costs an API call — only call this for a gap the curated data does not already cover.',
+    parameters: {
+      type: 'object',
+      properties: { query: { type: 'string', description: 'A concise, specific search query' } },
+      required: ['query'],
+    },
+  },
+};
 
 // Common aliases so "Facebook" maps to meta.json, "JP Morgan" maps to jpmorgan.json, etc.
 const ALIASES = {
@@ -128,19 +145,14 @@ function _buildQueries(companyName, targetRole, userProfile) {
  * }>}
  */
 async function research({ companyName, userProfile, targetRole }) {
-  const curated      = _loadCurated(companyName);
-  const liveSnippets = [];
+  // Defense in depth — the route already guards targetRole, but this file now
+  // puts it directly into an AI prompt (previously only into a sanitised query string).
+  if (targetRole) assertSafe(targetRole, 'research-agent:targetRole');
 
-  if (process.env.TAVILY_API_KEY) {
-    const queries = _buildQueries(companyName, targetRole, userProfile);
-    for (const query of queries) {
-      const snippet = await _fetchTavily(query);
-      if (!snippet) continue;
-      // Sanitise before adding — live content could contain injection attempts
-      const { safe } = scan(snippet);
-      if (safe) liveSnippets.push(snippet.slice(0, 400));
-    }
-  }
+  const curated = _loadCurated(companyName);
+  const liveSnippets = process.env.TAVILY_API_KEY
+    ? await _decideAndSearch(companyName, targetRole, userProfile, curated)
+    : [];
 
   const source = curated
     ? (liveSnippets.length ? 'curated+live' : 'curated')
@@ -153,6 +165,63 @@ async function research({ companyName, userProfile, targetRole }) {
     source,
     confidence: curated ? 'high' : liveSnippets.length ? 'medium' : 'low',
   };
+}
+
+function _buildDecisionPrompt(companyName, targetRole, userProfile, curated) {
+  return `You are a research assistant preparing live web-search queries for a candidate's interview at "${companyName}" (role: ${targetRole || 'not specified'}).
+
+${curated
+    ? `We already have curated interview-prep data on file for this company (interview format: ${curated.interviewFormat || 'unspecified'}; evaluation criteria: ${(curated.evaluationCriteria || []).join(', ') || 'unspecified'}).`
+    : 'We have no curated data on file for this company.'}
+
+Candidate top skills: ${(userProfile.skills || []).slice(0, 5).join(', ') || 'unknown'}
+Candidate weak areas to probe: ${(userProfile.weakAreas || []).slice(0, 3).join(', ') || 'none noted'}
+
+Decide whether a live web search would add value beyond what we already have. If the curated data already covers the interview style well and there is no clear gap worth searching, do not call any tool. Otherwise call web_search 1-2 times with concise, specific queries.`;
+}
+
+/**
+ * Let the model decide (via native tool-calling) whether live search adds
+ * value here, and if so, what to search for — replacing a fixed query
+ * template with a judgment call informed by the curated data + candidate profile.
+ *
+ * Falls back to the old fixed 2-query template if the tool-calling AI call
+ * itself fails, so a rate-limited or unreachable provider never blocks research.
+ */
+async function _decideAndSearch(companyName, targetRole, userProfile, curated) {
+  try {
+    // Cached 24h — company+role+skill-shape prompts repeat often across different
+    // candidates interviewing at the same popular company, unlike per-answer scoring prompts.
+    const { toolCalls } = await ai.generateWithTools(
+      _buildDecisionPrompt(companyName, targetRole, userProfile, curated),
+      'fast',
+      [WEB_SEARCH_TOOL],
+      { callSite: 'research-agent:decide-search', cacheTtlSeconds: 86_400 }
+    );
+
+    const queries = toolCalls
+      .filter(tc => tc.name === 'web_search' && typeof tc.arguments?.query === 'string')
+      .slice(0, 2)
+      .map(tc => _sanitizeQueryTerm(tc.arguments.query))
+      .filter(Boolean);
+
+    return _runQueries(queries);
+  } catch (err) {
+    logger.warn(`[research-agent] tool-calling search decision failed, falling back to fixed queries: ${err.message}`);
+    return _runQueries(_buildQueries(companyName, targetRole, userProfile));
+  }
+}
+
+async function _runQueries(queries) {
+  const snippets = [];
+  for (const query of queries) {
+    const snippet = await _fetchTavily(query);
+    if (!snippet) continue;
+    // Sanitise before adding — live content could contain injection attempts
+    const { safe } = scan(snippet);
+    if (safe) snippets.push(snippet.slice(0, 400));
+  }
+  return snippets;
 }
 
 module.exports = { research };

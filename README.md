@@ -38,6 +38,23 @@ Upload your CV, pick a role and company, and practice with AI-generated question
 | 28 | DSA Coding Questions — Monaco editor, 8 languages | ✅ |
 | 29 | Code Execution — Piston API, test case pass/fail via SSE | ✅ |
 | 30 | Question Bank Management (admin) | ✅ |
+| 31 | Standalone Practice Mode — drill one coding or system design question at a time, outside a full interview | ✅ |
+| 32 | Social Login — Google & LinkedIn OAuth (stateless, no session store) | ✅ |
+
+---
+
+## How It Works
+
+**Golden path — a full interview:**
+
+1. **Sign up / log in** — email+password or one-click Google/LinkedIn OAuth.
+2. **Upload your CV** — PDF, DOCX, or TXT. It's parsed for skills, experience, and projects; interviews are blocked until this step is done (`cv_required` gate).
+3. **Start a session** — pick a mode (`practice`, `timed`, `full`, or `panel`), optionally a target role and company. The question generator uses your CV + the mode to build a tailored question set.
+4. **Answer questions** — by typing, speaking (auto-transcribed), drawing a system design diagram, or writing code. Each answer is scored in real time over SSE as soon as you submit; the decision agent may follow up, probe deeper, challenge you, or move to the next question depending on your answer quality.
+5. **Finish the session** — get an aggregate score, category breakdown, filler-word/speech stats, and per-answer feedback.
+6. **Track progress** — the dashboard shows weak/strong areas, score trends per concept, daily streaks, and achievement badges across every past session.
+
+**Standalone Practice Mode** (`/practice/coding`, `/practice/system-design`) is a separate, lighter path for drilling a single question without starting a full session: pick any coding or system-design question from the bank, solve it, and get an immediate AI-graded score + feedback via `POST /api/practice/evaluate`. No CV or session required — useful for quick reps between full mock interviews.
 
 ---
 
@@ -71,12 +88,14 @@ mockprep/
 ├── server.js                      ← Express entry point (port 3000)
 ├── src/
 │   ├── routes/                    ← Thin HTTP handlers only
-│   │   ├── auth.js                ← /api/auth/*
+│   │   ├── auth.js                ← /api/auth/* (register/login/logout)
+│   │   ├── oauth.js               ← /api/auth/google, /api/auth/linkedin
 │   │   ├── cv.js                  ← /api/cv/*
 │   │   ├── interview.js           ← /api/interview/*
 │   │   ├── progress.js            ← /api/progress/*
 │   │   ├── questions.js           ← /api/questions/*
-│   │   └── speech.js              ← /api/speech/transcribe
+│   │   ├── speech.js              ← /api/speech/transcribe
+│   │   └── practice.js            ← /api/practice/evaluate (standalone drilling)
 │   ├── services/
 │   │   ├── ai/                    ← provider-manager (Groq → OpenRouter)
 │   │   ├── agents/                ← orchestrator, profile-agent, research-agent
@@ -98,15 +117,24 @@ mockprep/
 │   └── shared/                    ← logger, retry, circuitBreaker
 ├── frontend/                      ← Next.js 15 (port 3002)
 │   ├── app/                       ← App Router pages
+│   │   ├── login/, signup/        ← auth + OAuth buttons
+│   │   ├── upload/                ← CV upload
+│   │   ├── dashboard/             ← landing page after login
 │   │   ├── interview/             ← setup + [sessionId] active interview
-│   │   └── ...                    ← dashboard, upload, progress, results, etc.
+│   │   ├── practice/              ← coding/ + system-design/ standalone drilling
+│   │   ├── results/[sessionId]/   ← post-interview summary
+│   │   ├── progress/              ← trends, weak/strong areas
+│   │   ├── achievements/          ← earned badges
+│   │   ├── leaderboard/           ← personal session ranking
+│   │   ├── questions/             ← question bank browser
+│   │   └── profile/               ← account settings
 │   ├── components/
 │   │   ├── SystemDesignCanvas.tsx ← React Flow canvas + 14 node types
 │   │   └── CodeEditor.tsx         ← Monaco editor + test result panel
 │   ├── hooks/                     ← useSSE, useSpeech (+ Whisper fallback), useRequireAuth
 │   └── lib/                       ← api.ts, auth.ts, config.ts
 ├── tests/
-│   ├── unit/                      ← services + middleware (68 tests)
+│   ├── unit/                      ← services + middleware (105 test cases)
 │   └── e2e/                       ← HTTP endpoint tests (supertest)
 ├── Dockerfile
 ├── docker-compose.yml
@@ -180,6 +208,12 @@ Starts MongoDB, Redis, backend, and frontend. No local Node.js needed.
 | POST | `/api/auth/login` | Login, sets JWT cookie |
 | POST | `/api/auth/logout` | Clear session |
 | GET  | `/api/auth/me` | Current user |
+| GET  | `/api/auth/google` | Redirect to Google OAuth consent screen |
+| GET  | `/api/auth/google/callback` | Exchange code, issue JWT, redirect to `/dashboard` |
+| GET  | `/api/auth/linkedin` | Redirect to LinkedIn OAuth consent screen |
+| GET  | `/api/auth/linkedin/callback` | Exchange code, issue JWT, redirect to `/dashboard` |
+
+Both OAuth flows are stateless — CSRF `state` is an HMAC-signed, 10-minute-TTL token, no server-side session store needed. Each provider only activates once its client ID/secret env vars are set.
 
 ### CV
 | Method | Path | Description |
@@ -236,6 +270,11 @@ Answer submission accepts:
 | DELETE | `/api/questions/:id` | Deactivate (admin) |
 | POST   | `/api/questions/from-jd` | Generate from a job description |
 
+### Practice (standalone, no session required)
+| Method | Path | Description |
+|---|---|---|
+| POST | `/api/practice/evaluate` | AI-grade one coding or system-design answer — `{ type: 'coding'\|'system_design', questionId, code?, language?, nodes?, edges? }` |
+
 ---
 
 ## Interview Modes
@@ -280,6 +319,9 @@ Monaco editor with 8 language options. Code is executed against test cases via t
 | `OPENROUTER_API_KEY` | No | LLM fallback when Groq quota exhausted |
 | `REDIS_URL` | No | BullMQ queue + rate limiting (in-memory fallback if absent) |
 | `TAVILY_API_KEY` | No | Live company research (1,000 free searches/month) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | No | Enables Google OAuth login — redirect URI `<backend>/api/auth/google/callback` |
+| `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` | No | Enables LinkedIn OAuth login — redirect URI `<backend>/api/auth/linkedin/callback` |
+| `BACKEND_URL` | No | Backend base URL for OAuth redirects — default: `http://localhost:3000` |
 | `PORT` | No | Default: 3000 |
 | `LOG_LEVEL` | No | `error` \| `warn` \| `info` \| `debug` — default: `info` |
 

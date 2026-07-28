@@ -7,16 +7,70 @@
  * For a full mock interview the distribution is:
  *   intro (1) → technical (4-6) → behavioral (3-4) → situational (2-3) → closing (1)
  *
- * Bank questions use $sample for randomisation and exclude questions the user
- * has already answered (seenQuestionIds). Only source:'system' questions are
- * eligible for the shared bank — AI-generated questions are session-specific.
+ * Bank questions are sampled from a candidate pool (source:'system' only —
+ * AI-generated questions are session-specific) and ranked by semantic
+ * similarity to the candidate's profile (skills/weak areas/CV gaps) when a
+ * local embedding is available, falling back to pure randomness otherwise.
+ * Already-answered questions are excluded (seenQuestionIds).
  */
 
 const mongoose = require('mongoose');
 const ai = require('../ai/provider-manager');
+const schemas = require('../ai/schemas');
+const { embed, cosineSimilarity } = require('../ai/embedding-service');
 const Question = require('../../models/Question');
 const { assertSafe } = require('../../middleware/injection-guard');
 const { logger } = require('../../shared/logger');
+
+// How much bigger a pool to sample before ranking — gives the ranking step
+// something real to choose from without scanning the whole collection.
+const BANK_POOL_MULTIPLIER = 4;
+
+function _buildProfileContext(userProfile) {
+  if (!userProfile) return null;
+  const parts = [
+    ...(userProfile.skills || []).slice(0, 8),
+    ...(userProfile.weakAreas || []).slice(0, 5),
+    ...(userProfile.cvGaps || []).slice(0, 5),
+  ];
+  return parts.length ? parts.join(', ') : null;
+}
+
+function _shuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/**
+ * Sample a pool from the bank, then rank it by cosine similarity to the
+ * candidate's profile embedding when one is available. Takes a relevance-
+ * weighted top slice and shuffles within it, rather than always returning the
+ * single closest match — keeps the "different questions every session" property
+ * instead of trading all variety away for relevance.
+ */
+async function _retrieveBankQuestions(matchFilter, count, profileEmbedding) {
+  const pool = await Question.aggregate([
+    { $match: matchFilter },
+    { $sample: { size: count * BANK_POOL_MULTIPLIER } },
+  ]);
+
+  if (!profileEmbedding) return pool.slice(0, count);
+
+  const embedded = pool.filter(q => Array.isArray(q.embedding) && q.embedding.length > 0);
+  if (embedded.length === 0) return pool.slice(0, count); // nothing to rank against — old random behaviour
+
+  const ranked = embedded
+    .map(q => ({ q, score: cosineSimilarity(profileEmbedding, q.embedding) }))
+    .sort((a, b) => b.score - a.score)
+    .map(r => r.q);
+
+  const topSlice = ranked.slice(0, Math.max(count * 2, count));
+  return _shuffle(topSlice).slice(0, count);
+}
 
 const CATEGORY_COUNTS = {
   practice: { technical: 5, behavioral: 3, situational: 2, intro: 0, closing: 0 },
@@ -110,10 +164,22 @@ async function generate({ targetRole, mode, skills, jobDescription, interviewId,
     .filter(id => mongoose.Types.ObjectId.isValid(id))
     .map(id => new mongoose.Types.ObjectId(String(id)));
 
+  // One embedding for the whole session — reused to rank every category's bank pool.
+  let profileEmbedding = null;
+  const profileContext = _buildProfileContext(userProfile);
+  if (profileContext) {
+    try {
+      profileEmbedding = await embed(profileContext);
+    } catch (err) {
+      logger.warn(`[question-generator] profile embedding failed, bank retrieval falls back to random: ${err.message}`);
+    }
+  }
+
   for (const [category, count] of Object.entries(counts)) {
     if (count === 0) continue;
 
-    // Random sample from shared bank (source:system only, excluding already-seen questions)
+    // Sample from shared bank (source:system only, excluding already-seen questions),
+    // ranked by relevance to the candidate's profile when an embedding is available.
     const matchFilter = {
       category,
       active:  true,
@@ -122,10 +188,7 @@ async function generate({ targetRole, mode, skills, jobDescription, interviewId,
     };
     if (seenObjIds.length) matchFilter._id = { $nin: seenObjIds };
 
-    const bankQuestions = await Question.aggregate([
-      { $match: matchFilter },
-      { $sample: { size: count } },
-    ]);
+    const bankQuestions = await _retrieveBankQuestions(matchFilter, count, profileEmbedding);
 
     if (bankQuestions.length >= count) {
       allQuestions.push(...bankQuestions.slice(0, count));
@@ -146,7 +209,10 @@ async function generate({ targetRole, mode, skills, jobDescription, interviewId,
         liveSnippets || []
       );
 
-      const { data } = await ai.generateJson(prompt, 'balanced');
+      const { data } = await ai.generateJson(prompt, 'balanced', {
+        schema: schemas.generatedQuestions,
+        callSite: 'question-generator:generate',
+      });
       const generated = Array.isArray(data.questions) ? data.questions.slice(0, needed) : [];
 
       const questionSource = companyContext
