@@ -175,7 +175,7 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
       diagramSnapshot:  diagramSnapshot  || null,
       code:             code             || null,
       language:         language         || null,
-      idempotencyKey:   idempotencyKey   || null,
+      idempotencyKey:   idempotencyKey   || undefined, // never null — see Answer.js schema comment
       submittedAt: new Date(),
     });
   } catch (err) {

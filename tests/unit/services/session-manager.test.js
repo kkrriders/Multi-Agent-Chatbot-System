@@ -2,18 +2,22 @@
 
 jest.mock('../../../src/models/Interview');
 jest.mock('../../../src/models/Answer');
+jest.mock('../../../src/models/Question');
 jest.mock('../../../src/services/interview/question-generator');
 jest.mock('../../../src/services/interview/panel-interviewer');
 jest.mock('../../../src/services/agents/orchestrator');
 jest.mock('../../../src/services/agents/profile-agent');
+jest.mock('../../../src/services/queue/scoring-queue');
 jest.mock('../../../src/shared/logger', () => ({ logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() } }));
 
 const Interview = require('../../../src/models/Interview');
 const Answer = require('../../../src/models/Answer');
+const Question = require('../../../src/models/Question');
 const questionGenerator = require('../../../src/services/interview/question-generator');
 const orchestrator = require('../../../src/services/agents/orchestrator');
 const profileAgent = require('../../../src/services/agents/profile-agent');
-const { create } = require('../../../src/services/interview/session-manager');
+const scoringQueue = require('../../../src/services/queue/scoring-queue');
+const { create, submitAnswer } = require('../../../src/services/interview/session-manager');
 
 const FAKE_PROFILE = {
   skills: ['node'], skillGaps: [], experience: [],
@@ -65,5 +69,52 @@ describe('session-manager.create — weak-area personalization', () => {
     expect(questionGenerator.generate).toHaveBeenCalledWith(
       expect.objectContaining({ userProfile: FAKE_PROFILE, companyContext: { name: 'Acme' } })
     );
+  });
+});
+
+// Regression coverage for the E11000 duplicate-key bug: idempotencyKey must
+// be genuinely omitted (not explicitly null) so the sparse unique index on
+// it only ever matches documents that actually sent a key. A null default —
+// or `key || null` anywhere in this path — makes every keyless submission
+// (the normal case; the frontend never sends one) collide on the same index
+// entry after the very first one is ever written.
+describe('session-manager.submitAnswer — idempotencyKey', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Interview.findOne.mockResolvedValue({
+      _id: 'int1',
+      userId: 'u1',
+      status: 'active',
+      mode: 'practice',
+      questionIds: ['q1'],
+      startedAt: null,
+    });
+    Question.findById.mockReturnValue({ lean: jest.fn().mockResolvedValue({ _id: 'q1', text: 'Q' }) });
+    Answer.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+    Answer.create.mockResolvedValue({ _id: 'a1', toObject: jest.fn().mockReturnValue({ _id: 'a1' }) });
+    scoringQueue.enqueue.mockResolvedValue(undefined);
+  });
+
+  test('never passes an explicit null idempotencyKey to Answer.create when the client sends none', async () => {
+    await submitAnswer({
+      interviewId: 'int1', userId: 'u1', questionId: 'q1', questionIndex: 0,
+      answerText: 'my answer', inputMethod: 'text',
+    });
+
+    const createArgs = Answer.create.mock.calls[0][0];
+    // undefined (not null) — Mongoose omits undefined paths from the persisted
+    // document, which is what a sparse unique index actually needs to skip it.
+    expect(createArgs.idempotencyKey).toBeUndefined();
+    expect(createArgs.idempotencyKey).not.toBeNull();
+  });
+
+  test('still passes through a real idempotencyKey when the client sends one', async () => {
+    await submitAnswer({
+      interviewId: 'int1', userId: 'u1', questionId: 'q1', questionIndex: 0,
+      answerText: 'my answer', inputMethod: 'text', idempotencyKey: 'client-uuid-123',
+    });
+
+    const createArgs = Answer.create.mock.calls[0][0];
+    expect(createArgs.idempotencyKey).toBe('client-uuid-123');
   });
 });

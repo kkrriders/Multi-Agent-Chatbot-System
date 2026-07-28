@@ -231,7 +231,7 @@ router.post('/:sessionId/answer',
         diagramSnapshot:  hasDiagram ? diagramSnapshot : null,
         code:             hasCode ? code.trim() : null,
         language:         language || null,
-        idempotencyKey:   idempotencyKey || null,
+        idempotencyKey:   idempotencyKey || undefined, // never null — see Answer.js schema comment
       });
 
       // Persist speech metrics if available

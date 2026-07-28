@@ -34,8 +34,11 @@ const answerSchema = new mongoose.Schema({
   questionId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Question',  required: true },
   userId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User',       required: true, index: true },
 
-  // Idempotency key — client-generated UUID to deduplicate network retries
-  idempotencyKey: { type: String, default: null },
+  // Idempotency key — client-generated UUID to deduplicate network retries.
+  // No default: the sparse unique index below only skips documents where this
+  // field is truly absent, not documents where it's explicitly null. A default
+  // of null would make every keyless submission collide on the same index entry.
+  idempotencyKey: { type: String },
 
   // Answer content — format depends on question type
   // Schema allows 10k chars; interview.js route enforces a stricter 5k ceiling on inbound requests.
