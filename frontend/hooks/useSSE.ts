@@ -4,9 +4,9 @@ import { API_URL } from '@/lib/config'
 export type SSEEvent =
   | { type: 'connected'; sessionId: string }
   | { type: 'scoring-start'; answerId: string }
-  | { type: 'score-update'; answerId: string; scores: { relevance: number; depth: number; clarity: number; overall: number }; testResults?: Array<{ input: string; expectedOutput: string; actualOutput: string; passed: boolean; hidden: boolean; executionTimeMs: number | null }>; improvementSuggestions?: string[]; keywordsMissed?: string[] }
+  | { type: 'score-update'; answerId: string; scores: { relevance: number; depth: number; clarity: number; overall: number; rawOverall?: number; confidence?: number }; testResults?: Array<{ input: string; expectedOutput: string; actualOutput: string; passed: boolean; hidden: boolean; executionTimeMs: number | null }>; improvementSuggestions?: string[]; keywordsMissed?: string[] }
   | { type: 'scoring-error'; answerId: string; error: string }
-  | { type: 'integrity-update'; answerId: string; integrityScore: number; integrityFlag: string }
+  | { type: 'integrity-update'; answerId: string; integrityScore: number; integrityFlag: 'CLEAN' | 'SUSPICIOUS' | 'LIKELY_AI' }
   | { type: 'follow-up'; answerId: string; action: 'follow_up' | 'probe_deeper' | 'challenge'; response: string }
   | { type: 'speech-event'; data: unknown }
   | { type: 'timer-tick'; remaining: number }

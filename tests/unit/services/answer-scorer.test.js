@@ -6,7 +6,7 @@ jest.mock('../../../src/middleware/injection-guard', () => ({ assertSafe: jest.f
 
 const ai          = require('../../../src/services/ai/provider-manager');
 const broadcaster = require('../../../src/services/sse/broadcaster');
-const { score, aggregate, computeIntegrity } = require('../../../src/services/interview/answer-scorer');
+const { score, aggregate, computeIntegrity, applyIntegrityPenalty } = require('../../../src/services/interview/answer-scorer');
 
 // ── computeIntegrity (pure math — no AI) ────────────────────────────────────
 
@@ -56,6 +56,48 @@ describe('computeIntegrity', () => {
     const r = computeIntegrity({ pastedChars: 200, tabSwitchCount: 2 }, 200, 5);
     expect(r.integrityFlag).toBe('LIKELY_AI');
     expect(r.integrityScore).toBe(0);
+  });
+});
+
+// ── applyIntegrityPenalty (pure math — no AI) ───────────────────────────────
+
+describe('applyIntegrityPenalty', () => {
+  test('is a no-op at integrityScore 100 (clean)', () => {
+    const r = applyIntegrityPenalty({ relevance: 80, depth: 70, clarity: 75, overall: 75 }, 100);
+    expect(r.overall).toBe(75);
+    expect(r.rawOverall).toBe(75);
+    expect(r.relevance).toBe(80); // sub-dimensions never touched
+  });
+
+  test('scales overall proportionally to integrityScore, leaving rawOverall as the original', () => {
+    const r = applyIntegrityPenalty({ relevance: 80, depth: 70, clarity: 75, overall: 80 }, 25);
+    expect(r.rawOverall).toBe(80);
+    expect(r.overall).toBe(20); // 80 * 0.25
+    expect(r.relevance).toBe(80);
+  });
+
+  test('rounds the discounted overall to the nearest integer', () => {
+    const r = applyIntegrityPenalty({ overall: 77 }, 60);
+    expect(r.rawOverall).toBe(77);
+    expect(r.overall).toBe(Math.round(77 * 0.6));
+  });
+
+  test('treats a missing/undefined integrityScore as 100 (no discount)', () => {
+    const r = applyIntegrityPenalty({ overall: 50 }, undefined);
+    expect(r.overall).toBe(50);
+    expect(r.rawOverall).toBe(50);
+  });
+
+  test('clamps an out-of-range integrityScore before applying it', () => {
+    const over  = applyIntegrityPenalty({ overall: 50 }, 150);
+    const under = applyIntegrityPenalty({ overall: 50 }, -10);
+    expect(over.overall).toBe(50);  // clamped to 100 → no discount
+    expect(under.overall).toBe(0);  // clamped to 0 → fully discounted
+  });
+
+  test('preserves other fields on the scores object (e.g. confidence)', () => {
+    const r = applyIntegrityPenalty({ overall: 60, confidence: 0.8 }, 50);
+    expect(r.confidence).toBe(0.8);
   });
 });
 

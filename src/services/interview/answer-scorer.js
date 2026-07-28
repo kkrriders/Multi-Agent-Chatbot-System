@@ -135,6 +135,24 @@ function computeIntegrity(signals, answerLength, timeSpentSeconds) {
 }
 
 /**
+ * Discount `overall` proportionally to the integrity score — a candidate's
+ * demonstrated content quality (relevance/depth/clarity, untouched) is one
+ * thing; whether the practice rep is genuine is another. At integrityScore
+ * 100 this is a no-op (rawOverall === overall). At integrityScore 25, overall
+ * is cut to 25% of what content quality alone would have earned.
+ *
+ * Pure arithmetic — no AI call.
+ */
+function applyIntegrityPenalty(scores, integrityScore) {
+  const safeScore = typeof integrityScore === 'number' ? Math.min(100, Math.max(0, integrityScore)) : 100;
+  return {
+    ...scores,
+    rawOverall: scores.overall,
+    overall: Math.round(scores.overall * (safeScore / 100)),
+  };
+}
+
+/**
  * Aggregate scores from all answers in a session into category breakdowns.
  * @param {object[]} answers - Answer documents with scores and questionId populated
  * @param {object[]} questions - Question documents indexed by _id
@@ -168,4 +186,4 @@ function aggregate(answers, questions) {
   };
 }
 
-module.exports = { score, aggregate, computeIntegrity };
+module.exports = { score, aggregate, computeIntegrity, applyIntegrityPenalty };

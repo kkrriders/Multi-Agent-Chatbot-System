@@ -69,12 +69,13 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
     try {
       const { testResults, codeScore } = await codeExecutor.run(code, language, testCases || []);
       const passRate = codeScore.total > 0 ? (codeScore.passed / codeScore.total) * 100 : 0;
-      const scores = {
+      const rawScores = {
         relevance: Math.round(passRate),
         depth:     Math.round(passRate * 0.9),
         clarity:   Math.round(passRate * 0.8),
         overall:   Math.round(passRate),
       };
+      const scores = scorer.applyIntegrityPenalty(rawScores, integrityScore);
       await Answer.findByIdAndUpdate(answerId, { testResults, codeScore, scores, scored: true });
       broadcaster.emit(interviewId, 'score-update', { answerId, scores, testResults });
     } catch (err) {
@@ -96,14 +97,15 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
         sessionId: interviewId,
         answerId,
       });
+      const scores = scorer.applyIntegrityPenalty({ ...result.scores, confidence: result.confidence }, integrityScore);
       await Answer.findByIdAndUpdate(answerId, {
-        scores:                 { ...result.scores, confidence: result.confidence },
+        scores,
         scored:                 true,
         improvementSuggestions: result.improvementSuggestions,
         keywordsHit:            result.keywordsHit,
         keywordsMissed:         result.keywordsMissed,
       });
-      broadcaster.emit(interviewId, 'score-update', { answerId, scores: { ...result.scores, confidence: result.confidence }, timestamp: Date.now() });
+      broadcaster.emit(interviewId, 'score-update', { answerId, scores, timestamp: Date.now() });
     } catch (err) {
       logger.error(`[scoring] system-design score failed answer=${answerId}: ${err.message}`);
       broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Scoring failed' });
@@ -120,8 +122,12 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
       sessionId: interviewId,
       answerId,
     });
+    // Discounted for integrity below decision-agent and observation-compiler too,
+    // via result.scores — a pasted "excellent" answer shouldn't short-circuit the
+    // interview flow as if it reflected genuine understanding.
+    result.scores = scorer.applyIntegrityPenalty({ ...result.scores, confidence: result.confidence }, integrityScore);
     await Answer.findByIdAndUpdate(answerId, {
-      scores:                 { ...result.scores, confidence: result.confidence },
+      scores:                 result.scores,
       scored:                 true,
       improvementSuggestions: result.improvementSuggestions,
       keywordsHit:            result.keywordsHit,
@@ -132,7 +138,7 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
     // actionable feedback per-answer instead of only in the end-of-session summary.
     broadcaster.emit(interviewId, 'score-update', {
       answerId,
-      scores: { ...result.scores, confidence: result.confidence },
+      scores: result.scores,
       improvementSuggestions: result.improvementSuggestions,
       keywordsMissed: result.keywordsMissed,
       timestamp: Date.now(),

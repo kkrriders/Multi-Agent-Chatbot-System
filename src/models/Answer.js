@@ -9,6 +9,10 @@ const scoreBreakdownSchema = new mongoose.Schema({
   overall:    { type: Number, min: 0, max: 100, default: 0 },
   // How sure the AI grader was in this score (0-1), not a measure of answer quality.
   confidence: { type: Number, min: 0, max: 1, default: null },
+  // Content-quality overall before the integrity-score discount was applied.
+  // Equal to `overall` when integrityScore is 100 (clean). Kept so the UI can
+  // show "content quality was X, discounted to Y" instead of a silent drop.
+  rawOverall: { type: Number, min: 0, max: 100, default: null },
 }, { _id: false });
 
 const speechMetricsSchema = new mongoose.Schema({

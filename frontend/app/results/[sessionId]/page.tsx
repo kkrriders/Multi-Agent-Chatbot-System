@@ -212,6 +212,11 @@ export default function ResultsPage() {
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         {a.inputMethod === 'voice' && <span className="material-symbols-outlined text-base text-slate-muted icon-fill">mic</span>}
+                        {a.integrityFlag && a.integrityFlag !== 'CLEAN' && (
+                          <span className="material-symbols-outlined text-base text-error icon-fill" title={a.integrityFlag === 'LIKELY_AI' ? 'Flagged as likely pasted / AI-generated' : 'Flagged as suspicious'}>
+                            warning
+                          </span>
+                        )}
                         {a.scored && (
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${scoreBadgeClass(score)}`}>
                             {score}/100
@@ -224,6 +229,19 @@ export default function ResultsPage() {
                     {isOpen && (
                       <div className="px-4 pb-4 border-t border-outline-variant/15 space-y-3 pt-3">
                         <p className="text-sm text-slate-muted">{a.text}</p>
+                        {a.integrityFlag && a.integrityFlag !== 'CLEAN' && (
+                          <div className="flex items-start gap-1.5 bg-error/10 border border-error/30 rounded-lg p-2.5 text-xs text-error">
+                            <span className="material-symbols-outlined text-sm shrink-0 icon-fill">warning</span>
+                            <div>
+                              <p className="font-semibold">
+                                {a.integrityFlag === 'LIKELY_AI' ? 'Flagged as likely pasted / AI-generated' : 'Flagged as suspicious'}
+                              </p>
+                              {typeof a.scores.rawOverall === 'number' && a.scores.rawOverall !== score && (
+                                <p className="text-error/80 mt-0.5">Content quality was {a.scores.rawOverall}, discounted to {score} for this reason.</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         {a.scored && (
                           <div className="grid grid-cols-3 gap-2">
                             {(['relevance', 'depth', 'clarity'] as const).map(dim => (

@@ -67,7 +67,7 @@ export interface Answer {
   _id: string
   questionId: { _id: string; text: string; category: string; difficulty: string } | string
   text: string
-  scores: { relevance: number; depth: number; clarity: number; overall: number }
+  scores: { relevance: number; depth: number; clarity: number; overall: number; rawOverall?: number | null; confidence?: number | null }
   inputMethod?: 'text' | 'voice'
   scored: boolean
   improvementSuggestions: string[]

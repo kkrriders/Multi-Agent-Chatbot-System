@@ -16,7 +16,10 @@ const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface ScoreState {
-  [answerId: string]: { relevance: number; depth: number; clarity: number; overall: number }
+  [answerId: string]: { relevance: number; depth: number; clarity: number; overall: number; rawOverall?: number; confidence?: number }
+}
+interface IntegrityState {
+  [answerId: string]: { integrityScore: number; integrityFlag: 'CLEAN' | 'SUSPICIOUS' | 'LIKELY_AI' }
 }
 interface SingleTestResult {
   input: string; expectedOutput: string; actualOutput: string
@@ -85,6 +88,7 @@ export default function ActiveInterviewPage() {
 
   // Scoring / follow-up
   const [scores, setScores]           = useState<ScoreState>({})
+  const [integrity, setIntegrity]     = useState<IntegrityState>({})
   const [testResultMap, setTestResultMap] = useState<TestResultState>({})
   const [scoringIds, setScoringIds]   = useState<Set<string>>(new Set())
   const [followUp, setFollowUp]       = useState<FollowUpState | null>(null)
@@ -139,6 +143,12 @@ export default function ActiveInterviewPage() {
     if (event.type === 'scoring-error') {
       setScoringIds(s => { const n = new Set(s); n.delete(event.answerId); return n })
       toast.error('Scoring failed for one answer')
+    }
+    if (event.type === 'integrity-update') {
+      setIntegrity(s => ({ ...s, [event.answerId]: { integrityScore: event.integrityScore, integrityFlag: event.integrityFlag } }))
+      if (event.integrityFlag === 'LIKELY_AI') {
+        toast.warning('This answer was flagged as likely pasted/AI-generated — it will score lower.')
+      }
     }
     if (event.type === 'follow-up')
       setFollowUp({ answerId: event.answerId, action: event.action, response: event.response })
@@ -340,7 +350,10 @@ export default function ActiveInterviewPage() {
   const LastScoreChip = () => {
     const ids = Object.keys(scores)
     if (!ids.length) return null
-    const sc = scores[ids[ids.length - 1]]
+    const lastId = ids[ids.length - 1]
+    const sc = scores[lastId]
+    const flag = integrity[lastId]
+    const discounted = typeof sc.rawOverall === 'number' && sc.rawOverall !== sc.overall
     return (
       <div className="mt-4 w-full bg-surface rounded-lg p-3 border border-outline-variant/20 text-xs">
         <p className="text-slate-muted font-medium mb-2 text-center">Last Score</p>
@@ -351,7 +364,26 @@ export default function ActiveInterviewPage() {
               <div className="text-slate-muted capitalize">{d}</div>
             </div>
           ))}
+          <div className="text-center">
+            <div className={`font-bold text-sm ${sc.overall >= 80 ? 'text-primary' : sc.overall >= 60 ? 'text-tertiary-container' : 'text-error'}`}>{sc.overall}</div>
+            <div className="text-slate-muted">Overall</div>
+          </div>
         </div>
+        {flag && flag.integrityFlag !== 'CLEAN' && (
+          <div className="mt-2 flex items-start gap-1.5 bg-error/10 border border-error/30 rounded p-2 text-error">
+            <span className="material-symbols-outlined text-sm shrink-0 icon-fill">warning</span>
+            <div>
+              <p className="font-semibold">
+                {flag.integrityFlag === 'LIKELY_AI' ? 'Flagged as likely pasted / AI-generated' : 'Flagged as suspicious'}
+              </p>
+              {discounted && (
+                <p className="text-error/80 mt-0.5">
+                  Content quality was {sc.rawOverall}, discounted to {sc.overall} for this reason.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
