@@ -57,6 +57,27 @@ describe('computeIntegrity', () => {
     expect(r.integrityFlag).toBe('LIKELY_AI');
     expect(r.integrityScore).toBe(0);
   });
+
+  test('applies focus-loss penalty (8 per loss, max 15) — weaker than tab-switch', () => {
+    const one  = computeIntegrity({ pastedChars: 0, tabSwitchCount: 0, focusLossCount: 1 }, 50, 30);
+    const two  = computeIntegrity({ pastedChars: 0, tabSwitchCount: 0, focusLossCount: 2 }, 50, 30);
+    const many = computeIntegrity({ pastedChars: 0, tabSwitchCount: 0, focusLossCount: 10 }, 50, 30);
+    expect(one.integrityScore).toBe(92);  // 100 - min(1*8,15) = 92
+    expect(two.integrityScore).toBe(85);  // 100 - min(2*8,15) = 100-15 (capped)
+    expect(many.integrityScore).toBe(85); // same cap as two — penalty never exceeds -15
+  });
+
+  test('one focus loss discounts less than one tab switch, for the same count', () => {
+    const tabSwitch  = computeIntegrity({ pastedChars: 0, tabSwitchCount: 1, focusLossCount: 0 }, 50, 30);
+    const focusLoss   = computeIntegrity({ pastedChars: 0, tabSwitchCount: 0, focusLossCount: 1 }, 50, 30);
+    expect(focusLoss.integrityScore).toBeGreaterThan(tabSwitch.integrityScore);
+  });
+
+  test('focus loss and tab switch penalties stack independently', () => {
+    const r = computeIntegrity({ pastedChars: 0, tabSwitchCount: 1, focusLossCount: 1 }, 50, 30);
+    // tabPenalty=15, focusPenalty=8 → 100-15-8=77
+    expect(r.integrityScore).toBe(77);
+  });
 });
 
 // ── applyIntegrityPenalty (pure math — no AI) ───────────────────────────────

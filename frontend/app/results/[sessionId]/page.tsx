@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { interview as interviewApi, type Answer, type Interview, type PanelPersonaFeedback } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Sidebar } from '@/components/sidebar'
+import { describeIntegritySignals } from '@/lib/integrity'
 
 interface ResultData {
   interview: Interview
@@ -239,6 +240,9 @@ export default function ResultsPage() {
                               {typeof a.scores.rawOverall === 'number' && a.scores.rawOverall !== score && (
                                 <p className="text-error/80 mt-0.5">Content quality was {a.scores.rawOverall}, discounted to {score} for this reason.</p>
                               )}
+                              {describeIntegritySignals(a.integritySignals).map((line, k) => (
+                                <p key={k} className="text-error/80 mt-0.5">{line}</p>
+                              ))}
                             </div>
                           </div>
                         )}

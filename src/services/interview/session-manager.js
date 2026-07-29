@@ -29,7 +29,7 @@ async function _checkAndExpireSession(interview) {
     Date.now() - new Date(interview.startedAt).getTime() > SESSION_MAX_ACTIVE_MS
   ) {
     await Interview.findByIdAndUpdate(interview._id, { status: 'abandoned' });
-    throw new Error('Interview session has expired');
+    throw Object.assign(new Error('Interview session has expired'), { status: 410 });
   }
 }
 
@@ -212,6 +212,54 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
 }
 
 /**
+ * Swap out an unanswered question for a different one from the bank — the
+ * opt-in "get a fresh question" escape hatch offered after suspicious
+ * tab-switch/focus-loss activity on the current question. Bank-only (no AI
+ * generation fallback): if nothing else is available, fails soft with a 404
+ * rather than burning a Groq call for what's an edge case at this bank size.
+ */
+async function regenerateQuestion(interviewId, userId, questionIndex) {
+  const interview = await Interview.findOne({ _id: interviewId, userId, status: 'active' });
+  if (!interview) throw Object.assign(new Error('Interview session not found or not active'), { status: 404 });
+
+  await _checkAndExpireSession(interview);
+
+  const idx = Number(questionIndex);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= interview.questionIds.length) {
+    throw Object.assign(new Error('questionIndex out of bounds'), { status: 400 });
+  }
+
+  const currentQuestionId = interview.questionIds[idx];
+  const alreadyAnswered = await Answer.exists({ interviewId, questionId: currentQuestionId });
+  if (alreadyAnswered) {
+    throw Object.assign(new Error('This question has already been answered and cannot be regenerated'), { status: 409 });
+  }
+
+  const currentQuestion = await Question.findById(currentQuestionId).lean();
+  if (!currentQuestion) throw Object.assign(new Error('Question not found'), { status: 404 });
+
+  const [replacement] = await Question.aggregate([
+    {
+      $match: {
+        category: currentQuestion.category,
+        active:   true,
+        source:   'system',
+        _id:      { $nin: interview.questionIds },
+        $or: [{ role: interview.targetRole }, { role: 'General' }, { role: { $exists: false } }],
+      },
+    },
+    { $sample: { size: 1 } },
+  ]);
+  if (!replacement) throw Object.assign(new Error('No alternate question available right now'), { status: 404 });
+
+  interview.questionIds[idx] = replacement._id;
+  await interview.save();
+
+  logger.info(`[session-manager] regenerated question idx=${idx} interview=${interviewId}`);
+  return replacement;
+}
+
+/**
  * Complete an interview and compute the session summary.
  */
 async function complete(interviewId, userId) {
@@ -297,4 +345,4 @@ async function getState(interviewId, userId) {
   return { interview, questions, answers, nextQuestion };
 }
 
-module.exports = { create, submitAnswer, complete, getState };
+module.exports = { create, submitAnswer, regenerateQuestion, complete, getState };

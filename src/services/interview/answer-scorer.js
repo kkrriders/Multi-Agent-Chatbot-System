@@ -104,7 +104,12 @@ async function score({ questionText, expectedKeywords, answerText, sessionId, an
  *
  * Penalties:
  *   paste ratio   → up to -60  (pasting the whole answer is the strongest signal)
- *   tab switches  → up to -30  (left the tab to consult another source)
+ *   tab switches  → up to -30  (tab hidden — switched away or minimized)
+ *   focus loss    → up to -15  (window lost focus but tab stayed visible — the
+ *                                multi-monitor case. Weighted lower than tab
+ *                                switches: this also fires for a URL-bar click
+ *                                or an OS notification, not just window-switching,
+ *                                so it's a noisier signal.)
  *   speed         → up to -20  (polished long answer submitted suspiciously fast)
  */
 function computeIntegrity(signals, answerLength, timeSpentSeconds) {
@@ -113,6 +118,7 @@ function computeIntegrity(signals, answerLength, timeSpentSeconds) {
   const {
     pastedChars      = 0,
     tabSwitchCount   = 0,
+    focusLossCount   = 0,
   } = signals;
 
   const len     = Math.max(answerLength || 0, 1);
@@ -121,12 +127,13 @@ function computeIntegrity(signals, answerLength, timeSpentSeconds) {
   const pasteRatio   = Math.min(pastedChars / len, 1);
   const pastePenalty = Math.round(pasteRatio * 60);
   const tabPenalty   = Math.min(tabSwitchCount * 15, 30);
+  const focusPenalty = Math.min(focusLossCount * 8, 15);
 
   let speedPenalty = 0;
   if      (elapsed < 15 && len > 150) speedPenalty = 20;
   else if (elapsed < 30 && len > 300) speedPenalty = 10;
 
-  const integrityScore = Math.min(100, Math.max(0, 100 - pastePenalty - tabPenalty - speedPenalty));
+  const integrityScore = Math.min(100, Math.max(0, 100 - pastePenalty - tabPenalty - focusPenalty - speedPenalty));
   const integrityFlag  = integrityScore >= 70 ? 'CLEAN'
     : integrityScore >= 40 ? 'SUSPICIOUS'
     : 'LIKELY_AI';

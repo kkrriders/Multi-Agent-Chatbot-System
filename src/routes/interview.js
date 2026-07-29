@@ -8,6 +8,7 @@
  * POST /api/interview/:sessionId/answer             — submit answer
  * POST /api/interview/:sessionId/complete           — finalize + compute summary
  * GET  /api/interview/:sessionId/summary            — fetch completed summary
+ * POST /api/interview/:sessionId/questions/:questionIndex/regenerate — swap an unanswered question
  * GET  /api/interview/stream/:sessionId             — SSE real-time events
  * GET  /api/interview/history                       — past sessions list
  */
@@ -30,6 +31,22 @@ const { logger } = require('../shared/logger');
 
 const MAX_ANSWER_LEN = 5_000;
 const VALID_MODES = ['practice', 'timed', 'full', 'panel'];
+
+const mapQuestion = q => ({
+  id:               q._id,
+  text:             q.text,
+  category:         q.category,
+  difficulty:       q.difficulty,
+  timeLimitSeconds: q.timeLimitSeconds  || null,
+  interviewerName:  q.interviewerName   || null,
+  expectedKeywords: q.expectedKeywords  || [],
+  questionFormat:   q.questionFormat    || 'text',
+  subtype:          q.subtype           || null,
+  templateDiagram:  q.templateDiagram   || null,
+  starterCode:      q.starterCode       || null,
+  constraints:      q.constraints       || null,
+  evaluationRubric: q.evaluationRubric  || [],
+});
 
 // ── SSE stream (must be before :sessionId routes to avoid conflict) ──────────
 router.get('/stream/:sessionId', authenticate, generalLimiter, (req, res) => {
@@ -129,21 +146,6 @@ router.get('/:sessionId', authenticate, generalLimiter, async (req, res) => {
   try {
     if (!_validateSessionId(req.params.sessionId, res)) return;
     const state = await sessionManager.getState(req.params.sessionId, req.user._id);
-    const mapQuestion = q => ({
-      id:               q._id,
-      text:             q.text,
-      category:         q.category,
-      difficulty:       q.difficulty,
-      timeLimitSeconds: q.timeLimitSeconds  || null,
-      interviewerName:  q.interviewerName   || null,
-      expectedKeywords: q.expectedKeywords  || [],
-      questionFormat:   q.questionFormat    || 'text',
-      subtype:          q.subtype           || null,
-      templateDiagram:  q.templateDiagram   || null,
-      starterCode:      q.starterCode       || null,
-      constraints:      q.constraints       || null,
-      evaluationRubric: q.evaluationRubric  || [],
-    });
     res.json({
       success: true,
       interview:    state.interview,
@@ -207,6 +209,8 @@ router.post('/:sessionId/answer',
           typedChars:           Math.max(0, Number(rawSignals.typedChars)           || 0),
           tabSwitchCount:       Math.max(0, Number(rawSignals.tabSwitchCount)       || 0),
           tabSwitchSeconds:     Math.max(0, Number(rawSignals.tabSwitchSeconds)     || 0),
+          focusLossCount:       Math.max(0, Number(rawSignals.focusLossCount)       || 0),
+          focusLossSeconds:     Math.max(0, Number(rawSignals.focusLossSeconds)     || 0),
           timeToFirstKeystroke: rawSignals.timeToFirstKeystroke != null ? Math.max(0, Number(rawSignals.timeToFirstKeystroke)) : null,
         };
       }
@@ -255,6 +259,22 @@ router.post('/:sessionId/answer',
     }
   }
 );
+
+// ── Regenerate an unanswered question ────────────────────────────────────────
+// Opt-in "get a fresh question" — offered client-side after suspicious
+// tab-switch/focus-loss activity on the current question. Never forced.
+router.post('/:sessionId/questions/:questionIndex/regenerate', authenticate, messageLimiter, async (req, res) => {
+  try {
+    if (!_validateSessionId(req.params.sessionId, res)) return;
+    const question = await sessionManager.regenerateQuestion(
+      req.params.sessionId, req.user._id, req.params.questionIndex
+    );
+    res.json({ success: true, question: mapQuestion(question) });
+  } catch (err) {
+    logger.error(`[interview/regenerate] ${err.message}`);
+    res.status(err.status || 500).json({ success: false, error: err.message });
+  }
+});
 
 // ── Complete interview ───────────────────────────────────────────────────────
 router.post('/:sessionId/complete', authenticate, messageLimiter, async (req, res) => {

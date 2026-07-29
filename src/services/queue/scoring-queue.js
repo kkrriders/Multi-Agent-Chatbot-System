@@ -56,7 +56,7 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
     timeSpentSeconds
   );
   await Answer.findByIdAndUpdate(answerId, { integrityScore, integrityFlag });
-  broadcaster.emit(interviewId, 'integrity-update', { answerId, integrityScore, integrityFlag });
+  broadcaster.emit(interviewId, 'integrity-update', { answerId, integrityScore, integrityFlag, integritySignals });
   if (integrityFlag !== 'CLEAN') {
     logger.warn(`[integrity] answer=${answerId} flag=${integrityFlag} score=${integrityScore}`);
   }

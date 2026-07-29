@@ -60,6 +60,8 @@ export interface IntegritySignals {
   typedChars: number
   tabSwitchCount: number
   tabSwitchSeconds: number
+  focusLossCount: number
+  focusLossSeconds: number
   timeToFirstKeystroke: number | null
 }
 
@@ -82,6 +84,7 @@ export interface Answer {
   } | null
   integrityScore?: number | null
   integrityFlag?: 'CLEAN' | 'SUSPICIOUS' | 'LIKELY_AI' | null
+  integritySignals?: IntegritySignals | null
 }
 
 export interface Achievement {
@@ -189,6 +192,8 @@ export const interview = {
     code?: string | null
     language?: string | null
   }) => post<{ answerId: string; speechMetrics: unknown }>(`/api/interview/${sessionId}/answer`, payload),
+  regenerateQuestion: (sessionId: string, questionIndex: number) =>
+    post<{ question: Question }>(`/api/interview/${sessionId}/questions/${questionIndex}/regenerate`, {}),
   complete: (sessionId: string) =>
     post<{ interview: Interview; overallScore: number; categoryScores: Record<string, { overall: number }> }>(
       `/api/interview/${sessionId}/complete`, {}

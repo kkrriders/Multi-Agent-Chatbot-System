@@ -3,11 +3,12 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { interview as interviewApi, type Question } from '@/lib/api'
+import { interview as interviewApi, type Question, type IntegritySignals } from '@/lib/api'
 import { useSSE } from '@/hooks/useSSE'
 import { useSpeech } from '@/hooks/useSpeech'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { toast } from 'sonner'
+import { describeIntegritySignals } from '@/lib/integrity'
 
 // Heavy components — load client-side only
 const SystemDesignCanvas = dynamic(() => import('@/components/SystemDesignCanvas'), { ssr: false })
@@ -19,7 +20,7 @@ interface ScoreState {
   [answerId: string]: { relevance: number; depth: number; clarity: number; overall: number; rawOverall?: number; confidence?: number }
 }
 interface IntegrityState {
-  [answerId: string]: { integrityScore: number; integrityFlag: 'CLEAN' | 'SUSPICIOUS' | 'LIKELY_AI' }
+  [answerId: string]: { integrityScore: number; integrityFlag: 'CLEAN' | 'SUSPICIOUS' | 'LIKELY_AI'; integritySignals?: IntegritySignals | null }
 }
 interface SingleTestResult {
   input: string; expectedOutput: string; actualOutput: string
@@ -54,6 +55,12 @@ const FORMAT_LABEL: Record<string, string> = {
   system_design: 'System Design',
   coding:        'Coding',
   text:          'Interview',
+}
+
+// Offer a fresh question after 2+ switches away, or 45s+ cumulative away time,
+// on the current question — whichever comes first.
+function crossesFreshQuestionThreshold(s: { tabSwitchCount: number; focusLossCount: number; tabSwitchSeconds: number; focusLossSeconds: number }) {
+  return (s.tabSwitchCount + s.focusLossCount >= 2) || (s.tabSwitchSeconds + s.focusLossSeconds >= 45)
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -99,15 +106,22 @@ export default function ActiveInterviewPage() {
   const [showFillerToast, setShowFillerToast] = useState(false)
   const [fillerWord, setFillerWord]           = useState('')
 
+  // Opt-in "get a fresh question" — offered after suspicious tab/focus activity
+  const [freshQuestionOffer, setFreshQuestionOffer] = useState(false)
+  const [regenerating, setRegenerating]             = useState(false)
+  const freshQuestionDismissedRef = useRef(false)
+
   const timerRef        = useRef<NodeJS.Timeout | null>(null)
   const startTimeRef    = useRef<number>(Date.now())
   const transcriptEndRef = useRef<HTMLDivElement>(null)
   const handleSubmitRef = useRef<() => void>(() => {})
 
   const integrityRef = useRef({
-    pasteCount: 0, pastedChars: 0, tabSwitchCount: 0, tabSwitchSeconds: 0,
+    pasteCount: 0, pastedChars: 0,
+    tabSwitchCount: 0, tabSwitchSeconds: 0,
+    focusLossCount: 0, focusLossSeconds: 0,
     timeToFirstKeystroke: null as number | null,
-    questionDisplayedAt: Date.now(), tabHiddenAt: null as number | null,
+    questionDisplayedAt: Date.now(), tabHiddenAt: null as number | null, windowBlurredAt: null as number | null,
   })
 
   const speech = useSpeech()
@@ -145,7 +159,7 @@ export default function ActiveInterviewPage() {
       toast.error('Scoring failed for one answer')
     }
     if (event.type === 'integrity-update') {
-      setIntegrity(s => ({ ...s, [event.answerId]: { integrityScore: event.integrityScore, integrityFlag: event.integrityFlag } }))
+      setIntegrity(s => ({ ...s, [event.answerId]: { integrityScore: event.integrityScore, integrityFlag: event.integrityFlag, integritySignals: event.integritySignals } }))
       if (event.integrityFlag === 'LIKELY_AI') {
         toast.warning('This answer was flagged as likely pasted/AI-generated — it will score lower.')
       }
@@ -203,21 +217,76 @@ export default function ActiveInterviewPage() {
   // Reset integrity signals on question change
   useEffect(() => {
     integrityRef.current = {
-      pasteCount: 0, pastedChars: 0, tabSwitchCount: 0, tabSwitchSeconds: 0,
-      timeToFirstKeystroke: null, questionDisplayedAt: Date.now(), tabHiddenAt: null,
+      pasteCount: 0, pastedChars: 0,
+      tabSwitchCount: 0, tabSwitchSeconds: 0,
+      focusLossCount: 0, focusLossSeconds: 0,
+      timeToFirstKeystroke: null, questionDisplayedAt: Date.now(), tabHiddenAt: null, windowBlurredAt: null,
     }
+    freshQuestionDismissedRef.current = false
+    setFreshQuestionOffer(false)
     // Reset answer state for new question
     setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setPracticeFeedback(null)
   }, [currentIdx])
 
+  // Away-time tracking: visibilitychange catches same-window tab switches;
+  // window blur/focus additionally catches the multi-monitor case, where the
+  // interview tab stays fully visible on one screen while the user works in a
+  // different window on another — document.hidden never flips there, only the
+  // window's OS focus does.
   useEffect(() => {
+    const AWAY_WARNING_THRESHOLD_S = 3 // skip toasting on a sub-3s glance (URL bar click, brief alt-tab)
+    const FOCUS_LOSS_CONFIRM_DELAY_MS = 150 // lets a same-tick tab-switch's visibilitychange settle first
+
     const onVisibility = () => {
       const s = integrityRef.current
-      if (document.hidden) { s.tabSwitchCount += 1; s.tabHiddenAt = Date.now() }
-      else if (s.tabHiddenAt != null) { s.tabSwitchSeconds += Math.round((Date.now() - s.tabHiddenAt) / 1000); s.tabHiddenAt = null }
+      if (document.hidden) {
+        s.tabSwitchCount += 1
+        s.tabHiddenAt = Date.now()
+        s.windowBlurredAt = null // this away-period is a tab switch — don't also double-count it as a focus loss
+      } else if (s.tabHiddenAt != null) {
+        const awaySeconds = Math.round((Date.now() - s.tabHiddenAt) / 1000)
+        s.tabSwitchSeconds += awaySeconds
+        s.tabHiddenAt = null
+        if (awaySeconds >= AWAY_WARNING_THRESHOLD_S) {
+          toast.warning(`You switched away for ${awaySeconds}s — this may affect your score.`)
+        }
+        if (!freshQuestionDismissedRef.current && crossesFreshQuestionThreshold(s)) setFreshQuestionOffer(true)
+      }
     }
+
+    const onBlur = () => {
+      const s = integrityRef.current
+      s.windowBlurredAt = Date.now()
+      setTimeout(() => {
+        // Still not hidden after settling → a genuine focus-loss-only event
+        // (e.g. another window on a second monitor), not a tab switch, which
+        // onVisibility already handles and would have cleared windowBlurredAt.
+        if (s.windowBlurredAt != null && !document.hidden) s.focusLossCount += 1
+      }, FOCUS_LOSS_CONFIRM_DELAY_MS)
+    }
+    const onFocus = () => {
+      const s = integrityRef.current
+      if (s.windowBlurredAt != null) {
+        const awaySeconds = Math.round((Date.now() - s.windowBlurredAt) / 1000)
+        if (!document.hidden) {
+          s.focusLossSeconds += awaySeconds
+          if (awaySeconds >= AWAY_WARNING_THRESHOLD_S) {
+            toast.warning(`This window lost focus for ${awaySeconds}s — this may affect your score.`)
+          }
+          if (!freshQuestionDismissedRef.current && crossesFreshQuestionThreshold(s)) setFreshQuestionOffer(true)
+        }
+        s.windowBlurredAt = null
+      }
+    }
+
     document.addEventListener('visibilitychange', onVisibility)
-    return () => document.removeEventListener('visibilitychange', onVisibility)
+    window.addEventListener('blur', onBlur)
+    window.addEventListener('focus', onFocus)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('blur', onBlur)
+      window.removeEventListener('focus', onFocus)
+    }
   }, [])
 
   useEffect(() => {
@@ -277,12 +346,23 @@ export default function ActiveInterviewPage() {
     const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000)
     const s = integrityRef.current
 
+    // Sent for every format — tab-switching away to look something up is just as
+    // relevant mid-coding-problem or mid-diagram as it is for a text answer.
+    const commonIntegritySignals = (typedLength: number) => ({
+      pasteCount: s.pasteCount, pastedChars: s.pastedChars,
+      typedChars: Math.max(0, typedLength - s.pastedChars),
+      tabSwitchCount: s.tabSwitchCount, tabSwitchSeconds: s.tabSwitchSeconds,
+      focusLossCount: s.focusLossCount, focusLossSeconds: s.focusLossSeconds,
+      timeToFirstKeystroke: s.timeToFirstKeystroke,
+    })
+
     try {
       if (questionFormat === 'coding') {
         await interviewApi.submitAnswer(sessionId, {
           questionId: currentQuestion.id, questionIndex: currentIdx,
           inputMethod: 'code', timeSpentSeconds: elapsed,
           code, language,
+          integritySignals: commonIntegritySignals(code.length),
         })
         advanceQuestion('')
       } else if (questionFormat === 'system_design') {
@@ -291,6 +371,7 @@ export default function ActiveInterviewPage() {
           answerText: designExplanation.trim() || ' ',
           inputMethod: 'diagram', timeSpentSeconds: elapsed,
           diagramSnapshot,
+          integritySignals: commonIntegritySignals(designExplanation.length),
         })
         advanceQuestion('')
       } else {
@@ -299,12 +380,7 @@ export default function ActiveInterviewPage() {
           questionId: currentQuestion.id, questionIndex: currentIdx,
           answerText: text, inputMethod: inputMode, timeSpentSeconds: elapsed,
           speechDurationSeconds: speech.durationSeconds || undefined,
-          integritySignals: {
-            pasteCount: s.pasteCount, pastedChars: s.pastedChars,
-            typedChars: Math.max(0, text.length - s.pastedChars),
-            tabSwitchCount: s.tabSwitchCount, tabSwitchSeconds: s.tabSwitchSeconds,
-            timeToFirstKeystroke: s.timeToFirstKeystroke,
-          },
+          integritySignals: commonIntegritySignals(text.length),
         })
         advanceQuestion(text)
       }
@@ -314,6 +390,38 @@ export default function ActiveInterviewPage() {
   }
 
   handleSubmitRef.current = handleSubmit
+
+  const handleDismissFreshQuestionOffer = () => {
+    freshQuestionDismissedRef.current = true
+    setFreshQuestionOffer(false)
+  }
+
+  const handleRegenerateQuestion = async () => {
+    if (regenerating) return
+    setRegenerating(true)
+    try {
+      const { question } = await interviewApi.regenerateQuestion(sessionId, currentIdx)
+      setQuestions(qs => qs.map((q, i) => i === currentIdx ? question : q))
+      setMessages(m => [
+        ...m.filter(msg => msg.id !== `q-${currentIdx}`),
+        { id: `q-${currentIdx}`, role: 'ai', text: question.text, interviewer: question.interviewerName || 'Alex' },
+      ])
+      // Fresh question — fresh integrity tracking and a clean slate to answer in
+      integrityRef.current = {
+        pasteCount: 0, pastedChars: 0,
+        tabSwitchCount: 0, tabSwitchSeconds: 0,
+        focusLossCount: 0, focusLossSeconds: 0,
+        timeToFirstKeystroke: null, questionDisplayedAt: Date.now(), tabHiddenAt: null, windowBlurredAt: null,
+      }
+      setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setPracticeFeedback(null)
+      setFreshQuestionOffer(false)
+      toast.success('Here\'s a different question.')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Could not get a different question right now')
+    } finally {
+      setRegenerating(false)
+    }
+  }
 
   const toggleVoice = () => {
     if (speech.recording) { speech.stop(); setInputMode('text') }
@@ -381,6 +489,9 @@ export default function ActiveInterviewPage() {
                   Content quality was {sc.rawOverall}, discounted to {sc.overall} for this reason.
                 </p>
               )}
+              {describeIntegritySignals(flag.integritySignals).map((line, k) => (
+                <p key={k} className="text-error/80 mt-0.5">{line}</p>
+              ))}
             </div>
           </div>
         )}
@@ -422,6 +533,24 @@ export default function ActiveInterviewPage() {
           <span className="text-xs text-slate-muted">{currentIdx + 1} / {questions.length}</span>
         </div>
       </header>
+
+      {/* Opt-in fresh-question offer — shown after suspicious tab/focus activity, never forced */}
+      {freshQuestionOffer && (
+        <div className="w-full bg-tertiary-container/15 border-b border-tertiary-container/30 px-4 md:px-12 py-2.5 shrink-0 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="material-symbols-outlined text-tertiary-container text-lg shrink-0 icon-fill">help</span>
+            <p className="text-sm text-on-surface truncate">Think you&rsquo;ve already seen this question elsewhere? You can get a different one.</p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <button onClick={handleRegenerateQuestion} disabled={regenerating} className="text-sm font-semibold text-primary hover:underline disabled:opacity-60 whitespace-nowrap">
+              {regenerating ? 'Getting a new question…' : 'Get a different question'}
+            </button>
+            <button onClick={handleDismissFreshQuestionOffer} className="text-slate-muted hover:text-on-surface" aria-label="Dismiss">
+              <span className="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile-only question banner — visible instead of the left pane on small screens */}
       <div className="md:hidden bg-surface-container-lowest border-b border-outline-variant/20 px-4 py-2.5 shrink-0">

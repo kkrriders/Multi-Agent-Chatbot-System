@@ -28,8 +28,14 @@ const integritySignalsSchema = new mongoose.Schema({
   pasteCount:           { type: Number, default: 0 },
   pastedChars:          { type: Number, default: 0 },
   typedChars:           { type: Number, default: 0 },
-  tabSwitchCount:       { type: Number, default: 0 },
+  tabSwitchCount:       { type: Number, default: 0 }, // tab hidden — switched away or minimized
   tabSwitchSeconds:     { type: Number, default: 0 },
+  // Window lost OS focus while the tab stayed visible — the multi-monitor case
+  // (another window on a second screen). Tracked separately from tabSwitch*
+  // because it's a noisier signal (also fires for URL-bar clicks, OS
+  // notifications) and is weighted lower in computeIntegrity() accordingly.
+  focusLossCount:       { type: Number, default: 0 },
+  focusLossSeconds:     { type: Number, default: 0 },
   timeToFirstKeystroke: { type: Number, default: null }, // seconds from question display
 }, { _id: false });
 

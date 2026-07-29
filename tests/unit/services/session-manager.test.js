@@ -17,7 +17,7 @@ const questionGenerator = require('../../../src/services/interview/question-gene
 const orchestrator = require('../../../src/services/agents/orchestrator');
 const profileAgent = require('../../../src/services/agents/profile-agent');
 const scoringQueue = require('../../../src/services/queue/scoring-queue');
-const { create, submitAnswer } = require('../../../src/services/interview/session-manager');
+const { create, submitAnswer, regenerateQuestion } = require('../../../src/services/interview/session-manager');
 
 const FAKE_PROFILE = {
   skills: ['node'], skillGaps: [], experience: [],
@@ -116,5 +116,69 @@ describe('session-manager.submitAnswer — idempotencyKey', () => {
 
     const createArgs = Answer.create.mock.calls[0][0];
     expect(createArgs.idempotencyKey).toBe('client-uuid-123');
+  });
+});
+
+describe('session-manager.regenerateQuestion', () => {
+  let mockInterview;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInterview = {
+      _id: 'int1',
+      userId: 'u1',
+      status: 'active',
+      startedAt: null,
+      targetRole: 'Backend Engineer',
+      questionIds: ['q1', 'q2', 'q3'],
+      save: jest.fn().mockResolvedValue(undefined),
+    };
+    Interview.findOne.mockResolvedValue(mockInterview);
+    Answer.exists.mockResolvedValue(null); // not yet answered
+    Question.findById.mockReturnValue({ lean: jest.fn().mockResolvedValue({ _id: 'q1', category: 'technical' }) });
+    Question.aggregate.mockResolvedValue([{ _id: 'q1-replacement', text: 'New question', category: 'technical' }]);
+  });
+
+  test('swaps the question at the given index and persists it', async () => {
+    const result = await regenerateQuestion('int1', 'u1', 0);
+    expect(mockInterview.questionIds[0]).toBe('q1-replacement');
+    expect(mockInterview.save).toHaveBeenCalled();
+    expect(result).toEqual({ _id: 'q1-replacement', text: 'New question', category: 'technical' });
+  });
+
+  test('throws 404 when the interview is not found or not active', async () => {
+    Interview.findOne.mockResolvedValue(null);
+    await expect(regenerateQuestion('int1', 'u1', 0)).rejects.toMatchObject({ status: 404 });
+  });
+
+  test('throws 400 when questionIndex is out of bounds', async () => {
+    await expect(regenerateQuestion('int1', 'u1', 99)).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('throws 409 and does not save when the question has already been answered', async () => {
+    Answer.exists.mockResolvedValue({ _id: 'existing-answer' });
+    await expect(regenerateQuestion('int1', 'u1', 0)).rejects.toMatchObject({ status: 409 });
+    expect(mockInterview.save).not.toHaveBeenCalled();
+  });
+
+  test('throws 404 and does not save when the bank has no replacement available', async () => {
+    Question.aggregate.mockResolvedValue([]);
+    await expect(regenerateQuestion('int1', 'u1', 0)).rejects.toMatchObject({ status: 404 });
+    expect(mockInterview.save).not.toHaveBeenCalled();
+  });
+
+  test('excludes every question already in the interview from the replacement pool', async () => {
+    // $nin references interview.questionIds directly, and that array gets
+    // mutated (index swapped) after the aggregate call — so the exclusion
+    // list must be captured at call-time, not read back afterward.
+    let capturedNin;
+    Question.aggregate.mockImplementation((pipeline) => {
+      capturedNin = [...pipeline.find(stage => stage.$match).$match._id.$nin];
+      return Promise.resolve([{ _id: 'q1-replacement', text: 'New question', category: 'technical' }]);
+    });
+
+    await regenerateQuestion('int1', 'u1', 0);
+
+    expect(capturedNin).toEqual(['q1', 'q2', 'q3']);
   });
 });
