@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { setAuth } from '@/lib/auth'
 import { API_URL } from '@/lib/config'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 function OAuthButton({ provider, label, className }: { provider: 'google' | 'linkedin'; label: string; className?: string }) {
   const icon = provider === 'google' ? (
@@ -71,6 +72,7 @@ export default function SignupPage() {
           <span className="font-geist font-bold text-emerald-deep text-xl tracking-tight">MockPrep</span>
         </Link>
         <div className="hidden md:flex items-center gap-4">
+          <ThemeToggle />
           <span className="text-xs text-slate-muted">Already have an account?</span>
           <Link
             href="/login"
@@ -167,7 +169,7 @@ export default function SignupPage() {
 
               <button
                 type="submit" disabled={loading}
-                className="w-full bg-primary hover:bg-emerald-deep text-white font-semibold text-base py-3.5 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md flex justify-center items-center gap-2 disabled:opacity-60"
+                className="w-full bg-primary hover:brightness-90 text-white font-semibold text-base py-3.5 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md flex justify-center items-center gap-2 disabled:opacity-60"
               >
                 {loading ? (
                   <><span className="material-symbols-outlined text-base animate-spin">sync</span>Creating account…</>
@@ -220,7 +222,7 @@ export default function SignupPage() {
               <div className="space-y-4">
                 <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
                   <div className="h-full bg-primary w-[85%] rounded-full relative">
-                    <div className="absolute right-0 top-0 bottom-0 w-4 bg-white/30 animate-pulse" />
+                    <div className="absolute right-0 top-0 bottom-0 w-4 bg-surface-container-lowest/30 animate-pulse" />
                   </div>
                 </div>
                 <div className="flex justify-between text-xs">

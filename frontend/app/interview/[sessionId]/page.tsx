@@ -505,7 +505,7 @@ export default function ActiveInterviewPage() {
     <div className="bg-background text-on-surface h-screen flex flex-col overflow-hidden font-sans">
       {/* Filler word toast */}
       {showFillerToast && (
-        <div className="absolute top-20 right-6 z-50 bg-white/85 backdrop-blur-md border-l-4 border-l-tertiary-container border border-outline-variant/20 rounded-lg p-4 shadow-sm flex items-start gap-3 max-w-sm animate-in slide-in-from-top-2">
+        <div className="absolute top-20 right-6 z-50 bg-surface-container-lowest/85 backdrop-blur-md border-l-4 border-l-tertiary-container border border-outline-variant/20 rounded-lg p-4 shadow-sm flex items-start gap-3 max-w-sm animate-in slide-in-from-top-2">
           <span className="material-symbols-outlined text-tertiary-container mt-0.5 icon-fill">warning</span>
           <div>
             <p className="text-sm font-semibold text-on-surface mb-1">Filler word detected</p>
@@ -627,10 +627,10 @@ export default function ActiveInterviewPage() {
               <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
                 {/* Template diagram for fix/improve */}
                 {currentQuestion?.templateDiagram && (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 overflow-hidden">
-                    <div className="px-4 py-2 border-b border-amber-200 flex items-center gap-2">
-                      <span className="material-symbols-outlined text-amber-600 text-base">info</span>
-                      <span className="text-xs font-semibold text-amber-700">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/30 overflow-hidden">
+                    <div className="px-4 py-2 border-b border-amber-200 dark:border-amber-800 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-base">info</span>
+                      <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">
                         {currentQuestion.subtype === 'fix' ? 'Broken design to fix' : 'Starting design to improve'}
                       </span>
                     </div>
@@ -695,7 +695,7 @@ export default function ActiveInterviewPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || completing || !canSubmit}
-                    className="flex items-center gap-2 bg-primary text-white rounded-lg px-6 py-2.5 font-semibold text-sm disabled:opacity-50 hover:bg-emerald-deep transition-colors"
+                    className="flex items-center gap-2 bg-primary text-white rounded-lg px-6 py-2.5 font-semibold text-sm disabled:opacity-50 hover:brightness-90 transition-colors"
                   >
                     {submitting || completing
                       ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>{completing ? 'Finishing…' : 'Submitting…'}</>
@@ -726,15 +726,15 @@ export default function ActiveInterviewPage() {
                   const lastId = Object.keys(testResultMap)[Object.keys(testResultMap).length - 1]
                   const tr = testResultMap[lastId]
                   return (
-                    <div className={`rounded-xl border p-4 flex items-center gap-3 ${tr.passed === tr.total ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                      <span className={`material-symbols-outlined text-2xl ${tr.passed === tr.total ? 'text-green-600' : 'text-red-500'}`}>
+                    <div className={`rounded-xl border p-4 flex items-center gap-3 ${tr.passed === tr.total ? 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800' : 'bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800'}`}>
+                      <span className={`material-symbols-outlined text-2xl ${tr.passed === tr.total ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
                         {tr.passed === tr.total ? 'check_circle' : 'cancel'}
                       </span>
                       <div>
-                        <p className={`font-semibold text-sm ${tr.passed === tr.total ? 'text-green-800' : 'text-red-700'}`}>
+                        <p className={`font-semibold text-sm ${tr.passed === tr.total ? 'text-green-800 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
                           {tr.passed}/{tr.total} test cases passed
                         </p>
-                        {tr.passed < tr.total && <p className="text-xs text-red-600 mt-0.5">Check your logic and edge cases</p>}
+                        {tr.passed < tr.total && <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">Check your logic and edge cases</p>}
                       </div>
                     </div>
                   )
@@ -779,7 +779,7 @@ export default function ActiveInterviewPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || completing || !canSubmit}
-                    className="flex items-center gap-2 bg-primary text-white rounded-lg px-6 py-2.5 font-semibold text-sm disabled:opacity-50 hover:bg-emerald-deep transition-colors"
+                    className="flex items-center gap-2 bg-primary text-white rounded-lg px-6 py-2.5 font-semibold text-sm disabled:opacity-50 hover:brightness-90 transition-colors"
                   >
                     {submitting || completing
                       ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>{completing ? 'Finishing…' : 'Submitting…'}</>
@@ -908,7 +908,7 @@ export default function ActiveInterviewPage() {
                     <button
                       onClick={handleSubmit}
                       disabled={submitting || completing || !canSubmit}
-                      className="flex items-center gap-2 bg-primary text-white rounded-lg px-6 py-2 font-semibold text-sm disabled:opacity-50 hover:bg-emerald-deep transition-colors"
+                      className="flex items-center gap-2 bg-primary text-white rounded-lg px-6 py-2 font-semibold text-sm disabled:opacity-50 hover:brightness-90 transition-colors"
                     >
                       {submitting || completing
                         ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>{completing ? 'Finishing…' : 'Submitting…'}</>

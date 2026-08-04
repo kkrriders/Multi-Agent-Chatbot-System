@@ -7,6 +7,7 @@ const { authenticate } = require('../middleware/auth');
 const { logger } = require('../shared/logger');
 const { auditEvent } = require('../middleware/auditLog');
 const redisClient = require('../config/redis');
+const { sendPasswordResetEmail } = require('../services/email/email-service');
 
 const RESET_TTL_SECONDS = 3600; // 1 hour
 
@@ -324,6 +325,14 @@ router.post('/forgot-password', async (req, res) => {
     // Do NOT log the resetUrl — it contains the raw token which is a credential.
     logger.info(`[PASSWORD RESET] reset link generated for email=${email}`);
     auditEvent({ userId: user._id, email, action: 'password_reset.requested', ip: req.ip, userAgent: req.headers['user-agent'] });
+
+    try {
+      await sendPasswordResetEmail(email, resetUrl);
+    } catch (emailError) {
+      // Don't fail the request — the token is already valid in Redis, and
+      // leaking delivery failures would help an attacker enumerate emails.
+      logger.error('[email] failed to send password reset email:', emailError.message);
+    }
 
     res.status(200).json({ success: true, message: 'If that email is registered you will receive a reset link shortly.' });
   } catch (error) {

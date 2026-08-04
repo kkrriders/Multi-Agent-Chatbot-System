@@ -148,7 +148,7 @@ export default function ProfilePage() {
                         <div className="flex justify-end md:col-span-2 pt-2">
                           <button
                             type="submit" disabled={saving}
-                            className="bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm disabled:opacity-60 flex items-center gap-2"
+                            className="bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:brightness-90 transition-colors shadow-sm disabled:opacity-60 flex items-center gap-2"
                           >
                             {saving ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>Saving…</> : 'Save Changes'}
                           </button>
@@ -203,7 +203,7 @@ export default function ProfilePage() {
                         </div>
                         <button
                           onClick={handleCvUpload} disabled={uploading}
-                          className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm disabled:opacity-60 flex items-center gap-2 flex-shrink-0"
+                          className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:brightness-90 transition-colors shadow-sm disabled:opacity-60 flex items-center gap-2 flex-shrink-0"
                         >
                           {uploading ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>Uploading…</> : <><span className="material-symbols-outlined text-base">upload</span>Upload</>}
                         </button>

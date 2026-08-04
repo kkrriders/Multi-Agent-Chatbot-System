@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { auth } from '@/lib/api'
 import { clearAuth } from '@/lib/auth'
 import { toast } from 'sonner'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/dashboard',              label: 'Overview',          icon: 'dashboard' },
@@ -63,14 +64,15 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="px-4 mt-auto">
+        <div className="px-4 mt-auto flex items-center gap-2">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-outline-variant/30 rounded-lg text-slate-muted hover:bg-surface-container-lowest hover:text-error transition-colors text-sm shadow-sm"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-slate-muted hover:bg-surface-container-low hover:text-error transition-colors text-sm shadow-sm"
           >
             <span className="material-symbols-outlined text-base">logout</span>
             Sign Out
           </button>
+          <ThemeToggle />
         </div>
       </aside>
 

@@ -13,7 +13,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth');
 const { generalLimiter, messageLimiter } = require('../middleware/rateLimiter');
 const { guard } = require('../middleware/injection-guard');
 const Question = require('../models/Question');
@@ -31,8 +31,8 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// List/filter questions
-router.get('/', authenticate, generalLimiter, async (req, res) => {
+// List/filter questions — public read (guests browse the bank; evaluate/start is what's gated)
+router.get('/', optionalAuth, generalLimiter, async (req, res) => {
   try {
     const { role, category, difficulty, limit = '20', offset = '0' } = req.query;
     const filter = { active: true };

@@ -16,10 +16,13 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth');
 const { guard } = require('../middleware/injection-guard');
+const { attachGuestId, gateGuestUsage } = require('../middleware/guestGate');
 const { generalLimiter, messageLimiter } = require('../middleware/rateLimiter');
 const sessionManager = require('../services/interview/session-manager');
+const questionGenerator = require('../services/interview/question-generator');
+const answerScorer = require('../services/interview/answer-scorer');
 const broadcaster = require('../services/sse/broadcaster');
 const scoringQueue = require('../services/queue/scoring-queue');
 const retrieval = require('../services/history/retrieval-service');
@@ -28,6 +31,7 @@ const Answer = require('../models/Answer');
 const Interview = require('../models/Interview');
 const CandidateProfile = require('../models/CandidateProfile');
 const { logger } = require('../shared/logger');
+const crypto = require('crypto');
 
 const MAX_ANSWER_LEN = 5_000;
 const VALID_MODES = ['practice', 'timed', 'full', 'panel'];
@@ -124,6 +128,77 @@ router.post('/start',
         return res.status(422).json({ success: false, error: err.message });
       }
       res.status(500).json({ success: false, error: 'Failed to start interview session' });
+    }
+  }
+);
+
+// ── Guest preview (unauthenticated trial — generated on the fly, never persisted) ──
+router.post('/preview',
+  optionalAuth,
+  generalLimiter,
+  attachGuestId,
+  (req, res, next) => {
+    if (!VALID_MODES.includes(req.body.mode)) {
+      return res.status(400).json({ success: false, error: `mode must be one of: ${VALID_MODES.join(', ')}` });
+    }
+    next();
+  },
+  guard(['targetRole']),
+  gateGuestUsage(req => `interview:${req.body.mode}`),
+  async (req, res) => {
+    try {
+      const { mode, targetRole } = req.body;
+      const questions = await questionGenerator.generate({
+        targetRole: (targetRole && String(targetRole).slice(0, 200)) || 'Software Engineer',
+        mode,
+        numQuestions: 3,
+      });
+      res.json({
+        success: true,
+        questions: questions.map(q => ({
+          id:             q._id,
+          text:           q.text,
+          category:       q.category,
+          difficulty:     q.difficulty,
+          questionFormat: q.questionFormat || 'text',
+        })),
+      });
+    } catch (err) {
+      logger.error(`[interview/preview] ${err.message}`);
+      res.status(500).json({ success: false, error: 'Failed to generate preview questions' });
+    }
+  }
+);
+
+router.post('/preview/answer',
+  optionalAuth,
+  messageLimiter,
+  attachGuestId,
+  guard(['questionText', 'answerText']),
+  async (req, res) => {
+    try {
+      const { questionText, expectedKeywords, answerText } = req.body;
+      if (!questionText || typeof questionText !== 'string') {
+        return res.status(400).json({ success: false, error: 'questionText is required' });
+      }
+      if (!answerText || typeof answerText !== 'string' || !answerText.trim()) {
+        return res.status(400).json({ success: false, error: 'answerText is required' });
+      }
+      if (answerText.length > MAX_ANSWER_LEN) {
+        return res.status(400).json({ success: false, error: `answerText must be ≤ ${MAX_ANSWER_LEN} chars` });
+      }
+
+      const result = await answerScorer.score({
+        questionText,
+        expectedKeywords: Array.isArray(expectedKeywords) ? expectedKeywords.slice(0, 20) : [],
+        answerText,
+        sessionId: `guest:${req.guestId}`,
+        answerId:  crypto.randomUUID(),
+      });
+      res.json({ success: true, ...result });
+    } catch (err) {
+      logger.error(`[interview/preview/answer] ${err.message}`);
+      res.status(500).json({ success: false, error: 'Failed to score answer' });
     }
   }
 );
@@ -298,7 +373,7 @@ router.get('/:sessionId/summary', authenticate, generalLimiter, async (req, res)
 
     const [interview, answers] = await Promise.all([
       Interview.findOne({ _id: req.params.sessionId, userId: req.user._id }).lean(),
-      Answer.find({ interviewId: req.params.sessionId }).populate('questionId', 'text category difficulty').lean(),
+      Answer.find({ interviewId: req.params.sessionId }).populate('questionId', 'text category difficulty questionFormat').lean(),
     ]);
 
     if (!interview) return res.status(404).json({ success: false, error: 'Session not found' });

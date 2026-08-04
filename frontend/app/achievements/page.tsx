@@ -48,8 +48,8 @@ const ALL_BADGES: Record<string, {
     label: '3-Day Streak',
     description: 'Practiced 3 days in a row.',
     icon: 'local_fire_department',
-    iconBg: 'bg-orange-100',
-    iconColor: 'text-orange-500',
+    iconBg: 'bg-orange-100 dark:bg-orange-950/40',
+    iconColor: 'text-orange-500 dark:text-orange-400',
     hint: 'Practice on 3 consecutive days.',
     tier: 'bronze',
   },
@@ -110,9 +110,9 @@ const ALL_BADGES: Record<string, {
 }
 
 const TIER_CONFIG = {
-  bronze: { label: 'Bronze', color: 'text-amber-600',  ring: 'ring-amber-300/60',  glow: 'shadow-amber-100' },
+  bronze: { label: 'Bronze', color: 'text-amber-600 dark:text-amber-400',  ring: 'ring-amber-300/60',  glow: 'shadow-amber-100' },
   silver: { label: 'Silver', color: 'text-slate-muted', ring: 'ring-slate-300/60',  glow: 'shadow-slate-100' },
-  gold:   { label: 'Gold',   color: 'text-yellow-600',  ring: 'ring-yellow-300/60', glow: 'shadow-yellow-100' },
+  gold:   { label: 'Gold',   color: 'text-yellow-600 dark:text-yellow-400',  ring: 'ring-yellow-300/60', glow: 'shadow-yellow-100' },
 }
 
 function metaSummary(type: string, meta?: Record<string, unknown>): string | null {
@@ -165,19 +165,19 @@ export default function AchievementsPage() {
 
         {/* Summary strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-          <div className="bg-white rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
+          <div className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
             <div className="font-geist font-bold text-4xl text-emerald-deep mb-1">{earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Earned</div>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
+          <div className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
             <div className="font-geist font-bold text-4xl text-on-surface mb-1">{totalCount - earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Locked</div>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
+          <div className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
             <div className="font-geist font-bold text-4xl text-tertiary-container mb-1">{streak}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Day Streak</div>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
+          <div className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/15 shadow-sm text-center">
             <div className="font-geist font-bold text-4xl text-primary mb-1">
               {earnedCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0}%
             </div>
@@ -186,7 +186,7 @@ export default function AchievementsPage() {
         </div>
 
         {/* Progress bar */}
-        <div className="mb-10 bg-white rounded-xl p-6 border border-outline-variant/15 shadow-sm">
+        <div className="mb-10 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-sm">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm font-semibold text-on-surface">Collection Progress</span>
             <span className="text-sm text-slate-muted">{earnedCount} / {totalCount}</span>
@@ -222,7 +222,7 @@ export default function AchievementsPage() {
                   return (
                     <div
                       key={type}
-                      className={`bg-white rounded-xl border border-outline-variant/15 p-6 flex flex-col items-center text-center shadow-sm ring-2 ${tier.ring} hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
+                      className={`bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-6 flex flex-col items-center text-center shadow-sm ring-2 ${tier.ring} hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
                     >
                       {/* Tier label */}
                       <span className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${tier.color}`}>
@@ -305,7 +305,7 @@ export default function AchievementsPage() {
             </p>
             <Link
               href="/interview"
-              className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:brightness-90 transition-colors shadow-sm"
             >
               <span className="material-symbols-outlined text-base">play_arrow</span>
               Start an Interview

@@ -36,7 +36,7 @@ function csrfProtection(req, res, next) {
  * Routes are required lazily (inside this function) so that jest.mock()
  * factories registered by the calling test file are already in place.
  */
-function createTestApp() {
+function createTestApp({ mount = [] } = {}) {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
@@ -49,6 +49,12 @@ function createTestApp() {
 
   const authRoutes = require('../../../src/routes/auth');
   app.use('/api/auth', csrfProtection, authRoutes);
+
+  // Additional routers, mounted lazily (after caller's jest.mock() factories
+  // are in place) — pass e.g. [['/api/practice', '../../../src/routes/practice']]
+  for (const [path, modulePath] of mount) {
+    app.use(path, csrfProtection, require(modulePath));
+  }
 
   return app;
 }

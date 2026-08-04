@@ -161,7 +161,7 @@ export default function UploadPage() {
             <button
               onClick={handleUpload}
               disabled={!file || uploading}
-              className="w-full bg-primary text-white font-semibold text-base py-3 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-emerald-deep transition-colors shadow-sm"
+              className="w-full bg-primary text-white font-semibold text-base py-3 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 hover:brightness-90 transition-colors shadow-sm"
             >
               {uploading ? (
                 <><span className="material-symbols-outlined animate-spin text-base">sync</span>Parsing CV…</>
@@ -174,7 +174,7 @@ export default function UploadPage() {
           /* Results layout */
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Left: CV highlights */}
-            <div className="bg-white rounded-xl border border-outline-variant/15 p-6 md:p-8 flex flex-col shadow-sm">
+            <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-6 md:p-8 flex flex-col shadow-sm">
               <div className="flex justify-between items-center mb-6 border-b border-outline-variant/15 pb-4">
                 <h2 className="font-geist font-semibold text-2xl text-on-surface flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary">description</span>
@@ -247,7 +247,7 @@ export default function UploadPage() {
             </div>
 
             {/* Right: Gap analysis */}
-            <div className="bg-white rounded-xl border border-outline-variant/15 p-6 md:p-8 flex flex-col shadow-sm">
+            <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-6 md:p-8 flex flex-col shadow-sm">
               <div className="flex justify-between items-center mb-6 border-b border-outline-variant/15 pb-4">
                 <h2 className="font-geist font-semibold text-2xl text-on-surface flex items-center gap-2">
                   <span className="material-symbols-outlined text-slate-muted">work</span>
@@ -302,7 +302,7 @@ export default function UploadPage() {
                 <button
                   onClick={handleGapAnalysis}
                   disabled={!jd.trim() || analyzing}
-                  className="w-full bg-primary hover:bg-emerald-deep text-white text-sm font-semibold py-3 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50 shadow-sm"
+                  className="w-full bg-primary hover:brightness-90 text-white text-sm font-semibold py-3 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50 shadow-sm"
                 >
                   {analyzing ? (
                     <><span className="material-symbols-outlined animate-spin text-base">sync</span>Analyzing…</>
@@ -320,7 +320,7 @@ export default function UploadPage() {
           <div className="flex justify-center mt-4">
             <button
               onClick={() => router.push('/interview')}
-              className="inline-flex items-center gap-2 bg-primary text-white text-base font-semibold px-8 py-3 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 bg-primary text-white text-base font-semibold px-8 py-3 rounded-lg hover:brightness-90 transition-colors shadow-sm"
             >
               Start Interview <span className="material-symbols-outlined">arrow_forward</span>
             </button>

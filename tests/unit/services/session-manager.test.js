@@ -72,6 +72,57 @@ describe('session-manager.create — weak-area personalization', () => {
   });
 });
 
+describe('session-manager.create — adaptive difficulty', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Interview.findOne.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+    Answer.distinct.mockResolvedValue([]);
+    Interview.create.mockResolvedValue({
+      _id: 'int1',
+      questionIds: [],
+      save: jest.fn().mockResolvedValue(undefined),
+      toObject: jest.fn().mockReturnValue({ _id: 'int1' }),
+    });
+    profileAgent.build.mockResolvedValue(FAKE_PROFILE);
+    questionGenerator.generate.mockResolvedValue([{ _id: 'q1' }]);
+  });
+
+  function mockRecentScores(scores) {
+    // Interview.find is called twice in create(): once for seenQuestionIds
+    // (status: {$in:[...]}) and once for recent scores (status: 'completed').
+    // Route by the query shape so each gets its own canned response.
+    Interview.find.mockImplementation((query) => {
+      const isScoreQuery = query.status === 'completed';
+      const result = isScoreQuery ? scores.map(overallScore => ({ overallScore })) : [];
+      return { sort: jest.fn().mockReturnValue({ limit: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(result) }) }) };
+    });
+  }
+
+  test('biases up after 3 consistently high scores', async () => {
+    mockRecentScores([85, 90, 82]);
+    await create({ userId: 'u1', mode: 'practice', targetRole: 'Backend Engineer' });
+    expect(questionGenerator.generate).toHaveBeenCalledWith(expect.objectContaining({ difficultyBias: 'up' }));
+  });
+
+  test('biases down after 3 consistently low scores', async () => {
+    mockRecentScores([30, 45, 50]);
+    await create({ userId: 'u1', mode: 'practice', targetRole: 'Backend Engineer' });
+    expect(questionGenerator.generate).toHaveBeenCalledWith(expect.objectContaining({ difficultyBias: 'down' }));
+  });
+
+  test('no bias with mixed scores', async () => {
+    mockRecentScores([90, 40, 70]);
+    await create({ userId: 'u1', mode: 'practice', targetRole: 'Backend Engineer' });
+    expect(questionGenerator.generate).toHaveBeenCalledWith(expect.objectContaining({ difficultyBias: null }));
+  });
+
+  test('no bias with fewer than 3 completed sessions', async () => {
+    mockRecentScores([90, 95]);
+    await create({ userId: 'u1', mode: 'practice', targetRole: 'Backend Engineer' });
+    expect(questionGenerator.generate).toHaveBeenCalledWith(expect.objectContaining({ difficultyBias: null }));
+  });
+});
+
 // Regression coverage for the E11000 duplicate-key bug: idempotencyKey must
 // be genuinely omitted (not explicitly null) so the sparse unique index on
 // it only ever matches documents that actually sent a key. A null default —

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const FEATURES = [
   {
@@ -47,10 +48,11 @@ export default function LandingPage() {
             ))}
           </nav>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link href="/login" className="hidden md:block text-primary text-sm font-semibold hover:bg-surface-container-low px-4 py-2 rounded transition-colors">
               Log In
             </Link>
-            <Link href="/signup" className="bg-emerald-deep text-white text-sm font-semibold px-5 py-2 rounded-lg hover:bg-primary transition-colors shadow-sm">
+            <Link href="/signup" className="bg-primary text-white text-sm font-semibold px-5 py-2 rounded-lg hover:brightness-90 transition-colors shadow-sm">
               Get Started
             </Link>
           </div>
@@ -76,7 +78,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto">
               <Link
                 href="/signup"
-                className="bg-emerald-deep text-white font-semibold text-sm px-6 py-3 rounded-lg hover:bg-primary transition-all shadow-sm flex items-center justify-center gap-2 group"
+                className="bg-primary text-white font-semibold text-sm px-6 py-3 rounded-lg hover:brightness-90 transition-all shadow-sm flex items-center justify-center gap-2 group"
               >
                 Start Free Trial
                 <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -103,7 +105,7 @@ export default function LandingPage() {
 
           {/* CV Upload card */}
           <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
-            <div className="bg-white rounded-xl border border-outline-variant/20 p-6 md:p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(6,95,70,0.08)] transition-shadow duration-300 relative overflow-hidden group">
+            <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 md:p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(6,95,70,0.08)] transition-shadow duration-300 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-container/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
               <div className="mb-6">
                 <h3 className="font-geist font-semibold text-2xl text-ink">Upload your CV</h3>
@@ -141,7 +143,7 @@ export default function LandingPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Real-time Scoring — wide */}
-              <div className="md:col-span-2 bg-white rounded-xl border border-outline-variant/20 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
+              <div className="md:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
                 <div className="flex-1 z-10">
                   <div className="w-12 h-12 bg-primary-container/15 rounded-lg flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-primary icon-fill text-2xl">speed</span>
@@ -163,7 +165,7 @@ export default function LandingPage() {
               </div>
 
               {/* Speech Analysis */}
-              <div className="md:col-span-1 bg-white rounded-xl border border-outline-variant/20 p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-amber-light rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-tertiary-container icon-fill text-xl">mic</span>
                 </div>
@@ -182,7 +184,7 @@ export default function LandingPage() {
               </div>
 
               {/* Adaptive Follow-ups */}
-              <div className="md:col-span-1 bg-white rounded-xl border border-outline-variant/20 p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-secondary-container/30 rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-secondary icon-fill text-xl">forum</span>
                 </div>
@@ -199,7 +201,7 @@ export default function LandingPage() {
               </div>
 
               {/* Personalized Feedback — wide */}
-              <div className="md:col-span-2 bg-emerald-deep text-white rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden">
+              <div className="md:col-span-2 bg-primary text-white rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none opacity-20 z-0">
                   <div className="absolute top-[-20%] right-[-10%] w-64 h-64 rounded-full bg-primary-fixed blur-2xl" />
                   <div className="absolute bottom-[-10%] left-[20%] w-48 h-48 rounded-full bg-inverse-primary blur-2xl" />
@@ -212,7 +214,7 @@ export default function LandingPage() {
                   <p className="text-base text-white/80 mb-6 max-w-md">
                     Receive a detailed breakdown of your performance with actionable advice on structuring answers using the STAR method.
                   </p>
-                  <Link href="/signup" className="inline-block bg-white text-emerald-deep font-semibold text-sm px-5 py-2.5 rounded hover:bg-surface-container-lowest transition-colors">
+                  <Link href="/signup" className="inline-block bg-surface-container-lowest text-emerald-deep font-semibold text-sm px-5 py-2.5 rounded hover:bg-surface-container-lowest transition-colors">
                     Get Started Free
                   </Link>
                 </div>
@@ -222,7 +224,7 @@ export default function LandingPage() {
         </section>
 
         {/* How It Works */}
-        <section className="w-full py-16 md:py-24 bg-white">
+        <section className="w-full py-16 md:py-24 bg-surface-container-lowest">
           <div className="px-4 md:px-12 max-w-[1280px] mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="font-geist font-bold text-2xl md:text-3xl text-ink mb-4">How it works</h2>
@@ -234,7 +236,7 @@ export default function LandingPage() {
                 {STEPS.map(s => (
                   <div key={s.n} className="flex flex-col items-center text-center group">
                     <div className="w-24 h-24 bg-surface rounded-full border-2 border-outline-variant/30 flex items-center justify-center mb-6 group-hover:border-primary group-hover:bg-primary-container/10 transition-colors shadow-sm relative">
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-emerald-deep text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">{s.n}</div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">{s.n}</div>
                       <span className="material-symbols-outlined text-3xl text-secondary group-hover:text-primary transition-colors">{s.icon}</span>
                     </div>
                     <h4 className="text-[18px] font-semibold text-ink mb-2">{s.title}</h4>
@@ -244,7 +246,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="mt-16 text-center">
-              <Link href="/signup" className="inline-block bg-emerald-deep text-white font-semibold text-lg px-8 py-3.5 rounded-lg hover:bg-primary transition-colors shadow-md">
+              <Link href="/signup" className="inline-block bg-primary text-white font-semibold text-lg px-8 py-3.5 rounded-lg hover:brightness-90 transition-colors shadow-md">
                 Start your first session
               </Link>
             </div>

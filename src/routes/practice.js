@@ -9,7 +9,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate } = require('../middleware/auth');
+const { optionalAuth } = require('../middleware/auth');
+const { attachGuestId, gateGuestUsage } = require('../middleware/guestGate');
 const { messageLimiter } = require('../middleware/rateLimiter');
 const Question = require('../models/Question');
 const ai = require('../services/ai/provider-manager');
@@ -17,7 +18,7 @@ const schemas = require('../services/ai/schemas');
 const { logger } = require('../shared/logger');
 
 // POST /api/practice/evaluate
-router.post('/evaluate', authenticate, messageLimiter, async (req, res) => {
+router.post('/evaluate', optionalAuth, messageLimiter, attachGuestId, gateGuestUsage('practiceQuestion'), async (req, res) => {
   try {
     const { type, questionId, code, language, nodes, edges } = req.body;
 

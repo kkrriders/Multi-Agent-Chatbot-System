@@ -6,6 +6,7 @@ import { auth } from '@/lib/api'
 import { clearAuth } from '@/lib/auth'
 import { toast } from 'sonner'
 import { BrainCircuit, UploadCloud, Play, BarChart2, Trophy, BookOpen, LogOut } from 'lucide-react'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/dashboard',    label: 'Dashboard',  icon: BrainCircuit },
@@ -61,6 +62,7 @@ export function Nav() {
           >
             <LogOut className="w-4 h-4" />
           </button>
+          <ThemeToggle />
         </div>
       </div>
     </nav>

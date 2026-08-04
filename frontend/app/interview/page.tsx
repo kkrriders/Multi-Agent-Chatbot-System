@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { interview as interviewApi, cv as cvApi } from '@/lib/api'
-import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { interview as interviewApi, cv as cvApi, GUEST_LIMIT_ERROR } from '@/lib/api'
+import { useOptionalAuth } from '@/hooks/useOptionalAuth'
+import { GuestLimitPrompt } from '@/components/GuestLimitPrompt'
 import { Sidebar } from '@/components/sidebar'
 import { toast } from 'sonner'
 
@@ -65,9 +66,10 @@ const TIME_LIMITS = [
 ]
 
 export default function InterviewSetupPage() {
-  const { loading: authLoading } = useRequireAuth()
+  const { user, loading: authLoading } = useOptionalAuth()
   const router = useRouter()
   const cvFileRef = useRef<HTMLInputElement>(null)
+  const [guestLimitHit, setGuestLimitHit] = useState(false)
 
   const [mode, setMode] = useState('practice')
   const [role, setRole] = useState('')
@@ -89,10 +91,12 @@ export default function InterviewSetupPage() {
   const [cvExpandUpload, setCvExpandUpload] = useState(false)
 
   useEffect(() => {
+    if (authLoading) return
+    if (!user) { setCvChecking(false); return } // guests skip CV personalisation entirely
     cvApi.profile()
       .then(() => { setCvMissing(false); setCvChecking(false) })
       .catch(() => { setCvMissing(true); setCvChecking(false) })
-  }, [])
+  }, [authLoading, user])
 
   const uploadCvInline = async () => {
     if (!cvFile) return
@@ -111,12 +115,30 @@ export default function InterviewSetupPage() {
   }
 
   const start = async () => {
+    if (!role.trim()) { setRoleError(true); return }
+    setRoleError(false)
+
+    // Guests get a lightweight, non-persisted preview instead of a real session.
+    if (!user) {
+      setGuestLimitHit(false)
+      setLoading(true)
+      try {
+        const data = await interviewApi.preview(mode, role.trim())
+        sessionStorage.setItem('mockprep_guest_preview', JSON.stringify({ mode, questions: data.questions }))
+        router.push('/interview/preview')
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to start preview'
+        if (msg === GUEST_LIMIT_ERROR) setGuestLimitHit(true)
+        else toast.error(msg)
+        setLoading(false)
+      }
+      return
+    }
+
     if (cvMissing) {
       toast.error('Please upload your CV above to personalise your interview questions')
       return
     }
-    if (!role.trim()) { setRoleError(true); return }
-    setRoleError(false)
     setLoading(true)
     try {
       const useNumQ = ['practice', 'timed'].includes(mode) ? numQuestions : undefined
@@ -168,9 +190,20 @@ export default function InterviewSetupPage() {
             </p>
           </div>
 
+          {!user && !authLoading && (
+            <div className="mb-6 rounded-xl border border-primary/20 bg-primary-container/10 px-4 py-3 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-lg">info</span>
+              <p className="text-xs text-on-surface">
+                You&apos;re trying MockPrep as a guest — each mode is free to try <strong>2 times</strong>. <Link href="/signup" className="font-semibold text-primary underline">Sign up</Link> for full personalised sessions and progress tracking.
+              </p>
+            </div>
+          )}
+
+          {guestLimitHit && <div className="mb-8"><GuestLimitPrompt message="You've tried this mode twice as a guest. Create a free account to keep practicing — full sessions, history, and progress tracking." /></div>}
+
           {/* CV section */}
-          {!cvChecking && (
-            <div className={`bg-white rounded-2xl border mb-8 shadow-sm transition-all ${
+          {user && !cvChecking && (
+            <div className={`bg-surface-container-lowest rounded-2xl border mb-8 shadow-sm transition-all ${
               cvMissing ? 'border-2 border-amber-200' : 'border border-outline-variant/15'
             }`}>
               <div className="flex items-center justify-between p-5 md:p-6">
@@ -241,7 +274,7 @@ export default function InterviewSetupPage() {
                   <button
                     onClick={uploadCvInline}
                     disabled={!cvFile || cvUploading}
-                    className="mt-3 w-full bg-primary text-white font-semibold py-2.5 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-emerald-deep transition-colors shadow-sm text-sm"
+                    className="mt-3 w-full bg-primary text-white font-semibold py-2.5 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 hover:brightness-90 transition-colors shadow-sm text-sm"
                   >
                     {cvUploading ? (
                       <><span className="material-symbols-outlined animate-spin text-base">sync</span>Parsing CV…</>
@@ -260,7 +293,7 @@ export default function InterviewSetupPage() {
           )}
 
           {/* Section 1: Context */}
-          <div className="bg-white rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
+          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">1</span>
@@ -313,48 +346,48 @@ export default function InterviewSetupPage() {
           {detectedFormat && (
             <div className={`rounded-2xl border mb-8 p-5 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 items-start ${
               detectedFormat === 'coding'
-                ? 'bg-blue-50/60 border-blue-200'
-                : 'bg-purple-50/60 border-purple-200'
+                ? 'bg-blue-50/60 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800'
+                : 'bg-purple-50/60 border-purple-200 dark:bg-purple-950/30 dark:border-purple-800'
             }`}>
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                detectedFormat === 'coding' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
+                detectedFormat === 'coding' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300'
               }`}>
                 <span className="material-symbols-outlined">{detectedFormat === 'coding' ? 'code' : 'schema'}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-semibold mb-0.5 ${detectedFormat === 'coding' ? 'text-blue-700' : 'text-purple-700'}`}>
+                <p className={`text-sm font-semibold mb-0.5 ${detectedFormat === 'coding' ? 'text-blue-700 dark:text-blue-300' : 'text-purple-700 dark:text-purple-300'}`}>
                   {detectedFormat === 'coding' ? 'Coding questions detected' : 'System design questions detected'}
                 </p>
-                <p className="text-xs text-slate-600 mb-3">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
                   {detectedFormat === 'coding'
                     ? "This interview will include DSA/coding problems. You'll write code directly in a Monaco editor with syntax highlighting."
                     : "This interview will include system design problems. You'll use a drag-and-drop canvas to draw your architecture."}
                 </p>
                 {/* Lightweight mockup */}
                 {detectedFormat === 'coding' ? (
-                  <div className="rounded-lg border border-blue-200 bg-white overflow-hidden text-[10px] font-mono leading-relaxed">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 border-b border-blue-100">
+                  <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-surface-container-lowest overflow-hidden text-[10px] font-mono leading-relaxed">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-surface-container-high border-b border-blue-100 dark:border-blue-900">
                       <span className="w-2 h-2 rounded-full bg-red-400" />
                       <span className="w-2 h-2 rounded-full bg-yellow-400" />
                       <span className="w-2 h-2 rounded-full bg-green-400" />
-                      <span className="ml-2 text-gray-400">solution.js</span>
+                      <span className="ml-2 text-gray-400 dark:text-slate-400">solution.js</span>
                     </div>
-                    <div className="px-3 py-2 text-gray-600 space-y-0.5">
-                      <div><span className="text-blue-600">function</span> <span className="text-yellow-700">twoSum</span>(nums, target) &#123;</div>
-                      <div className="pl-4 text-gray-400">{'// your solution here'}</div>
+                    <div className="px-3 py-2 text-gray-600 dark:text-slate-300 space-y-0.5">
+                      <div><span className="text-blue-600 dark:text-blue-400">function</span> <span className="text-yellow-700 dark:text-yellow-500">twoSum</span>(nums, target) &#123;</div>
+                      <div className="pl-4 text-gray-400 dark:text-slate-500">{'// your solution here'}</div>
                       <div>&#125;</div>
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-lg border border-purple-200 bg-white overflow-hidden p-3">
+                  <div className="rounded-lg border border-purple-200 dark:border-purple-800 bg-surface-container-lowest overflow-hidden p-3">
                     <div className="flex gap-2 flex-wrap">
                       {['Client', 'API Gateway', 'Service', 'Cache', 'SQL DB'].map(label => (
-                        <div key={label} className="text-[10px] font-semibold px-2 py-1 rounded border border-gray-200 bg-gray-50 text-gray-600">
+                        <div key={label} className="text-[10px] font-semibold px-2 py-1 rounded border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-surface-container-high text-gray-600 dark:text-slate-300">
                           {label}
                         </div>
                       ))}
                     </div>
-                    <div className="mt-2 text-[10px] text-gray-400 flex items-center gap-1">
+                    <div className="mt-2 text-[10px] text-gray-400 dark:text-slate-500 flex items-center gap-1">
                       <span className="material-symbols-outlined text-xs">arrow_forward</span>
                       Drag components · Connect with edges
                     </div>
@@ -367,8 +400,8 @@ export default function InterviewSetupPage() {
                 rel="noopener noreferrer"
                 className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
                   detectedFormat === 'coding'
-                    ? 'border-blue-300 text-blue-600 hover:bg-blue-100'
-                    : 'border-purple-300 text-purple-600 hover:bg-purple-100'
+                    ? 'border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900'
+                    : 'border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900'
                 }`}
               >
                 Try sandbox
@@ -389,7 +422,7 @@ export default function InterviewSetupPage() {
                 <button
                   key={m.id}
                   onClick={() => setMode(m.id)}
-                  className={`text-left cursor-pointer bg-white border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:shadow-[0_10px_25px_-5px_rgba(0,108,73,0.1)] hover:-translate-y-0.5 ${
+                  className={`text-left cursor-pointer bg-surface-container-lowest border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:shadow-[0_10px_25px_-5px_rgba(0,108,73,0.1)] hover:-translate-y-0.5 ${
                     mode === m.id ? 'border-primary shadow-[0_0_0_1px_#006c49] bg-surface/50' : 'border-outline-variant/15 hover:border-outline-variant/40'
                   }`}
                 >
@@ -416,7 +449,7 @@ export default function InterviewSetupPage() {
 
           {/* Section 3: Session Settings (practice / timed only) */}
           {showConfig && (
-            <div className="bg-white rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
+            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
               <div className="flex items-center mb-6">
                 <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                   <span className="text-sm font-semibold text-primary">3</span>
@@ -493,7 +526,7 @@ export default function InterviewSetupPage() {
               )}
               <button
                 onClick={start} disabled={loading || cvChecking}
-                className="w-full sm:w-auto bg-primary hover:bg-emerald-deep text-white font-semibold text-base md:text-lg px-8 py-3 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 sm:ml-auto"
+                className="w-full sm:w-auto bg-primary hover:brightness-90 text-white font-semibold text-base md:text-lg px-8 py-3 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 sm:ml-auto"
               >
                 {cvChecking ? (
                   <><span className="material-symbols-outlined animate-spin">sync</span>Checking profile…</>

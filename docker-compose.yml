@@ -1,18 +1,8 @@
 services:
 
   # ── Infrastructure ────────────────────────────────────────────────────────────
-
-  mongodb:
-    image: mongo:7
-    restart: unless-stopped
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
+  # MongoDB is NOT run here — point MONGODB_URI in .env at MongoDB Atlas (free tier).
+  # Frontend is NOT run here — it's deployed separately on Vercel.
 
   redis:
     image: redis:7-alpine
@@ -36,13 +26,11 @@ services:
     env_file: .env
     environment:
       NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/mockprep
+      # MONGODB_URI, FRONTEND_URL (your Vercel domain) come from .env
       REDIS_URL: redis://redis:6379
       PORT: "3000"
-      # Set FRONTEND_URL in .env to your actual domain e.g. https://yourdomain.com
     depends_on:
-      mongodb: { condition: service_healthy }
-      redis:   { condition: service_healthy }
+      redis: { condition: service_healthy }
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 15s
@@ -52,23 +40,7 @@ services:
     volumes:
       - ./logs:/app/logs
 
-  # ── Frontend (Next.js on :3002, internal only) ────────────────────────────────
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        # Must be the public domain — baked into the Next.js client bundle at build time
-        # Set this to https://yourdomain.com (nginx proxies /api/* to backend)
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-    depends_on:
-      backend: { condition: service_healthy }
-
-  # ── Nginx reverse proxy (public: 80 + 443) ────────────────────────────────────
+  # ── Nginx reverse proxy (public: 80 + 443) — proxies straight to backend ──────
 
   nginx:
     image: nginx:alpine
@@ -81,7 +53,6 @@ services:
       - certbot_certs:/etc/letsencrypt:ro
       - certbot_www:/var/www/certbot:ro
     depends_on:
-      - frontend
       - backend
 
   # ── Certbot (run once to issue / renew SSL cert) ──────────────────────────────
@@ -115,7 +86,6 @@ services:
       - "16686:16686"
 
 volumes:
-  mongo_data:
   redis_data:
   certbot_certs:
   certbot_www:

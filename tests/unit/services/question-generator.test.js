@@ -52,6 +52,27 @@ describe('question-generator bank retrieval', () => {
     expect(embeddingService.embed).toHaveBeenCalledTimes(1);
   });
 
+  test('difficultyBias "up" excludes easy questions from the bank match filter', async () => {
+    Question.aggregate.mockResolvedValue([makeQuestion('q1', 0.5)]);
+    await generate({ ...BASE_PARAMS, difficultyBias: 'up' });
+    const matchStage = Question.aggregate.mock.calls[0][0][0].$match;
+    expect(matchStage.difficulty).toEqual({ $ne: 'easy' });
+  });
+
+  test('difficultyBias "down" excludes hard questions from the bank match filter', async () => {
+    Question.aggregate.mockResolvedValue([makeQuestion('q1', 0.5)]);
+    await generate({ ...BASE_PARAMS, difficultyBias: 'down' });
+    const matchStage = Question.aggregate.mock.calls[0][0][0].$match;
+    expect(matchStage.difficulty).toEqual({ $ne: 'hard' });
+  });
+
+  test('no difficulty filter when difficultyBias is null', async () => {
+    Question.aggregate.mockResolvedValue([makeQuestion('q1', 0.5)]);
+    await generate(BASE_PARAMS);
+    const matchStage = Question.aggregate.mock.calls[0][0][0].$match;
+    expect(matchStage.difficulty).toBeUndefined();
+  });
+
   test('falls back to the raw pool order when no candidate has an embedding', async () => {
     embeddingService.embed.mockResolvedValue([1, 0, 0]);
     const pool = [

@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { interview as interviewApi, type Answer, type Interview, type PanelPersonaFeedback } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Sidebar } from '@/components/sidebar'
 import { describeIntegritySignals } from '@/lib/integrity'
+
+const SystemDesignCanvas = dynamic(() => import('@/components/SystemDesignCanvas'), { ssr: false })
+const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false })
 
 interface ResultData {
   interview: Interview
@@ -65,7 +69,7 @@ export default function ResultsPage() {
             <Link href="/progress" className="flex-1 md:flex-none px-6 py-2.5 rounded-lg border border-outline text-on-surface text-sm font-semibold hover:bg-surface-container transition-colors shadow-sm">
               View Past Interviews
             </Link>
-            <Link href="/interview" className="flex-1 md:flex-none px-6 py-2.5 rounded-lg bg-emerald-deep text-white text-sm font-semibold hover:bg-primary transition-colors shadow-sm flex items-center justify-center gap-2">
+            <Link href="/interview" className="flex-1 md:flex-none px-6 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:brightness-90 transition-colors shadow-sm flex items-center justify-center gap-2">
               <span className="material-symbols-outlined text-lg">replay</span>
               Practice Again
             </Link>
@@ -229,7 +233,23 @@ export default function ResultsPage() {
 
                     {isOpen && (
                       <div className="px-4 pb-4 border-t border-outline-variant/15 space-y-3 pt-3">
-                        <p className="text-sm text-slate-muted">{a.text}</p>
+                        {q?.questionFormat === 'system_design' && a.diagramSnapshot ? (
+                          <div style={{ height: 360 }}>
+                            <SystemDesignCanvas initialDiagram={a.diagramSnapshot} readonly />
+                          </div>
+                        ) : q?.questionFormat === 'coding' && a.code ? (
+                          <div style={{ height: 420 }}>
+                            <CodeEditor
+                              starterCode={a.code}
+                              initialLanguage={a.language || 'javascript'}
+                              testResults={a.testResults}
+                              codeScore={a.codeScore}
+                              readonly
+                            />
+                          </div>
+                        ) : (
+                          <p className="text-sm text-slate-muted">{a.text}</p>
+                        )}
                         {a.integrityFlag && a.integrityFlag !== 'CLEAN' && (
                           <div className="flex items-start gap-1.5 bg-error/10 border border-error/30 rounded-lg p-2.5 text-xs text-error">
                             <span className="material-symbols-outlined text-sm shrink-0 icon-fill">warning</span>
@@ -249,7 +269,7 @@ export default function ResultsPage() {
                         {a.scored && (
                           <div className="grid grid-cols-3 gap-2">
                             {(['relevance', 'depth', 'clarity'] as const).map(dim => (
-                              <div key={dim} className="border border-outline-variant/20 rounded-lg p-2 text-center bg-white">
+                              <div key={dim} className="border border-outline-variant/20 rounded-lg p-2 text-center bg-surface-container-lowest">
                                 <div className={`text-lg font-bold ${scoreBarColor(a.scores[dim]).replace('bg-', 'text-')}`}>{a.scores[dim]}</div>
                                 <div className="text-xs text-slate-muted capitalize">{dim}</div>
                               </div>

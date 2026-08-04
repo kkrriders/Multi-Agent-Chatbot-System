@@ -1,92 +1,167 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   /* Base fonts */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-geist: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Hanken Grotesk', var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   /* Semantic colors (used by shadcn/sonner) */
-  --color-background: #f8f9fa;
-  --color-foreground: #191c1d;
-  --color-border: #bbcabf;
-  --color-primary: #006c49;
+  --color-background: #f7f9fb;
+  --color-foreground: #191c1e;
+  --color-border: #c6c6cd;
+  --color-primary: #0F172A;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #515f74;
+  --color-secondary: #475569;
   --color-secondary-foreground: #ffffff;
-  --color-muted: #edeeef;
-  --color-muted-foreground: #64748B;
-  --color-accent: #f3f4f5;
-  --color-accent-foreground: #191c1d;
+  --color-muted: #eceef0;
+  --color-muted-foreground: #45464d;
+  --color-accent: #f2f4f6;
+  --color-accent-foreground: #191c1e;
   --color-destructive: #ba1a1a;
   --color-destructive-foreground: #ffffff;
   --radius: 0.5rem;
 
-  /* === Stitch Design System Color Tokens === */
+  /* === Luminous Intelligence design tokens === */
 
-  /* Brand */
-  --color-emerald-deep: #065F46;
-  --color-ink: #0D0C22;
+  /* Brand — names kept for compatibility with existing usages, values updated */
+  --color-emerald-deep: #0F172A;
+  --color-ink: #131B2E;
   --color-slate-muted: #64748B;
   --color-amber-light: #FEF3C7;
   --color-white: #FFFFFF;
 
   /* Surface layers */
-  --color-surface: #f8f9fa;
-  --color-surface-bright: #f8f9fa;
-  --color-surface-dim: #d9dadb;
-  --color-surface-container: #edeeef;
-  --color-surface-container-low: #f3f4f5;
+  --color-surface: #f7f9fb;
+  --color-surface-bright: #f7f9fb;
+  --color-surface-dim: #d8dadc;
+  --color-surface-container: #eceef0;
+  --color-surface-container-low: #f2f4f6;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-high: #e7e8e9;
-  --color-surface-container-highest: #e1e3e4;
-  --color-surface-variant: #e1e3e4;
-  --color-surface-tint: #006c49;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-variant: #e0e3e5;
+  --color-surface-tint: #565e74;
 
   /* On-surface */
-  --color-on-surface: #191c1d;
-  --color-on-surface-variant: #3c4a42;
-  --color-on-background: #191c1d;
-  --color-inverse-surface: #2e3132;
-  --color-inverse-on-surface: #f0f1f2;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #45464d;
+  --color-on-background: #191c1e;
+  --color-inverse-surface: #2d3133;
+  --color-inverse-on-surface: #eff1f3;
 
   /* Outline */
-  --color-outline: #6c7a71;
-  --color-outline-variant: #bbcabf;
+  --color-outline: #76777d;
+  --color-outline-variant: #c6c6cd;
 
-  /* Primary scale */
+  /* Primary scale — Midnight Navy */
   --color-on-primary: #ffffff;
-  --color-primary-container: #10b981;
-  --color-on-primary-container: #00422b;
-  --color-inverse-primary: #4edea3;
-  --color-primary-fixed: #6ffbbe;
-  --color-primary-fixed-dim: #4edea3;
-  --color-on-primary-fixed: #002113;
-  --color-on-primary-fixed-variant: #005236;
+  --color-primary-container: #131b2e;
+  --color-on-primary-container: #7c839b;
+  --color-inverse-primary: #93c5fd;
+  --color-primary-fixed: #bfdbfe;
+  --color-primary-fixed-dim: #93c5fd;
+  --color-on-primary-fixed: #131b2e;
+  --color-on-primary-fixed-variant: #3f465c;
 
-  /* Secondary scale */
+  /* Secondary scale — Atmospheric Sky (accent badges/containers only;
+     --color-secondary itself is defined once, above, as shared muted text/fill) */
   --color-on-secondary: #ffffff;
-  --color-secondary-container: #d5e3fd;
-  --color-on-secondary-container: #57657b;
-  --color-secondary-fixed: #d5e3fd;
-  --color-secondary-fixed-dim: #b9c7e0;
-  --color-on-secondary-fixed: #0d1c2f;
-  --color-on-secondary-fixed-variant: #3a485c;
+  --color-secondary-container: #38bdf8;
+  --color-on-secondary-container: #004d6a;
+  --color-secondary-fixed: #c4e7ff;
+  --color-secondary-fixed-dim: #7bd0ff;
+  --color-on-secondary-fixed: #001e2c;
+  --color-on-secondary-fixed-variant: #004c69;
 
-  /* Tertiary scale */
-  --color-tertiary: #855300;
+  /* Tertiary scale — Teal (kept distinct from primary blue; no indigo/violet) */
+  --color-tertiary: #0d9488;
   --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #e29100;
-  --color-on-tertiary-container: #523200;
-  --color-tertiary-fixed: #ffddb8;
-  --color-tertiary-fixed-dim: #ffb95f;
-  --color-on-tertiary-fixed: #2a1700;
-  --color-on-tertiary-fixed-variant: #653e00;
+  --color-tertiary-container: #ccfbf1;
+  --color-on-tertiary-container: #134e4a;
+  --color-tertiary-fixed: #99f6e4;
+  --color-tertiary-fixed-dim: #5eead4;
+  --color-on-tertiary-fixed: #042f2e;
+  --color-on-tertiary-fixed-variant: #115e59;
 
   /* Error scale */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
+}
+
+.dark {
+  --color-background: #0b0f1a;
+  --color-foreground: #e3e2e6;
+  --color-border: #63656f;
+  /* Primary stays a rich, saturated blue (never a pale tint) — components
+     hardcode `text-white` against bg-primary throughout the app, so this
+     value must always be dark/saturated enough for white text on top of it,
+     in both themes. No indigo/violet — this is straight blue (~217° hue). */
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+  /* text-secondary is used as muted BODY TEXT throughout the app (hero copy,
+     card descriptions) — must be clearly legible against the near-black
+     background, not a near-black fill color. */
+  --color-secondary: #94a3b8;
+  --color-secondary-foreground: #0f172a;
+  --color-muted: #1f2330;
+  --color-muted-foreground: #c6c6cd;
+  --color-accent: #262b3a;
+  --color-accent-foreground: #e3e2e6;
+  --color-destructive: #ffb4ab;
+  --color-destructive-foreground: #690005;
+
+  /* emerald-deep is used as accent TEXT/icon color (needs to read against a
+     dark page) — a brighter blue-400 tint, same hue family as primary. */
+  --color-emerald-deep: #60a5fa;
+  --color-ink: #e3e2e6;
+  --color-slate-muted: #94a3b8;
+  --color-amber-light: #4a3b00;
+
+  /* Elevation ramp — each step must be LIGHTER than the last so cards visibly
+     "pop" off the page background, same relationship as light mode (where
+     surface-container-lowest is pure white, brighter than the page). */
+  --color-surface: #0b0f1a;
+  --color-surface-bright: #2c3038;
+  --color-surface-dim: #05070c;
+  --color-surface-container: #1f2330;
+  --color-surface-container-low: #191d28;
+  --color-surface-container-lowest: #141822;
+  --color-surface-container-high: #262b3a;
+  --color-surface-container-highest: #2e3444;
+  --color-surface-variant: #45464d;
+  --color-surface-tint: #bec6e0;
+
+  --color-on-surface: #e3e2e6;
+  --color-on-surface-variant: #c6c6cd;
+  --color-on-background: #e3e2e6;
+  --color-inverse-surface: #e3e2e6;
+  --color-inverse-on-surface: #2d3133;
+
+  --color-outline: #9a9ca6;
+  --color-outline-variant: #63656f;
+
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1e3a5f;
+  --color-on-primary-container: #bfdbfe;
+  --color-inverse-primary: #0f172a;
+
+  --color-secondary-container: #004c69;
+  --color-on-secondary-container: #c4e7ff;
+
+  --color-tertiary: #5eead4;
+  --color-on-tertiary: #042f2e;
+  --color-tertiary-container: #115e59;
+  --color-on-tertiary-container: #99f6e4;
+
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
 }
 
 @layer base {
@@ -97,6 +172,9 @@
     background-color: var(--color-background);
     color: var(--color-on-background);
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-heading);
   }
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;

@@ -98,7 +98,7 @@ Respond with valid JSON:
   ]
 }`.trim();
 
-function _buildPrompt(role, category, count, skills, jdSnippet, companyContext, userProfile, liveSnippets) {
+function _buildPrompt(role, category, count, skills, jdSnippet, companyContext, userProfile, liveSnippets, difficultyBias) {
   const companyBlock = companyContext ? `
 Target company: ${companyContext.name}
 Interview format: ${companyContext.interviewFormat}
@@ -121,8 +121,14 @@ ${userProfile.cvGaps.slice(0, 5).length ? `CV skill gaps to probe: ${userProfile
 
   const jdBlock = jdSnippet ? `\nJob description excerpt:\n${jdSnippet.slice(0, 800)}` : '';
 
+  const difficultyBlock = difficultyBias === 'up'
+    ? '\nThe candidate has been scoring consistently high in recent sessions — skew toward "hard" difficulty questions that probe deeper.'
+    : difficultyBias === 'down'
+    ? '\nThe candidate has been scoring low in recent sessions — skew toward "easy" and "medium" difficulty questions to build confidence.'
+    : '';
+
   return `You are an expert interviewer${companyContext ? ` simulating a ${companyContext.name} interview` : ''}. Generate exactly ${count} ${category} interview questions for a ${role} candidate.
-${companyBlock}${profileBlock}${jdBlock}${liveBlock}
+${companyBlock}${profileBlock}${jdBlock}${liveBlock}${difficultyBlock}
 Requirements:
 - Questions must mirror ${companyContext ? `${companyContext.name}'s actual interview style and evaluation criteria` : 'the role and candidate background'}
 - For technical: test depth of knowledge, not just definitions
@@ -147,9 +153,10 @@ ${RESPONSE_FORMAT}`.trim();
  * @param {object} [params.companyContext]  — from orchestrator (curated company data)
  * @param {object} [params.userProfile]     — from profile-agent (CV skills + weak areas)
  * @param {string[]} [params.liveSnippets]  — sanitised live search results
+ * @param {'up'|'down'|null} [params.difficultyBias] — skew bank/AI questions harder or easier based on recent performance
  * @returns {Promise<object[]>} array of question documents
  */
-async function generate({ targetRole, mode, skills, jobDescription, interviewId, companyContext, userProfile, liveSnippets, seenQuestionIds = [], numQuestions }) {
+async function generate({ targetRole, mode, skills, jobDescription, interviewId, companyContext, userProfile, liveSnippets, seenQuestionIds = [], numQuestions, difficultyBias = null }) {
   if (jobDescription) assertSafe(jobDescription, 'job-description');
   if (targetRole)     assertSafe(targetRole, 'target-role');
 
@@ -187,6 +194,11 @@ async function generate({ targetRole, mode, skills, jobDescription, interviewId,
       $or: [{ role: targetRole }, { role: 'General' }, { role: { $exists: false } }],
     };
     if (seenObjIds.length) matchFilter._id = { $nin: seenObjIds };
+    // Exclude one difficulty tier rather than pinning to a single value —
+    // keeps the bank pool wide enough that categories with few 'hard'
+    // entries (e.g. behavioral) don't starve and fall through to AI generation.
+    if (difficultyBias === 'up')   matchFilter.difficulty = { $ne: 'easy' };
+    if (difficultyBias === 'down') matchFilter.difficulty = { $ne: 'hard' };
 
     const bankQuestions = await _retrieveBankQuestions(matchFilter, count, profileEmbedding);
 
@@ -206,7 +218,8 @@ async function generate({ targetRole, mode, skills, jobDescription, interviewId,
         jobDescription,
         companyContext || null,
         userProfile || null,
-        liveSnippets || []
+        liveSnippets || [],
+        difficultyBias
       );
 
       const { data } = await ai.generateJson(prompt, 'balanced', {

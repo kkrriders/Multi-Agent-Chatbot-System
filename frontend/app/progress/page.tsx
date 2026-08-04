@@ -71,7 +71,7 @@ export default function ProgressPage() {
         {/* Top section: Chart + Badges */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
           {/* Performance chart */}
-          <div className="lg:col-span-2 bg-white rounded-xl p-6 border border-outline-variant/15 shadow-sm flex flex-col">
+          <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-sm flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="font-geist font-semibold text-2xl text-on-surface">Performance Trends</h2>
@@ -88,17 +88,17 @@ export default function ProgressPage() {
                   <LineChart data={chartData}>
                     <defs>
                       <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748B' }} />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#64748B' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-outline-variant)" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--color-on-surface-variant)' }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: 'var(--color-on-surface-variant)' }} />
                     <Tooltip
-                      contentStyle={{ background: 'white', border: '1px solid #bbcabf', borderRadius: '8px', fontSize: 12 }}
+                      contentStyle={{ background: 'var(--color-surface-container-lowest)', border: '1px solid var(--color-outline-variant)', borderRadius: '8px', fontSize: 12, color: 'var(--color-on-surface)' }}
                     />
-                    <Line type="monotone" dataKey="score" stroke="#006c49" strokeWidth={2} dot={{ r: 3, fill: '#fff', stroke: '#006c49', strokeWidth: 1 }} />
+                    <Line type="monotone" dataKey="score" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3, fill: 'var(--color-surface-container-lowest)', stroke: 'var(--color-primary)', strokeWidth: 1 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -113,7 +113,7 @@ export default function ProgressPage() {
           </div>
 
           {/* Achievements */}
-          <div className="bg-white rounded-xl p-6 border border-outline-variant/15 shadow-sm flex flex-col">
+          <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-sm flex flex-col">
             <h2 className="font-geist font-semibold text-2xl text-on-surface mb-6">Achievements</h2>
             <div className="grid grid-cols-2 gap-4 flex-1">
               {achievements.slice(0, 3).map(ach => {
@@ -172,14 +172,14 @@ export default function ProgressPage() {
             <div className="text-center py-16 border border-dashed border-outline-variant/30 rounded-xl">
               <span className="material-symbols-outlined text-slate-muted text-5xl mb-3 block">trending_up</span>
               <p className="text-slate-muted">Complete an interview to start tracking progress</p>
-              <Link href="/interview" className="inline-flex items-center gap-2 mt-4 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-emerald-deep transition-colors">
+              <Link href="/interview" className="inline-flex items-center gap-2 mt-4 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:brightness-90 transition-colors">
                 Start Interview
               </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl p-5 border border-outline-variant/15 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:-translate-y-0.5 transition-transform duration-200 cursor-pointer">
+                <div key={i} className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/15 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:-translate-y-0.5 transition-transform duration-200 cursor-pointer">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
                       <span className="material-symbols-outlined text-primary icon-fill">
@@ -232,7 +232,7 @@ export default function ProgressPage() {
         {(summary?.weakAreas?.length || summary?.strongAreas?.length) ? (
           <div className="grid sm:grid-cols-2 gap-6">
             {(summary?.weakAreas?.length ?? 0) > 0 && (
-              <div className="border border-outline-variant/20 rounded-xl p-6 bg-white shadow-sm">
+              <div className="border border-outline-variant/20 rounded-xl p-6 bg-surface-container-lowest shadow-sm">
                 <h2 className="font-geist font-semibold text-xl text-on-surface mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-tertiary-container">warning</span>
                   Weak Areas
@@ -245,7 +245,7 @@ export default function ProgressPage() {
               </div>
             )}
             {(summary?.strongAreas?.length ?? 0) > 0 && (
-              <div className="border border-outline-variant/20 rounded-xl p-6 bg-white shadow-sm">
+              <div className="border border-outline-variant/20 rounded-xl p-6 bg-surface-container-lowest shadow-sm">
                 <h2 className="font-geist font-semibold text-xl text-on-surface mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary icon-fill">verified</span>
                   Strong Areas

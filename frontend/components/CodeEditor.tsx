@@ -31,6 +31,7 @@ interface CodeScore {
 
 interface Props {
   starterCode?: string
+  initialLanguage?: string
   constraints?: string
   testResults?: TestResult[]
   codeScore?: CodeScore
@@ -38,8 +39,8 @@ interface Props {
   readonly?: boolean
 }
 
-export default function CodeEditor({ starterCode = '', constraints, testResults, codeScore, onChange, readonly = false }: Props) {
-  const [language, setLanguage] = useState('javascript')
+export default function CodeEditor({ starterCode = '', initialLanguage = 'javascript', constraints, testResults, codeScore, onChange, readonly = false }: Props) {
+  const [language, setLanguage] = useState(initialLanguage)
   const [code, setCode] = useState(starterCode)
 
   const handleCodeChange = (value: string | undefined) => {

@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Sidebar } from '@/components/sidebar'
-import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { questions as questionsApi, practice as practiceApi, type SystemDesignEvalResult } from '@/lib/api'
+import { useOptionalAuth } from '@/hooks/useOptionalAuth'
+import { GuestLimitPrompt } from '@/components/GuestLimitPrompt'
+import { questions as questionsApi, practice as practiceApi, GUEST_LIMIT_ERROR, type SystemDesignEvalResult } from '@/lib/api'
 
 const SystemDesignCanvas = dynamic(() => import('@/components/SystemDesignCanvas'), { ssr: false })
 
@@ -19,9 +20,9 @@ interface Prompt {
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
-  Easy: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-  Medium: 'text-amber-600 bg-amber-50 border-amber-200',
-  Hard: 'text-red-600 bg-red-50 border-red-200',
+  Easy: 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/40 dark:border-emerald-800',
+  Medium: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/40 dark:border-amber-800',
+  Hard: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/40 dark:border-red-800',
 }
 
 function extractTitle(text: string): string {
@@ -34,7 +35,8 @@ function extractDescription(text: string): string {
 }
 
 export default function SystemDesignPracticePage() {
-  const { loading: authLoading } = useRequireAuth()
+  const { loading: authLoading } = useOptionalAuth()
+  const [guestLimitHit, setGuestLimitHit] = useState(false)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [fetching, setFetching] = useState(true)
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null)
@@ -113,11 +115,14 @@ export default function SystemDesignPracticePage() {
     setEvaluating(true)
     setEvalResult(null)
     setEvalError(null)
+    setGuestLimitHit(false)
     try {
       const result = await practiceApi.evaluateSystemDesign(selectedPrompt.id, nodes, parsed.edges || [])
       setEvalResult(result)
     } catch (err: unknown) {
-      setEvalError(err instanceof Error ? err.message : 'Evaluation failed. Try again.')
+      const msg = err instanceof Error ? err.message : 'Evaluation failed. Try again.'
+      if (msg === GUEST_LIMIT_ERROR) setGuestLimitHit(true)
+      else setEvalError(msg)
     } finally {
       setEvaluating(false)
     }
@@ -151,7 +156,7 @@ export default function SystemDesignPracticePage() {
             <button
               onClick={handleCheckDesign}
               disabled={evaluating}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-white hover:bg-emerald-deep transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg bg-primary text-white hover:brightness-90 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {evaluating ? (
                 <span className="material-symbols-outlined text-base animate-spin">sync</span>
@@ -200,7 +205,7 @@ export default function SystemDesignPracticePage() {
             </div>
 
             {/* Prompt list */}
-            <div className="bg-white rounded-xl border border-outline-variant/15 overflow-hidden shadow-sm flex flex-col min-h-0 flex-1">
+            <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 overflow-hidden shadow-sm flex flex-col min-h-0 flex-1">
               <div className="px-4 py-3 border-b border-outline-variant/10 bg-surface-container-lowest/50 shrink-0">
                 <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">
                   {fetching ? 'Loading…' : `${filtered.length} Prompt${filtered.length !== 1 ? 's' : ''}`}
@@ -232,7 +237,7 @@ export default function SystemDesignPracticePage() {
 
             {/* Prompt description */}
             {selectedPrompt && (
-              <div className="bg-white rounded-xl border border-outline-variant/15 p-4 shadow-sm shrink-0">
+              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-4 shadow-sm shrink-0">
                 <div className="flex items-center gap-2 mb-3">
                   <h2 className="font-geist font-semibold text-base text-on-surface">{selectedPrompt.title}</h2>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${DIFFICULTY_COLOR[selectedPrompt.difficulty]}`}>
@@ -260,7 +265,7 @@ export default function SystemDesignPracticePage() {
 
           {/* Canvas + feedback column */}
           <div className="flex-1 flex flex-col gap-3 min-h-0">
-            <div className="bg-white rounded-xl border border-outline-variant/15 shadow-sm p-4 flex flex-col" style={{ minHeight: 500 }}>
+            <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 shadow-sm p-4 flex flex-col" style={{ minHeight: 500 }}>
               <div className="flex items-center justify-between mb-3 shrink-0">
                 <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Canvas</p>
                 <p className="text-xs text-slate-400">Drag components from the palette · Connect nodes by dragging from handles</p>
@@ -274,18 +279,20 @@ export default function SystemDesignPracticePage() {
               </div>
             </div>
 
+            {guestLimitHit && <GuestLimitPrompt />}
+
             {evalError && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 shrink-0 flex items-center gap-2">
-                <span className="material-symbols-outlined text-red-500 text-sm">error</span>
-                <p className="text-xs text-red-600">{evalError}</p>
-                <button onClick={() => setEvalError(null)} className="ml-auto text-red-400 hover:text-red-600">
+              <div className="bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-800 rounded-xl px-4 py-3 shrink-0 flex items-center gap-2">
+                <span className="material-symbols-outlined text-red-500 dark:text-red-400 text-sm">error</span>
+                <p className="text-xs text-red-600 dark:text-red-400">{evalError}</p>
+                <button onClick={() => setEvalError(null)} className="ml-auto text-red-400 hover:text-red-600 dark:hover:text-red-300">
                   <span className="material-symbols-outlined text-sm">close</span>
                 </button>
               </div>
             )}
 
             {evalResult && (
-              <div className="bg-white rounded-xl border border-outline-variant/15 shadow-sm shrink-0 overflow-hidden">
+              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 shadow-sm shrink-0 overflow-hidden">
                 {/* Score header */}
                 <div className="px-4 py-3 border-b border-outline-variant/10 flex items-center gap-3">
                   <div className="flex-1">
@@ -293,7 +300,7 @@ export default function SystemDesignPracticePage() {
                     <p className="text-xs text-slate-muted leading-relaxed mt-0.5">{evalResult.feedback}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`text-3xl font-bold ${evalResult.score >= 70 ? 'text-emerald-600' : evalResult.score >= 40 ? 'text-amber-600' : 'text-red-500'}`}>
+                    <p className={`text-3xl font-bold ${evalResult.score >= 70 ? 'text-emerald-600 dark:text-emerald-400' : evalResult.score >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 dark:text-red-400'}`}>
                       {evalResult.score}
                     </p>
                     <p className="text-[10px] text-slate-muted uppercase tracking-wider">/ 100</p>
@@ -310,8 +317,8 @@ export default function SystemDesignPracticePage() {
                     {evalResult.rubricResults.map((r, i) => (
                       <li key={i} className="flex items-start gap-2.5">
                         <span className={`material-symbols-outlined text-sm mt-0.5 shrink-0 ${
-                          r.status === 'covered' ? 'text-emerald-500' :
-                          r.status === 'partial' ? 'text-amber-500' : 'text-red-400'
+                          r.status === 'covered' ? 'text-emerald-500 dark:text-emerald-400' :
+                          r.status === 'partial' ? 'text-amber-500 dark:text-amber-400' : 'text-red-400 dark:text-red-400'
                         }`}>
                           {r.status === 'covered' ? 'check_circle' : r.status === 'partial' ? 'pending' : 'cancel'}
                         </span>
@@ -325,11 +332,11 @@ export default function SystemDesignPracticePage() {
 
                   {evalResult.topMissing.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-outline-variant/10">
-                      <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider mb-1.5">Key gaps to address</p>
+                      <p className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1.5">Key gaps to address</p>
                       <ul className="space-y-1">
                         {evalResult.topMissing.map((m, i) => (
                           <li key={i} className="flex items-start gap-2 text-xs text-slate-muted">
-                            <span className="material-symbols-outlined text-amber-500 text-sm mt-0.5 shrink-0">arrow_right</span>
+                            <span className="material-symbols-outlined text-amber-500 dark:text-amber-400 text-sm mt-0.5 shrink-0">arrow_right</span>
                             {m}
                           </li>
                         ))}

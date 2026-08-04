@@ -58,6 +58,7 @@ const OPTIONAL = [
   'COOKIE_SECRET',
   'GOOGLE_CLIENT_ID',
   'LINKEDIN_CLIENT_ID',
+  'RESEND_API_KEY',
 ];
 
 function validateEnv() {

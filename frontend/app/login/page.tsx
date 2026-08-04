@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { setAuth } from '@/lib/auth'
 import { API_URL } from '@/lib/config'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 // useSearchParams requires Suspense in Next.js 15
 export default function LoginPage() {
@@ -54,7 +55,8 @@ function LoginForm() {
   }
 
   return (
-    <div className="bg-surface text-on-surface antialiased min-h-screen flex flex-col md:flex-row selection:bg-primary-container/30 selection:text-emerald-deep">
+    <div className="relative bg-surface text-on-surface antialiased min-h-screen flex flex-col md:flex-row selection:bg-primary-container/30 selection:text-emerald-deep">
+      <div className="absolute top-4 right-4 z-10"><ThemeToggle /></div>
       {/* Left panel — context & branding (desktop only) */}
       <div className="hidden md:flex md:w-1/2 lg:w-[45%] bg-surface-container-low flex-col justify-between p-12 border-r border-outline-variant/15 relative overflow-hidden">
         <div className="flex items-center gap-2">
@@ -68,7 +70,7 @@ function LoginForm() {
           <p className="text-lg text-secondary mb-12">
             Your personalized AI interview coach is ready to help you land that dream role. Let&apos;s pick up where you left off.
           </p>
-          <div className="w-full aspect-video rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm bg-white flex items-center justify-center">
+          <div className="w-full aspect-video rounded-xl overflow-hidden border border-outline-variant/20 shadow-sm bg-surface-container-lowest flex items-center justify-center">
             <div className="w-full h-full bg-gradient-to-br from-surface-container-low to-surface-container-high flex items-center justify-center">
               <div className="text-center">
                 <span className="material-symbols-outlined text-emerald-deep text-6xl icon-fill">trending_up</span>
@@ -159,7 +161,7 @@ function LoginForm() {
             <div className="pt-2">
               <button
                 type="submit" disabled={loading}
-                className="w-full flex justify-center items-center py-3 px-4 rounded-lg shadow-sm font-semibold text-sm text-white bg-primary hover:bg-emerald-deep focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-60 cursor-pointer"
+                className="w-full flex justify-center items-center py-3 px-4 rounded-lg shadow-sm font-semibold text-sm text-white bg-primary hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-60 cursor-pointer"
               >
                 {loading ? (
                   <span className="flex items-center gap-2"><span className="material-symbols-outlined text-base animate-spin">sync</span>Signing in…</span>
@@ -218,7 +220,7 @@ function OAuthButton({ provider, label }: { provider: 'google' | 'linkedin'; lab
     <button
       type="button"
       onClick={handleClick}
-      className="flex items-center justify-center w-full px-4 py-2.5 border border-outline-variant/50 rounded-lg shadow-sm bg-white hover:bg-surface-container-low transition-colors text-sm font-semibold text-on-surface"
+      className="flex items-center justify-center w-full px-4 py-2.5 border border-outline-variant/50 rounded-lg shadow-sm bg-surface-container-lowest hover:bg-surface-container-low transition-colors text-sm font-semibold text-on-surface"
     >
       {icon}{label}
     </button>

@@ -1453,6 +1453,32 @@ const CODING_QUESTIONS = [
       { input: '[1,2,3]',              expectedOutput: '3', hidden: true  },
     ],
   },
+
+  // Hard — design & DP
+  {
+    text: 'LRU Cache — Design a Least Recently Used (LRU) cache with get(key) and put(key, value), both running in O(1). Implement class LRUCache(capacity).',
+    category: 'coding', difficulty: 'hard', questionFormat: 'coding',
+    constraints: 'get and put must both run in O(1) time. Evict the least recently used entry when capacity is exceeded.',
+    starterCode: `class LRUCache {\n  constructor(capacity) {\n    // your code here\n  }\n  get(key) {\n    // your code here\n  }\n  put(key, value) {\n    // your code here\n  }\n}`,
+    expectedKeywords: ['hash map', 'doubly linked list', 'O(1)', 'capacity', 'evict', 'least recently used'],
+    testCases: [
+      { input: '["LRUCache","put","put","get","put","get","put","get","get","get"]\n[[2],[1,1],[2,2],[1],[3,3],[2],[4,4],[1],[3],[4]]', expectedOutput: '[null,null,null,1,null,-1,null,-1,3,4]', hidden: false },
+      { input: '["LRUCache","put","get"]\n[[1],[2,1],[2]]', expectedOutput: '[null,null,1]', hidden: true },
+    ],
+  },
+  {
+    text: 'Word Break — Given a string s and a dictionary wordDict, return true if s can be segmented into a space-separated sequence of one or more dictionary words.',
+    category: 'coding', difficulty: 'hard', questionFormat: 'coding',
+    constraints: 'Time: O(n^2). Words may be reused any number of times. Use dynamic programming.',
+    starterCode: `function wordBreak(s, wordDict) {\n  // your code here\n}`,
+    expectedKeywords: ['dynamic programming', 'dp', 'set', 'substring', 'memoization'],
+    testCases: [
+      { input: '"leetcode"\n["leet","code"]',        expectedOutput: 'true',  hidden: false },
+      { input: '"applepenapple"\n["apple","pen"]',    expectedOutput: 'true',  hidden: false },
+      { input: '"catsandog"\n["cats","dog","sand","and","cat"]', expectedOutput: 'false', hidden: true },
+      { input: '"a"\n["b"]',                          expectedOutput: 'false', hidden: true },
+    ],
+  },
 ];
 
 // ── General bank (technical / behavioral / situational) ───────────────────────

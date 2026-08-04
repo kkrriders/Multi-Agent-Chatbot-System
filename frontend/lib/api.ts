@@ -67,10 +67,10 @@ export interface IntegritySignals {
 
 export interface Answer {
   _id: string
-  questionId: { _id: string; text: string; category: string; difficulty: string } | string
+  questionId: { _id: string; text: string; category: string; difficulty: string; questionFormat?: string } | string
   text: string
   scores: { relevance: number; depth: number; clarity: number; overall: number; rawOverall?: number | null; confidence?: number | null }
-  inputMethod?: 'text' | 'voice'
+  inputMethod?: 'text' | 'voice' | 'diagram' | 'code'
   scored: boolean
   improvementSuggestions: string[]
   keywordsHit: string[]
@@ -85,6 +85,18 @@ export interface Answer {
   integrityScore?: number | null
   integrityFlag?: 'CLEAN' | 'SUSPICIOUS' | 'LIKELY_AI' | null
   integritySignals?: IntegritySignals | null
+  diagramSnapshot?: string | null
+  code?: string | null
+  language?: string | null
+  testResults?: {
+    input: string
+    expectedOutput: string
+    actualOutput: string
+    passed: boolean
+    hidden: boolean
+    executionTimeMs: number | null
+  }[]
+  codeScore?: { passed: number; total: number; timeMs?: number | null; memoryKb?: number | null }
 }
 
 export interface Achievement {
@@ -201,7 +213,18 @@ export const interview = {
   summary: (sessionId: string) =>
     get<{ interview: Interview; answers: Answer[]; progress: unknown }>(`/api/interview/${sessionId}/summary`),
   history: () => get<{ sessions: Interview[] }>('/api/interview/history'),
+  // Guest trial — lightweight, non-persisted preview (no session, no history)
+  preview: (mode: string, targetRole?: string) =>
+    post<{ questions: Pick<Question, 'id' | 'text' | 'category' | 'difficulty' | 'questionFormat'>[] }>(
+      '/api/interview/preview', { mode, targetRole }
+    ),
+  previewAnswer: (questionText: string, answerText: string, expectedKeywords?: string[]) =>
+    post<{ scores: { relevance: number; depth: number; clarity: number; overall: number }; improvementSuggestions: string[]; keywordsHit: string[]; keywordsMissed: string[]; evidence: string }>(
+      '/api/interview/preview/answer', { questionText, answerText, expectedKeywords }
+    ),
 }
+
+export const GUEST_LIMIT_ERROR = 'GUEST_LIMIT_REACHED'
 
 // ── Progress ─────────────────────────────────────────────────────────────────
 

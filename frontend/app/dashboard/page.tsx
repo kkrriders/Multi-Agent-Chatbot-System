@@ -62,7 +62,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/interview"
-            className="inline-flex items-center justify-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg shadow-sm hover:bg-emerald-deep transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg shadow-sm hover:brightness-90 transition-colors"
           >
             <span className="material-symbols-outlined">play_arrow</span>
             Start New Interview
@@ -74,7 +74,7 @@ export default function DashboardPage() {
           {/* Left column: streak + weak area */}
           <div className="md:col-span-4 flex flex-col gap-6">
             {/* Streak */}
-            <div className="bg-white rounded-xl p-6 border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:shadow-[0_8px_30px_-12px_rgba(0,108,73,0.1)] transition-shadow">
+            <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:shadow-[0_8px_30px_-12px_rgba(0,108,73,0.1)] transition-shadow">
               <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-light/30 rounded-full blur-2xl group-hover:bg-amber-light/50 transition-colors" />
               <div className="flex items-center gap-4 mb-4 relative z-10">
                 <div className="w-12 h-12 bg-amber-light rounded-full flex items-center justify-center text-tertiary-container shadow-sm border border-tertiary-container/10">
@@ -105,7 +105,7 @@ export default function DashboardPage() {
                   <p className="font-geist font-semibold text-lg text-on-surface mb-2">{summary.weakAreas[0]}</p>
                   <p className="text-xs text-slate-muted mb-4">Our AI detected this as an area needing improvement. Practice this to elevate your score.</p>
                 </div>
-                <Link href="/progress" className="w-full py-2 bg-white border border-error/20 text-error rounded-lg text-xs font-semibold hover:bg-error/5 transition-colors text-center block">
+                <Link href="/progress" className="w-full py-2 bg-surface-container-lowest border border-error/20 text-error rounded-lg text-xs font-semibold hover:bg-error/5 transition-colors text-center block">
                   View Progress
                 </Link>
               </div>
@@ -119,7 +119,7 @@ export default function DashboardPage() {
                   <p className="font-geist font-semibold text-lg text-on-surface mb-2">No weak areas yet</p>
                   <p className="text-xs text-slate-muted mb-4">Complete interviews to reveal personalized focus areas.</p>
                 </div>
-                <Link href="/interview" className="w-full py-2 bg-white border border-primary/20 text-primary rounded-lg text-xs font-semibold hover:bg-primary/5 transition-colors text-center block">
+                <Link href="/interview" className="w-full py-2 bg-surface-container-lowest border border-primary/20 text-primary rounded-lg text-xs font-semibold hover:bg-primary/5 transition-colors text-center block">
                   Start Interview
                 </Link>
               </div>
@@ -127,7 +127,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Performance overview */}
-          <div className="md:col-span-8 bg-white rounded-xl p-6 border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
+          <div className="md:col-span-8 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-geist font-semibold text-xl text-on-surface">Performance Overview</h3>
               <Link href="/progress" className="text-primary hover:text-emerald-deep text-xs font-semibold flex items-center gap-1 transition-colors">
@@ -178,7 +178,7 @@ export default function DashboardPage() {
 
           {/* Recent sessions table */}
           {sessions.length > 0 && (
-            <div className="md:col-span-12 bg-white rounded-xl border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] overflow-hidden mt-4">
+            <div className="md:col-span-12 bg-surface-container-lowest rounded-xl border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] overflow-hidden mt-4">
               <div className="p-6 border-b border-outline-variant/15 flex justify-between items-center bg-surface-bright/50">
                 <h3 className="font-geist font-semibold text-xl text-on-surface">Recent Sessions</h3>
                 <Link href="/progress" className="text-xs text-slate-muted hover:text-primary transition-colors">View All</Link>
@@ -228,10 +228,10 @@ export default function DashboardPage() {
           )}
 
           {sessions.length === 0 && (
-            <div className="md:col-span-12 bg-white rounded-xl border border-dashed border-outline-variant/30 p-12 text-center mt-4">
+            <div className="md:col-span-12 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant/30 p-12 text-center mt-4">
               <span className="material-symbols-outlined text-slate-muted text-5xl mb-3 block">play_circle</span>
               <p className="text-slate-muted mb-6">No interviews yet — start your first session to see your progress here.</p>
-              <Link href="/interview" className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:bg-emerald-deep transition-colors shadow-sm">
+              <Link href="/interview" className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:brightness-90 transition-colors shadow-sm">
                 <span className="material-symbols-outlined">play_arrow</span>
                 Start Interview
               </Link>

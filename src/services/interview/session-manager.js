@@ -55,6 +55,18 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
   // so question generation can target it even when no company is specified.
   const userProfile = await profileAgent.build(userId.toString());
 
+  // Adaptive difficulty: skew question selection based on the last 3 completed
+  // sessions' overallScore. Needs at least 3 to avoid over-reacting to a single result.
+  const recentScores = await Interview.find(
+    { userId, status: 'completed', overallScore: { $ne: null } },
+    { overallScore: 1 }
+  ).sort({ completedAt: -1 }).limit(3).lean();
+  let difficultyBias = null;
+  if (recentScores.length === 3) {
+    const avgScore = recentScores.reduce((s, r) => s + r.overallScore, 0) / recentScores.length;
+    difficultyBias = avgScore >= 80 ? 'up' : avgScore <= 50 ? 'down' : null;
+  }
+
   // Run the (expensive, AI + optional Tavily) research pipeline only when a company is
   // specified (10s max — session must always start).
   let agentContext = null;
@@ -101,6 +113,7 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
         liveSnippets:    agentContext?.liveSnippets   || [],
         seenQuestionIds: seenQuestionIds.map(id => id.toString()),
         numQuestions,
+        difficultyBias,
       });
 
   if (questions.length === 0) {
@@ -113,7 +126,7 @@ async function create({ userId, candidateProfileId, mode, targetRole, jobDescrip
   interview.startedAt = new Date();
   await interview.save();
 
-  logger.info(`[session] created ${mode} interview ${interview._id} for user ${userId} with ${questions.length} questions`);
+  logger.info(`[session] created ${mode} interview ${interview._id} for user ${userId} with ${questions.length} questions${difficultyBias ? ` (difficultyBias=${difficultyBias})` : ''}`);
 
   return {
     interview: interview.toObject(),
