@@ -575,7 +575,7 @@ export default function ActiveInterviewPage() {
 
         {/* Left pane: AI Persona — hidden on mobile (replaced by compact banner above) */}
         <section className="hidden md:flex w-full md:w-56 lg:w-64 shrink-0 flex-col gap-4">
-          <div className={`bg-gradient-to-br ${persona.color} rounded-2xl border border-outline-variant/40 p-5 flex flex-col items-center`}>
+          <div className={`bg-gradient-to-br ${persona.color} glass-card rounded-2xl p-5 flex flex-col items-center`}>
             <div className="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center mb-3 text-5xl">
               {interviewerName === 'Alex' ? '👨' : interviewerName === 'Priya' ? '👩' : '🧔'}
             </div>
@@ -591,7 +591,7 @@ export default function ActiveInterviewPage() {
           </div>
 
           {/* Question mini-card */}
-          <div className="bg-surface rounded-xl border border-outline-variant/20 p-4">
+          <div className="glass-card rounded-xl p-4">
             <p className="text-xs font-semibold text-slate-muted uppercase tracking-wide mb-2">
               {currentIdx + 1} of {questions.length} · {currentQuestion?.category?.replace('_', ' ')}
             </p>
@@ -607,7 +607,7 @@ export default function ActiveInterviewPage() {
         </section>
 
         {/* Right pane: format-specific workspace */}
-        <section className="flex-1 flex flex-col bg-surface rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm min-w-0">
+        <section className="flex-1 flex flex-col glass-card rounded-xl overflow-hidden min-w-0">
 
           {/* ── SYSTEM DESIGN ───────────────────────────────────────────────── */}
           {questionFormat === 'system_design' && (
@@ -642,7 +642,7 @@ export default function ActiveInterviewPage() {
 
                 {/* Evaluation rubric hints */}
                 {currentQuestion?.evaluationRubric && currentQuestion.evaluationRubric.length > 0 && (
-                  <div className="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-4">
+                  <div className="glass-card rounded-xl p-4">
                     <p className="text-xs font-semibold text-slate-muted uppercase tracking-wide mb-2">What a complete answer should cover</p>
                     <ul className="space-y-1">
                       {currentQuestion.evaluationRubric.map((r, i) => (

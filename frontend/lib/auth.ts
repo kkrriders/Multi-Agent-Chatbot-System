@@ -4,6 +4,7 @@ export interface AuthUser {
   id: string
   email: string
   fullName?: string
+  avatarUrl?: string | null
 }
 
 const KEY = 'mockprep_user'

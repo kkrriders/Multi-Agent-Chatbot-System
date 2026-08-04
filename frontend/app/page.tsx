@@ -105,7 +105,7 @@ export default function LandingPage() {
 
           {/* CV Upload card */}
           <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
-            <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 md:p-8 w-full max-w-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(6,95,70,0.08)] transition-shadow duration-300 relative overflow-hidden group">
+            <div className="glass-card rounded-xl p-6 md:p-8 w-full max-w-md hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-container/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
               <div className="mb-6">
                 <h3 className="font-geist font-semibold text-2xl text-ink">Upload your CV</h3>
@@ -115,7 +115,7 @@ export default function LandingPage() {
                 href="/signup"
                 className="flex flex-col items-center justify-center w-full h-56 border-2 border-slate-muted/30 border-dashed rounded-lg cursor-pointer bg-surface-container-lowest hover:bg-surface-container-low transition-colors relative overflow-hidden"
               >
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #065F46 1px, transparent 0)', backgroundSize: '16px 16px' }} />
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, var(--color-primary) 1px, transparent 0)', backgroundSize: '16px 16px' }} />
                 <div className="flex flex-col items-center justify-center pt-5 pb-6 z-10">
                   <div className="w-16 h-16 mb-4 rounded-full bg-emerald-deep/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <span className="material-symbols-outlined text-4xl text-emerald-deep opacity-80">description</span>
@@ -143,7 +143,7 @@ export default function LandingPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Real-time Scoring — wide */}
-              <div className="md:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
+              <div className="md:col-span-2 glass-card rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
                 <div className="flex-1 z-10">
                   <div className="w-12 h-12 bg-primary-container/15 rounded-lg flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-primary icon-fill text-2xl">speed</span>
@@ -153,8 +153,8 @@ export default function LandingPage() {
                 </div>
                 <div className="w-full md:w-5/12 h-40 bg-surface-container rounded-lg border border-outline-variant/10 flex items-center justify-center relative shadow-inner z-10">
                   <svg className="w-32 h-32 -rotate-90 transform" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" fill="none" r="40" stroke="#e1e3e4" strokeWidth="8" />
-                    <circle cx="50" cy="50" fill="none" r="40" stroke="#10b981" strokeDasharray="251" strokeDashoffset="60" strokeWidth="8" className="transition-all duration-1000 ease-out" />
+                    <circle cx="50" cy="50" fill="none" r="40" stroke="var(--color-surface-container-high)" strokeWidth="8" />
+                    <circle cx="50" cy="50" fill="none" r="40" stroke="var(--color-primary)" strokeDasharray="251" strokeDashoffset="60" strokeWidth="8" className="transition-all duration-1000 ease-out" />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="font-geist font-bold text-3xl text-emerald-deep">86</span>
@@ -165,7 +165,7 @@ export default function LandingPage() {
               </div>
 
               {/* Speech Analysis */}
-              <div className="md:col-span-1 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 glass-card rounded-xl p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-amber-light rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-tertiary-container icon-fill text-xl">mic</span>
                 </div>
@@ -184,7 +184,7 @@ export default function LandingPage() {
               </div>
 
               {/* Adaptive Follow-ups */}
-              <div className="md:col-span-1 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 glass-card rounded-xl p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-secondary-container/30 rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-secondary icon-fill text-xl">forum</span>
                 </div>

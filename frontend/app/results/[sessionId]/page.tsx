@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { interview as interviewApi, type Answer, type Interview, type PanelPersonaFeedback } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Sidebar } from '@/components/sidebar'
+import { Topbar } from '@/components/Topbar'
 import { describeIntegritySignals } from '@/lib/integrity'
 
 const SystemDesignCanvas = dynamic(() => import('@/components/SystemDesignCanvas'), { ssr: false })
@@ -25,6 +26,7 @@ export default function ResultsPage() {
   const sessionId = params.sessionId as string
 
   const [data, setData] = useState<ResultData | null>(null)
+  const [recentScores, setRecentScores] = useState<{ id: string; score: number; date: string }[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -32,6 +34,15 @@ export default function ResultsPage() {
     interviewApi.summary(sessionId)
       .then(d => { setData(d as ResultData); setLoading(false) })
       .catch(() => { router.push('/dashboard') })
+    interviewApi.history()
+      .then(d => {
+        const completed = (d.sessions || [])
+          .filter(s => s.status === 'completed' && s.overallScore != null)
+          .sort((a, b) => new Date(a.completedAt || a.createdAt).getTime() - new Date(b.completedAt || b.createdAt).getTime())
+        const lastFour = completed.slice(-4)
+        setRecentScores(lastFour.map(s => ({ id: s._id, score: s.overallScore!, date: new Date(s.completedAt || s.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) })))
+      })
+      .catch(() => {})
   }, [sessionId, router])
 
   if (loading) return (
@@ -44,178 +55,191 @@ export default function ResultsPage() {
   const { interview, answers } = data
   const overallScore = interview.overallScore ?? 0
   const categoryScores = interview.categoryScores ?? {}
+  const prevScore = recentScores.length > 1 ? recentScores[recentScores.length - 2].score : null
+  const delta = prevScore != null ? overallScore - prevScore : null
 
-  const scoreBarColor = (v: number) => v >= 80 ? 'bg-emerald-deep' : v >= 60 ? 'bg-tertiary-container' : 'bg-error'
+  const scoreBarColor = (v: number) => v >= 80 ? 'bg-secondary' : v >= 60 ? 'bg-tertiary' : 'bg-error'
   const scoreBadgeClass = (s: number) => s >= 80
     ? 'text-primary bg-primary-container/20 border-primary-container/30'
     : s >= 60
     ? 'text-tertiary-container bg-amber-light border-tertiary-container/10'
     : 'text-error bg-error-container/20 border-error-container'
 
+  const voiceAnswers = answers.filter(a => a.speechMetrics)
+  const totalFillers = voiceAnswers.reduce((s, a) => s + (a.speechMetrics?.fillerWordCount || 0), 0)
+  const avgPronunciation = voiceAnswers.length
+    ? Math.round(voiceAnswers.reduce((s, a) => s + (a.speechMetrics?.pronunciationScore || 0), 0) / voiceAnswers.length)
+    : 0
+  const avgWpm = voiceAnswers.filter(a => a.speechMetrics?.wordsPerMinute != null).length
+    ? Math.round(voiceAnswers.reduce((s, a) => s + (a.speechMetrics?.wordsPerMinute || 0), 0) / voiceAnswers.filter(a => a.speechMetrics?.wordsPerMinute != null).length)
+    : null
+
   return (
     <div className="bg-background text-on-surface min-h-screen flex font-sans antialiased">
       <Sidebar />
+      <Topbar />
 
-      <main className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-12 pb-24 md:pb-12 w-full overflow-x-hidden">
-        {/* Page header */}
-        <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-margin-mobile md:px-margin-desktop pb-24 md:pb-12 w-full max-w-[1280px] mx-auto">
+        <header className="mb-xl flex flex-col md:flex-row md:items-end justify-between gap-md">
           <div>
-            <h1 className="font-geist font-bold text-2xl md:text-3xl text-ink">Session Summary Report</h1>
-            <p className="text-base text-slate-muted mt-2">
-              {interview.targetRole || 'Mock Interview'} · {interview.mode} · Completed {new Date(interview.completedAt || interview.createdAt).toLocaleDateString()}
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary">Session Summary</h2>
+            <p className="text-lg text-on-surface-variant mt-sm">
+              {interview.targetRole || 'Mock Interview'} — {interview.mode} interview · {new Date(interview.completedAt || interview.createdAt).toLocaleDateString()}
             </p>
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
-            <Link href="/progress" className="flex-1 md:flex-none px-6 py-2.5 rounded-lg border border-outline text-on-surface text-sm font-semibold hover:bg-surface-container transition-colors shadow-sm">
-              View Past Interviews
+          <div className="flex gap-sm">
+            <Link href="/progress" className="px-md py-sm rounded-lg text-sm font-semibold bg-surface-container-highest text-on-surface-variant hover:bg-surface-dim transition-colors flex items-center gap-xs">
+              <span className="material-symbols-outlined text-[18px]">bar_chart</span> View Past Interviews
             </Link>
-            <Link href="/interview" className="flex-1 md:flex-none px-6 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:brightness-90 transition-colors shadow-sm flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-lg">replay</span>
-              Practice Again
+            <Link href="/interview" className="px-md py-sm rounded-lg text-sm font-semibold bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-colors flex items-center gap-xs">
+              <span className="material-symbols-outlined text-[18px]">replay</span> Practice Again
             </Link>
           </div>
-        </div>
+        </header>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Score ring */}
-          <div className="col-span-1 md:col-span-5 lg:col-span-4 bg-surface rounded-xl p-8 border border-outline-variant/30 flex flex-col items-center justify-center relative overflow-hidden shadow-sm">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-container/20 rounded-full blur-2xl" />
-            <h2 className="font-geist font-semibold text-2xl text-ink w-full text-center mb-6">Final Score</h2>
-            <div className="relative w-48 h-48 flex items-center justify-center">
-              <svg className="w-full h-full absolute transform -rotate-90" viewBox="0 0 36 36">
-                <path className="text-surface-container stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" strokeWidth="3"/>
-                <path
-                  className="text-emerald-deep stroke-current"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  strokeDasharray={`${overallScore}, 100`}
-                  strokeLinecap="round"
-                  strokeWidth="3"
-                  style={{ transition: 'stroke-dasharray 1.5s ease-out' }}
-                />
-              </svg>
-              <div className="flex flex-col items-center z-10">
-                <div className="font-geist font-bold text-5xl text-emerald-deep leading-none">{overallScore}</div>
-                <div className="text-xs text-slate-muted mt-1 uppercase tracking-wider">Out of 100</div>
-              </div>
-            </div>
-            <div className="mt-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/50">
-              <span className="material-symbols-outlined text-emerald-deep icon-fill text-base">trending_up</span>
-              <span className="text-xs text-on-surface font-medium">
-                {overallScore >= 80 ? 'Excellent performance!' : overallScore >= 60 ? 'Good effort — keep going' : 'Room to improve — review tips below'}
-              </span>
-            </div>
-          </div>
-
-          {/* Performance breakdown */}
-          <div className="col-span-1 md:col-span-7 lg:col-span-8 flex flex-col gap-6">
-            {/* Category scores */}
-            <div className="bg-surface rounded-xl p-8 border border-outline-variant/30 shadow-sm flex-grow">
-              <h2 className="font-geist font-semibold text-2xl text-ink mb-6 flex items-center gap-2">
-                <span className="material-symbols-outlined text-slate-muted">bar_chart</span>
-                Performance Breakdown
-              </h2>
-              <div className="space-y-6">
-                {Object.keys(categoryScores).length > 0 ? (
-                  Object.entries(categoryScores).map(([cat, sc]) => (
-                    <div key={cat}>
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="text-sm font-semibold text-on-surface capitalize">{cat}</span>
-                        <span className="text-xs text-slate-muted">{sc.overall}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
-                        <div className={`h-full ${scoreBarColor(sc.overall)} rounded-full transition-all duration-700`} style={{ width: `${sc.overall}%` }} />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  [
-                    { label: 'Relevance',  pct: Math.min(100, Math.round(overallScore * 1.07)) },
-                    { label: 'Depth',      pct: Math.min(100, Math.round(overallScore * 0.89)) },
-                    { label: 'Clarity',    pct: Math.min(100, Math.round(overallScore * 1.05)) },
-                  ].map(({ label, pct }) => (
-                    <div key={label}>
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="text-sm font-semibold text-on-surface">{label}</span>
-                        <span className="text-xs text-slate-muted">{pct}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
-                        <div className={`h-full ${scoreBarColor(pct)} rounded-full`} style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  ))
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+          {/* Score & Trend */}
+          <div className="md:col-span-4 glass-card rounded-xl p-lg flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-md">
+                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Overall Score</h3>
+                {delta != null && (
+                  <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium border ${delta >= 0 ? 'bg-secondary/10 text-secondary border-secondary/20' : 'bg-error/10 text-error border-error/20'}`}>
+                    {delta >= 0 ? '+' : ''}{delta}% from last
+                  </span>
                 )}
               </div>
+              <div className="flex items-baseline gap-xs">
+                <span className="font-heading text-[56px] leading-none font-bold text-primary">{overallScore}</span>
+                <span className="text-lg text-on-surface-variant">/ 100</span>
+              </div>
+              <p className="text-sm text-on-surface-variant mt-sm">
+                {overallScore >= 80 ? 'Excellent performance! Keep refining the details.' : overallScore >= 60 ? 'Good effort — focus on elaborating your weaker answers.' : 'Room to improve — review the tips below.'}
+              </p>
             </div>
-
-            {/* Speech metrics */}
-            {answers.some(a => a.speechMetrics) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {(() => {
-                  const voiceAnswers = answers.filter(a => a.speechMetrics)
-                  const totalFillers = voiceAnswers.reduce((s, a) => s + (a.speechMetrics?.fillerWordCount || 0), 0)
-                  const avgPronunciation = voiceAnswers.length
-                    ? Math.round(voiceAnswers.reduce((s, a) => s + (a.speechMetrics?.pronunciationScore || 0), 0) / voiceAnswers.length)
-                    : 0
-                  return (
-                    <>
-                      <div className="bg-surface rounded-xl p-6 border border-outline-variant/30 shadow-sm flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-amber-light flex items-center justify-center flex-shrink-0 mt-1">
-                          <span className="material-symbols-outlined text-on-tertiary-container">record_voice_over</span>
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-semibold text-ink mb-1">Filler Words</h3>
-                          <p className="text-lg font-semibold text-on-surface mb-1">{totalFillers} detected</p>
-                          <p className="text-xs text-slate-muted">{totalFillers <= 3 ? 'Excellent pacing — well below average.' : 'Try to pause instead of using filler words.'}</p>
-                        </div>
-                      </div>
-                      <div className="bg-surface rounded-xl p-6 border border-outline-variant/30 shadow-sm flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center flex-shrink-0 mt-1">
-                          <span className="material-symbols-outlined text-emerald-deep icon-fill">campaign</span>
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-semibold text-ink mb-1">Pronunciation</h3>
-                          <p className="text-lg font-semibold text-emerald-deep mb-1">{avgPronunciation}% Confidence</p>
-                          <p className="text-xs text-slate-muted">{avgPronunciation >= 85 ? 'Clear articulation across complex terminology.' : 'Continue practicing to improve clarity.'}</p>
-                        </div>
-                      </div>
-                    </>
-                  )
-                })()}
+            {recentScores.length > 1 && (
+              <div className="mt-lg pt-lg border-t border-outline-variant/20">
+                <h4 className="text-xs font-semibold text-on-surface-variant uppercase mb-md">Recent Trend</h4>
+                <div className="h-20 w-full flex items-end justify-between gap-xs">
+                  {recentScores.map((s, i) => (
+                    <div
+                      key={s.id}
+                      className={`w-full rounded-t-sm ${i === recentScores.length - 1 ? 'bg-secondary shadow-[0_0_12px_rgba(0,102,138,0.3)]' : 'bg-surface-container'}`}
+                      style={{ height: `${Math.max(8, s.score)}%` }}
+                      title={`${s.score}`}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-between mt-xs text-xs text-outline">
+                  {recentScores.map((s, i) => (
+                    <span key={s.id} className={i === recentScores.length - 1 ? 'text-secondary font-medium' : ''}>
+                      {i === recentScores.length - 1 ? 'Today' : s.date}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
+          {/* Category Breakdown */}
+          <div className="md:col-span-8 glass-card rounded-xl p-lg">
+            <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-lg">Category Breakdown</h3>
+            <div className="space-y-lg">
+              {Object.keys(categoryScores).length > 0 ? (
+                Object.entries(categoryScores).map(([cat, sc]) => (
+                  <div key={cat}>
+                    <div className="flex justify-between items-end mb-sm">
+                      <h4 className="font-semibold text-primary capitalize">{cat}</h4>
+                      <span className="font-heading text-xl font-bold text-primary">{sc.overall}<span className="text-sm text-on-surface-variant">/100</span></span>
+                    </div>
+                    <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+                      <div className={`h-full ${scoreBarColor(sc.overall)} rounded-full transition-all duration-700`} style={{ width: `${sc.overall}%` }} />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                [
+                  { label: 'Relevance', pct: Math.min(100, Math.round(overallScore * 1.07)) },
+                  { label: 'Depth',     pct: Math.min(100, Math.round(overallScore * 0.89)) },
+                  { label: 'Clarity',   pct: Math.min(100, Math.round(overallScore * 1.05)) },
+                ].map(({ label, pct }) => (
+                  <div key={label}>
+                    <div className="flex justify-between items-end mb-sm">
+                      <h4 className="font-semibold text-primary">{label}</h4>
+                      <span className="font-heading text-xl font-bold text-primary">{pct}<span className="text-sm text-on-surface-variant">/100</span></span>
+                    </div>
+                    <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+                      <div className={`h-full ${scoreBarColor(pct)} rounded-full`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
           {/* Panel feedback */}
           {interview.mode === 'panel' && interview.panelFeedback && (
-            <div className="col-span-1 md:col-span-12">
+            <div className="md:col-span-12">
               <PanelFeedbackSection feedback={interview.panelFeedback} />
             </div>
           )}
 
-          {/* Answer breakdown */}
-          <div className="col-span-1 md:col-span-12 bg-surface-container-low rounded-xl p-8 border border-outline-variant/20 shadow-sm">
-            <h2 className="font-geist font-semibold text-2xl text-ink mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-tertiary-container icon-fill">lightbulb</span>
-              Answer Breakdown
-            </h2>
-            <div className="space-y-3">
+          {/* Speech Analysis & Question Review */}
+          {voiceAnswers.length > 0 && (
+            <div className="md:col-span-4 glass-card rounded-xl p-lg">
+              <div className="flex items-center gap-sm mb-lg">
+                <span className="material-symbols-outlined text-tertiary">record_voice_over</span>
+                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Speech Analysis</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-sm mb-lg">
+                <div className="bg-surface/60 rounded-lg p-md border border-outline-variant/10 text-center">
+                  <span className="block font-heading text-2xl font-bold text-primary">{totalFillers}</span>
+                  <span className="block text-xs text-on-surface-variant mt-xs">Filler Words</span>
+                </div>
+                <div className="bg-surface/60 rounded-lg p-md border border-outline-variant/10 text-center">
+                  <span className="block font-heading text-2xl font-bold text-primary">{avgWpm ?? '—'}</span>
+                  <span className="block text-xs text-on-surface-variant mt-xs">Words / Min</span>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-xs mb-xs">
+                  <span className="text-on-surface-variant">Pronunciation Clarity</span>
+                  <span className="text-primary font-semibold">{avgPronunciation >= 85 ? 'High' : avgPronunciation >= 60 ? 'Moderate' : 'Low'}</span>
+                </div>
+                <div className="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                  <div className="h-full bg-secondary rounded-full" style={{ width: `${avgPronunciation}%` }} />
+                </div>
+              </div>
+              {totalFillers > 3 && (
+                <div className="mt-lg p-md rounded-lg bg-inverse-primary/20 border border-inverse-primary/30">
+                  <p className="text-sm text-primary flex gap-sm items-start">
+                    <span className="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">lightbulb</span>
+                    Try pausing briefly instead of using filler words — it reads as more confident.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className={voiceAnswers.length > 0 ? 'md:col-span-8' : 'md:col-span-12'}>
+            <h3 className="font-heading text-2xl font-bold text-primary mb-md">Question Review</h3>
+            <div className="space-y-md">
               {answers.map((a: Answer, i: number) => {
                 const q = typeof a.questionId === 'object' ? a.questionId : null
                 const isOpen = expanded === a._id
                 const score = a.scores?.overall ?? 0
+                const borderColor = !a.scored ? 'border-l-outline-variant' : score >= 70 ? 'border-l-secondary' : 'border-l-error/50'
                 return (
-                  <div key={a._id} className="bg-surface rounded-lg border border-outline-variant/15 overflow-hidden">
+                  <div key={a._id} className={`glass-card rounded-xl border-l-4 ${borderColor} overflow-hidden`}>
                     <button
                       onClick={() => setExpanded(isOpen ? null : a._id)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-surface-container-lowest/50 transition-colors"
+                      className="w-full flex items-start justify-between gap-md p-lg text-left hover:bg-surface-container-high/20 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-slate-muted w-5">Q{i + 1}</span>
-                        <span className="text-sm font-medium text-on-surface line-clamp-1">{q?.text || 'Question'}</span>
+                      <div>
+                        <span className="text-xs font-semibold text-secondary uppercase tracking-wider mb-xs block">Question {i + 1}{q?.category ? ` • ${q.category}` : ''}</span>
+                        <h4 className="text-base font-medium text-primary">{q?.text || 'Question'}</h4>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="flex items-center gap-sm shrink-0">
                         {a.inputMethod === 'voice' && <span className="material-symbols-outlined text-base text-slate-muted icon-fill">mic</span>}
                         {a.integrityFlag && a.integrityFlag !== 'CLEAN' && (
                           <span className="material-symbols-outlined text-base text-error icon-fill" title={a.integrityFlag === 'LIKELY_AI' ? 'Flagged as likely pasted / AI-generated' : 'Flagged as suspicious'}>
@@ -223,7 +247,7 @@ export default function ResultsPage() {
                           </span>
                         )}
                         {a.scored && (
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${scoreBadgeClass(score)}`}>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${scoreBadgeClass(score)}`}>
                             {score}/100
                           </span>
                         )}
@@ -232,24 +256,26 @@ export default function ResultsPage() {
                     </button>
 
                     {isOpen && (
-                      <div className="px-4 pb-4 border-t border-outline-variant/15 space-y-3 pt-3">
-                        {q?.questionFormat === 'system_design' && a.diagramSnapshot ? (
-                          <div style={{ height: 360 }}>
-                            <SystemDesignCanvas initialDiagram={a.diagramSnapshot} readonly />
-                          </div>
-                        ) : q?.questionFormat === 'coding' && a.code ? (
-                          <div style={{ height: 420 }}>
-                            <CodeEditor
-                              starterCode={a.code}
-                              initialLanguage={a.language || 'javascript'}
-                              testResults={a.testResults}
-                              codeScore={a.codeScore}
-                              readonly
-                            />
-                          </div>
-                        ) : (
-                          <p className="text-sm text-slate-muted">{a.text}</p>
-                        )}
+                      <div className="px-lg pb-lg space-y-md">
+                        <div className="bg-surface-container/50 rounded-lg p-md">
+                          {q?.questionFormat === 'system_design' && a.diagramSnapshot ? (
+                            <div style={{ height: 360 }}>
+                              <SystemDesignCanvas initialDiagram={a.diagramSnapshot} readonly />
+                            </div>
+                          ) : q?.questionFormat === 'coding' && a.code ? (
+                            <div style={{ height: 420 }}>
+                              <CodeEditor
+                                starterCode={a.code}
+                                initialLanguage={a.language || 'javascript'}
+                                testResults={a.testResults}
+                                codeScore={a.codeScore}
+                                readonly
+                              />
+                            </div>
+                          ) : (
+                            <p className="text-sm text-on-surface-variant">{a.text}</p>
+                          )}
+                        </div>
                         {a.integrityFlag && a.integrityFlag !== 'CLEAN' && (
                           <div className="flex items-start gap-1.5 bg-error/10 border border-error/30 rounded-lg p-2.5 text-xs text-error">
                             <span className="material-symbols-outlined text-sm shrink-0 icon-fill">warning</span>
@@ -335,26 +361,26 @@ function PanelFeedbackSection({ feedback }: {
   feedback: { alex: PanelPersonaFeedback; priya: PanelPersonaFeedback; james: PanelPersonaFeedback }
 }) {
   return (
-    <div className="mb-6">
-      <h2 className="font-geist font-semibold text-2xl text-ink mb-4">Panel Feedback</h2>
-      <div className="space-y-3">
+    <div>
+      <h3 className="font-heading text-2xl font-bold text-primary mb-md">Panel Feedback</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
         {(Object.entries(feedback) as [string, PanelPersonaFeedback][]).map(([key, pf]) => {
           const cfg = PANEL_PERSONA_CONFIG[key]
           if (!cfg) return null
           return (
-            <div key={key} className={`border rounded-xl p-6 ${cfg.colorClass}`}>
+            <div key={key} className={`glass-card rounded-xl p-lg border-t-4 ${cfg.colorClass}`}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-xl flex-shrink-0">{cfg.emoji}</div>
                 <div>
                   <span className="font-semibold text-on-surface capitalize">{key}</span>
-                  <span className="text-xs text-slate-muted ml-2">— {cfg.role}</span>
+                  <span className="text-xs text-slate-muted block">{cfg.role}</span>
                 </div>
                 <span className={`ml-auto text-xl font-bold ${pf.score >= 80 ? 'text-primary' : pf.score >= 60 ? 'text-tertiary-container' : 'text-error'}`}>
                   {pf.score}
                 </span>
               </div>
               <p className="text-sm text-slate-muted mb-3">{pf.summary}</p>
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-3">
                 {pf.strengths.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-primary mb-1">Strengths</p>

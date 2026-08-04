@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { progress as progressApi, type Achievement } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Sidebar } from '@/components/sidebar'
+import { Topbar } from '@/components/Topbar'
 import { Trophy, Medal, Award, Flame, TrendingUp } from 'lucide-react'
 
 const BADGE_ICON: Record<string, React.ReactNode> = {
@@ -43,12 +44,13 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-background flex antialiased">
       <Sidebar />
-      <div className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-12 pb-24 md:pb-12 overflow-x-hidden">
+      <Topbar title="Rankings & Badges" />
+      <div className="flex-1 md:ml-64 pt-20 md:pt-24 px-4 md:px-12 pb-24 md:pb-12 overflow-x-hidden">
         <div className="max-w-4xl mx-auto py-4 md:py-8">
-          <h1 className="text-2xl font-bold mb-6">Rankings & Badges</h1>
+          <h1 className="font-heading text-2xl font-bold mb-6">Rankings & Badges</h1>
 
           {streak > 0 && (
-            <div className="flex items-center gap-3 border border-orange-500/30 bg-orange-500/5 rounded-xl px-4 py-3 mb-6">
+            <div className="flex items-center gap-3 glass-card rounded-xl px-4 py-3 mb-6">
               <Flame className="w-6 h-6 text-orange-400 flex-shrink-0" />
               <div>
                 <p className="font-semibold">{streak}-day streak</p>
@@ -62,7 +64,7 @@ export default function LeaderboardPage() {
             {achievements.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {achievements.map(a => (
-                  <div key={a._id} className="border border-border rounded-xl p-4 flex items-start gap-3">
+                  <div key={a._id} className="glass-card rounded-xl p-4 flex items-start gap-3">
                     <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
                       {BADGE_ICON[a.type] || <Award className="w-5 h-5 text-primary" />}
                     </div>
@@ -87,7 +89,7 @@ export default function LeaderboardPage() {
             {leaderboard.length > 0 ? (
               <div className="space-y-2">
                 {leaderboard.map((s, i) => (
-                  <div key={s._id} className="flex items-center gap-4 border border-border rounded-xl px-4 py-3">
+                  <div key={s._id} className="flex items-center gap-4 glass-card rounded-xl px-4 py-3">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
                       i === 0 ? 'bg-yellow-500/20 text-yellow-400' :
                       i === 1 ? 'bg-gray-400/20 text-gray-400' :

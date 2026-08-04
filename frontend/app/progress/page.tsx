@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { progress as progressApi, type Achievement } from '@/lib/api'
+import { progress as progressApi, interview as interviewApi, type Achievement, type Interview } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Sidebar } from '@/components/sidebar'
+import { Topbar } from '@/components/Topbar'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 export default function ProgressPage() {
@@ -18,9 +19,7 @@ export default function ProgressPage() {
     interviewId: string
     observations: Array<{ type: string; score?: number; timestamp?: string; concept?: string }>
   }>>([])
-  const [sessions, setSessions] = useState<Array<{
-    _id: string; targetRole: string; mode: string; overallScore?: number; createdAt: string; durationSeconds?: number
-  }>>([])
+  const [sessions, setSessions] = useState<Interview[]>([])
   const [filterMode, setFilterMode] = useState('All Modes')
   const [loading, setLoading] = useState(true)
 
@@ -30,8 +29,13 @@ export default function ProgressPage() {
       progressApi.streak().then(d => setStreak(d.streak)),
       progressApi.timeline().then(d => setTimeline(d.timeline as typeof timeline)),
       progressApi.achievements().then(d => setAchievements(d.achievements || [])).catch(() => {}),
+      interviewApi.history().then(d => setSessions((d.sessions || []).filter(s => s.status === 'completed'))).catch(() => {}),
     ]).catch(() => {}).finally(() => setLoading(false))
   }, [])
+
+  const filteredSessions = filterMode === 'All Modes'
+    ? sessions
+    : sessions.filter(s => s.mode.toLowerCase() === filterMode.toLowerCase())
 
   const chartData = timeline.flatMap(session =>
     session.observations
@@ -60,18 +64,19 @@ export default function ProgressPage() {
   return (
     <div className="bg-background text-on-background min-h-screen flex antialiased">
       <Sidebar />
+      <Topbar title="History" />
 
-      <main className="flex-1 md:ml-64 p-4 md:p-12 max-w-[1280px] mx-auto w-full pb-24 md:pb-12">
+      <main className="flex-1 md:ml-64 p-4 md:p-12 max-w-[1280px] mx-auto w-full pb-24 md:pb-12 pt-20 md:pt-24">
         {/* Header */}
-        <header className="mb-12 mt-16 md:mt-0">
-          <h1 className="font-geist font-bold text-4xl md:text-5xl text-on-background mb-2">History</h1>
-          <p className="text-lg text-slate-muted">Track your progress and review past sessions.</p>
+        <header className="mb-12">
+          <h1 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-2">History</h1>
+          <p className="text-lg text-on-surface-variant">Track your progress and review past sessions.</p>
         </header>
 
         {/* Top section: Chart + Badges */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-12">
           {/* Performance chart */}
-          <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-sm flex flex-col">
+          <div className="lg:col-span-2 glass-card rounded-xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="font-geist font-semibold text-2xl text-on-surface">Performance Trends</h2>
@@ -113,7 +118,7 @@ export default function ProgressPage() {
           </div>
 
           {/* Achievements */}
-          <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-sm flex flex-col">
+          <div className="glass-card rounded-xl p-6 flex flex-col">
             <h2 className="font-geist font-semibold text-2xl text-on-surface mb-6">Achievements</h2>
             <div className="grid grid-cols-2 gap-4 flex-1">
               {achievements.slice(0, 3).map(ach => {
@@ -168,7 +173,7 @@ export default function ProgressPage() {
             </div>
           </div>
 
-          {timeline.length === 0 && !summary?.weakAreas?.length ? (
+          {filteredSessions.length === 0 ? (
             <div className="text-center py-16 border border-dashed border-outline-variant/30 rounded-xl">
               <span className="material-symbols-outlined text-slate-muted text-5xl mb-3 block">trending_up</span>
               <p className="text-slate-muted">Complete an interview to start tracking progress</p>
@@ -178,52 +183,52 @@ export default function ProgressPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/15 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:-translate-y-0.5 transition-transform duration-200 cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-outlined text-primary icon-fill">
-                        {i === 0 ? 'code' : i === 1 ? 'groups' : 'psychology'}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-base font-semibold text-on-surface">
-                        {i === 0 ? 'Senior Frontend Engineer' : i === 1 ? 'Product Manager' : 'Software Engineer I'}
-                      </h3>
-                      <p className="text-sm text-slate-muted mt-0.5">
-                        {i === 0 ? 'TechCorp Inc. • Technical Round' : i === 1 ? 'Innovate LLC • Behavioral (Panel)' : 'StartUp Co • System Design'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end border-t border-outline-variant/10 sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
-                    <div className="text-left sm:text-right">
-                      <div className="text-sm font-semibold text-on-surface">{i === 0 ? 'Oct 24, 2024' : i === 1 ? 'Oct 18, 2024' : 'Oct 10, 2024'}</div>
-                      <div className="text-xs text-slate-muted">{i === 0 ? '45 mins' : i === 1 ? '60 mins' : '30 mins'}</div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col items-end">
-                        <span className={`font-geist font-bold text-2xl leading-none ${i === 0 ? 'text-primary' : i === 1 ? 'text-tertiary-container' : 'text-error'}`}>
-                          {i === 0 ? '92' : i === 1 ? '78' : '64'}
-                        </span>
-                        <span className={`text-xs ${i === 0 ? 'text-emerald-deep' : i === 1 ? 'text-tertiary' : 'text-error'}`}>
-                          {i === 0 ? 'Excellent' : i === 1 ? 'Good' : 'Needs Work'}
-                        </span>
+              {filteredSessions.slice(0, 5).map(s => {
+                const score = s.overallScore ?? 0
+                const scoreColor = score >= 80 ? 'text-primary' : score >= 60 ? 'text-tertiary-container' : 'text-error'
+                const scoreLabel = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : 'Needs Work'
+                const icon = s.mode === 'panel' ? 'groups' : s.mode === 'full' ? 'cases' : 'psychology'
+                return (
+                  <Link
+                    key={s._id}
+                    href={`/results/${s._id}`}
+                    className="glass-card rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:-translate-y-0.5 transition-transform duration-200"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
+                        <span className="material-symbols-outlined text-primary icon-fill">{icon}</span>
                       </div>
-                      <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-                        <path className="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"/>
-                        <path
-                          className={i === 0 ? 'text-primary' : i === 1 ? 'text-tertiary-container' : 'text-error'}
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          fill="none" stroke="currentColor"
-                          strokeDasharray={`${i === 0 ? 92 : i === 1 ? 78 : 64}, 100`}
-                          strokeLinecap="round" strokeWidth="3"
-                        />
-                      </svg>
+                      <div>
+                        <h3 className="text-base font-semibold text-on-surface">{s.targetRole || 'Interview'}</h3>
+                        <p className="text-sm text-slate-muted mt-0.5 capitalize">{s.mode} mode</p>
+                      </div>
                     </div>
-                    <span className="material-symbols-outlined text-slate-muted hidden sm:block">chevron_right</span>
-                  </div>
-                </div>
-              ))}
+                    <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end border-t border-outline-variant/10 sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
+                      <div className="text-left sm:text-right">
+                        <div className="text-sm font-semibold text-on-surface">{new Date(s.completedAt || s.createdAt).toLocaleDateString()}</div>
+                        {s.durationSeconds && <div className="text-xs text-slate-muted">{Math.round(s.durationSeconds / 60)} mins</div>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-end">
+                          <span className={`font-heading font-bold text-2xl leading-none ${scoreColor}`}>{score}</span>
+                          <span className={`text-xs ${scoreColor}`}>{scoreLabel}</span>
+                        </div>
+                        <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
+                          <path className="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"/>
+                          <path
+                            className={scoreColor}
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none" stroke="currentColor"
+                            strokeDasharray={`${score}, 100`}
+                            strokeLinecap="round" strokeWidth="3"
+                          />
+                        </svg>
+                      </div>
+                      <span className="material-symbols-outlined text-slate-muted hidden sm:block">chevron_right</span>
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           )}
         </div>
@@ -232,7 +237,7 @@ export default function ProgressPage() {
         {(summary?.weakAreas?.length || summary?.strongAreas?.length) ? (
           <div className="grid sm:grid-cols-2 gap-6">
             {(summary?.weakAreas?.length ?? 0) > 0 && (
-              <div className="border border-outline-variant/20 rounded-xl p-6 bg-surface-container-lowest shadow-sm">
+              <div className="glass-card rounded-xl p-6">
                 <h2 className="font-geist font-semibold text-xl text-on-surface mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-tertiary-container">warning</span>
                   Weak Areas
@@ -245,7 +250,7 @@ export default function ProgressPage() {
               </div>
             )}
             {(summary?.strongAreas?.length ?? 0) > 0 && (
-              <div className="border border-outline-variant/20 rounded-xl p-6 bg-surface-container-lowest shadow-sm">
+              <div className="glass-card rounded-xl p-6">
                 <h2 className="font-geist font-semibold text-xl text-on-surface mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary icon-fill">verified</span>
                   Strong Areas

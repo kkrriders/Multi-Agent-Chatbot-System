@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Sidebar } from '@/components/sidebar'
+import { Topbar } from '@/components/Topbar'
 import { useOptionalAuth } from '@/hooks/useOptionalAuth'
 import { GuestLimitPrompt } from '@/components/GuestLimitPrompt'
 import { questions as questionsApi, practice as practiceApi, GUEST_LIMIT_ERROR, type CodingEvalResult } from '@/lib/api'
@@ -126,8 +127,9 @@ export default function CodingPracticePage() {
   return (
     <div className="bg-background text-on-background min-h-screen flex font-sans antialiased">
       <Sidebar />
+      <Topbar title="Code Practice" />
 
-      <main className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-6 pb-24 md:pb-8 w-full overflow-x-hidden flex flex-col" style={{ height: '100vh' }}>
+      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-4 md:px-6 pb-24 md:pb-8 w-full overflow-x-hidden flex flex-col" style={{ height: '100vh' }}>
         {/* Header */}
         <div className="flex items-center justify-between mb-4 shrink-0">
           <div>
@@ -173,7 +175,7 @@ export default function CodingPracticePage() {
             </div>
 
             {/* Problem list */}
-            <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 overflow-hidden shadow-sm flex flex-col min-h-0 flex-1">
+            <div className="glass-card rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
               <div className="px-4 py-3 border-b border-outline-variant/10 bg-surface-container-lowest/50 shrink-0">
                 <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">
                   {fetching ? 'Loading…' : `${filtered.length} Problem${filtered.length !== 1 ? 's' : ''}`}
@@ -205,7 +207,7 @@ export default function CodingPracticePage() {
 
             {/* Problem description */}
             {selectedProblem && (
-              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-4 shadow-sm shrink-0">
+              <div className="glass-card rounded-xl p-4 shrink-0">
                 <div className="flex items-center gap-2 mb-3">
                   <h2 className="font-geist font-semibold text-base text-on-surface">{selectedProblem.title}</h2>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${DIFFICULTY_COLOR[selectedProblem.difficulty]}`}>
@@ -227,7 +229,7 @@ export default function CodingPracticePage() {
           <div className="flex-1 flex flex-col gap-3 min-h-0">
             {selectedProblem && (
               <>
-                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 shadow-sm flex-1 p-4 flex flex-col min-h-0" style={{ minHeight: 400 }}>
+                <div className="glass-card rounded-xl flex-1 p-4 flex flex-col min-h-0" style={{ minHeight: 400 }}>
                   <div className="flex items-center justify-between mb-3 shrink-0">
                     <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Editor</p>
                     <button
@@ -269,7 +271,7 @@ export default function CodingPracticePage() {
                 )}
 
                 {evalResult && (
-                  <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 shadow-sm shrink-0 overflow-hidden">
+                  <div className="glass-card rounded-xl shrink-0 overflow-hidden">
                     {/* Score header */}
                     <div className={`px-4 py-3 flex items-center gap-3 ${
                       evalResult.verdict === 'correct' ? 'bg-emerald-50 border-b border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900' :

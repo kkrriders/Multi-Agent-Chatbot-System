@@ -131,7 +131,7 @@ export default function InterviewPreviewPage() {
                 {scoring ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>Scoring…</> : 'Submit answer'}
               </button>
             ) : (
-              <div className="mt-4 rounded-xl border border-outline-variant/15 bg-surface-container-lowest p-5">
+              <div className="mt-4 glass-card rounded-xl p-5">
                 <div className="flex items-center gap-4 mb-3">
                   <p className="text-3xl font-bold text-primary">{result.scores.overall}</p>
                   <p className="text-xs text-slate-muted uppercase tracking-wider">/ 100 overall</p>

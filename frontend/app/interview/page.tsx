@@ -7,6 +7,7 @@ import { interview as interviewApi, cv as cvApi, GUEST_LIMIT_ERROR } from '@/lib
 import { useOptionalAuth } from '@/hooks/useOptionalAuth'
 import { GuestLimitPrompt } from '@/components/GuestLimitPrompt'
 import { Sidebar } from '@/components/sidebar'
+import { Topbar } from '@/components/Topbar'
 import { toast } from 'sonner'
 
 const MODES = [
@@ -175,8 +176,9 @@ export default function InterviewSetupPage() {
   return (
     <div className="bg-background text-on-background min-h-screen flex font-sans antialiased">
       <Sidebar />
+      <Topbar title="Configure Your Session" />
 
-      <main className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-12 pb-24 md:pb-12 w-full overflow-x-hidden">
+      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-4 md:px-12 pb-24 md:pb-12 w-full overflow-x-hidden">
         <div className="max-w-4xl mx-auto">
 
           <div className="mb-8 md:mb-10">
@@ -203,8 +205,8 @@ export default function InterviewSetupPage() {
 
           {/* CV section */}
           {user && !cvChecking && (
-            <div className={`bg-surface-container-lowest rounded-2xl border mb-8 shadow-sm transition-all ${
-              cvMissing ? 'border-2 border-amber-200' : 'border border-outline-variant/15'
+            <div className={`glass-card rounded-2xl mb-8 transition-all ${
+              cvMissing ? 'border-2 border-amber-200 dark:border-amber-800' : ''
             }`}>
               <div className="flex items-center justify-between p-5 md:p-6">
                 <div className="flex items-center gap-3">
@@ -293,7 +295,7 @@ export default function InterviewSetupPage() {
           )}
 
           {/* Section 1: Context */}
-          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
+          <div className="glass-card rounded-2xl p-6 md:p-8 mb-8">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">1</span>
@@ -422,8 +424,8 @@ export default function InterviewSetupPage() {
                 <button
                   key={m.id}
                   onClick={() => setMode(m.id)}
-                  className={`text-left cursor-pointer bg-surface-container-lowest border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:shadow-[0_10px_25px_-5px_rgba(0,108,73,0.1)] hover:-translate-y-0.5 ${
-                    mode === m.id ? 'border-primary shadow-[0_0_0_1px_#006c49] bg-surface/50' : 'border-outline-variant/15 hover:border-outline-variant/40'
+                  className={`text-left cursor-pointer glass-card border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-0.5 ${
+                    mode === m.id ? 'border-primary' : 'border-transparent hover:border-outline-variant/40'
                   }`}
                 >
                   <div className={`absolute top-4 right-4 text-primary transition-all duration-300 ${mode === m.id ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
@@ -449,7 +451,7 @@ export default function InterviewSetupPage() {
 
           {/* Section 3: Session Settings (practice / timed only) */}
           {showConfig && (
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/15 p-6 md:p-8 mb-8 shadow-sm">
+            <div className="glass-card rounded-2xl p-6 md:p-8 mb-8">
               <div className="flex items-center mb-6">
                 <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                   <span className="text-sm font-semibold text-primary">3</span>

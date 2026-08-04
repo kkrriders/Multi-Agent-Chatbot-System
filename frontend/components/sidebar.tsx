@@ -9,7 +9,6 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/dashboard',              label: 'Overview',          icon: 'dashboard' },
-  { href: '/interview',              label: 'Start Interview',   icon: 'play_arrow' },
   { href: '/practice/coding',        label: 'Practice',          icon: 'code',        activePrefix: '/practice' },
   { href: '/progress',               label: 'Performance',       icon: 'insights' },
   { href: '/achievements',           label: 'Achievements',      icon: 'emoji_events' },
@@ -31,30 +30,30 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col py-6 bg-surface-container-low border-r border-outline-variant/10 fixed left-0 top-0 bottom-0 h-full w-64 z-40">
-        <div className="px-6 mb-8">
-          <div className="flex items-center gap-3">
+      <aside className="hidden md:flex flex-col py-lg px-md glass-nav border-r border-outline-variant/10 shadow-sm fixed left-0 top-0 bottom-0 h-full w-64 z-40">
+        <div className="px-sm mb-xl">
+          <div className="flex items-center gap-sm">
             <div className="w-10 h-10 rounded-full bg-emerald-deep/10 flex items-center justify-center">
               <span className="material-symbols-outlined text-emerald-deep icon-fill text-xl">psychology</span>
             </div>
             <div>
               <h1 className="font-geist font-bold text-emerald-deep text-lg leading-tight">MockPrep</h1>
-              <span className="text-xs text-slate-muted">Interview Coach</span>
+              <span className="text-[11px] font-semibold text-slate-muted uppercase tracking-wider">AI Interview Coach</span>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-1 px-2">
+        <nav className="flex-1 flex flex-col gap-sm">
           {NAV_ITEMS.map(item => {
             const active = pathname === item.href || (item.href !== '/dashboard' && (item.activePrefix ? pathname.startsWith(item.activePrefix) : pathname.startsWith(item.href)))
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 border-l-4 rounded-r-lg transition-all active:scale-95 font-medium text-sm ${
+                className={`flex items-center gap-sm px-md py-sm rounded-lg transition-colors duration-200 active:scale-95 text-sm ${
                   active
-                    ? 'text-primary font-bold border-primary bg-primary-container/10'
-                    : 'text-slate-muted border-transparent hover:bg-surface-container-high hover:text-primary'
+                    ? 'bg-secondary-container/20 text-on-secondary-container font-semibold'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/50'
                 }`}
               >
                 <span className={`material-symbols-outlined text-xl ${active ? 'icon-fill' : ''}`}>{item.icon}</span>
@@ -64,20 +63,29 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="px-4 mt-auto flex items-center gap-2">
-          <button
-            onClick={handleLogout}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-slate-muted hover:bg-surface-container-low hover:text-error transition-colors text-sm shadow-sm"
+        <div className="mt-auto space-y-md">
+          <Link
+            href="/interview"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary text-sm font-semibold py-sm rounded-xl hover:brightness-90 hover:scale-[1.02] hover:shadow-[0_4px_15px_rgba(0,0,0,0.2)] transition-all duration-300"
           >
-            <span className="material-symbols-outlined text-base">logout</span>
-            Sign Out
-          </button>
-          <ThemeToggle />
+            <span className="material-symbols-outlined text-base">play_arrow</span>
+            Start Practice
+          </Link>
+          <div className="flex items-center gap-2 pt-md border-t border-outline-variant/10">
+            <button
+              onClick={handleLogout}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-slate-muted hover:bg-surface-container-low hover:text-error transition-colors text-sm shadow-sm"
+            >
+              <span className="material-symbols-outlined text-base">logout</span>
+              Sign Out
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
 
       {/* Mobile Top Bar */}
-      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 bg-surface border-b border-outline-variant/15 fixed top-0 z-50">
+      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 glass-nav border-b border-outline-variant/10 fixed top-0 z-50">
         <Link href="/dashboard" className="font-geist font-bold text-emerald-deep text-lg">MockPrep</Link>
         <button className="text-on-surface">
           <span className="material-symbols-outlined">menu</span>
@@ -85,9 +93,8 @@ export function Sidebar() {
       </header>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 w-full bg-surface border-t border-outline-variant/15 flex justify-around items-center h-16 z-50 px-2 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
-        {[NAV_ITEMS[0], NAV_ITEMS[1], NAV_ITEMS[2], NAV_ITEMS[3]].map(item => {
-          // Shows: Overview, Start Interview, Practice, Performance
+      <nav className="md:hidden fixed bottom-0 w-full glass-nav border-t border-outline-variant/10 flex justify-around items-center h-16 z-50 px-2 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
+        {NAV_ITEMS.slice(0, 4).map(item => {
           const active = pathname === item.href || (item.href !== '/dashboard' && (item.activePrefix ? pathname.startsWith(item.activePrefix) : pathname.startsWith(item.href)))
           return (
             <Link

@@ -3,9 +3,17 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { interview, progress as progressApi, type Interview } from '@/lib/api'
+import { interview, progress as progressApi, cv as cvApi, type Interview, type CandidateProfile } from '@/lib/api'
 import { Sidebar } from '@/components/sidebar'
+import { Topbar } from '@/components/Topbar'
 import { getCachedUser } from '@/lib/auth'
+
+const MODES = [
+  { id: 'practice', label: 'Practice',        icon: 'mic',    desc: 'Untimed, specific topics.' },
+  { id: 'timed',     label: 'Timed',           icon: 'timer',  desc: 'Simulate pressure.' },
+  { id: 'full',      label: 'Full Behavioral', icon: 'groups', desc: 'STAR method focus.' },
+  { id: 'panel',     label: 'Panel',           icon: 'forum',  desc: 'Multi-persona AI.' },
+]
 
 export default function DashboardPage() {
   const { loading: authLoading } = useRequireAuth()
@@ -13,6 +21,7 @@ export default function DashboardPage() {
   const [sessions, setSessions] = useState<Interview[]>([])
   const [streak, setStreak] = useState(0)
   const [summary, setSummary] = useState<{ weakAreas?: string[]; strongAreas?: string[]; avgTechnical?: number | null } | null>(null)
+  const [profile, setProfile] = useState<CandidateProfile | null>(null)
   const user = getCachedUser()
 
   useEffect(() => {
@@ -21,6 +30,7 @@ export default function DashboardPage() {
       interview.history().then(d => setSessions(d.sessions || [])).catch(() => {}),
       progressApi.streak().then(d => setStreak(d.streak || 0)).catch(() => {}),
       progressApi.summary().then(d => setSummary(d.summary)).catch(() => {}),
+      cvApi.profile().then(d => setProfile(d.profile)).catch(() => {}),
     ]).finally(() => setLoading(false))
   }, [authLoading])
 
@@ -50,185 +60,151 @@ export default function DashboardPage() {
   return (
     <div className="bg-background text-on-background min-h-screen flex antialiased">
       <Sidebar />
+      <Topbar />
 
-      <main className="flex-1 md:ml-64 pt-20 md:pt-8 px-4 md:px-12 pb-24 md:pb-12 w-full max-w-[1280px] mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h2 className="font-geist font-bold text-2xl md:text-3xl text-on-surface mb-2">
-              Ready for your next session, {firstName}?
-            </h2>
-            <p className="text-lg text-slate-muted">Your structured growth plan is on track. Let&apos;s keep the momentum going.</p>
-          </div>
-          <Link
-            href="/interview"
-            className="inline-flex items-center justify-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg shadow-sm hover:brightness-90 transition-colors"
-          >
-            <span className="material-symbols-outlined">play_arrow</span>
-            Start New Interview
-          </Link>
+      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-margin-mobile md:px-margin-desktop pb-24 md:pb-12 w-full max-w-[1280px] mx-auto">
+        {/* Welcome Header */}
+        <div className="mb-xl">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary tracking-tight mb-2">Welcome back, {firstName}.</h2>
+          <p className="text-lg text-on-surface-variant">Ready to ace your next interview?</p>
         </div>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Left column: streak + weak area */}
-          <div className="md:col-span-4 flex flex-col gap-6">
-            {/* Streak */}
-            <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden group hover:shadow-[0_8px_30px_-12px_rgba(0,108,73,0.1)] transition-shadow">
-              <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-light/30 rounded-full blur-2xl group-hover:bg-amber-light/50 transition-colors" />
-              <div className="flex items-center gap-4 mb-4 relative z-10">
-                <div className="w-12 h-12 bg-amber-light rounded-full flex items-center justify-center text-tertiary-container shadow-sm border border-tertiary-container/10">
-                  <span className="material-symbols-outlined text-2xl icon-fill">local_fire_department</span>
-                </div>
-                <div>
-                  <h3 className="font-geist font-semibold text-xl text-on-surface">
-                    {streak > 0 ? `${streak} Day Streak!` : 'Start your streak!'}
-                  </h3>
-                  <p className="text-xs text-slate-muted">{streak > 0 ? "You're on fire. Keep practicing." : 'Practice daily to build momentum.'}</p>
-                </div>
-              </div>
-              <div className="flex gap-1 relative z-10">
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <div key={i} className={`h-2 flex-1 rounded-full ${i < streak ? 'bg-primary' : 'bg-surface-container'}`} />
-                ))}
+        {/* Top Grid: Stats & Resume */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-xl">
+          {/* Avg Score */}
+          <div className="glass-card rounded-xl p-lg flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute -top-8 -right-8 w-32 h-32 bg-secondary-fixed/30 rounded-full blur-2xl" />
+            <div className="relative z-10">
+              <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-sm">Avg. Score</h3>
+              <div className="flex items-end gap-2">
+                <span className="font-heading text-4xl font-bold text-primary">{avgScore ?? '—'}</span>
+                <span className="text-sm text-on-surface-variant pb-1">/100</span>
               </div>
             </div>
-
-            {/* Weak area / focus */}
-            {summary?.weakAreas && summary.weakAreas.length > 0 ? (
-              <div className="bg-error-container/30 rounded-xl p-6 border border-error-container shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-error text-lg">warning</span>
-                    <h3 className="text-xs font-bold text-error uppercase tracking-wider">Focus Area</h3>
-                  </div>
-                  <p className="font-geist font-semibold text-lg text-on-surface mb-2">{summary.weakAreas[0]}</p>
-                  <p className="text-xs text-slate-muted mb-4">Our AI detected this as an area needing improvement. Practice this to elevate your score.</p>
-                </div>
-                <Link href="/progress" className="w-full py-2 bg-surface-container-lowest border border-error/20 text-error rounded-lg text-xs font-semibold hover:bg-error/5 transition-colors text-center block">
-                  View Progress
-                </Link>
-              </div>
-            ) : (
-              <div className="bg-primary-container/10 rounded-xl p-6 border border-primary/20 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-primary text-lg icon-fill">verified</span>
-                    <h3 className="text-xs font-bold text-primary uppercase tracking-wider">All Clear</h3>
-                  </div>
-                  <p className="font-geist font-semibold text-lg text-on-surface mb-2">No weak areas yet</p>
-                  <p className="text-xs text-slate-muted mb-4">Complete interviews to reveal personalized focus areas.</p>
-                </div>
-                <Link href="/interview" className="w-full py-2 bg-surface-container-lowest border border-primary/20 text-primary rounded-lg text-xs font-semibold hover:bg-primary/5 transition-colors text-center block">
-                  Start Interview
-                </Link>
-              </div>
-            )}
+            <div className="mt-md w-full bg-surface-container-high rounded-full h-2 overflow-hidden relative z-10">
+              <div
+                className="bg-gradient-to-r from-secondary-container to-secondary h-full rounded-full transition-all duration-700"
+                style={{ width: `${avgScore ?? 0}%` }}
+              />
+            </div>
           </div>
 
-          {/* Performance overview */}
-          <div className="md:col-span-8 bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-geist font-semibold text-xl text-on-surface">Performance Overview</h3>
-              <Link href="/progress" className="text-primary hover:text-emerald-deep text-xs font-semibold flex items-center gap-1 transition-colors">
-                Detailed Report <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          {/* Sessions & Streak */}
+          <div className="glass-card rounded-xl p-lg flex flex-col justify-between">
+            <div className="flex justify-between items-start mb-md">
+              <div>
+                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-xs">Completed</h3>
+                <span className="font-heading text-2xl font-bold text-primary">{completed.length} <span className="text-sm text-on-surface-variant font-normal">Sessions</span></span>
+              </div>
+              {streak > 0 && (
+                <div className="bg-secondary-container/10 px-sm py-xs rounded-full border border-secondary/20 flex items-center gap-xs shrink-0">
+                  <span className="material-symbols-outlined text-secondary text-base icon-fill">local_fire_department</span>
+                  <span className="text-xs font-semibold text-secondary">{streak} Day Streak</span>
+                </div>
+              )}
+            </div>
+            <p className="text-sm text-on-surface-variant">
+              {summary?.weakAreas?.length
+                ? `Focus area: ${summary.weakAreas[0]}`
+                : 'Consistent practice improves confidence by 40%.'}
+            </p>
+          </div>
+
+          {/* Resume Status */}
+          <div className="glass-card rounded-xl p-lg flex flex-col justify-between relative overflow-hidden group">
+            <div className="relative z-10">
+              <div className="flex items-center gap-sm mb-md">
+                <span className="material-symbols-outlined text-secondary">description</span>
+                <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">Resume Status</h3>
+              </div>
+              <p className="text-sm text-on-surface-variant mb-md">
+                {profile
+                  ? `${profile.name || 'Your CV'} parsed successfully. AI context updated.`
+                  : 'No CV on file yet — upload one to personalise your interviews.'}
+              </p>
+            </div>
+            <Link
+              href="/upload"
+              className="relative z-10 self-start px-sm py-xs bg-secondary-container/20 text-on-secondary-container border border-secondary-container/50 rounded-full text-xs font-semibold uppercase hover:bg-secondary-container/30 transition-colors"
+            >
+              {profile ? 'Update Resume' : 'Upload Resume'}
+            </Link>
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-secondary-fixed opacity-20 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-500" />
+          </div>
+        </div>
+
+        {/* Interview Modes */}
+        <div className="mb-xl">
+          <h3 className="font-heading text-2xl font-bold text-primary mb-md">Select Mode</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-sm">
+            {MODES.map(m => (
+              <Link
+                key={m.id}
+                href="/interview"
+                className="glass-card rounded-xl p-md flex flex-col items-start gap-md hover:bg-surface-container-lowest/80 transition-all duration-300 hover:scale-[1.03] text-left group"
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
+                  m.id === 'panel' ? 'bg-primary text-on-primary' : 'bg-secondary-container/20 text-secondary'
+                }`}>
+                  <span className="material-symbols-outlined">{m.icon}</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-primary">{m.label}</h4>
+                  <p className="text-xs text-on-surface-variant mt-1">{m.desc}</p>
+                </div>
               </Link>
-            </div>
+            ))}
+          </div>
+        </div>
 
-            {avgScore != null ? (
-              <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
-                <div className="w-full max-w-sm flex flex-col gap-6 p-4">
-                  {[
-                    { label: 'Sessions Completed', value: completed.length, max: Math.max(completed.length, 10), color: 'bg-primary' },
-                    { label: 'Average Score', value: avgScore, max: 100, color: avgScore >= 70 ? 'bg-primary' : 'bg-amber-light border border-tertiary-container/20' },
-                    { label: 'Strong Areas', value: summary?.strongAreas?.length || 0, max: Math.max(summary?.strongAreas?.length || 0, 5), color: 'bg-primary' },
-                  ].map(({ label, value, max, color }) => (
-                    <div key={label}>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-on-surface font-semibold">{label}</span>
-                        <span className="text-emerald-deep font-bold">{value}{label === 'Average Score' ? '%' : ''}</span>
-                      </div>
-                      <div className="w-full bg-surface-container rounded-full h-3 overflow-hidden border border-outline-variant/20">
-                        <div className={`${color} h-3 rounded-full transition-all duration-700`} style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="bg-surface-container-low rounded-lg p-5 border border-outline-variant/20 max-w-xs">
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary mt-1 icon-fill">lightbulb</span>
-                    <div>
-                      <h4 className="text-sm font-semibold text-on-surface mb-1">AI Insight</h4>
-                      <p className="text-sm text-slate-muted leading-relaxed">
-                        {avgScore >= 75
-                          ? 'Great scores! Focus on structured communication (STAR method) to reach the top tier.'
-                          : 'Keep practicing consistently — scores typically improve 15% after 5 sessions.'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <span className="material-symbols-outlined text-slate-muted text-5xl mb-3">bar_chart</span>
-                <p className="text-slate-muted text-sm">Complete your first interview to see performance analytics.</p>
-              </div>
-            )}
+        {/* Recent Sessions */}
+        <div>
+          <div className="flex justify-between items-end mb-md">
+            <h3 className="font-heading text-2xl font-bold text-primary">Recent Sessions</h3>
+            <Link href="/progress" className="text-xs font-semibold text-secondary hover:underline">View All</Link>
           </div>
 
-          {/* Recent sessions table */}
-          {sessions.length > 0 && (
-            <div className="md:col-span-12 bg-surface-container-lowest rounded-xl border border-outline-variant/15 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] overflow-hidden mt-4">
-              <div className="p-6 border-b border-outline-variant/15 flex justify-between items-center bg-surface-bright/50">
-                <h3 className="font-geist font-semibold text-xl text-on-surface">Recent Sessions</h3>
-                <Link href="/progress" className="text-xs text-slate-muted hover:text-primary transition-colors">View All</Link>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-surface-container-lowest text-xs text-slate-muted border-b border-outline-variant/15">
-                      <th className="py-4 px-6 font-medium">Role / Mode</th>
-                      <th className="py-4 px-6 font-medium">Date</th>
-                      <th className="py-4 px-6 font-medium">Overall Score</th>
-                      <th className="py-4 px-6 font-medium text-right">Action</th>
+          {sessions.length > 0 ? (
+            <div className="glass-card rounded-xl overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-outline-variant/10">
+                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Role / Mode</th>
+                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Date</th>
+                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Score</th>
+                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/5">
+                  {sessions.slice(0, 5).map(s => (
+                    <tr key={s._id} className="hover:bg-surface-container-highest/20 transition-colors group">
+                      <td className="py-md px-lg text-sm text-on-surface font-medium">
+                        {s.targetRole || 'Interview'} <span className="text-on-surface-variant capitalize font-normal">— {s.mode}</span>
+                      </td>
+                      <td className="py-md px-lg text-sm text-on-surface-variant">{new Date(s.createdAt).toLocaleDateString()}</td>
+                      <td className="py-md px-lg">
+                        {s.overallScore != null ? (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${scoreBadgeClass(s.overallScore)}`}>
+                            {s.overallScore}/100
+                          </span>
+                        ) : (
+                          <span className="text-xs text-on-surface-variant">—</span>
+                        )}
+                      </td>
+                      <td className="py-md px-lg text-right">
+                        {s.status === 'completed' && (
+                          <Link href={`/results/${s._id}`} className={`text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity ${s.overallScore != null ? scoreColor(s.overallScore) : 'text-primary'} hover:text-emerald-deep`}>
+                            Review
+                          </Link>
+                        )}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="text-sm">
-                    {sessions.slice(0, 5).map(s => (
-                      <tr key={s._id} className="border-b border-outline-variant/10 hover:bg-surface-container-lowest/50 transition-colors group">
-                        <td className="py-4 px-6 font-medium text-on-surface flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-md bg-surface-container flex items-center justify-center text-slate-muted border border-outline-variant/20">
-                            <span className="material-symbols-outlined text-base">domain</span>
-                          </div>
-                          {s.targetRole || 'Interview'} — <span className="text-slate-muted capitalize">{s.mode}</span>
-                        </td>
-                        <td className="py-4 px-6 text-slate-muted">{new Date(s.createdAt).toLocaleDateString()}</td>
-                        <td className="py-4 px-6">
-                          {s.overallScore != null ? (
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${scoreBadgeClass(s.overallScore)}`}>
-                              {s.overallScore}/100
-                            </span>
-                          ) : (
-                            <span className="text-xs text-slate-muted">—</span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6 text-right">
-                          {s.status === 'completed' && (
-                            <Link href={`/results/${s._id}`} className={`text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity ${s.overallScore && s.overallScore >= 0 ? scoreColor(s.overallScore) : 'text-primary'} hover:text-emerald-deep`}>
-                              Review
-                            </Link>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-
-          {sessions.length === 0 && (
-            <div className="md:col-span-12 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant/30 p-12 text-center mt-4">
+          ) : (
+            <div className="glass-card rounded-xl border-dashed border-2 p-12 text-center">
               <span className="material-symbols-outlined text-slate-muted text-5xl mb-3 block">play_circle</span>
               <p className="text-slate-muted mb-6">No interviews yet — start your first session to see your progress here.</p>
               <Link href="/interview" className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:brightness-90 transition-colors shadow-sm">
