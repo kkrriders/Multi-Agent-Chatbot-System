@@ -58,7 +58,7 @@ function LoginForm() {
     <div className="relative bg-surface text-on-surface antialiased min-h-screen flex flex-col md:flex-row selection:bg-primary-container/30 selection:text-emerald-deep">
       <div className="absolute top-4 right-4 z-10"><ThemeToggle /></div>
       {/* Left panel — context & branding (desktop only) */}
-      <div className="hidden md:flex md:w-1/2 lg:w-[45%] bg-surface-container-low flex-col justify-between p-12 border-r border-outline-variant/15 relative overflow-hidden">
+      <div className="hidden md:flex md:w-1/2 lg:w-[45%] min-w-0 bg-surface-container-low flex-col justify-between p-12 border-r border-outline-variant/15 relative overflow-hidden">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-emerald-deep icon-fill">psychology</span>
           <span className="text-emerald-deep font-geist font-semibold text-2xl tracking-tight">MockPrep</span>

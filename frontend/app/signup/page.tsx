@@ -90,7 +90,7 @@ export default function SignupPage() {
         />
 
         {/* Left column — form */}
-        <section className="w-full lg:w-1/2 flex flex-col justify-center px-4 md:px-12 lg:px-[12%] py-24 z-10 relative bg-surface/80 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none border-r border-outline-variant/10">
+        <section className="w-full lg:w-1/2 min-w-0 flex flex-col justify-center px-4 md:px-12 lg:px-[12%] py-24 z-10 relative bg-surface/80 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none border-r border-outline-variant/10">
           <div className="max-w-md w-full mx-auto space-y-8">
             {/* Header */}
             <div className="space-y-3">
@@ -205,7 +205,7 @@ export default function SignupPage() {
         </section>
 
         {/* Right column — visual (desktop only) */}
-        <section className="hidden lg:flex w-1/2 bg-surface-container-low relative overflow-hidden flex-col justify-center items-center px-[8%]">
+        <section className="hidden lg:flex w-1/2 min-w-0 bg-surface-container-low relative overflow-hidden flex-col justify-center items-center px-[8%]">
           <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-primary-container/20 rounded-full blur-[80px]" />
           <div className="absolute bottom-[-10%] left-[-10%] w-80 h-80 bg-tertiary-fixed/30 rounded-full blur-[60px]" />
           <div className="relative z-10 w-full max-w-lg space-y-6">

@@ -63,7 +63,7 @@ export default function LandingPage() {
         {/* Hero */}
         <section className="w-full px-4 md:px-12 max-w-[1280px] mx-auto py-16 md:py-24 flex flex-col lg:flex-row items-center gap-12">
           {/* Hero text */}
-          <div className="w-full lg:w-1/2 flex flex-col gap-6 items-start text-left">
+          <div className="w-full lg:w-1/2 min-w-0 flex flex-col gap-6 items-start text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-container/10 border border-primary/20 rounded-full text-primary text-xs font-semibold">
               <span className="material-symbols-outlined text-base">bolt</span>
               AI-Powered Interview Coach
@@ -104,7 +104,7 @@ export default function LandingPage() {
           </div>
 
           {/* CV Upload card */}
-          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
+          <div className="w-full lg:w-1/2 min-w-0 flex justify-center lg:justify-end">
             <div className="glass-card rounded-xl p-6 md:p-8 w-full max-w-md hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-container/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
               <div className="mb-6">
