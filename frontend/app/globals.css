@@ -8,18 +8,6 @@
   --font-geist: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --font-heading: 'Hanken Grotesk', var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  /* Spacing scale — matches the Stitch design system (DESIGN.md) so p-md,
-     gap-lg, etc. read the same rhythm the reference mockups use. */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 40px;
-  --spacing-gutter: 24px;
-  --spacing-2xl: 64px;
-  --spacing-margin-mobile: 16px;
-  --spacing-margin-desktop: 48px;
-
   /* Semantic colors (used by shadcn/sonner) */
   --color-background: #f7f9fb;
   --color-foreground: #191c1e;

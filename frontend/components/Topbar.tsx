@@ -12,17 +12,17 @@ export function Topbar({ title, showSearch = false }: Props) {
   const initials = (user?.fullName || user?.email || '?').trim().charAt(0).toUpperCase()
 
   return (
-    <header className="hidden md:flex justify-between items-center px-lg h-16 glass-nav border-b border-outline-variant/10 fixed top-0 right-0 w-[calc(100%-16rem)] z-30">
+    <header className="hidden md:flex justify-between items-center px-6 h-16 glass-nav border-b border-outline-variant/10 fixed top-0 right-0 w-[calc(100%-16rem)] z-30">
       {title ? (
         <h2 className="font-geist font-bold text-xl text-primary">{title}</h2>
       ) : (
         <div />
       )}
 
-      <div className="flex items-center gap-md">
+      <div className="flex items-center gap-4">
         {showSearch && (
-          <div className="relative focus-within:ring-2 focus-within:ring-secondary/50 rounded-full bg-surface-container-lowest border border-outline-variant/50 flex items-center px-sm py-xs">
-            <span className="material-symbols-outlined text-on-surface-variant text-sm mr-xs">search</span>
+          <div className="relative focus-within:ring-2 focus-within:ring-secondary/50 rounded-full bg-surface-container-lowest border border-outline-variant/50 flex items-center px-2 py-1">
+            <span className="material-symbols-outlined text-on-surface-variant text-sm mr-1">search</span>
             <input
               type="text"
               placeholder="Search..."
@@ -30,7 +30,7 @@ export function Topbar({ title, showSearch = false }: Props) {
             />
           </div>
         )}
-        <button className="text-on-surface-variant hover:bg-surface-container-highest/30 rounded-full transition-all p-sm" aria-label="Notifications">
+        <button className="text-on-surface-variant hover:bg-surface-container-highest/30 rounded-full transition-all p-2" aria-label="Notifications">
           <span className="material-symbols-outlined">notifications</span>
         </button>
         <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/20 flex items-center justify-center bg-primary-container/20 text-on-primary-container text-xs font-bold">

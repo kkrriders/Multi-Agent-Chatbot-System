@@ -74,7 +74,7 @@ export default function ProgressPage() {
         </header>
 
         {/* Top section: Chart + Badges */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
           {/* Performance chart */}
           <div className="lg:col-span-2 glass-card rounded-xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-6">

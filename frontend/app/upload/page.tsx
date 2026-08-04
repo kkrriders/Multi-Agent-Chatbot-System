@@ -92,54 +92,54 @@ export default function UploadPage() {
       <Sidebar />
       <Topbar title="Profile & CV Analysis" />
 
-      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-margin-mobile md:px-margin-desktop pb-24 md:pb-12 w-full max-w-[1280px] mx-auto space-y-xl overflow-x-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-4 md:px-12 pb-24 md:pb-12 w-full max-w-[1280px] mx-auto space-y-10 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Upload */}
-          <div className="lg:col-span-4 space-y-gutter">
+          <div className="lg:col-span-4 space-y-6">
             <div
               onDrop={handleDrop}
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
               onDragLeave={() => setDragging(false)}
               onClick={() => fileRef.current?.click()}
-              className={`glass-card rounded-xl p-lg flex flex-col items-center justify-center text-center border-dashed border-2 transition-all cursor-pointer group min-h-[240px] ${
+              className={`glass-card rounded-xl p-6 flex flex-col items-center justify-center text-center border-dashed border-2 transition-all cursor-pointer group min-h-[240px] ${
                 dragging ? 'border-primary bg-primary-container/10' : 'border-secondary/30'
               }`}
             >
               <input ref={fileRef} type="file" accept=".pdf,.docx,.txt" onChange={handleFile} className="hidden" />
-              <div className="w-16 h-16 rounded-full bg-secondary-container/20 flex items-center justify-center mb-md group-hover:scale-110 group-hover:bg-secondary-container/40 transition-transform duration-300">
+              <div className="w-16 h-16 rounded-full bg-secondary-container/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-secondary-container/40 transition-transform duration-300">
                 <span className="material-symbols-outlined text-3xl text-secondary">cloud_upload</span>
               </div>
               {file ? (
                 <>
-                  <h3 className="text-sm font-bold text-primary mb-xs">{file.name}</h3>
+                  <h3 className="text-sm font-bold text-primary mb-1">{file.name}</h3>
                   <p className="text-xs text-on-surface-variant">{(file.size / 1024).toFixed(0)} KB — ready to upload</p>
                 </>
               ) : (
                 <>
-                  <h3 className="text-sm font-bold text-primary mb-xs">{profile ? 'Upload New CV' : 'Upload Your CV'}</h3>
-                  <p className="text-xs text-on-surface-variant mb-md">Drag and drop your PDF, DOCX, or TXT here</p>
+                  <h3 className="text-sm font-bold text-primary mb-1">{profile ? 'Upload New CV' : 'Upload Your CV'}</h3>
+                  <p className="text-xs text-on-surface-variant mb-4">Drag and drop your PDF, DOCX, or TXT here</p>
                 </>
               )}
               {file && (
                 <button
                   onClick={e => { e.stopPropagation(); handleUpload() }}
                   disabled={uploading}
-                  className="mt-md px-md py-sm bg-primary text-white rounded-xl text-sm font-semibold hover:brightness-90 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="mt-4 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:brightness-90 transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {uploading ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>Parsing…</> : 'Upload & Parse'}
                 </button>
               )}
               {!file && (
-                <button className="px-md py-sm bg-secondary/10 text-secondary border border-secondary/20 rounded-xl text-sm font-semibold hover:bg-secondary/20 transition-colors">
+                <button className="px-4 py-2 bg-secondary/10 text-secondary border border-secondary/20 rounded-xl text-sm font-semibold hover:bg-secondary/20 transition-colors">
                   Browse Files
                 </button>
               )}
             </div>
 
             {profile && (
-              <div className="glass-card rounded-xl p-md">
-                <div className="flex items-center justify-between p-sm rounded-lg">
-                  <div className="flex items-center gap-sm">
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center justify-between p-2 rounded-lg">
+                  <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-secondary icon-fill">verified_user</span>
                     <div>
                       <p className="text-sm font-medium text-primary">{profile.name || 'Your CV'}</p>
@@ -147,7 +147,7 @@ export default function UploadPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-sm mt-sm pt-sm border-t border-outline-variant/10">
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-outline-variant/10">
                   <button onClick={handleDelete} disabled={deleting} className="text-xs font-semibold text-error hover:text-error/70 transition-colors disabled:opacity-50">
                     {deleting ? 'Deleting…' : 'Delete CV'}
                   </button>
@@ -157,25 +157,25 @@ export default function UploadPage() {
           </div>
 
           {/* Right Column: Analysis Results */}
-          <div className="lg:col-span-8 space-y-gutter">
+          <div className="lg:col-span-8 space-y-6">
             {profile ? (
               <>
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-md">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                   <div>
-                    <h2 className="font-heading text-3xl font-bold text-primary mb-xs">{profile.name || 'Your CV'}</h2>
+                    <h2 className="font-heading text-3xl font-bold text-primary mb-1">{profile.name || 'Your CV'}</h2>
                     <p className="text-lg text-on-surface-variant">{profile.skills?.length ? `${profile.skills.length} skills extracted` : 'Analysis complete'}</p>
                   </div>
-                  <div className="flex items-center gap-sm bg-surface-container-highest/40 px-md py-sm rounded-full w-fit shadow-sm border border-secondary/10">
+                  <div className="flex items-center gap-2 bg-surface-container-highest/40 px-4 py-2 rounded-full w-fit shadow-sm border border-secondary/10">
                     <span className="material-symbols-outlined text-secondary text-sm">check_circle</span>
                     <span className="text-sm font-medium text-on-surface-variant">Analysis Complete</span>
                   </div>
                 </div>
 
                 {/* Bento: Gauge + Skill Gaps */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-                  <div className="glass-card rounded-xl p-lg flex flex-col items-center justify-center relative overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="glass-card rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden">
                     <div className="absolute -top-10 -right-10 w-32 h-32 bg-secondary-fixed/30 rounded-full blur-2xl" />
-                    <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-lg w-full text-left">Role Match Score</h3>
+                    <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-6 w-full text-left">Role Match Score</h3>
                     {gaps?.fitScore != null ? (
                       <div className="relative w-40 h-40 flex items-center justify-center">
                         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -198,28 +198,28 @@ export default function UploadPage() {
                     )}
                   </div>
 
-                  <div className="glass-card rounded-xl p-lg flex flex-col">
-                    <div className="flex items-center justify-between mb-md">
+                  <div className="glass-card rounded-xl p-6 flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
                       <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Skill Gaps</h3>
                       <span className="material-symbols-outlined text-outline">work</span>
                     </div>
                     <div className="flex-1 flex flex-col justify-center">
                       {gaps?.missingSkills?.length ? (
-                        <div className="flex items-start gap-md mb-md">
+                        <div className="flex items-start gap-4 mb-4">
                           <div className="w-8 h-8 rounded-full bg-error-container/50 flex items-center justify-center shrink-0">
                             <span className="material-symbols-outlined text-error text-sm">warning</span>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-primary">{gaps.missingSkills.length} skills missing</p>
-                            <p className="text-xs text-on-surface-variant mt-xs">{gaps.missingSkills.slice(0, 4).join(', ')}{gaps.missingSkills.length > 4 ? '…' : ''}</p>
+                            <p className="text-xs text-on-surface-variant mt-1">{gaps.missingSkills.slice(0, 4).join(', ')}{gaps.missingSkills.length > 4 ? '…' : ''}</p>
                           </div>
                         </div>
                       ) : (
                         <p className="text-xs text-on-surface-variant">Run a gap analysis (below) to see missing vs. matched skills for a target role.</p>
                       )}
                       {gaps?.matchedSkills?.length ? (
-                        <div className="bg-surface-container-low p-sm rounded-lg border border-outline-variant/20">
-                          <p className="text-xs font-semibold text-secondary mb-xs">Matched Skills</p>
+                        <div className="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
+                          <p className="text-xs font-semibold text-secondary mb-1">Matched Skills</p>
                           <p className="text-xs text-on-surface-variant">{gaps.matchedSkills.slice(0, 6).join(', ')}</p>
                         </div>
                       ) : null}
@@ -229,14 +229,14 @@ export default function UploadPage() {
 
                 {/* Skills pill cloud */}
                 {(profile.skills?.length ?? 0) > 0 && (
-                  <div className="glass-card rounded-xl p-lg">
-                    <div className="flex items-center gap-sm mb-md">
+                  <div className="glass-card rounded-xl p-6">
+                    <div className="flex items-center gap-2 mb-4">
                       <span className="material-symbols-outlined text-secondary">psychology_alt</span>
                       <h3 className="text-xs font-bold text-primary uppercase tracking-wider">AI Extracted Skills</h3>
                     </div>
-                    <div className="flex flex-wrap gap-sm">
+                    <div className="flex flex-wrap gap-2">
                       {profile.skills.map(s => (
-                        <span key={s} className="px-sm py-xs bg-secondary-fixed/20 text-on-secondary-fixed-variant rounded-full text-xs font-medium border border-secondary-fixed/30 hover:scale-105 hover:bg-secondary-fixed hover:text-on-secondary-fixed transition-all cursor-default">
+                        <span key={s} className="px-2 py-1 bg-secondary-fixed/20 text-on-secondary-fixed-variant rounded-full text-xs font-medium border border-secondary-fixed/30 hover:scale-105 hover:bg-secondary-fixed hover:text-on-secondary-fixed transition-all cursor-default">
                           {s}
                         </span>
                       ))}
@@ -246,14 +246,14 @@ export default function UploadPage() {
 
                 {/* Experience timeline */}
                 {(profile.experience?.length ?? 0) > 0 && (
-                  <div className="glass-card rounded-xl p-lg">
-                    <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-md">Experience Summary</h3>
-                    <div className="relative pl-md border-l-2 border-outline-variant/30 space-y-lg">
+                  <div className="glass-card rounded-xl p-6">
+                    <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-4">Experience Summary</h3>
+                    <div className="relative pl-4 border-l-2 border-outline-variant/30 space-y-6">
                       {profile.experience.map((e, i) => (
                         <div key={i} className="relative">
                           <div className={`absolute -left-[25px] top-1 w-4 h-4 rounded-full border-4 border-surface ${i === 0 ? 'bg-secondary' : 'bg-outline-variant'}`} />
                           <h4 className="font-bold text-primary text-lg">{e.role}</h4>
-                          <p className="text-xs text-secondary mb-sm">{e.company}{e.duration ? ` • ${e.duration}` : ''}</p>
+                          <p className="text-xs text-secondary mb-2">{e.company}{e.duration ? ` • ${e.duration}` : ''}</p>
                           {e.description && <p className="text-sm text-on-surface-variant">{e.description}</p>}
                         </div>
                       ))}
@@ -262,17 +262,17 @@ export default function UploadPage() {
                 )}
 
                 {/* JD gap analysis input */}
-                <div className="glass-card rounded-xl p-lg">
-                  <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider mb-md">Paste a job description to analyze</h3>
+                <div className="glass-card rounded-xl p-6">
+                  <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider mb-4">Paste a job description to analyze</h3>
                   <textarea
                     value={jd} onChange={e => setJd(e.target.value)}
                     placeholder="Paste key requirements from the job description here..." rows={4} maxLength={10000}
-                    className="w-full border border-outline-variant/50 rounded-lg px-4 py-3 bg-surface-container-lowest text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none mb-md"
+                    className="w-full border border-outline-variant/50 rounded-lg px-4 py-3 bg-surface-container-lowest text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none mb-4"
                   />
                   <button
                     onClick={handleGapAnalysis}
                     disabled={!jd.trim() || analyzing}
-                    className="bg-primary hover:brightness-90 text-white text-sm font-semibold py-sm px-lg rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50 shadow-sm"
+                    className="bg-primary hover:brightness-90 text-white text-sm font-semibold py-2 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 disabled:opacity-50 shadow-sm"
                   >
                     {analyzing ? (
                       <><span className="material-symbols-outlined animate-spin text-base">sync</span>Analyzing…</>
@@ -292,8 +292,8 @@ export default function UploadPage() {
                 </div>
               </>
             ) : (
-              <div className="glass-card rounded-xl p-xl flex flex-col items-center justify-center text-center min-h-[300px]">
-                <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-md">description</span>
+              <div className="glass-card rounded-xl p-10 flex flex-col items-center justify-center text-center min-h-[300px]">
+                <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-4">description</span>
                 <h2 className="font-heading text-2xl font-bold text-primary mb-2">No CV on file yet</h2>
                 <p className="text-sm text-on-surface-variant max-w-sm">Upload your resume on the left and we&apos;ll extract your skills and experience to personalise your interview questions.</p>
               </div>

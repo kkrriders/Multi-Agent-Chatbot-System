@@ -79,29 +79,29 @@ export default function ResultsPage() {
       <Sidebar />
       <Topbar />
 
-      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-margin-mobile md:px-margin-desktop pb-24 md:pb-12 w-full max-w-[1280px] mx-auto">
-        <header className="mb-xl flex flex-col md:flex-row md:items-end justify-between gap-md">
+      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-4 md:px-12 pb-24 md:pb-12 w-full max-w-[1280px] mx-auto">
+        <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary">Session Summary</h2>
-            <p className="text-lg text-on-surface-variant mt-sm">
+            <p className="text-lg text-on-surface-variant mt-2">
               {interview.targetRole || 'Mock Interview'} — {interview.mode} interview · {new Date(interview.completedAt || interview.createdAt).toLocaleDateString()}
             </p>
           </div>
-          <div className="flex gap-sm">
-            <Link href="/progress" className="px-md py-sm rounded-lg text-sm font-semibold bg-surface-container-highest text-on-surface-variant hover:bg-surface-dim transition-colors flex items-center gap-xs">
+          <div className="flex gap-2">
+            <Link href="/progress" className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container-highest text-on-surface-variant hover:bg-surface-dim transition-colors flex items-center gap-1">
               <span className="material-symbols-outlined text-[18px]">bar_chart</span> View Past Interviews
             </Link>
-            <Link href="/interview" className="px-md py-sm rounded-lg text-sm font-semibold bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-colors flex items-center gap-xs">
+            <Link href="/interview" className="px-4 py-2 rounded-lg text-sm font-semibold bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-colors flex items-center gap-1">
               <span className="material-symbols-outlined text-[18px]">replay</span> Practice Again
             </Link>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Score & Trend */}
-          <div className="md:col-span-4 glass-card rounded-xl p-lg flex flex-col justify-between">
+          <div className="md:col-span-4 glass-card rounded-xl p-6 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-md">
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Overall Score</h3>
                 {delta != null && (
                   <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium border ${delta >= 0 ? 'bg-secondary/10 text-secondary border-secondary/20' : 'bg-error/10 text-error border-error/20'}`}>
@@ -109,18 +109,18 @@ export default function ResultsPage() {
                   </span>
                 )}
               </div>
-              <div className="flex items-baseline gap-xs">
+              <div className="flex items-baseline gap-1">
                 <span className="font-heading text-[56px] leading-none font-bold text-primary">{overallScore}</span>
                 <span className="text-lg text-on-surface-variant">/ 100</span>
               </div>
-              <p className="text-sm text-on-surface-variant mt-sm">
+              <p className="text-sm text-on-surface-variant mt-2">
                 {overallScore >= 80 ? 'Excellent performance! Keep refining the details.' : overallScore >= 60 ? 'Good effort — focus on elaborating your weaker answers.' : 'Room to improve — review the tips below.'}
               </p>
             </div>
             {recentScores.length > 1 && (
-              <div className="mt-lg pt-lg border-t border-outline-variant/20">
-                <h4 className="text-xs font-semibold text-on-surface-variant uppercase mb-md">Recent Trend</h4>
-                <div className="h-20 w-full flex items-end justify-between gap-xs">
+              <div className="mt-6 pt-6 border-t border-outline-variant/20">
+                <h4 className="text-xs font-semibold text-on-surface-variant uppercase mb-4">Recent Trend</h4>
+                <div className="h-20 w-full flex items-end justify-between gap-1">
                   {recentScores.map((s, i) => (
                     <div
                       key={s.id}
@@ -130,7 +130,7 @@ export default function ResultsPage() {
                     />
                   ))}
                 </div>
-                <div className="flex justify-between mt-xs text-xs text-outline">
+                <div className="flex justify-between mt-1 text-xs text-outline">
                   {recentScores.map((s, i) => (
                     <span key={s.id} className={i === recentScores.length - 1 ? 'text-secondary font-medium' : ''}>
                       {i === recentScores.length - 1 ? 'Today' : s.date}
@@ -142,13 +142,13 @@ export default function ResultsPage() {
           </div>
 
           {/* Category Breakdown */}
-          <div className="md:col-span-8 glass-card rounded-xl p-lg">
-            <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-lg">Category Breakdown</h3>
-            <div className="space-y-lg">
+          <div className="md:col-span-8 glass-card rounded-xl p-6">
+            <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-6">Category Breakdown</h3>
+            <div className="space-y-6">
               {Object.keys(categoryScores).length > 0 ? (
                 Object.entries(categoryScores).map(([cat, sc]) => (
                   <div key={cat}>
-                    <div className="flex justify-between items-end mb-sm">
+                    <div className="flex justify-between items-end mb-2">
                       <h4 className="font-semibold text-primary capitalize">{cat}</h4>
                       <span className="font-heading text-xl font-bold text-primary">{sc.overall}<span className="text-sm text-on-surface-variant">/100</span></span>
                     </div>
@@ -164,7 +164,7 @@ export default function ResultsPage() {
                   { label: 'Clarity',   pct: Math.min(100, Math.round(overallScore * 1.05)) },
                 ].map(({ label, pct }) => (
                   <div key={label}>
-                    <div className="flex justify-between items-end mb-sm">
+                    <div className="flex justify-between items-end mb-2">
                       <h4 className="font-semibold text-primary">{label}</h4>
                       <span className="font-heading text-xl font-bold text-primary">{pct}<span className="text-sm text-on-surface-variant">/100</span></span>
                     </div>
@@ -186,23 +186,23 @@ export default function ResultsPage() {
 
           {/* Speech Analysis & Question Review */}
           {voiceAnswers.length > 0 && (
-            <div className="md:col-span-4 glass-card rounded-xl p-lg">
-              <div className="flex items-center gap-sm mb-lg">
+            <div className="md:col-span-4 glass-card rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-6">
                 <span className="material-symbols-outlined text-tertiary">record_voice_over</span>
                 <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Speech Analysis</h3>
               </div>
-              <div className="grid grid-cols-2 gap-sm mb-lg">
-                <div className="bg-surface/60 rounded-lg p-md border border-outline-variant/10 text-center">
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <div className="bg-surface/60 rounded-lg p-4 border border-outline-variant/10 text-center">
                   <span className="block font-heading text-2xl font-bold text-primary">{totalFillers}</span>
-                  <span className="block text-xs text-on-surface-variant mt-xs">Filler Words</span>
+                  <span className="block text-xs text-on-surface-variant mt-1">Filler Words</span>
                 </div>
-                <div className="bg-surface/60 rounded-lg p-md border border-outline-variant/10 text-center">
+                <div className="bg-surface/60 rounded-lg p-4 border border-outline-variant/10 text-center">
                   <span className="block font-heading text-2xl font-bold text-primary">{avgWpm ?? '—'}</span>
-                  <span className="block text-xs text-on-surface-variant mt-xs">Words / Min</span>
+                  <span className="block text-xs text-on-surface-variant mt-1">Words / Min</span>
                 </div>
               </div>
               <div>
-                <div className="flex justify-between text-xs mb-xs">
+                <div className="flex justify-between text-xs mb-1">
                   <span className="text-on-surface-variant">Pronunciation Clarity</span>
                   <span className="text-primary font-semibold">{avgPronunciation >= 85 ? 'High' : avgPronunciation >= 60 ? 'Moderate' : 'Low'}</span>
                 </div>
@@ -211,8 +211,8 @@ export default function ResultsPage() {
                 </div>
               </div>
               {totalFillers > 3 && (
-                <div className="mt-lg p-md rounded-lg bg-inverse-primary/20 border border-inverse-primary/30">
-                  <p className="text-sm text-primary flex gap-sm items-start">
+                <div className="mt-6 p-4 rounded-lg bg-inverse-primary/20 border border-inverse-primary/30">
+                  <p className="text-sm text-primary flex gap-2 items-start">
                     <span className="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">lightbulb</span>
                     Try pausing briefly instead of using filler words — it reads as more confident.
                   </p>
@@ -222,8 +222,8 @@ export default function ResultsPage() {
           )}
 
           <div className={voiceAnswers.length > 0 ? 'md:col-span-8' : 'md:col-span-12'}>
-            <h3 className="font-heading text-2xl font-bold text-primary mb-md">Question Review</h3>
-            <div className="space-y-md">
+            <h3 className="font-heading text-2xl font-bold text-primary mb-4">Question Review</h3>
+            <div className="space-y-4">
               {answers.map((a: Answer, i: number) => {
                 const q = typeof a.questionId === 'object' ? a.questionId : null
                 const isOpen = expanded === a._id
@@ -233,13 +233,13 @@ export default function ResultsPage() {
                   <div key={a._id} className={`glass-card rounded-xl border-l-4 ${borderColor} overflow-hidden`}>
                     <button
                       onClick={() => setExpanded(isOpen ? null : a._id)}
-                      className="w-full flex items-start justify-between gap-md p-lg text-left hover:bg-surface-container-high/20 transition-colors"
+                      className="w-full flex items-start justify-between gap-4 p-6 text-left hover:bg-surface-container-high/20 transition-colors"
                     >
                       <div>
-                        <span className="text-xs font-semibold text-secondary uppercase tracking-wider mb-xs block">Question {i + 1}{q?.category ? ` • ${q.category}` : ''}</span>
+                        <span className="text-xs font-semibold text-secondary uppercase tracking-wider mb-1 block">Question {i + 1}{q?.category ? ` • ${q.category}` : ''}</span>
                         <h4 className="text-base font-medium text-primary">{q?.text || 'Question'}</h4>
                       </div>
-                      <div className="flex items-center gap-sm shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         {a.inputMethod === 'voice' && <span className="material-symbols-outlined text-base text-slate-muted icon-fill">mic</span>}
                         {a.integrityFlag && a.integrityFlag !== 'CLEAN' && (
                           <span className="material-symbols-outlined text-base text-error icon-fill" title={a.integrityFlag === 'LIKELY_AI' ? 'Flagged as likely pasted / AI-generated' : 'Flagged as suspicious'}>
@@ -256,8 +256,8 @@ export default function ResultsPage() {
                     </button>
 
                     {isOpen && (
-                      <div className="px-lg pb-lg space-y-md">
-                        <div className="bg-surface-container/50 rounded-lg p-md">
+                      <div className="px-6 pb-6 space-y-4">
+                        <div className="bg-surface-container/50 rounded-lg p-4">
                           {q?.questionFormat === 'system_design' && a.diagramSnapshot ? (
                             <div style={{ height: 360 }}>
                               <SystemDesignCanvas initialDiagram={a.diagramSnapshot} readonly />
@@ -362,13 +362,13 @@ function PanelFeedbackSection({ feedback }: {
 }) {
   return (
     <div>
-      <h3 className="font-heading text-2xl font-bold text-primary mb-md">Panel Feedback</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+      <h3 className="font-heading text-2xl font-bold text-primary mb-4">Panel Feedback</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {(Object.entries(feedback) as [string, PanelPersonaFeedback][]).map(([key, pf]) => {
           const cfg = PANEL_PERSONA_CONFIG[key]
           if (!cfg) return null
           return (
-            <div key={key} className={`glass-card rounded-xl p-lg border-t-4 ${cfg.colorClass}`}>
+            <div key={key} className={`glass-card rounded-xl p-6 border-t-4 ${cfg.colorClass}`}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-xl flex-shrink-0">{cfg.emoji}</div>
                 <div>

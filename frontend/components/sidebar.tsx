@@ -30,9 +30,9 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col py-lg px-md glass-nav border-r border-outline-variant/10 shadow-sm fixed left-0 top-0 bottom-0 h-full w-64 z-40">
-        <div className="px-sm mb-xl">
-          <div className="flex items-center gap-sm">
+      <aside className="hidden md:flex flex-col py-6 px-4 glass-nav border-r border-outline-variant/10 shadow-sm fixed left-0 top-0 bottom-0 h-full w-64 z-40">
+        <div className="px-2 mb-10">
+          <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-full bg-emerald-deep/10 flex items-center justify-center">
               <span className="material-symbols-outlined text-emerald-deep icon-fill text-xl">psychology</span>
             </div>
@@ -43,14 +43,14 @@ export function Sidebar() {
           </div>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-sm">
+        <nav className="flex-1 flex flex-col gap-2">
           {NAV_ITEMS.map(item => {
             const active = pathname === item.href || (item.href !== '/dashboard' && (item.activePrefix ? pathname.startsWith(item.activePrefix) : pathname.startsWith(item.href)))
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-sm px-md py-sm rounded-lg transition-colors duration-200 active:scale-95 text-sm ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 active:scale-95 text-sm ${
                   active
                     ? 'bg-secondary-container/20 text-on-secondary-container font-semibold'
                     : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/50'
@@ -63,15 +63,15 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="mt-auto space-y-md">
+        <div className="mt-auto space-y-4">
           <Link
             href="/interview"
-            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary text-sm font-semibold py-sm rounded-xl hover:brightness-90 hover:scale-[1.02] hover:shadow-[0_4px_15px_rgba(0,0,0,0.2)] transition-all duration-300"
+            className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary text-sm font-semibold py-2 rounded-xl hover:brightness-90 hover:scale-[1.02] hover:shadow-[0_4px_15px_rgba(0,0,0,0.2)] transition-all duration-300"
           >
             <span className="material-symbols-outlined text-base">play_arrow</span>
             Start Practice
           </Link>
-          <div className="flex items-center gap-2 pt-md border-t border-outline-variant/10">
+          <div className="flex items-center gap-2 pt-4 border-t border-outline-variant/10">
             <button
               onClick={handleLogout}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-slate-muted hover:bg-surface-container-low hover:text-error transition-colors text-sm shadow-sm"

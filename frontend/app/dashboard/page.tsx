@@ -62,26 +62,26 @@ export default function DashboardPage() {
       <Sidebar />
       <Topbar />
 
-      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-margin-mobile md:px-margin-desktop pb-24 md:pb-12 w-full max-w-[1280px] mx-auto">
+      <main className="flex-1 md:ml-64 pt-20 md:pt-24 px-4 md:px-12 pb-24 md:pb-12 w-full max-w-[1280px] mx-auto">
         {/* Welcome Header */}
-        <div className="mb-xl">
+        <div className="mb-10">
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary tracking-tight mb-2">Welcome back, {firstName}.</h2>
           <p className="text-lg text-on-surface-variant">Ready to ace your next interview?</p>
         </div>
 
         {/* Top Grid: Stats & Resume */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {/* Avg Score */}
-          <div className="glass-card rounded-xl p-lg flex flex-col justify-between relative overflow-hidden">
+          <div className="glass-card rounded-xl p-6 flex flex-col justify-between relative overflow-hidden">
             <div className="absolute -top-8 -right-8 w-32 h-32 bg-secondary-fixed/30 rounded-full blur-2xl" />
             <div className="relative z-10">
-              <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-sm">Avg. Score</h3>
+              <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Avg. Score</h3>
               <div className="flex items-end gap-2">
                 <span className="font-heading text-4xl font-bold text-primary">{avgScore ?? '—'}</span>
                 <span className="text-sm text-on-surface-variant pb-1">/100</span>
               </div>
             </div>
-            <div className="mt-md w-full bg-surface-container-high rounded-full h-2 overflow-hidden relative z-10">
+            <div className="mt-4 w-full bg-surface-container-high rounded-full h-2 overflow-hidden relative z-10">
               <div
                 className="bg-gradient-to-r from-secondary-container to-secondary h-full rounded-full transition-all duration-700"
                 style={{ width: `${avgScore ?? 0}%` }}
@@ -90,14 +90,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Sessions & Streak */}
-          <div className="glass-card rounded-xl p-lg flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-md">
+          <div className="glass-card rounded-xl p-6 flex flex-col justify-between">
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-xs">Completed</h3>
+                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Completed</h3>
                 <span className="font-heading text-2xl font-bold text-primary">{completed.length} <span className="text-sm text-on-surface-variant font-normal">Sessions</span></span>
               </div>
               {streak > 0 && (
-                <div className="bg-secondary-container/10 px-sm py-xs rounded-full border border-secondary/20 flex items-center gap-xs shrink-0">
+                <div className="bg-secondary-container/10 px-2 py-1 rounded-full border border-secondary/20 flex items-center gap-1 shrink-0">
                   <span className="material-symbols-outlined text-secondary text-base icon-fill">local_fire_department</span>
                   <span className="text-xs font-semibold text-secondary">{streak} Day Streak</span>
                 </div>
@@ -111,13 +111,13 @@ export default function DashboardPage() {
           </div>
 
           {/* Resume Status */}
-          <div className="glass-card rounded-xl p-lg flex flex-col justify-between relative overflow-hidden group">
+          <div className="glass-card rounded-xl p-6 flex flex-col justify-between relative overflow-hidden group">
             <div className="relative z-10">
-              <div className="flex items-center gap-sm mb-md">
+              <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-secondary">description</span>
                 <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">Resume Status</h3>
               </div>
-              <p className="text-sm text-on-surface-variant mb-md">
+              <p className="text-sm text-on-surface-variant mb-4">
                 {profile
                   ? `${profile.name || 'Your CV'} parsed successfully. AI context updated.`
                   : 'No CV on file yet — upload one to personalise your interviews.'}
@@ -125,7 +125,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/upload"
-              className="relative z-10 self-start px-sm py-xs bg-secondary-container/20 text-on-secondary-container border border-secondary-container/50 rounded-full text-xs font-semibold uppercase hover:bg-secondary-container/30 transition-colors"
+              className="relative z-10 self-start px-2 py-1 bg-secondary-container/20 text-on-secondary-container border border-secondary-container/50 rounded-full text-xs font-semibold uppercase hover:bg-secondary-container/30 transition-colors"
             >
               {profile ? 'Update Resume' : 'Upload Resume'}
             </Link>
@@ -134,14 +134,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Interview Modes */}
-        <div className="mb-xl">
-          <h3 className="font-heading text-2xl font-bold text-primary mb-md">Select Mode</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-sm">
+        <div className="mb-10">
+          <h3 className="font-heading text-2xl font-bold text-primary mb-4">Select Mode</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {MODES.map(m => (
               <Link
                 key={m.id}
                 href="/interview"
-                className="glass-card rounded-xl p-md flex flex-col items-start gap-md hover:bg-surface-container-lowest/80 transition-all duration-300 hover:scale-[1.03] text-left group"
+                className="glass-card rounded-xl p-4 flex flex-col items-start gap-4 hover:bg-surface-container-lowest/80 transition-all duration-300 hover:scale-[1.03] text-left group"
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
                   m.id === 'panel' ? 'bg-primary text-on-primary' : 'bg-secondary-container/20 text-secondary'
@@ -159,7 +159,7 @@ export default function DashboardPage() {
 
         {/* Recent Sessions */}
         <div>
-          <div className="flex justify-between items-end mb-md">
+          <div className="flex justify-between items-end mb-4">
             <h3 className="font-heading text-2xl font-bold text-primary">Recent Sessions</h3>
             <Link href="/progress" className="text-xs font-semibold text-secondary hover:underline">View All</Link>
           </div>
@@ -169,20 +169,20 @@ export default function DashboardPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-outline-variant/10">
-                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Role / Mode</th>
-                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Date</th>
-                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Score</th>
-                    <th className="py-md px-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-right">Action</th>
+                    <th className="py-4 px-6 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Role / Mode</th>
+                    <th className="py-4 px-6 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Date</th>
+                    <th className="py-4 px-6 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Score</th>
+                    <th className="py-4 px-6 text-xs font-semibold text-on-surface-variant uppercase tracking-wider text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/5">
                   {sessions.slice(0, 5).map(s => (
                     <tr key={s._id} className="hover:bg-surface-container-highest/20 transition-colors group">
-                      <td className="py-md px-lg text-sm text-on-surface font-medium">
+                      <td className="py-4 px-6 text-sm text-on-surface font-medium">
                         {s.targetRole || 'Interview'} <span className="text-on-surface-variant capitalize font-normal">— {s.mode}</span>
                       </td>
-                      <td className="py-md px-lg text-sm text-on-surface-variant">{new Date(s.createdAt).toLocaleDateString()}</td>
-                      <td className="py-md px-lg">
+                      <td className="py-4 px-6 text-sm text-on-surface-variant">{new Date(s.createdAt).toLocaleDateString()}</td>
+                      <td className="py-4 px-6">
                         {s.overallScore != null ? (
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${scoreBadgeClass(s.overallScore)}`}>
                             {s.overallScore}/100
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                           <span className="text-xs text-on-surface-variant">—</span>
                         )}
                       </td>
-                      <td className="py-md px-lg text-right">
+                      <td className="py-4 px-6 text-right">
                         {s.status === 'completed' && (
                           <Link href={`/results/${s._id}`} className={`text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity ${s.overallScore != null ? scoreColor(s.overallScore) : 'text-primary'} hover:text-emerald-deep`}>
                             Review
