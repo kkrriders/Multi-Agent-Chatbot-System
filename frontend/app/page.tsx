@@ -68,11 +68,11 @@ export default function LandingPage() {
               <span className="material-symbols-outlined text-base">bolt</span>
               AI-Powered Interview Coach
             </div>
-            <h1 className="font-geist font-bold text-3xl md:text-5xl text-ink leading-tight tracking-tight">
+            <h1 className="w-full font-geist font-bold text-3xl md:text-5xl text-ink leading-tight tracking-tight">
               Master your next interview with{' '}
               <span className="text-emerald-deep">AI precision.</span>
             </h1>
-            <p className="text-lg text-secondary leading-relaxed max-w-lg">
+            <p className="w-full text-lg text-secondary leading-relaxed max-w-lg">
               Upload your resume, select your target role, and engage in realistic, adaptive mock interviews that build your confidence and refine your answers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto">
@@ -144,7 +144,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Real-time Scoring — wide */}
               <div className="md:col-span-2 glass-card rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
-                <div className="flex-1 z-10">
+                <div className="w-full flex-1 z-10">
                   <div className="w-12 h-12 bg-primary-container/15 rounded-lg flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-primary icon-fill text-2xl">speed</span>
                   </div>
@@ -206,7 +206,7 @@ export default function LandingPage() {
                   <div className="absolute top-[-20%] right-[-10%] w-64 h-64 rounded-full bg-primary-fixed blur-2xl" />
                   <div className="absolute bottom-[-10%] left-[20%] w-48 h-48 rounded-full bg-inverse-primary blur-2xl" />
                 </div>
-                <div className="flex-1 z-10">
+                <div className="w-full flex-1 z-10">
                   <h3 className="font-geist font-semibold text-2xl text-white mb-3 flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary-fixed icon-fill">auto_awesome</span>
                     Personalized Action Plan

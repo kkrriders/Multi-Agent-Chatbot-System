@@ -356,7 +356,7 @@ export default function InterviewSetupPage() {
               }`}>
                 <span className="material-symbols-outlined">{detectedFormat === 'coding' ? 'code' : 'schema'}</span>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="w-full flex-1 min-w-0">
                 <p className={`text-sm font-semibold mb-0.5 ${detectedFormat === 'coding' ? 'text-blue-700 dark:text-blue-300' : 'text-purple-700 dark:text-purple-300'}`}>
                   {detectedFormat === 'coding' ? 'Coding questions detected' : 'System design questions detected'}
                 </p>

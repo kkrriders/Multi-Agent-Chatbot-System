@@ -148,7 +148,7 @@ export default function DashboardPage() {
                 }`}>
                   <span className="material-symbols-outlined">{m.icon}</span>
                 </div>
-                <div>
+                <div className="w-full">
                   <h4 className="text-sm font-semibold text-primary">{m.label}</h4>
                   <p className="text-xs text-on-surface-variant mt-1">{m.desc}</p>
                 </div>
