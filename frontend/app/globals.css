@@ -192,6 +192,7 @@
 @layer base {
   * {
     border-color: var(--color-outline-variant);
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, fill 0.25s ease;
   }
   body {
     background-color: var(--color-background);
