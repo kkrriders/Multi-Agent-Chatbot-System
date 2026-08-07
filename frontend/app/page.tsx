@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { BorderBeam } from '@/components/ui/border-beam'
 
 const FEATURES = [
   {
@@ -106,6 +107,7 @@ export default function LandingPage() {
           {/* CV Upload card */}
           <div className="w-full lg:w-1/2 min-w-0 flex justify-center lg:justify-end">
             <div className="glass-card rounded-xl p-6 md:p-8 w-full max-w-md hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group">
+              <BorderBeam size={120} duration={8} colorFrom="var(--color-primary)" colorTo="var(--color-emerald-deep)" />
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-container/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
               <div className="mb-6">
                 <h3 className="font-geist font-semibold text-2xl text-ink">Upload your CV</h3>
