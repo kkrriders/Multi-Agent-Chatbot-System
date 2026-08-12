@@ -106,7 +106,7 @@ export default function LandingPage() {
 
           {/* CV Upload card */}
           <div className="w-full lg:w-1/2 min-w-0 flex justify-center lg:justify-end">
-            <div className="glass-card rounded-xl p-6 md:p-8 w-full max-w-md hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group">
+            <div className="blueprint-card rounded-xl p-6 md:p-8 w-full max-w-md hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group">
               <BorderBeam size={120} duration={8} colorFrom="var(--color-primary)" colorTo="var(--color-emerald-deep)" />
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-container/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
               <div className="mb-6">
@@ -145,7 +145,7 @@ export default function LandingPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Real-time Scoring — wide */}
-              <div className="md:col-span-2 glass-card rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
+              <div className="md:col-span-2 blueprint-card rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
                 <div className="w-full flex-1 z-10">
                   <div className="w-12 h-12 bg-primary-container/15 rounded-lg flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-primary icon-fill text-2xl">speed</span>
@@ -167,7 +167,7 @@ export default function LandingPage() {
               </div>
 
               {/* Speech Analysis */}
-              <div className="md:col-span-1 glass-card rounded-xl p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 blueprint-card rounded-xl p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-amber-light rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-tertiary-container icon-fill text-xl">mic</span>
                 </div>
@@ -186,7 +186,7 @@ export default function LandingPage() {
               </div>
 
               {/* Adaptive Follow-ups */}
-              <div className="md:col-span-1 glass-card rounded-xl p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 blueprint-card rounded-xl p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-secondary-container/30 rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-secondary icon-fill text-xl">forum</span>
                 </div>

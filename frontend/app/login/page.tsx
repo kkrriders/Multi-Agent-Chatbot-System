@@ -70,7 +70,7 @@ function LoginForm() {
           <p className="text-lg text-secondary mb-12">
             Your personalized AI interview coach is ready to help you land that dream role. Let&apos;s pick up where you left off.
           </p>
-          <div className="w-full aspect-video rounded-xl overflow-hidden glass-card flex items-center justify-center">
+          <div className="w-full aspect-video rounded-xl overflow-hidden blueprint-card flex items-center justify-center">
             <div className="w-full h-full bg-gradient-to-br from-surface-container-low to-surface-container-high flex items-center justify-center">
               <div className="text-center">
                 <span className="material-symbols-outlined text-emerald-deep text-6xl icon-fill">trending_up</span>

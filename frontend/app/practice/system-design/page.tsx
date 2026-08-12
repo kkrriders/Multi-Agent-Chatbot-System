@@ -207,7 +207,7 @@ export default function SystemDesignPracticePage() {
             </div>
 
             {/* Prompt list */}
-            <div className="glass-card rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
+            <div className="blueprint-card rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
               <div className="px-4 py-3 border-b border-outline-variant/10 bg-surface-container-lowest/50 shrink-0">
                 <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">
                   {fetching ? 'Loading…' : `${filtered.length} Prompt${filtered.length !== 1 ? 's' : ''}`}
@@ -239,7 +239,7 @@ export default function SystemDesignPracticePage() {
 
             {/* Prompt description */}
             {selectedPrompt && (
-              <div className="glass-card rounded-xl p-4 shrink-0">
+              <div className="blueprint-card rounded-xl p-4 shrink-0">
                 <div className="flex items-center gap-2 mb-3">
                   <h2 className="font-geist font-semibold text-base text-on-surface">{selectedPrompt.title}</h2>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${DIFFICULTY_COLOR[selectedPrompt.difficulty]}`}>
@@ -267,7 +267,7 @@ export default function SystemDesignPracticePage() {
 
           {/* Canvas + feedback column */}
           <div className="flex-1 flex flex-col gap-3 min-h-0">
-            <div className="glass-card rounded-xl p-4 flex flex-col" style={{ minHeight: 500 }}>
+            <div className="blueprint-card rounded-xl p-4 flex flex-col" style={{ minHeight: 500 }}>
               <div className="flex items-center justify-between mb-3 shrink-0">
                 <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Canvas</p>
                 <p className="text-xs text-slate-400">Drag components from the palette · Connect nodes by dragging from handles</p>
@@ -294,7 +294,7 @@ export default function SystemDesignPracticePage() {
             )}
 
             {evalResult && (
-              <div className="glass-card rounded-xl shrink-0 overflow-hidden">
+              <div className="blueprint-card rounded-xl shrink-0 overflow-hidden">
                 {/* Score header */}
                 <div className="px-4 py-3 border-b border-outline-variant/10 flex items-center gap-3">
                   <div className="flex-1">

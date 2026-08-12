@@ -97,7 +97,7 @@ export default function ProfilePage() {
               {activeTab === 0 && (
                 <>
                   {/* Profile card */}
-                  <section className="glass-card rounded-xl overflow-hidden flex flex-col md:flex-row">
+                  <section className="blueprint-card rounded-xl overflow-hidden flex flex-col md:flex-row">
                     {/* Avatar column */}
                     <div className="p-8 md:w-1/3 border-b md:border-b-0 md:border-r border-outline-variant/15 flex flex-col items-center text-center justify-center bg-surface-bright">
                       <div className="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-surface-container relative group cursor-pointer bg-emerald-deep/10 flex items-center justify-center">
@@ -160,7 +160,7 @@ export default function ProfilePage() {
                   </section>
 
                   {/* CV Upload */}
-                  <section className="glass-card rounded-xl p-8">
+                  <section className="blueprint-card rounded-xl p-8">
                     <div className="flex flex-col gap-2 mb-6">
                       <h3 className="font-geist font-semibold text-2xl text-on-surface">Curriculum Vitae</h3>
                       <p className="text-base text-slate-muted">Upload your latest CV to provide context for your AI interview coach. PDF or Word documents up to 5MB.</p>
@@ -217,7 +217,7 @@ export default function ProfilePage() {
 
               {/* Other tabs — coming soon */}
               {activeTab > 0 && (
-                <section className="glass-card rounded-xl p-12 flex flex-col items-center justify-center text-center min-h-[300px]">
+                <section className="blueprint-card rounded-xl p-12 flex flex-col items-center justify-center text-center min-h-[300px]">
                   <span className="material-symbols-outlined text-slate-muted text-6xl mb-4">
                     {activeTab === 1 ? 'tune' : activeTab === 2 ? 'workspace_premium' : 'security'}
                   </span>

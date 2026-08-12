@@ -205,7 +205,7 @@ export default function InterviewSetupPage() {
 
           {/* CV section */}
           {user && !cvChecking && (
-            <div className={`glass-card rounded-2xl mb-8 transition-all ${
+            <div className={`blueprint-card rounded-2xl mb-8 transition-all ${
               cvMissing ? 'border-2 border-amber-200 dark:border-amber-800' : ''
             }`}>
               <div className="flex items-center justify-between p-5 md:p-6">
@@ -295,7 +295,7 @@ export default function InterviewSetupPage() {
           )}
 
           {/* Section 1: Context */}
-          <div className="glass-card rounded-2xl p-6 md:p-8 mb-8">
+          <div className="blueprint-card rounded-2xl p-6 md:p-8 mb-8">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">1</span>
@@ -424,7 +424,7 @@ export default function InterviewSetupPage() {
                 <button
                   key={m.id}
                   onClick={() => setMode(m.id)}
-                  className={`text-left cursor-pointer glass-card border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-0.5 ${
+                  className={`text-left cursor-pointer blueprint-card border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-0.5 ${
                     mode === m.id ? 'border-primary' : 'border-transparent hover:border-outline-variant/40'
                   }`}
                 >
@@ -451,7 +451,7 @@ export default function InterviewSetupPage() {
 
           {/* Section 3: Session Settings (practice / timed only) */}
           {showConfig && (
-            <div className="glass-card rounded-2xl p-6 md:p-8 mb-8">
+            <div className="blueprint-card rounded-2xl p-6 md:p-8 mb-8">
               <div className="flex items-center mb-6">
                 <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                   <span className="text-sm font-semibold text-primary">3</span>

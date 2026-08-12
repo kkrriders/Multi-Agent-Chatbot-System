@@ -76,7 +76,7 @@ export default function ProgressPage() {
         {/* Top section: Chart + Badges */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
           {/* Performance chart */}
-          <div className="lg:col-span-2 glass-card rounded-xl p-6 flex flex-col">
+          <div className="lg:col-span-2 blueprint-card rounded-xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="font-geist font-semibold text-2xl text-on-surface">Performance Trends</h2>
@@ -118,7 +118,7 @@ export default function ProgressPage() {
           </div>
 
           {/* Achievements */}
-          <div className="glass-card rounded-xl p-6 flex flex-col">
+          <div className="blueprint-card rounded-xl p-6 flex flex-col">
             <h2 className="font-geist font-semibold text-2xl text-on-surface mb-6">Achievements</h2>
             <div className="grid grid-cols-2 gap-4 flex-1">
               {achievements.slice(0, 3).map(ach => {
@@ -192,7 +192,7 @@ export default function ProgressPage() {
                   <Link
                     key={s._id}
                     href={`/results/${s._id}`}
-                    className="glass-card rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:-translate-y-0.5 transition-transform duration-200"
+                    className="blueprint-card rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:-translate-y-0.5 transition-transform duration-200"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
@@ -237,7 +237,7 @@ export default function ProgressPage() {
         {(summary?.weakAreas?.length || summary?.strongAreas?.length) ? (
           <div className="grid sm:grid-cols-2 gap-6">
             {(summary?.weakAreas?.length ?? 0) > 0 && (
-              <div className="glass-card rounded-xl p-6">
+              <div className="blueprint-card rounded-xl p-6">
                 <h2 className="font-geist font-semibold text-xl text-on-surface mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-tertiary-container">warning</span>
                   Weak Areas
@@ -250,7 +250,7 @@ export default function ProgressPage() {
               </div>
             )}
             {(summary?.strongAreas?.length ?? 0) > 0 && (
-              <div className="glass-card rounded-xl p-6">
+              <div className="blueprint-card rounded-xl p-6">
                 <h2 className="font-geist font-semibold text-xl text-on-surface mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary icon-fill">verified</span>
                   Strong Areas

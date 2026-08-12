@@ -30,7 +30,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col py-6 px-4 glass-nav border-r border-outline-variant/10 shadow-sm fixed left-0 top-0 bottom-0 h-full w-64 z-40">
+      <aside className="hidden md:flex flex-col py-6 px-4 blueprint-nav border-r border-outline-variant/10 shadow-sm fixed left-0 top-0 bottom-0 h-full w-64 z-40">
         <div className="px-2 mb-10">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-full bg-emerald-deep/10 flex items-center justify-center">
@@ -85,7 +85,7 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile Top Bar */}
-      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 glass-nav border-b border-outline-variant/10 fixed top-0 z-50">
+      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 blueprint-nav border-b border-outline-variant/10 fixed top-0 z-50">
         <Link href="/dashboard" className="font-geist font-bold text-emerald-deep text-lg">MockPrep</Link>
         <button className="text-on-surface">
           <span className="material-symbols-outlined">menu</span>
@@ -93,7 +93,7 @@ export function Sidebar() {
       </header>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 w-full glass-nav border-t border-outline-variant/10 flex justify-around items-center h-16 z-50 px-2 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
+      <nav className="md:hidden fixed bottom-0 w-full blueprint-nav border-t border-outline-variant/10 flex justify-around items-center h-16 z-50 px-2 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
         {NAV_ITEMS.slice(0, 4).map(item => {
           const active = pathname === item.href || (item.href !== '/dashboard' && (item.activePrefix ? pathname.startsWith(item.activePrefix) : pathname.startsWith(item.href)))
           return (

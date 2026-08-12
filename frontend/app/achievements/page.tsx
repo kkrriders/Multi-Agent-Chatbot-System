@@ -167,19 +167,19 @@ export default function AchievementsPage() {
 
         {/* Summary strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-          <div className="glass-card rounded-xl p-5 text-center">
+          <div className="blueprint-card rounded-xl p-5 text-center">
             <div className="font-geist font-bold text-4xl text-emerald-deep mb-1">{earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Earned</div>
           </div>
-          <div className="glass-card rounded-xl p-5 text-center">
+          <div className="blueprint-card rounded-xl p-5 text-center">
             <div className="font-geist font-bold text-4xl text-on-surface mb-1">{totalCount - earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Locked</div>
           </div>
-          <div className="glass-card rounded-xl p-5 text-center">
+          <div className="blueprint-card rounded-xl p-5 text-center">
             <div className="font-geist font-bold text-4xl text-tertiary-container mb-1">{streak}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Day Streak</div>
           </div>
-          <div className="glass-card rounded-xl p-5 text-center">
+          <div className="blueprint-card rounded-xl p-5 text-center">
             <div className="font-geist font-bold text-4xl text-primary mb-1">
               {earnedCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0}%
             </div>
@@ -188,7 +188,7 @@ export default function AchievementsPage() {
         </div>
 
         {/* Progress bar */}
-        <div className="mb-10 glass-card rounded-xl p-6">
+        <div className="mb-10 blueprint-card rounded-xl p-6">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm font-semibold text-on-surface">Collection Progress</span>
             <span className="text-sm text-slate-muted">{earnedCount} / {totalCount}</span>
@@ -224,7 +224,7 @@ export default function AchievementsPage() {
                   return (
                     <div
                       key={type}
-                      className={`glass-card rounded-xl p-6 flex flex-col items-center text-center ring-2 ${tier.ring} hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
+                      className={`blueprint-card rounded-xl p-6 flex flex-col items-center text-center ring-2 ${tier.ring} hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
                     >
                       {/* Tier label */}
                       <span className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${tier.color}`}>

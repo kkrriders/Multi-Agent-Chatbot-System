@@ -12,7 +12,7 @@ export function Topbar({ title, showSearch = false }: Props) {
   const initials = (user?.fullName || user?.email || '?').trim().charAt(0).toUpperCase()
 
   return (
-    <header className="hidden md:flex justify-between items-center px-6 h-16 glass-nav border-b border-outline-variant/10 fixed top-0 right-0 w-[calc(100%-16rem)] z-30">
+    <header className="hidden md:flex justify-between items-center px-6 h-16 blueprint-nav border-b border-outline-variant/10 fixed top-0 right-0 w-[calc(100%-16rem)] z-30">
       {title ? (
         <h2 className="font-geist font-bold text-xl text-primary">{title}</h2>
       ) : (

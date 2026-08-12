@@ -99,7 +99,7 @@ export default function ResultsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Score & Trend */}
-          <div className="md:col-span-4 glass-card rounded-xl p-6 flex flex-col justify-between">
+          <div className="md:col-span-4 blueprint-card rounded-xl p-6 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Overall Score</h3>
@@ -142,7 +142,7 @@ export default function ResultsPage() {
           </div>
 
           {/* Category Breakdown */}
-          <div className="md:col-span-8 glass-card rounded-xl p-6">
+          <div className="md:col-span-8 blueprint-card rounded-xl p-6">
             <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-6">Category Breakdown</h3>
             <div className="space-y-6">
               {Object.keys(categoryScores).length > 0 ? (
@@ -186,7 +186,7 @@ export default function ResultsPage() {
 
           {/* Speech Analysis & Question Review */}
           {voiceAnswers.length > 0 && (
-            <div className="md:col-span-4 glass-card rounded-xl p-6">
+            <div className="md:col-span-4 blueprint-card rounded-xl p-6">
               <div className="flex items-center gap-2 mb-6">
                 <span className="material-symbols-outlined text-tertiary">record_voice_over</span>
                 <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Speech Analysis</h3>
@@ -230,7 +230,7 @@ export default function ResultsPage() {
                 const score = a.scores?.overall ?? 0
                 const borderColor = !a.scored ? 'border-l-outline-variant' : score >= 70 ? 'border-l-secondary' : 'border-l-error/50'
                 return (
-                  <div key={a._id} className={`glass-card rounded-xl border-l-4 ${borderColor} overflow-hidden`}>
+                  <div key={a._id} className={`blueprint-card rounded-xl border-l-4 ${borderColor} overflow-hidden`}>
                     <button
                       onClick={() => setExpanded(isOpen ? null : a._id)}
                       className="w-full flex items-start justify-between gap-4 p-6 text-left hover:bg-surface-container-high/20 transition-colors"
@@ -368,7 +368,7 @@ function PanelFeedbackSection({ feedback }: {
           const cfg = PANEL_PERSONA_CONFIG[key]
           if (!cfg) return null
           return (
-            <div key={key} className={`glass-card rounded-xl p-6 border-t-4 ${cfg.colorClass}`}>
+            <div key={key} className={`blueprint-card rounded-xl p-6 border-t-4 ${cfg.colorClass}`}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-xl flex-shrink-0">{cfg.emoji}</div>
                 <div>
