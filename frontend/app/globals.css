@@ -7,6 +7,7 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-geist: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --font-heading: 'Hanken Grotesk', var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Semantic colors (used by shadcn/sonner) */
   --color-background: #f7f9fb;
@@ -22,7 +23,19 @@
   --color-accent-foreground: #191c1e;
   --color-destructive: #ba1a1a;
   --color-destructive-foreground: #ffffff;
-  --radius: 0.5rem;
+  --radius: 0.1875rem;
+  --radius-sm: 0.1875rem;
+  --radius-md: 0.1875rem;
+  --radius-lg: 0.1875rem;
+  --radius-xl: 0.25rem;
+  --radius-2xl: 0.25rem;
+  --radius-3xl: 0.25rem;
+
+  /* Hard, minimal-blur shadows — replaces Tailwind's soft default blur scale */
+  --shadow-sm: 1px 1px 0 0 rgb(0 0 0 / 0.12);
+  --shadow-md: 2px 2px 0 0 rgb(0 0 0 / 0.14);
+  --shadow-lg: 2px 2px 0 0 rgb(0 0 0 / 0.18);
+  --shadow-xl: 3px 3px 0 0 rgb(0 0 0 / 0.2);
 
   /* === Luminous Intelligence design tokens === */
 
@@ -32,6 +45,9 @@
   --color-slate-muted: #64748B;
   --color-amber-light: #FEF3C7;
   --color-white: #FFFFFF;
+
+  /* Blueprint accent — corner brackets, annotations, highlighted metrics */
+  --color-accent-warn: #f59e0b;
 
   /* Surface layers */
   --color-surface: #f7f9fb;
@@ -121,6 +137,7 @@
   --color-ink: #e3e2e6;
   --color-slate-muted: #94a3b8;
   --color-amber-light: #4a3b00;
+  --color-accent-warn: #fbbf24;
 
   /* Elevation ramp — each step must be LIGHTER than the last so cards visibly
      "pop" off the page background, same relationship as light mode (where
@@ -165,34 +182,51 @@
 }
 
 @layer components {
-  /* Theme-reactive glassmorphic card — uses color-mix() against the existing
-     surface/on-surface variables so it needs no separate .dark override.
-     Matches the Stitch mockups' .glass-card/.glass-panel treatment. */
-  .glass-card {
-    background-color: color-mix(in srgb, var(--color-surface-container-lowest) 70%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--color-on-surface) 8%, transparent);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-    /* ponytail: isolate each blurred card into its own stacking context —
-       without this, adjacent glass-cards sharing a grid row can get merged
-       into one GPU compositor layer, which renders backdrop-filter as solid
-       black on some Chromium builds (repro'd with Role Match Score / Skill
-       Gaps sitting side-by-side; single-column cards never hit it). */
+  /* Blueprint card — flat surface, hairline border, corner brackets (no blur). */
+  .blueprint-card {
+    position: relative;
+    background-color: var(--color-surface-container);
+    border: 1px solid var(--color-outline-variant);
     isolation: isolate;
+    background-image:
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
+      linear-gradient(var(--color-accent-warn), var(--color-accent-warn));
+    background-repeat: no-repeat;
+    background-size:
+      10px 2px, 2px 10px,
+      10px 2px, 2px 10px,
+      10px 2px, 2px 10px,
+      10px 2px, 2px 10px;
+    background-position:
+      top 0 left 0, top 0 left 0,
+      top 0 right 0, top 0 right 0,
+      bottom 0 left 0, bottom 0 left 0,
+      bottom 0 right 0, bottom 0 right 0;
   }
-  /* Translucent nav/header chrome — lighter blur, no border by default. */
-  .glass-nav {
-    background-color: color-mix(in srgb, var(--color-surface) 80%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  /* Flat nav/header chrome — no blur, hairline bottom border. */
+  .blueprint-nav {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-outline-variant);
+  }
+  /* Subtle graph-paper texture for hero/section backgrounds only. */
+  .blueprint-grid {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--color-on-surface) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-on-surface) 6%, transparent) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 }
 
 @layer base {
   * {
     border-color: var(--color-outline-variant);
-    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, fill 0.25s ease;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out, border-color 0.15s ease-out, fill 0.15s ease-out;
   }
   body {
     background-color: var(--color-background);
