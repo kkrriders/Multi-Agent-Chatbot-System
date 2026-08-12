@@ -77,7 +77,7 @@ export default function DashboardPage() {
             <div className="relative z-10">
               <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Avg. Score</h3>
               <div className="flex items-end gap-2">
-                <span className="font-heading text-4xl font-bold text-primary">{avgScore ?? '—'}</span>
+                <span className="font-mono text-4xl font-bold text-primary">{avgScore ?? '—'}</span>
                 <span className="text-sm text-on-surface-variant pb-1">/100</span>
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function DashboardPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Completed</h3>
-                <span className="font-heading text-2xl font-bold text-primary">{completed.length} <span className="text-sm text-on-surface-variant font-normal">Sessions</span></span>
+                <span className="font-heading text-2xl font-bold text-primary"><span className="font-mono">{completed.length}</span> <span className="text-sm text-on-surface-variant font-normal">Sessions</span></span>
               </div>
               {streak > 0 && (
                 <div className="bg-secondary-container/10 px-2 py-1 rounded-full border border-secondary/20 flex items-center gap-1 shrink-0">
@@ -184,7 +184,7 @@ export default function DashboardPage() {
                       <td className="py-4 px-6 text-sm text-on-surface-variant">{new Date(s.createdAt).toLocaleDateString()}</td>
                       <td className="py-4 px-6">
                         {s.overallScore != null ? (
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${scoreBadgeClass(s.overallScore)}`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border ${scoreBadgeClass(s.overallScore)}`}>
                             {s.overallScore}/100
                           </span>
                         ) : (
