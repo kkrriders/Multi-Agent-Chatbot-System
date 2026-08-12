@@ -127,3 +127,7 @@ multi-agent-chatbot/out/
 multi-agent-chatbot/dist/
 multi-agent-chatbot/.env*
 !multi-agent-chatbot/.env.example.claude/settings.local.json
+
+# Superpowers subagent-driven-development scratch workspace
+.superpowers/
+
