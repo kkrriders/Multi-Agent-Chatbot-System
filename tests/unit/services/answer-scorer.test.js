@@ -6,7 +6,7 @@ jest.mock('../../../src/middleware/injection-guard', () => ({ assertSafe: jest.f
 
 const ai          = require('../../../src/services/ai/provider-manager');
 const broadcaster = require('../../../src/services/sse/broadcaster');
-const { score, aggregate, computeIntegrity, applyIntegrityPenalty } = require('../../../src/services/interview/answer-scorer');
+const { score, scoreFollowUpReply, aggregate, computeIntegrity, applyIntegrityPenalty } = require('../../../src/services/interview/answer-scorer');
 
 // ── computeIntegrity (pure math — no AI) ────────────────────────────────────
 
@@ -224,10 +224,43 @@ describe('score', () => {
     expect(options.callSite).toBe('answer-scorer:score');
   });
 
-  test('re-throws AI errors and emits scoring-error', async () => {
+  test('re-throws AI errors without emitting scoring-error itself', async () => {
+    // scoring-error is emitted by the caller (scoring-queue.js), which covers
+    // both an AI-call failure here and a post-scoring DB-write failure with a
+    // single emit — answer-scorer only needs to propagate the error.
     ai.generateJsonWithEscalation.mockRejectedValue(new Error('Groq timeout'));
     await expect(score({ questionText: 'Q', expectedKeywords: [], answerText: 'A', sessionId: 's', answerId: 'a' }))
       .rejects.toThrow('Groq timeout');
-    expect(broadcaster.emit).toHaveBeenCalledWith('s', 'scoring-error', expect.any(Object));
+    expect(broadcaster.emit).not.toHaveBeenCalledWith('s', 'scoring-error', expect.any(Object));
+  });
+});
+
+// ── scoreFollowUpReply (mocks AI only — no SSE, unlike score()) ────────────
+
+describe('scoreFollowUpReply', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  test('returns normalised scores without emitting any SSE event', async () => {
+    ai.generateJsonWithEscalation.mockResolvedValue({
+      data: { relevance: 60, depth: 80, clarity: 70, evidence: 'Addressed the follow-up reasonably.' },
+    });
+
+    const result = await scoreFollowUpReply({
+      followUpQuestion: 'Can you elaborate on caching?',
+      replyText: 'We use a write-through cache with a 5 minute TTL.',
+    });
+
+    expect(result).toEqual({ relevance: 60, depth: 80, clarity: 70, overall: 70 }); // (60+80+70)/3
+    expect(broadcaster.emit).not.toHaveBeenCalled();
+  });
+
+  test('uses the same schema-validated call contract as score(), tagged with its own callSite', async () => {
+    ai.generateJsonWithEscalation.mockResolvedValue({
+      data: { relevance: 60, depth: 80, clarity: 70, evidence: 'x' },
+    });
+    await scoreFollowUpReply({ followUpQuestion: 'Q', replyText: 'A' });
+    const [, options] = ai.generateJsonWithEscalation.mock.calls[0];
+    expect(options.schema).toBeDefined();
+    expect(options.callSite).toBe('answer-scorer:scoreFollowUpReply');
   });
 });

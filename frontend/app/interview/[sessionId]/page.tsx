@@ -99,6 +99,10 @@ export default function ActiveInterviewPage() {
   const [testResultMap, setTestResultMap] = useState<TestResultState>({})
   const [scoringIds, setScoringIds]   = useState<Set<string>>(new Set())
   const [followUp, setFollowUp]       = useState<FollowUpState | null>(null)
+  const [followUpReply, setFollowUpReply]             = useState('')
+  const [followUpReplySubmitting, setFollowUpReplySubmitting] = useState(false)
+  const [followUpReplySent, setFollowUpReplySent]     = useState(false)
+  const [followUpReplyScore, setFollowUpReplyScore]   = useState<number | null>(null)
   const [practiceFeedback, setPracticeFeedback] = useState<PracticeFeedbackState | null>(null)
 
   // Transcript (text/voice only)
@@ -164,8 +168,10 @@ export default function ActiveInterviewPage() {
         toast.warning('This answer was flagged as likely pasted/AI-generated — it will score lower.')
       }
     }
-    if (event.type === 'follow-up')
+    if (event.type === 'follow-up') {
       setFollowUp({ answerId: event.answerId, action: event.action, response: event.response })
+      setFollowUpReply(''); setFollowUpReplySent(false); setFollowUpReplyScore(null)
+    }
     if (event.type === 'speech-event') {
       const d = event.data as Record<string, unknown> | null
       if (d?.fillerWord) {
@@ -225,7 +231,7 @@ export default function ActiveInterviewPage() {
     freshQuestionDismissedRef.current = false
     setFreshQuestionOffer(false)
     // Reset answer state for new question
-    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setPracticeFeedback(null)
+    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setFollowUpReply(''); setFollowUpReplySent(false); setFollowUpReplyScore(null); setPracticeFeedback(null)
   }, [currentIdx])
 
   // Away-time tracking: visibilitychange catches same-window tab switches;
@@ -315,6 +321,20 @@ export default function ActiveInterviewPage() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────────
 
+  const handleFollowUpReply = useCallback(async () => {
+    if (!followUp || !followUpReply.trim() || followUpReplySubmitting) return
+    setFollowUpReplySubmitting(true)
+    try {
+      const { answer } = await interviewApi.submitFollowUpReply(sessionId, followUp.answerId, followUpReply.trim())
+      setFollowUpReplyScore(answer.followUpAction?.replyScore?.overall ?? null)
+      setFollowUpReplySent(true)
+    } catch {
+      toast.error('Failed to send your reply')
+    } finally {
+      setFollowUpReplySubmitting(false)
+    }
+  }, [sessionId, followUp, followUpReply, followUpReplySubmitting])
+
   const handleComplete = useCallback(async () => {
     if (completing) return
     setCompleting(true)
@@ -327,7 +347,7 @@ export default function ActiveInterviewPage() {
 
   const advanceQuestion = useCallback((submittedText: string) => {
     speech.reset()
-    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setPracticeFeedback(null)
+    setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setFollowUpReply(''); setFollowUpReplySent(false); setFollowUpReplyScore(null); setPracticeFeedback(null)
     if (isLastQuestion) { handleComplete(); return }
     const nextIdx = currentIdx + 1
     setCurrentIdx(nextIdx)
@@ -413,7 +433,7 @@ export default function ActiveInterviewPage() {
         focusLossCount: 0, focusLossSeconds: 0,
         timeToFirstKeystroke: null, questionDisplayedAt: Date.now(), tabHiddenAt: null, windowBlurredAt: null,
       }
-      setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setPracticeFeedback(null)
+      setAnswerText(''); setDiagramSnapshot(null); setDesignExplanation(''); setCode(''); setFollowUp(null); setFollowUpReply(''); setFollowUpReplySent(false); setFollowUpReplyScore(null); setPracticeFeedback(null)
       setFreshQuestionOffer(false)
       toast.success('Here\'s a different question.')
     } catch (err: unknown) {
@@ -468,12 +488,12 @@ export default function ActiveInterviewPage() {
         <div className="flex justify-around">
           {(['relevance', 'depth', 'clarity'] as const).map(d => (
             <div key={d} className="text-center">
-              <div className={`font-mono font-bold text-sm ${sc[d] >= 80 ? 'text-primary' : sc[d] >= 60 ? 'text-tertiary-container' : 'text-error'}`}>{sc[d]}</div>
+              <div className={`font-mono font-bold text-sm ${sc[d] >= 80 ? 'text-primary' : sc[d] >= 60 ? 'text-on-tertiary-container' : 'text-error'}`}>{sc[d]}</div>
               <div className="text-slate-muted capitalize">{d}</div>
             </div>
           ))}
           <div className="text-center">
-            <div className={`font-mono font-bold text-sm ${sc.overall >= 80 ? 'text-primary' : sc.overall >= 60 ? 'text-tertiary-container' : 'text-error'}`}>{sc.overall}</div>
+            <div className={`font-mono font-bold text-sm ${sc.overall >= 80 ? 'text-primary' : sc.overall >= 60 ? 'text-on-tertiary-container' : 'text-error'}`}>{sc.overall}</div>
             <div className="text-slate-muted">Overall</div>
           </div>
         </div>
@@ -506,11 +526,11 @@ export default function ActiveInterviewPage() {
       {/* Filler word toast */}
       {showFillerToast && (
         <div className="absolute top-20 right-6 z-50 bg-surface-container-lowest border-l-4 border-l-tertiary-container border border-outline-variant/20 rounded-lg p-4 shadow-sm flex items-start gap-3 max-w-sm animate-in slide-in-from-top-2">
-          <span className="material-symbols-outlined text-tertiary-container mt-0.5 icon-fill">warning</span>
+          <span className="material-symbols-outlined text-on-tertiary-container mt-0.5 icon-fill">warning</span>
           <div>
             <p className="text-sm font-semibold text-on-surface mb-1">Filler word detected</p>
             <p className="text-sm text-slate-muted leading-tight">
-              Try pausing instead of saying <strong className="text-tertiary-container bg-amber-light/30 px-1 rounded">&ldquo;{fillerWord}&rdquo;</strong>.
+              Try pausing instead of saying <strong className="text-on-tertiary-container bg-amber-light/30 px-1 rounded">&ldquo;{fillerWord}&rdquo;</strong>.
             </p>
           </div>
           <button onClick={() => setShowFillerToast(false)} className="text-slate-muted hover:text-on-surface ml-auto">
@@ -538,7 +558,7 @@ export default function ActiveInterviewPage() {
       {freshQuestionOffer && (
         <div className="w-full bg-tertiary-container/15 border-b border-tertiary-container/30 px-4 md:px-12 py-2.5 shrink-0 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="material-symbols-outlined text-tertiary-container text-lg shrink-0 icon-fill">help</span>
+            <span className="material-symbols-outlined text-on-tertiary-container text-lg shrink-0 icon-fill">help</span>
             <p className="text-sm text-on-surface truncate">Think you&rsquo;ve already seen this question elsewhere? You can get a different one.</p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
@@ -599,7 +619,7 @@ export default function ActiveInterviewPage() {
             {currentQuestion?.difficulty && (
               <span className={`mt-2 inline-block text-xs px-2 py-0.5 rounded-full font-semibold ${
                 currentQuestion.difficulty === 'hard' ? 'bg-error-container/30 text-error' :
-                currentQuestion.difficulty === 'medium' ? 'bg-amber-light/40 text-tertiary-container' :
+                currentQuestion.difficulty === 'medium' ? 'bg-amber-light/40 text-on-tertiary-container' :
                 'bg-surface-container text-on-surface-variant'
               }`}>{currentQuestion.difficulty}</span>
             )}
@@ -819,10 +839,36 @@ export default function ActiveInterviewPage() {
                 {followUp && (
                   <div className="self-start max-w-[85%]">
                     <div className={`p-4 rounded-xl border ${followUp.action === 'challenge' ? 'border-error-container bg-error-container/20' : 'border-amber-light bg-amber-light/30'}`}>
-                      <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${followUp.action === 'challenge' ? 'text-error' : 'text-tertiary-container'}`}>
+                      <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${followUp.action === 'challenge' ? 'text-error' : 'text-on-tertiary-container'}`}>
                         {followUp.action === 'follow_up' ? 'Follow-up' : followUp.action === 'probe_deeper' ? 'Probe Deeper' : 'Challenge'}
                       </p>
                       <p className="text-sm text-on-surface">{followUp.response}</p>
+                      {followUpReplySent ? (
+                        <p className="text-xs text-slate-muted mt-2 italic">
+                          {followUpReplyScore != null
+                            ? `Reply sent — scored ${followUpReplyScore}/100.`
+                            : 'Reply sent — saved with this answer.'}
+                        </p>
+                      ) : (
+                        <div className="mt-3 flex gap-2">
+                          <input
+                            type="text"
+                            value={followUpReply}
+                            onChange={e => setFollowUpReply(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') handleFollowUpReply() }}
+                            placeholder="Reply — this won't count as a new question"
+                            maxLength={2_000}
+                            className="flex-1 px-3 py-2 text-sm rounded-lg border border-outline-variant bg-surface"
+                          />
+                          <button
+                            onClick={handleFollowUpReply}
+                            disabled={!followUpReply.trim() || followUpReplySubmitting}
+                            className="px-3 py-2 text-sm rounded-lg bg-primary text-on-primary disabled:opacity-50"
+                          >
+                            {followUpReplySubmitting ? '...' : 'Send'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -835,7 +881,7 @@ export default function ActiveInterviewPage() {
                       )}
                       {practiceFeedback.keywordsMissed.length > 0 && (
                         <p className="text-xs text-slate-muted">
-                          Didn&apos;t come up: <span className="text-tertiary-container font-medium">{practiceFeedback.keywordsMissed.join(', ')}</span>
+                          Didn&apos;t come up: <span className="text-on-tertiary-container font-medium">{practiceFeedback.keywordsMissed.join(', ')}</span>
                         </p>
                       )}
                     </div>

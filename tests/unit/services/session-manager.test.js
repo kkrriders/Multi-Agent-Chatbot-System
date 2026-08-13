@@ -8,6 +8,17 @@ jest.mock('../../../src/services/interview/panel-interviewer');
 jest.mock('../../../src/services/agents/orchestrator');
 jest.mock('../../../src/services/agents/profile-agent');
 jest.mock('../../../src/services/queue/scoring-queue');
+jest.mock('../../../src/services/history/observation-compiler');
+jest.mock('../../../src/services/gamification/achievement-service');
+jest.mock('../../../src/services/sse/broadcaster');
+// Keep aggregate() (pure arithmetic, exercised by the complete() tests below)
+// real, but mock scoreFollowUpReply — it calls out to the AI provider, and
+// this repo's .env has a real GROQ_API_KEY, so leaving it unmocked makes
+// unit tests fire real Groq requests.
+jest.mock('../../../src/services/interview/answer-scorer', () => ({
+  ...jest.requireActual('../../../src/services/interview/answer-scorer'),
+  scoreFollowUpReply: jest.fn(),
+}));
 jest.mock('../../../src/shared/logger', () => ({ logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() } }));
 
 const Interview = require('../../../src/models/Interview');
@@ -17,7 +28,11 @@ const questionGenerator = require('../../../src/services/interview/question-gene
 const orchestrator = require('../../../src/services/agents/orchestrator');
 const profileAgent = require('../../../src/services/agents/profile-agent');
 const scoringQueue = require('../../../src/services/queue/scoring-queue');
-const { create, submitAnswer, regenerateQuestion } = require('../../../src/services/interview/session-manager');
+const obsCompiler = require('../../../src/services/history/observation-compiler');
+const achievementService = require('../../../src/services/gamification/achievement-service');
+const broadcaster = require('../../../src/services/sse/broadcaster');
+const scorer = require('../../../src/services/interview/answer-scorer');
+const { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete } = require('../../../src/services/interview/session-manager');
 
 const FAKE_PROFILE = {
   skills: ['node'], skillGaps: [], experience: [],
@@ -182,18 +197,20 @@ describe('session-manager.regenerateQuestion', () => {
       startedAt: null,
       targetRole: 'Backend Engineer',
       questionIds: ['q1', 'q2', 'q3'],
-      save: jest.fn().mockResolvedValue(undefined),
     };
     Interview.findOne.mockResolvedValue(mockInterview);
+    Interview.findByIdAndUpdate.mockResolvedValue(undefined);
     Answer.exists.mockResolvedValue(null); // not yet answered
     Question.findById.mockReturnValue({ lean: jest.fn().mockResolvedValue({ _id: 'q1', category: 'technical' }) });
     Question.aggregate.mockResolvedValue([{ _id: 'q1-replacement', text: 'New question', category: 'technical' }]);
   });
 
-  test('swaps the question at the given index and persists it', async () => {
+  test('swaps the question at the given index via an atomic single-field update', async () => {
     const result = await regenerateQuestion('int1', 'u1', 0);
-    expect(mockInterview.questionIds[0]).toBe('q1-replacement');
-    expect(mockInterview.save).toHaveBeenCalled();
+    expect(Interview.findByIdAndUpdate).toHaveBeenCalledWith(
+      'int1',
+      { $set: { 'questionIds.0': 'q1-replacement' } }
+    );
     expect(result).toEqual({ _id: 'q1-replacement', text: 'New question', category: 'technical' });
   });
 
@@ -209,19 +226,16 @@ describe('session-manager.regenerateQuestion', () => {
   test('throws 409 and does not save when the question has already been answered', async () => {
     Answer.exists.mockResolvedValue({ _id: 'existing-answer' });
     await expect(regenerateQuestion('int1', 'u1', 0)).rejects.toMatchObject({ status: 409 });
-    expect(mockInterview.save).not.toHaveBeenCalled();
+    expect(Interview.findByIdAndUpdate).not.toHaveBeenCalled();
   });
 
   test('throws 404 and does not save when the bank has no replacement available', async () => {
     Question.aggregate.mockResolvedValue([]);
     await expect(regenerateQuestion('int1', 'u1', 0)).rejects.toMatchObject({ status: 404 });
-    expect(mockInterview.save).not.toHaveBeenCalled();
+    expect(Interview.findByIdAndUpdate).not.toHaveBeenCalled();
   });
 
   test('excludes every question already in the interview from the replacement pool', async () => {
-    // $nin references interview.questionIds directly, and that array gets
-    // mutated (index swapped) after the aggregate call — so the exclusion
-    // list must be captured at call-time, not read back afterward.
     let capturedNin;
     Question.aggregate.mockImplementation((pipeline) => {
       capturedNin = [...pipeline.find(stage => stage.$match).$match._id.$nin];
@@ -231,5 +245,154 @@ describe('session-manager.regenerateQuestion', () => {
     await regenerateQuestion('int1', 'u1', 0);
 
     expect(capturedNin).toEqual(['q1', 'q2', 'q3']);
+  });
+});
+
+describe('session-manager.submitFollowUpReply', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Interview.findOne.mockResolvedValue({ _id: 'int1', userId: 'u1', status: 'active' });
+    Answer.findOne.mockResolvedValue({
+      _id: 'a1', questionId: 'q1',
+      followUpAction: { action: 'follow_up', response: 'Can you elaborate?', candidateReply: null },
+    });
+    Answer.findByIdAndUpdate.mockResolvedValue({ toObject: () => ({ _id: 'a1' }) });
+    Question.findById.mockReturnValue({ lean: jest.fn().mockResolvedValue({ _id: 'q1', category: 'technical' }) });
+    obsCompiler.record.mockResolvedValue(undefined);
+  });
+
+  test('scores the reply and stores it nested under the answer, not as a new question', async () => {
+    scorer.scoreFollowUpReply.mockResolvedValue({ relevance: 70, depth: 70, clarity: 70, overall: 70 });
+
+    await submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'Sure, here is more detail.' });
+
+    expect(scorer.scoreFollowUpReply).toHaveBeenCalledWith({
+      followUpQuestion: 'Can you elaborate?',
+      replyText: 'Sure, here is more detail.',
+    });
+    expect(Answer.findByIdAndUpdate).toHaveBeenCalledWith(
+      'a1',
+      expect.objectContaining({
+        'followUpAction.candidateReply': 'Sure, here is more detail.',
+        'followUpAction.replyScore': { relevance: 70, depth: 70, clarity: 70, overall: 70 },
+      }),
+      { new: true }
+    );
+    // Never touches the interview's question list/count
+    expect(Interview.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  test('records a weak_area observation for a poorly-handled follow-up (feeds future question personalization)', async () => {
+    scorer.scoreFollowUpReply.mockResolvedValue({ relevance: 40, depth: 40, clarity: 40, overall: 40 });
+
+    await submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'uh, not sure' });
+
+    expect(obsCompiler.record).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'weak_area', concept: 'technical follow-up', score: 40,
+    }));
+  });
+
+  test('records a strong_area observation for a well-handled follow-up', async () => {
+    scorer.scoreFollowUpReply.mockResolvedValue({ relevance: 90, depth: 90, clarity: 90, overall: 90 });
+
+    await submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'detailed reply' });
+
+    expect(obsCompiler.record).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'strong_area', concept: 'technical follow-up', score: 90,
+    }));
+  });
+
+  test('mid-range reply score records no observation', async () => {
+    scorer.scoreFollowUpReply.mockResolvedValue({ relevance: 70, depth: 70, clarity: 70, overall: 70 });
+    await submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'ok reply' });
+    expect(obsCompiler.record).not.toHaveBeenCalled();
+  });
+
+  test('still saves the reply (with a null score) when AI scoring fails — best-effort, never blocks saving', async () => {
+    scorer.scoreFollowUpReply.mockRejectedValue(new Error('Groq timeout'));
+
+    await submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'a reply' });
+
+    expect(Answer.findByIdAndUpdate).toHaveBeenCalledWith(
+      'a1',
+      expect.objectContaining({ 'followUpAction.candidateReply': 'a reply', 'followUpAction.replyScore': null }),
+      { new: true }
+    );
+    expect(obsCompiler.record).not.toHaveBeenCalled();
+  });
+
+  test('throws 422 when the answer has no pending follow-up', async () => {
+    Answer.findOne.mockResolvedValue({ _id: 'a1', followUpAction: null });
+    await expect(submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'x' }))
+      .rejects.toMatchObject({ status: 422 });
+    expect(scorer.scoreFollowUpReply).not.toHaveBeenCalled();
+  });
+
+  test('throws 409 when the follow-up was already answered', async () => {
+    Answer.findOne.mockResolvedValue({
+      _id: 'a1', followUpAction: { action: 'follow_up', response: 'Can you elaborate?', candidateReply: 'already replied' },
+    });
+    await expect(submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'x' }))
+      .rejects.toMatchObject({ status: 409 });
+    expect(scorer.scoreFollowUpReply).not.toHaveBeenCalled();
+  });
+});
+
+describe('session-manager.complete', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Plain object with no .save() — if complete() regresses back to
+    // mutate-and-.save() instead of an atomic findByIdAndUpdate, this throws.
+    Interview.findOne.mockResolvedValue({
+      _id: 'int1',
+      userId: 'u1',
+      status: 'active',
+      mode: 'practice',
+      targetRole: 'Backend Engineer',
+      startedAt: new Date(),
+      questionIds: ['q1'],
+    });
+    Answer.countDocuments.mockResolvedValue(0); // nothing pending — wait loop exits immediately
+    Answer.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([
+      { _id: 'a1', questionId: 'q1', scored: true, scores: { overall: 80 } },
+    ]) });
+    Question.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([
+      { _id: 'q1', category: 'technical' },
+    ]) });
+    Interview.findByIdAndUpdate.mockResolvedValue({
+      toObject: jest.fn().mockReturnValue({ _id: 'int1', status: 'completed' }),
+    });
+    obsCompiler.record.mockResolvedValue(undefined);
+    achievementService.checkAndAward.mockResolvedValue(undefined);
+    broadcaster.close.mockReturnValue(undefined);
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  test('checks for pending scoring before aggregating, then persists via an atomic update', async () => {
+    await complete('int1', 'u1');
+
+    expect(Answer.countDocuments).toHaveBeenCalledWith({ interviewId: 'int1', scored: false });
+    expect(Interview.findByIdAndUpdate).toHaveBeenCalledWith(
+      'int1',
+      expect.objectContaining({ status: 'completed', overallScore: 80 }),
+      { new: true }
+    );
+  });
+
+  test('gives up waiting after the bounded timeout and excludes still-unscored answers', async () => {
+    jest.useFakeTimers();
+    Answer.countDocuments.mockResolvedValue(1); // stays pending for the whole bounded wait
+    Answer.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([
+      { _id: 'a1', questionId: 'q1', scored: true, scores: { overall: 80 } },
+      { _id: 'a2', questionId: 'q1', scored: false, scores: {} },
+    ]) });
+
+    const resultPromise = complete('int1', 'u1');
+    await jest.advanceTimersByTimeAsync(21_000);
+    const result = await resultPromise;
+
+    expect(result.pendingScoringCount).toBe(1);
+    expect(result.overallScore).toBe(80);
   });
 });

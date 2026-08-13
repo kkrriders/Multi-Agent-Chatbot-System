@@ -62,7 +62,7 @@ export default function ResultsPage() {
   const scoreBadgeClass = (s: number) => s >= 80
     ? 'text-primary bg-primary-container/20 border-primary-container/30'
     : s >= 60
-    ? 'text-tertiary-container bg-amber-light border-tertiary-container/10'
+    ? 'text-on-tertiary-container bg-amber-light border-tertiary-container/10'
     : 'text-error bg-error-container/20 border-error-container'
 
   const voiceAnswers = answers.filter(a => a.speechMetrics)
@@ -328,13 +328,34 @@ export default function ResultsPage() {
                             )}
                             {a.keywordsMissed?.length > 0 && (
                               <div>
-                                <p className="text-xs font-semibold text-tertiary-container mb-1.5">Keywords to include</p>
+                                <p className="text-xs font-semibold text-on-tertiary-container mb-1.5">Keywords to include</p>
                                 <div className="flex flex-wrap gap-1">
                                   {a.keywordsMissed.map(k => (
-                                    <span key={k} className="text-xs bg-amber-light text-tertiary-container px-2 py-0.5 rounded-full border border-tertiary-container/20">{k}</span>
+                                    <span key={k} className="text-xs bg-amber-light text-on-tertiary-container px-2 py-0.5 rounded-full border border-tertiary-container/20">{k}</span>
                                   ))}
                                 </div>
                               </div>
+                            )}
+                          </div>
+                        )}
+                        {a.followUpAction?.response && (
+                          <div className="border border-outline-variant/30 rounded-lg p-3 bg-surface-container/30">
+                            <p className="text-xs font-semibold text-on-tertiary-container uppercase tracking-wide mb-1">
+                              {a.followUpAction.action === 'follow_up' ? 'Follow-up' : a.followUpAction.action === 'probe_deeper' ? 'Probe Deeper' : 'Challenge'}
+                            </p>
+                            <p className="text-sm text-on-surface mb-2">{a.followUpAction.response}</p>
+                            {a.followUpAction.candidateReply ? (
+                              <div className="border-t border-outline-variant/20 pt-2 mt-2">
+                                <p className="text-xs font-semibold text-slate-muted mb-1">Your reply</p>
+                                <p className="text-sm text-on-surface-variant">{a.followUpAction.candidateReply}</p>
+                                {a.followUpAction.replyScore && (
+                                  <span className={`inline-flex items-center mt-2 px-2 py-1 rounded-full text-xs font-medium border ${scoreBadgeClass(a.followUpAction.replyScore.overall)}`}>
+                                    <span className="font-mono">{a.followUpAction.replyScore.overall}</span>/100
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-slate-muted italic">Not answered</p>
                             )}
                           </div>
                         )}
@@ -375,7 +396,7 @@ function PanelFeedbackSection({ feedback }: {
                   <span className="font-semibold text-on-surface capitalize">{key}</span>
                   <span className="text-xs text-slate-muted block">{cfg.role}</span>
                 </div>
-                <span className={`ml-auto text-xl font-bold font-mono ${pf.score >= 80 ? 'text-primary' : pf.score >= 60 ? 'text-tertiary-container' : 'text-error'}`}>
+                <span className={`ml-auto text-xl font-bold font-mono ${pf.score >= 80 ? 'text-primary' : pf.score >= 60 ? 'text-on-tertiary-container' : 'text-error'}`}>
                   {pf.score}
                 </span>
               </div>

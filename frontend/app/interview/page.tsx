@@ -26,7 +26,7 @@ const MODES = [
     id: 'timed',
     label: 'Timed Fire',
     icon: 'timer',
-    iconBg: 'bg-amber-light text-tertiary-container',
+    iconBg: 'bg-amber-light text-on-tertiary-container',
     desc: 'Train your concise answering skills. Strict time limits per question with no pausing allowed.',
     features: [
       { icon: 'schedule', text: 'Adjustable time limit' },

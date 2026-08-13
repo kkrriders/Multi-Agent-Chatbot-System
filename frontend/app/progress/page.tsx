@@ -48,7 +48,7 @@ export default function ProgressPage() {
   ).slice(-20)
 
   const BADGE_ICONS: Record<string, { icon: string; color: string; bg: string }> = {
-    top_scorer:    { icon: 'workspace_premium', color: 'text-tertiary-container', bg: 'bg-amber-light' },
+    top_scorer:    { icon: 'workspace_premium', color: 'text-on-tertiary-container', bg: 'bg-amber-light' },
     quick_thinker: { icon: 'speed',             color: 'text-secondary',          bg: 'bg-secondary-fixed' },
     streak_5:      { icon: 'local_fire_department', color: 'text-primary',        bg: 'bg-primary-container/20' },
     first_session: { icon: 'flag',              color: 'text-primary',            bg: 'bg-primary-container/10' },
@@ -185,7 +185,7 @@ export default function ProgressPage() {
             <div className="grid grid-cols-1 gap-4">
               {filteredSessions.slice(0, 5).map(s => {
                 const score = s.overallScore ?? 0
-                const scoreColor = score >= 80 ? 'text-primary' : score >= 60 ? 'text-tertiary-container' : 'text-error'
+                const scoreColor = score >= 80 ? 'text-primary' : score >= 60 ? 'text-on-tertiary-container' : 'text-error'
                 const scoreLabel = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : 'Needs Work'
                 const icon = s.mode === 'panel' ? 'groups' : s.mode === 'full' ? 'cases' : 'psychology'
                 return (
@@ -239,7 +239,7 @@ export default function ProgressPage() {
             {(summary?.weakAreas?.length ?? 0) > 0 && (
               <div className="panel rounded-xl p-6">
                 <h2 className="font-heading font-semibold text-xl text-on-surface mb-3 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-tertiary-container">warning</span>
+                  <span className="material-symbols-outlined text-on-tertiary-container">warning</span>
                   Weak Areas
                 </h2>
                 <div className="flex flex-wrap gap-2">

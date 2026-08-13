@@ -39,11 +39,11 @@ export default function DashboardPage() {
     ? Math.round(completed.reduce((s, c) => s + (c.overallScore || 0), 0) / completed.length)
     : null
 
-  const scoreColor = (s: number) => s >= 80 ? 'text-primary' : s >= 60 ? 'text-tertiary-container' : 'text-error'
+  const scoreColor = (s: number) => s >= 80 ? 'text-primary' : s >= 60 ? 'text-on-tertiary-container' : 'text-error'
   const scoreBadgeClass = (s: number) => s >= 80
     ? 'bg-primary-container/20 text-emerald-deep border-primary-container/30'
     : s >= 60
-    ? 'bg-amber-light text-tertiary-container border-tertiary-container/10'
+    ? 'bg-amber-light text-on-tertiary-container border-tertiary-container/10'
     : 'bg-error-container/20 text-error border-error-container/30'
 
   if (loading || authLoading) return (

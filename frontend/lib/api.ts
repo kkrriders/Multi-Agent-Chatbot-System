@@ -97,6 +97,14 @@ export interface Answer {
     executionTimeMs: number | null
   }[]
   codeScore?: { passed: number; total: number; timeMs?: number | null; memoryKb?: number | null }
+  followUpAction?: {
+    action: 'follow_up' | 'probe_deeper' | 'next_question' | 'challenge'
+    reason?: string
+    response?: string
+    candidateReply?: string | null
+    repliedAt?: string | null
+    replyScore?: { relevance: number; depth: number; clarity: number; overall: number } | null
+  } | null
 }
 
 export interface Achievement {
@@ -206,6 +214,8 @@ export const interview = {
   }) => post<{ answerId: string; speechMetrics: unknown }>(`/api/interview/${sessionId}/answer`, payload),
   regenerateQuestion: (sessionId: string, questionIndex: number) =>
     post<{ question: Question }>(`/api/interview/${sessionId}/questions/${questionIndex}/regenerate`, {}),
+  submitFollowUpReply: (sessionId: string, answerId: string, replyText: string) =>
+    post<{ answer: Answer }>(`/api/interview/${sessionId}/answer/${answerId}/follow-up-reply`, { replyText }),
   complete: (sessionId: string) =>
     post<{ interview: Interview; overallScore: number; categoryScores: Record<string, { overall: number }> }>(
       `/api/interview/${sessionId}/complete`, {}

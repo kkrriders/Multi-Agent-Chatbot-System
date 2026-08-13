@@ -328,9 +328,43 @@ router.post('/:sessionId/answer',
       logger.error(`[interview/answer] ${err.message}`);
       const status = err.message.includes('not found') ? 404
                    : err.message.includes('expired') || err.message.includes('time limit') ? 410
-                   : err.message.includes('does not belong') || err.message.includes('out of bounds') ? 422
+                   : err.message.includes('does not belong') || err.message.includes('out of bounds') || err.message.includes('does not match') ? 422
                    : 500;
       res.status(status).json({ success: false, error: err.message });
+    }
+  }
+);
+
+// ── Reply to a follow-up/probe/challenge on a previously-submitted answer ───
+router.post('/:sessionId/answer/:answerId/follow-up-reply',
+  authenticate,
+  messageLimiter,
+  guard(['replyText']),
+  async (req, res) => {
+    try {
+      if (!_validateSessionId(req.params.sessionId, res)) return;
+      if (!/^[a-f0-9]{24}$/i.test(req.params.answerId)) {
+        return res.status(400).json({ success: false, error: 'Invalid answerId' });
+      }
+
+      const { replyText } = req.body;
+      if (!replyText || typeof replyText !== 'string' || !replyText.trim()) {
+        return res.status(400).json({ success: false, error: 'replyText is required' });
+      }
+      if (replyText.length > 2_000) {
+        return res.status(400).json({ success: false, error: 'replyText must be ≤ 2,000 chars' });
+      }
+
+      const answer = await sessionManager.submitFollowUpReply({
+        interviewId: req.params.sessionId,
+        userId:      req.user._id,
+        answerId:    req.params.answerId,
+        replyText:   replyText.trim(),
+      });
+      res.json({ success: true, answer });
+    } catch (err) {
+      logger.error(`[interview/follow-up-reply] ${err.message}`);
+      res.status(err.status || 500).json({ success: false, error: err.message });
     }
   }
 );

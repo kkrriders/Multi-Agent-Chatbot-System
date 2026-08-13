@@ -41,7 +41,7 @@ const ALL_BADGES: Record<string, {
     description: 'Answered a question with a perfect 100.',
     icon: 'military_tech',
     iconBg: 'bg-amber-light',
-    iconColor: 'text-tertiary-container',
+    iconColor: 'text-on-tertiary-container',
     hint: 'Score 100 on any single answer.',
     tier: 'gold',
   },
@@ -59,7 +59,7 @@ const ALL_BADGES: Record<string, {
     description: 'Practiced every day for a full week.',
     icon: 'local_fire_department',
     iconBg: 'bg-amber-light',
-    iconColor: 'text-tertiary-container',
+    iconColor: 'text-on-tertiary-container',
     hint: 'Practice on 7 consecutive days.',
     tier: 'silver',
   },
@@ -176,7 +176,7 @@ export default function AchievementsPage() {
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Locked</div>
           </div>
           <div className="panel rounded-xl p-5 text-center">
-            <div className="stat-tile-value font-geist font-mono font-bold text-4xl text-tertiary-container mb-1">{streak}</div>
+            <div className="stat-tile-value font-geist font-mono font-bold text-4xl text-on-tertiary-container mb-1">{streak}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Day Streak</div>
           </div>
           <div className="panel rounded-xl p-5 text-center">

@@ -49,6 +49,16 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
   const broadcaster   = require('../sse/broadcaster');
   const Answer        = require('../../models/Answer');
 
+  // Idempotency guard — a BullMQ retry (attempts: 2) or a manual rescore can
+  // re-invoke this for an answer a prior run already finished; the pipeline
+  // below isn't safe to re-run (it emits SSE events and appends observation
+  // records each time), so bail out early if scoring already landed.
+  const already = await Answer.findById(answerId).select('scored').lean();
+  if (already?.scored) {
+    logger.info(`[scoring] answer=${answerId} already scored — skipping duplicate run`);
+    return;
+  }
+
   // Integrity (pure math, runs for all formats)
   const { integrityScore, integrityFlag } = scorer.computeIntegrity(
     integritySignals,
@@ -145,6 +155,7 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
     });
   } catch (err) {
     logger.error(`[scoring] score failed answer=${answerId}: ${err.message}`);
+    broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Scoring failed' });
   }
 
   if (!result) return;
@@ -194,7 +205,10 @@ if (process.env.REDIS_URL) {
       backoff:          { type: 'exponential', delay: 2000 },
       removeOnComplete: 100,
       removeOnFail:     200,
-      timeout:          25_000, // kill after 25s — inside the 30s lock window
+      // ponytail: no per-job timeout — BullMQ's DefaultJobOptions has no
+      // `timeout` field (the old `timeout: 25_000` here was a silent no-op,
+      // never enforced). The scored-guard above makes any retry/duplicate
+      // invocation safe instead of trying to race a job-level timeout.
     },
   });
 

@@ -200,7 +200,7 @@ export default function LandingPage() {
               {/* Speech Analysis */}
               <div className="md:col-span-1 panel rounded-xl p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-amber-light rounded-lg flex items-center justify-center mb-5 z-10">
-                  <span className="material-symbols-outlined text-tertiary-container icon-fill text-xl">mic</span>
+                  <span className="material-symbols-outlined text-on-tertiary-container icon-fill text-xl">mic</span>
                 </div>
                 <h3 className="text-[18px] font-semibold text-ink mb-2 z-10">Speech Analysis</h3>
                 <p className="text-base text-secondary mb-6 z-10 flex-grow">Detect filler words, monitor pace, and assess vocal confidence automatically.</p>

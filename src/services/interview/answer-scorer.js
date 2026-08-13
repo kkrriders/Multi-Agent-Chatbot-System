@@ -19,6 +19,14 @@ const schemas = require('../ai/schemas');
 const broadcaster = require('../sse/broadcaster');
 const { assertSafe } = require('../../middleware/injection-guard');
 
+const _clamp = v => (typeof v === 'number' ? Math.min(100, Math.max(0, Math.round(v))) : 0);
+const _toScores = data => ({
+  relevance: _clamp(data.relevance),
+  depth:     _clamp(data.depth),
+  clarity:   _clamp(data.clarity),
+  overall:   _clamp((data.relevance + data.depth + data.clarity) / 3),
+});
+
 const SCORE_PROMPT = (question, answer, keywords) => `
 You are an expert interview evaluator. Score this answer strictly and fairly.
 
@@ -70,18 +78,13 @@ async function score({ questionText, expectedKeywords, answerText, sessionId, an
     );
     data = result.data;
   } catch (err) {
-    broadcaster.emit(sessionId, 'scoring-error', { answerId, error: 'Scoring failed' });
+    // scoring-error is emitted by the caller (scoring-queue.js) so it covers
+    // both an AI-call failure here and a post-scoring DB-write failure with
+    // a single emit — emitting here too would double-fire the event.
     throw err;
   }
 
-  const clamp = v => (typeof v === 'number' ? Math.min(100, Math.max(0, Math.round(v))) : 0);
-
-  const scores = {
-    relevance: clamp(data.relevance),
-    depth:     clamp(data.depth),
-    clarity:   clamp(data.clarity),
-    overall:   clamp((data.relevance + data.depth + data.clarity) / 3),
-  };
+  const scores = _toScores(data);
 
   // score-update is emitted by scoring-queue.js AFTER the DB write completes,
   // so a client that refetches immediately does not see stale scored:false data.
@@ -96,6 +99,29 @@ async function score({ questionText, expectedKeywords, answerText, sessionId, an
     evidence: String(data.evidence || '').slice(0, 500),
     confidence: data.confidence,
   };
+}
+
+/**
+ * Score a candidate's reply to a follow-up/probe/challenge question. Runs
+ * synchronously inside the follow-up-reply request rather than the async
+ * per-answer scoring pipeline, so no SSE events here — those correlate to
+ * Answer scoring, not this nested sub-reply, and reusing an Answer's id would
+ * mislead the UI's scoring indicator without anything ever clearing it.
+ *
+ * @param {object} params
+ * @param {string} params.followUpQuestion - the interviewer's follow-up/probe/challenge text
+ * @param {string} params.replyText
+ * @returns {Promise<{relevance:number, depth:number, clarity:number, overall:number}>}
+ */
+async function scoreFollowUpReply({ followUpQuestion, replyText }) {
+  assertSafe(replyText, 'follow-up-reply-text');
+
+  const { data } = await ai.generateJsonWithEscalation(
+    SCORE_PROMPT(followUpQuestion, replyText, []),
+    { schema: schemas.answerScore, callSite: 'answer-scorer:scoreFollowUpReply' }
+  );
+
+  return _toScores(data);
 }
 
 /**
@@ -193,4 +219,4 @@ function aggregate(answers, questions) {
   };
 }
 
-module.exports = { score, aggregate, computeIntegrity, applyIntegrityPenalty };
+module.exports = { score, scoreFollowUpReply, aggregate, computeIntegrity, applyIntegrityPenalty };

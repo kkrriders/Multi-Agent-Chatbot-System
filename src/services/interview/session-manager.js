@@ -22,6 +22,20 @@ const { logger } = require('../../shared/logger');
 
 const SESSION_MAX_ACTIVE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+// Bounded wait for in-flight scoring — the client calls complete() immediately
+// after the last answer's fast HTTP response, before async scoring
+// (setImmediate/BullMQ) has necessarily finished. Without this, the final
+// answer's score is silently excluded from the aggregate forever, since
+// nothing re-aggregates after completion.
+async function _waitForScoring(interviewId, maxWaitMs = 20_000, pollMs = 1000) {
+  const deadline = Date.now() + maxWaitMs;
+  while (Date.now() < deadline) {
+    const pending = await Answer.countDocuments({ interviewId, scored: false });
+    if (pending === 0) return;
+    await new Promise(resolve => setTimeout(resolve, pollMs));
+  }
+}
+
 async function _checkAndExpireSession(interview) {
   if (
     interview.status === 'active' &&
@@ -150,10 +164,15 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
   const isOwned = interview.questionIds.some(id => id.toString() === questionId);
   if (!isOwned) throw new Error('Question does not belong to this interview');
 
-  // Validate questionIndex is in bounds
+  // Validate questionIndex is in bounds AND actually matches this question —
+  // a mismatched pair desyncs answer ordering (used to pair transcript entries
+  // on resume) even though the question itself legitimately belongs here.
   const resolvedIndex = Number(questionIndex) || 0;
   if (resolvedIndex < 0 || resolvedIndex >= interview.questionIds.length) {
     throw new Error('questionIndex out of bounds');
+  }
+  if (interview.questionIds[resolvedIndex].toString() !== questionId) {
+    throw new Error('questionIndex does not match questionId');
   }
 
   // Return existing answer for retried requests
@@ -265,11 +284,68 @@ async function regenerateQuestion(interviewId, userId, questionIndex) {
   ]);
   if (!replacement) throw Object.assign(new Error('No alternate question available right now'), { status: 404 });
 
-  interview.questionIds[idx] = replacement._id;
-  await interview.save();
+  // Atomic single-field write — avoids a lost-update race against any other
+  // concurrent write to this Interview document (e.g. a second regenerate
+  // click), unlike load-mutate-.save() which writes the whole in-memory doc back.
+  await Interview.findByIdAndUpdate(interviewId, { $set: { [`questionIds.${idx}`]: replacement._id } });
 
   logger.info(`[session-manager] regenerated question idx=${idx} interview=${interviewId}`);
   return replacement;
+}
+
+/**
+ * Answer a pending follow-up/probe/challenge on a previously-submitted answer.
+ * Stored nested under that Answer, not as a new Interview question — doesn't
+ * touch questionIds or affect the session's question count.
+ */
+async function submitFollowUpReply({ interviewId, userId, answerId, replyText }) {
+  const interview = await Interview.findOne({ _id: interviewId, userId, status: 'active' });
+  if (!interview) throw Object.assign(new Error('Interview session not found or not active'), { status: 404 });
+
+  await _checkAndExpireSession(interview);
+
+  const answer = await Answer.findOne({ _id: answerId, interviewId, userId });
+  if (!answer) throw Object.assign(new Error('Answer not found'), { status: 404 });
+  if (!answer.followUpAction?.response) {
+    throw Object.assign(new Error('This answer has no pending follow-up'), { status: 422 });
+  }
+  if (answer.followUpAction.candidateReply) {
+    throw Object.assign(new Error('Follow-up has already been answered'), { status: 409 });
+  }
+
+  // Best-effort — an AI outage shouldn't block saving the reply itself.
+  const replyScore = await scorer.scoreFollowUpReply({
+    followUpQuestion: answer.followUpAction.response,
+    replyText,
+  }).catch(() => null);
+
+  const updated = await Answer.findByIdAndUpdate(
+    answerId,
+    {
+      'followUpAction.candidateReply': replyText,
+      'followUpAction.repliedAt':      new Date(),
+      'followUpAction.replyScore':     replyScore,
+    },
+    { new: true }
+  );
+
+  // Feed follow-up handling into the same weak/strong-area personalization
+  // loop as regular answers (profile-agent.js → question-generator.js), so
+  // future interviews' question selection reflects how the candidate handles
+  // follow-ups — reuses the existing observation types/pipeline as-is.
+  if (replyScore) {
+    const type = replyScore.overall < 60 ? 'weak_area' : replyScore.overall >= 80 ? 'strong_area' : null;
+    if (type) {
+      const question = await Question.findById(answer.questionId).lean();
+      await obsCompiler.record({
+        userId, interviewId: interviewId.toString(),
+        type, concept: `${question?.category || 'technical'} follow-up`, score: replyScore.overall,
+        data: { answerId, followUpQuestion: answer.followUpAction.response },
+      }).catch(() => {});
+    }
+  }
+
+  return updated.toObject();
 }
 
 /**
@@ -288,29 +364,33 @@ async function complete(interviewId, userId) {
 
   await _checkAndExpireSession(interview);
 
+  await _waitForScoring(interviewId);
+
   const answers = await Answer.find({ interviewId }).lean();
   const questions = await Question.find({ _id: { $in: interview.questionIds } }).lean();
 
   const { categoryScores, overallScore } = scorer.aggregate(answers, questions);
 
-  interview.status = 'completed';
-  interview.completedAt = new Date();
-  interview.durationSeconds = interview.startedAt
-    ? Math.round((Date.now() - interview.startedAt.getTime()) / 1000)
-    : null;
-  interview.overallScore = overallScore;
-  interview.categoryScores = categoryScores;
+  const updateFields = {
+    status: 'completed',
+    completedAt: new Date(),
+    durationSeconds: interview.startedAt
+      ? Math.round((Date.now() - interview.startedAt.getTime()) / 1000)
+      : null,
+    overallScore,
+    categoryScores,
+  };
 
   // Panel mode: generate multi-perspective feedback (one AI call, 15s timeout)
   if (interview.mode === 'panel') {
     const feedbackTimeout = new Promise(resolve => setTimeout(() => resolve(null), 15_000));
-    interview.panelFeedback = await Promise.race([
+    updateFields.panelFeedback = await Promise.race([
       sessionFeedback.generate({ targetRole: interview.targetRole, answers, questions }),
       feedbackTimeout,
     ]).catch(() => null);
   }
 
-  await interview.save();
+  const updatedInterview = await Interview.findByIdAndUpdate(interviewId, updateFields, { new: true });
 
   // Record weak/strong areas as observations
   for (const [cat, scores] of Object.entries(categoryScores)) {
@@ -327,7 +407,7 @@ async function complete(interviewId, userId) {
   }
 
   // Check and award achievements
-  await achievementService.checkAndAward(userId, interview.toObject(), answers).catch(() => {});
+  await achievementService.checkAndAward(userId, updatedInterview.toObject(), answers).catch(() => {});
 
   // Close SSE connections
   broadcaster.close(interviewId.toString());
@@ -335,7 +415,7 @@ async function complete(interviewId, userId) {
   const pendingScoringCount = answers.filter(a => !a.scored).length;
   logger.info(`[session] completed interview ${interviewId} — score: ${overallScore}${pendingScoringCount ? ` (${pendingScoringCount} answers still scoring)` : ''}`);
 
-  return { interview: interview.toObject(), answers, overallScore, categoryScores, pendingScoringCount };
+  return { interview: updatedInterview.toObject(), answers, overallScore, categoryScores, pendingScoringCount };
 }
 
 /**
@@ -358,4 +438,4 @@ async function getState(interviewId, userId) {
   return { interview, questions, answers, nextQuestion };
 }
 
-module.exports = { create, submitAnswer, regenerateQuestion, complete, getState };
+module.exports = { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete, getState };

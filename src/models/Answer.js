@@ -99,6 +99,13 @@ const answerSchema = new mongoose.Schema({
     action:   { type: String, enum: ['follow_up', 'probe_deeper', 'next_question', 'challenge'] },
     reason:   { type: String, maxlength: 300 },
     response: { type: String, maxlength: 500 },
+    // The candidate's reply to the follow-up/probe/challenge — a sub-answer
+    // nested under this Q&A pair. Not a new top-level interview question:
+    // doesn't touch Interview.questionIds or the session's question count.
+    candidateReply: { type: String, maxlength: 2_000, default: null },
+    repliedAt:      { type: Date, default: null },
+    // Best-effort — null if scoring failed (AI outage doesn't block saving the reply).
+    replyScore:     { type: scoreBreakdownSchema, default: null },
   },
 
   // Anti-cheat: behavioral signals captured client-side
