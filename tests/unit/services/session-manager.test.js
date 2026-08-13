@@ -32,7 +32,7 @@ const obsCompiler = require('../../../src/services/history/observation-compiler'
 const achievementService = require('../../../src/services/gamification/achievement-service');
 const broadcaster = require('../../../src/services/sse/broadcaster');
 const scorer = require('../../../src/services/interview/answer-scorer');
-const { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete, getState } = require('../../../src/services/interview/session-manager');
+const { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete, reaggregateIfCompleted, getState } = require('../../../src/services/interview/session-manager');
 
 const FAKE_PROFILE = {
   skills: ['node'], skillGaps: [], experience: [],
@@ -246,6 +246,21 @@ describe('session-manager.regenerateQuestion', () => {
 
     expect(capturedNin).toEqual(['q1', 'q2', 'q3']);
   });
+
+  test('reverts the swap and throws 409 if a submitAnswer for the old question lands in the race window', async () => {
+    // First Answer.exists (pre-swap check) says "not answered yet"; second
+    // (post-swap re-check) says "now it is" — simulating a submitAnswer that
+    // landed in the gap between the check and the swap.
+    Answer.exists
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ _id: 'race-answer' });
+
+    await expect(regenerateQuestion('int1', 'u1', 0)).rejects.toMatchObject({ status: 409 });
+
+    expect(Interview.findByIdAndUpdate).toHaveBeenNthCalledWith(1, 'int1', { $set: { 'questionIds.0': 'q1-replacement' } });
+    // Reverted back to the original question id
+    expect(Interview.findByIdAndUpdate).toHaveBeenNthCalledWith(2, 'int1', { $set: { 'questionIds.0': 'q1' } });
+  });
 });
 
 describe('session-manager.submitFollowUpReply', () => {
@@ -256,7 +271,7 @@ describe('session-manager.submitFollowUpReply', () => {
       _id: 'a1', questionId: 'q1',
       followUpAction: { action: 'follow_up', response: 'Can you elaborate?', candidateReply: null },
     });
-    Answer.findByIdAndUpdate.mockResolvedValue({ toObject: () => ({ _id: 'a1' }) });
+    Answer.findOneAndUpdate.mockResolvedValue({ toObject: () => ({ _id: 'a1' }) });
     Question.findById.mockReturnValue({ lean: jest.fn().mockResolvedValue({ _id: 'q1', category: 'technical' }) });
     obsCompiler.record.mockResolvedValue(undefined);
   });
@@ -270,8 +285,8 @@ describe('session-manager.submitFollowUpReply', () => {
       followUpQuestion: 'Can you elaborate?',
       replyText: 'Sure, here is more detail.',
     });
-    expect(Answer.findByIdAndUpdate).toHaveBeenCalledWith(
-      'a1',
+    expect(Answer.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 'a1', interviewId: 'int1', userId: 'u1', 'followUpAction.candidateReply': null },
       expect.objectContaining({
         'followUpAction.candidateReply': 'Sure, here is more detail.',
         'followUpAction.replyScore': { relevance: 70, depth: 70, clarity: 70, overall: 70 },
@@ -280,6 +295,14 @@ describe('session-manager.submitFollowUpReply', () => {
     );
     // Never touches the interview's question list/count
     expect(Interview.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  test('throws 409 if a concurrent request already answered the follow-up between the read-check and this write', async () => {
+    scorer.scoreFollowUpReply.mockResolvedValue({ relevance: 70, depth: 70, clarity: 70, overall: 70 });
+    Answer.findOneAndUpdate.mockResolvedValue(null); // write matched 0 docs — candidateReply was no longer null
+
+    await expect(submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'a reply' }))
+      .rejects.toMatchObject({ status: 409 });
   });
 
   test('records a weak_area observation for a poorly-handled follow-up (feeds future question personalization)', async () => {
@@ -313,8 +336,8 @@ describe('session-manager.submitFollowUpReply', () => {
 
     await submitFollowUpReply({ interviewId: 'int1', userId: 'u1', answerId: 'a1', replyText: 'a reply' });
 
-    expect(Answer.findByIdAndUpdate).toHaveBeenCalledWith(
-      'a1',
+    expect(Answer.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 'a1', interviewId: 'int1', userId: 'u1', 'followUpAction.candidateReply': null },
       expect.objectContaining({ 'followUpAction.candidateReply': 'a reply', 'followUpAction.replyScore': null }),
       { new: true }
     );
@@ -359,7 +382,7 @@ describe('session-manager.complete', () => {
     Question.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([
       { _id: 'q1', category: 'technical' },
     ]) });
-    Interview.findByIdAndUpdate.mockResolvedValue({
+    Interview.findOneAndUpdate.mockResolvedValue({
       toObject: jest.fn().mockReturnValue({ _id: 'int1', status: 'completed' }),
     });
     obsCompiler.record.mockResolvedValue(undefined);
@@ -369,20 +392,45 @@ describe('session-manager.complete', () => {
 
   afterEach(() => jest.useRealTimers());
 
-  test('checks for pending scoring before aggregating, then persists via an atomic update', async () => {
+  test('checks for pending scoring before aggregating, then persists via an atomic status-guarded update', async () => {
     await complete('int1', 'u1');
 
     expect(Answer.countDocuments).toHaveBeenCalledWith({ interviewId: 'int1', scored: false });
-    expect(Interview.findByIdAndUpdate).toHaveBeenCalledWith(
-      'int1',
+    expect(Interview.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 'int1', userId: 'u1', status: 'active' },
       expect.objectContaining({ status: 'completed', overallScore: 80 }),
       { new: true }
     );
   });
 
+  test('returns the already-completed state without duplicating side effects when a concurrent complete() wins the race', async () => {
+    Interview.findOneAndUpdate.mockResolvedValue(null); // lost the atomic status-guarded write
+    Interview.findOne
+      .mockResolvedValueOnce({ // first call — the initial active-status read
+        _id: 'int1', userId: 'u1', status: 'active', mode: 'practice',
+        targetRole: 'Backend Engineer', startedAt: new Date(), questionIds: ['q1'],
+      })
+      .mockResolvedValueOnce({ // second call — re-fetch after losing the race
+        _id: 'int1', userId: 'u1', status: 'completed', overallScore: 80, categoryScores: {},
+        toObject: function () { return { _id: this._id, status: this.status, overallScore: this.overallScore }; },
+      });
+
+    const result = await complete('int1', 'u1');
+
+    expect(result.overallScore).toBe(80);
+    expect(obsCompiler.record).not.toHaveBeenCalled();
+    expect(achievementService.checkAndAward).not.toHaveBeenCalled();
+  });
+
   test('gives up waiting after the bounded timeout and excludes still-unscored answers', async () => {
     jest.useFakeTimers();
-    Answer.countDocuments.mockResolvedValue(1); // stays pending for the whole bounded wait
+    // Only the scored:false check (the scoring wait) stays pending for the
+    // whole bounded wait; the followUpAction check (the follow-up wait)
+    // resolves immediately — this test is specifically about _waitForScoring's
+    // own timeout, not the separate follow-up wait.
+    Answer.countDocuments.mockImplementation((query) =>
+      Promise.resolve('followUpAction' in query ? 0 : 1)
+    );
     Answer.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([
       { _id: 'a1', questionId: 'q1', scored: true, scores: { overall: 80 } },
       { _id: 'a2', questionId: 'q1', scored: false, scores: {} },
@@ -394,6 +442,77 @@ describe('session-manager.complete', () => {
 
     expect(result.pendingScoringCount).toBe(1);
     expect(result.overallScore).toBe(80);
+  });
+
+  test('waits for a scored answer\'s pending decision-agent step before completing, in non-timed mode', async () => {
+    jest.useFakeTimers();
+    // Scoring wait resolves immediately; the follow-up wait stays pending
+    // (simulating decision-agent still in flight) until it gives up.
+    Answer.countDocuments.mockImplementation((query) =>
+      Promise.resolve('followUpAction' in query ? 1 : 0)
+    );
+
+    const resultPromise = complete('int1', 'u1');
+    await jest.advanceTimersByTimeAsync(9_000);
+    await resultPromise;
+
+    // Called with the text/voice question id, scoped so coding/system_design
+    // answers (which never get a followUpAction) can't cause an endless wait.
+    expect(Answer.countDocuments).toHaveBeenCalledWith(expect.objectContaining({
+      questionId: { $in: ['q1'] },
+      followUpAction: { $exists: false },
+    }));
+  });
+
+  test('skips the follow-up wait entirely in timed mode', async () => {
+    Interview.findOne.mockResolvedValue({
+      _id: 'int1', userId: 'u1', status: 'active', mode: 'timed',
+      targetRole: 'Backend Engineer', startedAt: new Date(), questionIds: ['q1'],
+    });
+    Answer.countDocuments.mockResolvedValue(0);
+
+    await complete('int1', 'u1');
+
+    expect(Answer.countDocuments).not.toHaveBeenCalledWith(expect.objectContaining({
+      followUpAction: { $exists: false },
+    }));
+  });
+});
+
+describe('session-manager.reaggregateIfCompleted', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('recomputes and persists overallScore/categoryScores for a completed interview', async () => {
+    Interview.findOne.mockResolvedValue({ _id: 'int1', userId: 'u1', status: 'completed', questionIds: ['q1', 'q2'] });
+    Answer.countDocuments.mockResolvedValue(0);
+    Answer.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([
+      { _id: 'a1', questionId: 'q1', scored: true, scores: { overall: 80 } },
+      { _id: 'a2', questionId: 'q2', scored: true, scores: { overall: 40 } },
+    ]) });
+    Question.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([
+      { _id: 'q1', category: 'technical' }, { _id: 'q2', category: 'technical' },
+    ]) });
+    Interview.findByIdAndUpdate.mockResolvedValue({ toObject: () => ({ _id: 'int1', overallScore: 60 }) });
+
+    const result = await reaggregateIfCompleted('int1', 'u1');
+
+    expect(result.overallScore).toBe(60); // (80+40)/2
+    expect(Interview.findByIdAndUpdate).toHaveBeenCalledWith(
+      'int1',
+      { overallScore: 60, categoryScores: expect.any(Object) },
+      { new: true }
+    );
+  });
+
+  test('is a no-op for an interview that is not completed', async () => {
+    Interview.findOne.mockResolvedValue({ _id: 'int1', userId: 'u1', status: 'active' });
+
+    const result = await reaggregateIfCompleted('int1', 'u1');
+
+    expect(result).toBeNull();
+    expect(Interview.findByIdAndUpdate).not.toHaveBeenCalled();
   });
 });
 

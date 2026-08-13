@@ -80,6 +80,7 @@ async function score({ questionText, diagramSnapshot, textExplanation, evaluatio
   if (textExplanation) assertSafe(textExplanation, 'system-design:explanation');
 
   const diagramSummary = diagramSnapshot ? _summariseDiagram(diagramSnapshot) : 'No diagram provided';
+  if (diagramSnapshot) assertSafe(diagramSummary, 'system-design:diagram');
   const rubric = Array.isArray(evaluationRubric) && evaluationRubric.length
     ? evaluationRubric
     : ['Identify main components', 'Show data flow', 'Address scalability'];

@@ -6,7 +6,7 @@ jest.mock('../../src/shared/logger', () => ({
   logger: { info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() },
 }));
 jest.mock('../../src/models/Question', () => ({
-  findById: jest.fn(),
+  findOne: jest.fn(),
 }));
 jest.mock('../../src/models/GuestUsage', () => ({
   findOne:   jest.fn(),
@@ -17,6 +17,7 @@ jest.mock('../../src/services/ai/provider-manager', () => ({
   generateJsonWithEscalation: jest.fn(),
   generateJson: jest.fn(),
 }));
+jest.mock('../../src/middleware/injection-guard', () => ({ assertSafe: jest.fn() }));
 
 const request = require('supertest');
 const Question    = require('../../src/models/Question');
@@ -33,9 +34,11 @@ describe('POST /api/practice/evaluate — guest gating', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    Question.findById.mockReturnValue({
+    // source:'system' only — Question.findOne(), not findById(), per the
+    // cross-user-leak fix in practice.js.
+    Question.findOne.mockReturnValue({
       lean: jest.fn().mockResolvedValue({
-        _id: 'q1', text: 'Reverse a linked list', expectedKeywords: ['pointer'], constraints: 'O(n)',
+        _id: 'q1', text: 'Reverse a linked list', expectedKeywords: ['pointer'], constraints: 'O(n)', source: 'system',
       }),
     });
     ai.generateJsonWithEscalation.mockResolvedValue({

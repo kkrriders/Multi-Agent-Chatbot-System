@@ -53,7 +53,10 @@ const mapQuestion = q => ({
 });
 
 // ── SSE stream (must be before :sessionId routes to avoid conflict) ──────────
-router.get('/stream/:sessionId', authenticate, generalLimiter, (req, res) => {
+router.get('/stream/:sessionId', authenticate, generalLimiter, async (req, res) => {
+  if (!_validateSessionId(req.params.sessionId, res)) return;
+  const owns = await Interview.exists({ _id: req.params.sessionId, userId: req.user._id });
+  if (!owns) return res.status(404).json({ success: false, error: 'Session not found' });
   broadcaster.connect(req, res);
 });
 
@@ -433,7 +436,14 @@ router.post('/:sessionId/rescore-pending', authenticate, generalLimiter, async (
     const interview = await Interview.findOne({ _id: req.params.sessionId, userId: req.user._id }).lean();
     if (!interview) return res.status(404).json({ success: false, error: 'Session not found' });
     const { requeued } = await scoringQueue.requeuePending(req.params.sessionId);
-    res.json({ success: true, requeued, message: `${requeued} answer(s) queued for re-scoring` });
+    // If this interview already completed with some answers stuck unscored,
+    // wait for them to finish and correct the score fields the candidate sees —
+    // requeuePending alone only fixes the Answer docs, never Interview.overallScore.
+    const reaggregated = await sessionManager.reaggregateIfCompleted(req.params.sessionId, req.user._id).catch(() => null);
+    res.json({
+      success: true, requeued, message: `${requeued} answer(s) queued for re-scoring`,
+      ...(reaggregated ? { overallScore: reaggregated.overallScore, categoryScores: reaggregated.categoryScores } : {}),
+    });
   } catch (err) {
     logger.error(`[interview/rescore] ${err.message}`);
     res.status(500).json({ success: false, error: 'Failed to requeue pending answers' });

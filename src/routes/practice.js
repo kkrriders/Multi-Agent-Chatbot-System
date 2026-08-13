@@ -15,6 +15,7 @@ const { messageLimiter } = require('../middleware/rateLimiter');
 const Question = require('../models/Question');
 const ai = require('../services/ai/provider-manager');
 const schemas = require('../services/ai/schemas');
+const { assertSafe } = require('../middleware/injection-guard');
 const { logger } = require('../shared/logger');
 
 // POST /api/practice/evaluate
@@ -29,7 +30,10 @@ router.post('/evaluate', optionalAuth, messageLimiter, attachGuestId, gateGuestU
       return res.status(400).json({ success: false, error: 'Invalid questionId' });
     }
 
-    const question = await Question.findById(questionId).lean();
+    // source:'system' only — cv-generated/jd-generated/company-tailored questions
+    // are session-specific and must never be evaluable by another user (this
+    // route has no interview/session ownership check, so it can't tell).
+    const question = await Question.findOne({ _id: questionId, source: 'system' }).lean();
     if (!question) {
       return res.status(404).json({ success: false, error: 'Question not found' });
     }
@@ -52,6 +56,7 @@ async function evaluateCoding({ question, code, language }) {
   if (!code || typeof code !== 'string' || code.trim().length < 5) {
     throw Object.assign(new Error('No code submitted'), { status: 400 });
   }
+  assertSafe(code, 'practice:code');
 
   const keywords = (question.expectedKeywords || []).join(', ') || 'not specified';
   const constraints = question.constraints || 'none';
@@ -117,6 +122,9 @@ async function evaluateSystemDesign({ question, nodes, edges }) {
       return e.label ? `${src} → ${tgt} (${e.label})` : `${src} → ${tgt}`;
     })
     .join('; ') || 'none';
+
+  assertSafe(componentList, 'practice:diagram-components');
+  assertSafe(connectionList, 'practice:diagram-connections');
 
   const rubricList = rubric.map((r, i) => `${i + 1}. ${r}`).join('\n');
 

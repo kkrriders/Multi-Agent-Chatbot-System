@@ -122,7 +122,18 @@ const answerSchema = new mongoose.Schema({
 answerSchema.index({ interviewId: 1, questionIndex: 1 });
 // One answer per question per interview — prevents duplicate submissions and race conditions
 answerSchema.index({ interviewId: 1, questionId: 1 }, { unique: true });
-// Sparse unique index — deduplicates network retries without forcing clients to send a key
-answerSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
+// Partial unique index, scoped per interview+user — deduplicates network
+// retries without forcing clients to send a key, and without letting a
+// colliding idempotencyKey from a DIFFERENT user's interview count as a
+// duplicate (a bare {idempotencyKey:1} index would reject/collide globally).
+// partialFilterExpression, not `sparse` — sparse on a COMPOUND index only
+// excludes a document if EVERY indexed field is missing, and interviewId/
+// userId are always present, so a sparse compound index here would still
+// collide every answer that has no idempotencyKey (the common case) against
+// every other one in the same interview+user pair.
+answerSchema.index(
+  { interviewId: 1, userId: 1, idempotencyKey: 1 },
+  { unique: true, partialFilterExpression: { idempotencyKey: { $exists: true } } }
+);
 
 module.exports = mongoose.model('Answer', answerSchema);

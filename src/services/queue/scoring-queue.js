@@ -86,8 +86,15 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
         overall:   Math.round(passRate),
       };
       const scores = scorer.applyIntegrityPenalty(rawScores, integrityScore);
-      await Answer.findByIdAndUpdate(answerId, { testResults, codeScore, scores, scored: true });
-      broadcaster.emit(interviewId, 'score-update', { answerId, scores, testResults });
+      // Conditional on scored:false — closes the gap between the read-check
+      // above and this write, so a concurrent duplicate run (BullMQ retry
+      // racing the original attempt) can't both land a score-update.
+      const updated = await Answer.findOneAndUpdate(
+        { _id: answerId, scored: false },
+        { testResults, codeScore, scores, scored: true },
+        { new: true }
+      );
+      if (updated) broadcaster.emit(interviewId, 'score-update', { answerId, scores, testResults });
     } catch (err) {
       logger.error(`[scoring] code execution failed answer=${answerId}: ${err.message}`);
       broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Code execution failed' });
@@ -108,14 +115,18 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
         answerId,
       });
       const scores = scorer.applyIntegrityPenalty({ ...result.scores, confidence: result.confidence }, integrityScore);
-      await Answer.findByIdAndUpdate(answerId, {
-        scores,
-        scored:                 true,
-        improvementSuggestions: result.improvementSuggestions,
-        keywordsHit:            result.keywordsHit,
-        keywordsMissed:         result.keywordsMissed,
-      });
-      broadcaster.emit(interviewId, 'score-update', { answerId, scores, timestamp: Date.now() });
+      const updated = await Answer.findOneAndUpdate(
+        { _id: answerId, scored: false },
+        {
+          scores,
+          scored:                 true,
+          improvementSuggestions: result.improvementSuggestions,
+          keywordsHit:            result.keywordsHit,
+          keywordsMissed:         result.keywordsMissed,
+        },
+        { new: true }
+      );
+      if (updated) broadcaster.emit(interviewId, 'score-update', { answerId, scores, timestamp: Date.now() });
     } catch (err) {
       logger.error(`[scoring] system-design score failed answer=${answerId}: ${err.message}`);
       broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Scoring failed' });
@@ -124,6 +135,7 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
   }
 
   // ── Text / voice: existing AI scorer ─────────────────────────────────────
+  let scoredNow = false;
   try {
     result = await scorer.score({
       questionText,
@@ -136,29 +148,38 @@ async function runPipeline({ answerId, interviewId, questionId, questionText, qu
     // via result.scores — a pasted "excellent" answer shouldn't short-circuit the
     // interview flow as if it reflected genuine understanding.
     result.scores = scorer.applyIntegrityPenalty({ ...result.scores, confidence: result.confidence }, integrityScore);
-    await Answer.findByIdAndUpdate(answerId, {
-      scores:                 result.scores,
-      scored:                 true,
-      improvementSuggestions: result.improvementSuggestions,
-      keywordsHit:            result.keywordsHit,
-      keywordsMissed:         result.keywordsMissed,
-    });
-    // Emit after DB write so an immediate GET sees scored:true.
-    // improvementSuggestions/keywordsMissed ride along so practice mode can show
-    // actionable feedback per-answer instead of only in the end-of-session summary.
-    broadcaster.emit(interviewId, 'score-update', {
-      answerId,
-      scores: result.scores,
-      improvementSuggestions: result.improvementSuggestions,
-      keywordsMissed: result.keywordsMissed,
-      timestamp: Date.now(),
-    });
+    const updated = await Answer.findOneAndUpdate(
+      { _id: answerId, scored: false },
+      {
+        scores:                 result.scores,
+        scored:                 true,
+        improvementSuggestions: result.improvementSuggestions,
+        keywordsHit:            result.keywordsHit,
+        keywordsMissed:         result.keywordsMissed,
+      },
+      { new: true }
+    );
+    scoredNow = !!updated;
+    if (scoredNow) {
+      // Emit after DB write so an immediate GET sees scored:true.
+      // improvementSuggestions/keywordsMissed ride along so practice mode can show
+      // actionable feedback per-answer instead of only in the end-of-session summary.
+      broadcaster.emit(interviewId, 'score-update', {
+        answerId,
+        scores: result.scores,
+        improvementSuggestions: result.improvementSuggestions,
+        keywordsMissed: result.keywordsMissed,
+        timestamp: Date.now(),
+      });
+    }
   } catch (err) {
     logger.error(`[scoring] score failed answer=${answerId}: ${err.message}`);
     broadcaster.emit(interviewId, 'scoring-error', { answerId, error: 'Scoring failed' });
   }
 
-  if (!result) return;
+  // A concurrent run already scored this answer — decision-agent/observation
+  // steps below were (or will be) handled by that run; don't duplicate them.
+  if (!result || !scoredNow) return;
 
   try {
     const decision = await decisionAgent.decide({

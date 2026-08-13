@@ -108,18 +108,26 @@ async function _bankFallback(targetRole, interviewId) {
   const withPersona = (questions, name) =>
     questions.map(q => ({ ...q, interviewerName: name }));
 
-  const result = interleave(
+  const picked = interleave(
     withPersona(tech, 'Alex'),
     withPersona(behav, 'Priya'),
     withPersona(closing, 'James')
   );
 
-  // Persist interviewerName so session-feedback and later queries see it
-  await Promise.all(
-    result.map(q => Question.findByIdAndUpdate(q._id, { interviewerName: q.interviewerName }))
-  ).catch(() => {}); // non-critical, don't block
+  // Clone into new, session-scoped documents instead of writing interviewerName
+  // back onto the shared bank question. tech/behav/closing above is a small
+  // (~10-question) pool reused across every user's panel session — mutating
+  // the shared doc let two concurrent sessions race and overwrite each
+  // other's persona assignment on the same question.
+  const saved = await Question.insertMany(
+    picked.map(({ _id, __v, createdAt, updatedAt, ...q }) => ({
+      ...q,
+      source: 'system',
+      interviewId,
+    }))
+  );
 
-  return result;
+  return saved;
 }
 
 function interleave(alex, priya, james) {

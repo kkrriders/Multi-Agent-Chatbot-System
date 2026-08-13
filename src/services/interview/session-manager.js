@@ -36,6 +36,30 @@ async function _waitForScoring(interviewId, maxWaitMs = 20_000, pollMs = 1000) {
   }
 }
 
+// Bounded wait for the decision-agent step to catch up on already-scored
+// text/voice answers — see the call site in complete() for why this exists.
+// Scoped to only the question ids that could actually get a followUpAction
+// (coding/system_design answers never do), so it resolves instantly and
+// cheaply for sessions where nothing is pending.
+async function _waitForFollowUpDecisions(interviewId, questions, maxWaitMs = 8_000, pollMs = 1000) {
+  const textVoiceQuestionIds = questions
+    .filter(q => !q.questionFormat || q.questionFormat === 'text')
+    .map(q => q._id);
+  if (textVoiceQuestionIds.length === 0) return;
+
+  const deadline = Date.now() + maxWaitMs;
+  while (Date.now() < deadline) {
+    const pending = await Answer.countDocuments({
+      interviewId,
+      questionId: { $in: textVoiceQuestionIds },
+      scored: true,
+      followUpAction: { $exists: false },
+    });
+    if (pending === 0) return;
+    await new Promise(resolve => setTimeout(resolve, pollMs));
+  }
+}
+
 async function _checkAndExpireSession(interview) {
   if (
     interview.status === 'active' &&
@@ -175,9 +199,12 @@ async function submitAnswer({ interviewId, userId, questionId, questionIndex, an
     throw new Error('questionIndex does not match questionId');
   }
 
-  // Return existing answer for retried requests
+  // Return existing answer for retried requests — scoped to this interview
+  // and user, not a bare idempotencyKey lookup: idempotencyKey is a
+  // client-supplied string, and an unscoped match would hand back a
+  // different user's answer (text, scores) on a colliding key.
   if (idempotencyKey) {
-    const existing = await Answer.findOne({ idempotencyKey }).lean();
+    const existing = await Answer.findOne({ idempotencyKey, interviewId, userId }).lean();
     if (existing) return existing;
   }
 
@@ -289,6 +316,17 @@ async function regenerateQuestion(interviewId, userId, questionIndex) {
   // click), unlike load-mutate-.save() which writes the whole in-memory doc back.
   await Interview.findByIdAndUpdate(interviewId, { $set: { [`questionIds.${idx}`]: replacement._id } });
 
+  // The alreadyAnswered check above isn't atomic with this swap — a
+  // submitAnswer() for the old question can land in that gap. Re-check and
+  // revert if it did, rather than leaving a scored Answer orphaned from
+  // questionIds (which would silently require one extra real answer to finish
+  // the session and drop that answer's category out of the aggregate).
+  const nowAnswered = await Answer.exists({ interviewId, questionId: currentQuestionId });
+  if (nowAnswered) {
+    await Interview.findByIdAndUpdate(interviewId, { $set: { [`questionIds.${idx}`]: currentQuestionId } });
+    throw Object.assign(new Error('This question has already been answered and cannot be regenerated'), { status: 409 });
+  }
+
   logger.info(`[session-manager] regenerated question idx=${idx} interview=${interviewId}`);
   return replacement;
 }
@@ -319,8 +357,11 @@ async function submitFollowUpReply({ interviewId, userId, answerId, replyText })
     replyText,
   }).catch(() => null);
 
-  const updated = await Answer.findByIdAndUpdate(
-    answerId,
+  // Conditional on candidateReply still being null — closes the gap between
+  // the read-check above and this write (a concurrent double-submit can both
+  // pass that check since a Groq call sits in between; only one write wins).
+  const updated = await Answer.findOneAndUpdate(
+    { _id: answerId, interviewId, userId, 'followUpAction.candidateReply': null },
     {
       'followUpAction.candidateReply': replyText,
       'followUpAction.repliedAt':      new Date(),
@@ -328,6 +369,9 @@ async function submitFollowUpReply({ interviewId, userId, answerId, replyText })
     },
     { new: true }
   );
+  if (!updated) {
+    throw Object.assign(new Error('Follow-up has already been answered'), { status: 409 });
+  }
 
   // Feed follow-up handling into the same weak/strong-area personalization
   // loop as regular answers (profile-agent.js → question-generator.js), so
@@ -366,8 +410,22 @@ async function complete(interviewId, userId) {
 
   await _waitForScoring(interviewId);
 
-  const answers = await Answer.find({ interviewId }).lean();
   const questions = await Question.find({ _id: { $in: interview.questionIds } }).lean();
+
+  // scoring-queue.js flips scored:true, THEN runs the decision-agent step (a
+  // separate, sequential Groq call) in the same pipeline invocation, before
+  // writing followUpAction. _waitForScoring only tracks `scored`, so it can
+  // return while the last answer's decision-agent call is still in flight —
+  // once broadcaster.close() below fires, that follow-up's SSE emit becomes a
+  // silent no-op and the candidate can never see or reply to it (this
+  // endpoint requires status:'active'). Skipped entirely for timed mode and
+  // for interviews with no text/voice questions, since decision-agent never
+  // runs for those — no unnecessary wait added to sessions that don't need it.
+  if (interview.mode !== 'timed') {
+    await _waitForFollowUpDecisions(interviewId, questions);
+  }
+
+  const answers = await Answer.find({ interviewId }).lean();
 
   const { categoryScores, overallScore } = scorer.aggregate(answers, questions);
 
@@ -390,7 +448,23 @@ async function complete(interviewId, userId) {
     ]).catch(() => null);
   }
 
-  const updatedInterview = await Interview.findByIdAndUpdate(interviewId, updateFields, { new: true });
+  // Conditional on status:'active' — a concurrent duplicate complete() call
+  // (double-click, retried request) racing this one only lets ONE win the
+  // write; the loser gets null back instead of clobbering/duplicating the
+  // score fields and the side effects below.
+  const updatedInterview = await Interview.findOneAndUpdate(
+    { _id: interviewId, userId, status: 'active' },
+    updateFields,
+    { new: true }
+  );
+
+  if (!updatedInterview) {
+    const already = await Interview.findOne({ _id: interviewId, userId });
+    return {
+      interview: already.toObject(), answers,
+      overallScore: already.overallScore, categoryScores: already.categoryScores,
+    };
+  }
 
   // Record weak/strong areas as observations
   for (const [cat, scores] of Object.entries(categoryScores)) {
@@ -416,6 +490,32 @@ async function complete(interviewId, userId) {
   logger.info(`[session] completed interview ${interviewId} — score: ${overallScore}${pendingScoringCount ? ` (${pendingScoringCount} answers still scoring)` : ''}`);
 
   return { interview: updatedInterview.toObject(), answers, overallScore, categoryScores, pendingScoringCount };
+}
+
+/**
+ * Recompute and persist overallScore/categoryScores for an already-completed
+ * interview — used after /rescore-pending recovers answers that were stuck
+ * unscored past complete()'s bounded wait, so the score the candidate sees
+ * actually reflects the recovered answers instead of staying permanently wrong.
+ * No-op (returns null) if the interview isn't completed yet.
+ */
+async function reaggregateIfCompleted(interviewId, userId) {
+  const interview = await Interview.findOne({ _id: interviewId, userId });
+  if (!interview || interview.status !== 'completed') return null;
+
+  await _waitForScoring(interviewId);
+
+  const answers = await Answer.find({ interviewId }).lean();
+  const questions = await Question.find({ _id: { $in: interview.questionIds } }).lean();
+  const { categoryScores, overallScore } = scorer.aggregate(answers, questions);
+
+  const updated = await Interview.findByIdAndUpdate(
+    interviewId,
+    { overallScore, categoryScores },
+    { new: true }
+  );
+
+  return { overallScore, categoryScores, interview: updated.toObject() };
 }
 
 /**
@@ -446,4 +546,4 @@ async function getState(interviewId, userId) {
   return { interview, questions, answers, nextQuestion };
 }
 
-module.exports = { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete, getState };
+module.exports = { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete, reaggregateIfCompleted, getState };
