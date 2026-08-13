@@ -302,7 +302,7 @@ export default function SystemDesignPracticePage() {
                     <p className="text-xs text-slate-muted leading-relaxed mt-0.5">{evalResult.feedback}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`text-3xl font-bold ${evalResult.score >= 70 ? 'text-emerald-600 dark:text-emerald-400' : evalResult.score >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 dark:text-red-400'}`}>
+                    <p className={`text-3xl font-bold font-mono ${evalResult.score >= 70 ? 'text-emerald-600 dark:text-emerald-400' : evalResult.score >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 dark:text-red-400'}`}>
                       {evalResult.score}
                     </p>
                     <p className="text-[10px] text-slate-muted uppercase tracking-wider">/ 100</p>

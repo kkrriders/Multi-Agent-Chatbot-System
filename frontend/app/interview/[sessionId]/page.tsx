@@ -468,12 +468,12 @@ export default function ActiveInterviewPage() {
         <div className="flex justify-around">
           {(['relevance', 'depth', 'clarity'] as const).map(d => (
             <div key={d} className="text-center">
-              <div className={`font-bold text-sm ${sc[d] >= 80 ? 'text-primary' : sc[d] >= 60 ? 'text-tertiary-container' : 'text-error'}`}>{sc[d]}</div>
+              <div className={`font-mono font-bold text-sm ${sc[d] >= 80 ? 'text-primary' : sc[d] >= 60 ? 'text-tertiary-container' : 'text-error'}`}>{sc[d]}</div>
               <div className="text-slate-muted capitalize">{d}</div>
             </div>
           ))}
           <div className="text-center">
-            <div className={`font-bold text-sm ${sc.overall >= 80 ? 'text-primary' : sc.overall >= 60 ? 'text-tertiary-container' : 'text-error'}`}>{sc.overall}</div>
+            <div className={`font-mono font-bold text-sm ${sc.overall >= 80 ? 'text-primary' : sc.overall >= 60 ? 'text-tertiary-container' : 'text-error'}`}>{sc.overall}</div>
             <div className="text-slate-muted">Overall</div>
           </div>
         </div>
@@ -486,7 +486,7 @@ export default function ActiveInterviewPage() {
               </p>
               {discounted && (
                 <p className="text-error/80 mt-0.5">
-                  Content quality was {sc.rawOverall}, discounted to {sc.overall} for this reason.
+                  Content quality was <span className="font-mono">{sc.rawOverall}</span>, discounted to <span className="font-mono">{sc.overall}</span> for this reason.
                 </p>
               )}
               {describeIntegritySignals(flag.integritySignals).map((line, k) => (
@@ -505,7 +505,7 @@ export default function ActiveInterviewPage() {
     <div className="bg-background text-on-surface h-screen flex flex-col overflow-hidden font-sans">
       {/* Filler word toast */}
       {showFillerToast && (
-        <div className="absolute top-20 right-6 z-50 bg-surface-container-lowest/85 backdrop-blur-md border-l-4 border-l-tertiary-container border border-outline-variant/20 rounded-lg p-4 shadow-sm flex items-start gap-3 max-w-sm animate-in slide-in-from-top-2">
+        <div className="absolute top-20 right-6 z-50 bg-surface-container-lowest border-l-4 border-l-tertiary-container border border-outline-variant/20 rounded-lg p-4 shadow-sm flex items-start gap-3 max-w-sm animate-in slide-in-from-top-2">
           <span className="material-symbols-outlined text-tertiary-container mt-0.5 icon-fill">warning</span>
           <div>
             <p className="text-sm font-semibold text-on-surface mb-1">Filler word detected</p>
@@ -530,7 +530,7 @@ export default function ActiveInterviewPage() {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 text-right">
           {targetRole && <span className="text-sm font-semibold text-on-surface">{targetRole}</span>}
-          <span className="text-xs text-slate-muted">{currentIdx + 1} / {questions.length}</span>
+          <span className="text-xs font-mono text-slate-muted">{currentIdx + 1} / {questions.length}</span>
         </div>
       </header>
 
@@ -557,7 +557,7 @@ export default function ActiveInterviewPage() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-xs font-semibold text-slate-muted shrink-0">
-              {interviewerName} · Q{currentIdx + 1}/{questions.length}
+              {interviewerName} · <span className="font-mono">Q{currentIdx + 1}/{questions.length}</span>
             </span>
             {scoringIds.size > 0 && <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />}
           </div>
@@ -575,7 +575,7 @@ export default function ActiveInterviewPage() {
 
         {/* Left pane: AI Persona — hidden on mobile (replaced by compact banner above) */}
         <section className="hidden md:flex w-full md:w-56 lg:w-64 shrink-0 flex-col gap-4">
-          <div className={`bg-gradient-to-br ${persona.color} blueprint-card rounded-2xl p-5 flex flex-col items-center`}>
+          <div className="blueprint-card rounded-2xl p-5 flex flex-col items-center">
             <div className="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center mb-3 text-5xl">
               {interviewerName === 'Alex' ? '👨' : interviewerName === 'Priya' ? '👩' : '🧔'}
             </div>
@@ -593,7 +593,7 @@ export default function ActiveInterviewPage() {
           {/* Question mini-card */}
           <div className="blueprint-card rounded-xl p-4">
             <p className="text-xs font-semibold text-slate-muted uppercase tracking-wide mb-2">
-              {currentIdx + 1} of {questions.length} · {currentQuestion?.category?.replace('_', ' ')}
+              <span className="font-mono">{currentIdx + 1}</span> of <span className="font-mono">{questions.length}</span> · {currentQuestion?.category?.replace('_', ' ')}
             </p>
             <p className="text-sm text-on-surface leading-snug line-clamp-4">{currentQuestion?.text}</p>
             {currentQuestion?.difficulty && (
@@ -732,7 +732,7 @@ export default function ActiveInterviewPage() {
                       </span>
                       <div>
                         <p className={`font-semibold text-sm ${tr.passed === tr.total ? 'text-green-800 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-                          {tr.passed}/{tr.total} test cases passed
+                          <span className="font-mono">{tr.passed}/{tr.total}</span> test cases passed
                         </p>
                         {tr.passed < tr.total && <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">Check your logic and edge cases</p>}
                       </div>
@@ -888,7 +888,7 @@ export default function ActiveInterviewPage() {
                           }`}
                         >
                           <span className="material-symbols-outlined text-xl icon-fill">{speech.recording ? 'mic_off' : 'mic'}</span>
-                          {speech.recording ? `Stop (${formatTime(speech.durationSeconds)})` : 'Record'}
+                          {speech.recording ? <>Stop (<span className="font-mono">{formatTime(speech.durationSeconds)}</span>)</> : 'Record'}
                         </button>
                       )}
                       {mode === 'practice' && (

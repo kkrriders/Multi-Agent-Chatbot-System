@@ -107,7 +107,7 @@ export default function InterviewPreviewPage() {
         ) : (
           <>
             <p className="text-xs font-semibold text-slate-muted uppercase tracking-wider mb-2">
-              Question {index + 1} of {questions.length} · {current.category}
+              Question <span className="font-mono">{index + 1}</span> of <span className="font-mono">{questions.length}</span> · {current.category}
             </p>
             <h1 className="font-geist font-bold text-xl md:text-2xl text-on-background mb-6">{current.text}</h1>
 
@@ -133,7 +133,7 @@ export default function InterviewPreviewPage() {
             ) : (
               <div className="mt-4 blueprint-card rounded-xl p-5">
                 <div className="flex items-center gap-4 mb-3">
-                  <p className="text-3xl font-bold text-primary">{result.scores.overall}</p>
+                  <p className="font-mono text-3xl font-bold text-primary">{result.scores.overall}</p>
                   <p className="text-xs text-slate-muted uppercase tracking-wider">/ 100 overall</p>
                 </div>
                 <p className="text-sm text-on-surface mb-3">{result.evidence}</p>

@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { questions as questionsApi, type Question } from '@/lib/api'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { Nav } from '@/components/nav'
+import { Sidebar } from '@/components/sidebar'
+import { Topbar } from '@/components/Topbar'
 import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -72,14 +73,16 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Nav />
-      <div className="pt-14">
-        <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="bg-background text-on-background min-h-screen flex antialiased">
+      <Sidebar />
+      <Topbar title="Question Bank" />
+
+      <main className="flex-1 md:ml-64 p-4 md:p-12 max-w-[1280px] mx-auto w-full pb-24 md:pb-12 pt-20 md:pt-24">
+        <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold">Question Bank</h1>
-              <p className="text-muted-foreground text-sm">{total} questions</p>
+              <p className="text-muted-foreground text-sm"><span className="font-mono">{total}</span> questions</p>
             </div>
             <button
               onClick={() => setShowForm(s => !s)}
@@ -190,7 +193,7 @@ export default function QuestionsPage() {
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

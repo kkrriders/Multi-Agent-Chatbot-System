@@ -168,19 +168,19 @@ export default function AchievementsPage() {
         {/* Summary strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
           <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-bold text-4xl text-emerald-deep mb-1">{earnedCount}</div>
+            <div className="font-geist font-mono font-bold text-4xl text-emerald-deep mb-1">{earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Earned</div>
           </div>
           <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-bold text-4xl text-on-surface mb-1">{totalCount - earnedCount}</div>
+            <div className="font-geist font-mono font-bold text-4xl text-on-surface mb-1">{totalCount - earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Locked</div>
           </div>
           <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-bold text-4xl text-tertiary-container mb-1">{streak}</div>
+            <div className="font-geist font-mono font-bold text-4xl text-tertiary-container mb-1">{streak}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Day Streak</div>
           </div>
           <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-bold text-4xl text-primary mb-1">
+            <div className="font-geist font-mono font-bold text-4xl text-primary mb-1">
               {earnedCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0}%
             </div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Complete</div>
@@ -191,7 +191,7 @@ export default function AchievementsPage() {
         <div className="mb-10 blueprint-card rounded-xl p-6">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm font-semibold text-on-surface">Collection Progress</span>
-            <span className="text-sm text-slate-muted">{earnedCount} / {totalCount}</span>
+            <span className="text-sm text-slate-muted"><span className="font-mono">{earnedCount}</span> / <span className="font-mono">{totalCount}</span></span>
           </div>
           <div className="h-3 bg-surface-container rounded-full overflow-hidden">
             <div
@@ -212,7 +212,7 @@ export default function AchievementsPage() {
           <div className="mb-10">
             <h2 className="font-geist font-semibold text-2xl text-on-surface mb-5 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary icon-fill">workspace_premium</span>
-              Earned ({earnedCount})
+              Earned (<span className="font-mono">{earnedCount}</span>)
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {Object.entries(ALL_BADGES)
@@ -247,7 +247,7 @@ export default function AchievementsPage() {
 
                       <div className="mt-auto pt-2 border-t border-outline-variant/10 w-full">
                         <p className="text-[10px] text-slate-muted">
-                          Earned {new Date(ach.awardedAt).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          Earned <span className="font-mono">{new Date(ach.awardedAt).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         </p>
                       </div>
                     </div>
@@ -262,7 +262,7 @@ export default function AchievementsPage() {
           <div>
             <h2 className="font-geist font-semibold text-2xl text-on-surface mb-5 flex items-center gap-2">
               <span className="material-symbols-outlined text-slate-muted">lock</span>
-              Locked ({totalCount - earnedCount})
+              Locked (<span className="font-mono">{totalCount - earnedCount}</span>)
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {Object.entries(ALL_BADGES)

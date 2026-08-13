@@ -289,7 +289,7 @@ export default function CodingPracticePage() {
                         <p className="text-xs text-slate-muted">{evalResult.approachUsed}</p>
                       </div>
                       <div className="ml-auto text-right">
-                        <p className="text-2xl font-bold text-on-surface">{evalResult.score}</p>
+                        <p className="text-2xl font-bold font-mono text-on-surface">{evalResult.score}</p>
                         <p className="text-[10px] text-slate-muted uppercase tracking-wider">/ 100</p>
                       </div>
                       <button onClick={() => setEvalResult(null)} className="text-slate-400 hover:text-slate-600 ml-2">

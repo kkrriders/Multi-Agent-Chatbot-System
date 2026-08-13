@@ -143,7 +143,7 @@ export default function UploadPage() {
                     <span className="material-symbols-outlined text-secondary icon-fill">verified_user</span>
                     <div>
                       <p className="text-sm font-medium text-primary">{profile.name || 'Your CV'}</p>
-                      <p className="text-xs text-on-surface-variant">Parsed {profile.parsedAt ? new Date(profile.parsedAt).toLocaleDateString() : 'recently'}</p>
+                      <p className="text-xs text-on-surface-variant">Parsed <span className="font-mono">{profile.parsedAt ? new Date(profile.parsedAt).toLocaleDateString() : 'recently'}</span></p>
                     </div>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export default function UploadPage() {
                           />
                         </svg>
                         <div className="absolute flex flex-col items-center">
-                          <span className="font-heading text-3xl font-bold text-primary">{gaps.fitScore}%</span>
+                          <span className="font-heading font-mono text-3xl font-bold text-primary">{gaps.fitScore}%</span>
                           <span className="text-xs text-secondary">{gaps.fitScore >= 75 ? 'Strong Match' : gaps.fitScore >= 50 ? 'Good Match' : 'Needs Work'}</span>
                         </div>
                       </div>

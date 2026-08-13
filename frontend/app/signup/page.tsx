@@ -90,7 +90,7 @@ export default function SignupPage() {
         />
 
         {/* Left column — form */}
-        <section className="w-full lg:w-1/2 min-w-0 flex flex-col justify-center px-4 md:px-12 lg:px-[12%] py-24 z-10 relative bg-surface/80 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none border-r border-outline-variant/10">
+        <section className="w-full lg:w-1/2 min-w-0 flex flex-col justify-center px-4 md:px-12 lg:px-[12%] py-24 z-10 relative bg-surface lg:bg-transparent border-r border-outline-variant/10">
           <div className="max-w-md w-full mx-auto space-y-8">
             {/* Header */}
             <div className="space-y-3">
@@ -209,7 +209,7 @@ export default function SignupPage() {
           <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-primary-container/20 rounded-full blur-[80px]" />
           <div className="absolute bottom-[-10%] left-[-10%] w-80 h-80 bg-tertiary-fixed/30 rounded-full blur-[60px]" />
           <div className="relative z-10 w-full max-w-lg space-y-6">
-            <div className="bg-surface/60 backdrop-blur-md border border-outline-variant/20 rounded-xl p-8 shadow-sm">
+            <div className="blueprint-card rounded-xl p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
                   <span className="material-symbols-outlined text-primary text-[28px]">model_training</span>
@@ -231,7 +231,7 @@ export default function SignupPage() {
                 </div>
               </div>
             </div>
-            <div className="bg-surface/80 backdrop-blur-md border border-outline-variant/20 rounded-xl p-6 shadow-sm flex gap-4 ml-8">
+            <div className="blueprint-card rounded-xl p-6 flex gap-4 ml-8">
               <div className="w-12 h-12 rounded-full bg-emerald-deep/10 border-2 border-surface flex items-center justify-center flex-shrink-0 text-xl">👩</div>
               <div>
                 <p className="text-base text-on-surface-variant italic mb-2">

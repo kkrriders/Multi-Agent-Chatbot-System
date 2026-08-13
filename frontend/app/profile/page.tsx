@@ -200,7 +200,7 @@ export default function ProfilePage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-on-surface truncate">{cvFile.name}</p>
-                            <p className="text-xs text-slate-muted">{(cvFile.size / 1024).toFixed(0)} KB</p>
+                            <p className="text-xs text-slate-muted"><span className="font-mono">{(cvFile.size / 1024).toFixed(0)}</span> KB</p>
                           </div>
                         </div>
                         <button

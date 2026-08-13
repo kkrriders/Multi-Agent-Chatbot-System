@@ -61,6 +61,12 @@
   --color-surface-variant: #e0e3e5;
   --color-surface-tint: #565e74;
 
+  /* Card background — light mode uses pure white (surface-container-lowest)
+     for real separation from the near-white page background; dark mode keeps
+     surface-container (see .dark override below) since surface-container-lowest
+     would regress dark-mode card/page contrast (~1.22:1 -> ~1.08:1). */
+  --color-card-surface: var(--color-surface-container-lowest);
+
   /* On-surface */
   --color-on-surface: #191c1e;
   --color-on-surface-variant: #45464d;
@@ -153,6 +159,10 @@
   --color-surface-variant: #45464d;
   --color-surface-tint: #bec6e0;
 
+  /* Keep card background at surface-container in dark mode — already
+     sufficient contrast against the page (~1.22:1), unlike surface-container-lowest. */
+  --color-card-surface: var(--color-surface-container);
+
   --color-on-surface: #e3e2e6;
   --color-on-surface-variant: #c6c6cd;
   --color-on-background: #e3e2e6;
@@ -185,7 +195,7 @@
   /* Blueprint card — flat surface, hairline border, corner brackets (no blur). */
   .blueprint-card {
     position: relative;
-    background-color: var(--color-surface-container);
+    background-color: var(--color-card-surface);
     border: 1px solid var(--color-outline-variant);
     isolation: isolate;
     background-image:

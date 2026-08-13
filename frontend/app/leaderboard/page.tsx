@@ -53,14 +53,14 @@ export default function LeaderboardPage() {
             <div className="flex items-center gap-3 blueprint-card rounded-xl px-4 py-3 mb-6">
               <Flame className="w-6 h-6 text-orange-400 flex-shrink-0" />
               <div>
-                <p className="font-semibold">{streak}-day streak</p>
+                <p className="font-semibold"><span className="font-mono">{streak}</span>-day streak</p>
                 <p className="text-xs text-muted-foreground">Keep practicing daily to maintain it</p>
               </div>
             </div>
           )}
 
           <div className="mb-8">
-            <h2 className="font-semibold mb-4">Achievements ({achievements.length})</h2>
+            <h2 className="font-semibold mb-4">Achievements (<span className="font-mono">{achievements.length}</span>)</h2>
             {achievements.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {achievements.map(a => (
@@ -71,7 +71,7 @@ export default function LeaderboardPage() {
                     <div>
                       <p className="text-sm font-medium">{a.badge.label}</p>
                       <p className="text-xs text-muted-foreground">{a.badge.description}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{new Date(a.awardedAt).toLocaleDateString()}</p>
+                      <p className="font-mono text-xs text-muted-foreground mt-0.5">{new Date(a.awardedAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                 ))}
@@ -90,7 +90,7 @@ export default function LeaderboardPage() {
               <div className="space-y-2">
                 {leaderboard.map((s, i) => (
                   <div key={s._id} className="flex items-center gap-4 blueprint-card rounded-xl px-4 py-3">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-mono font-bold flex-shrink-0 ${
                       i === 0 ? 'bg-yellow-500/20 text-yellow-400' :
                       i === 1 ? 'bg-gray-400/20 text-gray-400' :
                       i === 2 ? 'bg-amber-600/20 text-amber-600' :
@@ -100,9 +100,9 @@ export default function LeaderboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{s.targetRole || 'Interview'}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{s.mode} · {new Date(s.completedAt).toLocaleDateString()}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{s.mode} · <span className="font-mono">{new Date(s.completedAt).toLocaleDateString()}</span></p>
                     </div>
-                    <div className={`text-lg font-bold ${
+                    <div className={`text-lg font-mono font-bold ${
                       s.overallScore >= 80 ? 'text-green-500' :
                       s.overallScore >= 60 ? 'text-yellow-500' : 'text-red-500'
                     }`}>

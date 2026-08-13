@@ -84,7 +84,7 @@ export default function ResultsPage() {
           <div>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary">Session Summary</h2>
             <p className="text-lg text-on-surface-variant mt-2">
-              {interview.targetRole || 'Mock Interview'} — {interview.mode} interview · {new Date(interview.completedAt || interview.createdAt).toLocaleDateString()}
+              {interview.targetRole || 'Mock Interview'} — {interview.mode} interview · <span className="font-mono">{new Date(interview.completedAt || interview.createdAt).toLocaleDateString()}</span>
             </p>
           </div>
           <div className="flex gap-2">
@@ -105,12 +105,12 @@ export default function ResultsPage() {
                 <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Overall Score</h3>
                 {delta != null && (
                   <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium border ${delta >= 0 ? 'bg-secondary/10 text-secondary border-secondary/20' : 'bg-error/10 text-error border-error/20'}`}>
-                    {delta >= 0 ? '+' : ''}{delta}% from last
+                    <span className="font-mono">{delta >= 0 ? '+' : ''}{delta}%</span> from last
                   </span>
                 )}
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="font-heading text-[56px] leading-none font-bold text-primary">{overallScore}</span>
+                <span className="font-heading font-mono text-[56px] leading-none font-bold text-primary">{overallScore}</span>
                 <span className="text-lg text-on-surface-variant">/ 100</span>
               </div>
               <p className="text-sm text-on-surface-variant mt-2">
@@ -150,7 +150,7 @@ export default function ResultsPage() {
                   <div key={cat}>
                     <div className="flex justify-between items-end mb-2">
                       <h4 className="font-semibold text-primary capitalize">{cat}</h4>
-                      <span className="font-heading text-xl font-bold text-primary">{sc.overall}<span className="text-sm text-on-surface-variant">/100</span></span>
+                      <span className="font-heading text-xl font-bold text-primary"><span className="font-mono">{sc.overall}</span><span className="text-sm text-on-surface-variant">/100</span></span>
                     </div>
                     <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
                       <div className={`h-full ${scoreBarColor(sc.overall)} rounded-full transition-all duration-700`} style={{ width: `${sc.overall}%` }} />
@@ -166,7 +166,7 @@ export default function ResultsPage() {
                   <div key={label}>
                     <div className="flex justify-between items-end mb-2">
                       <h4 className="font-semibold text-primary">{label}</h4>
-                      <span className="font-heading text-xl font-bold text-primary">{pct}<span className="text-sm text-on-surface-variant">/100</span></span>
+                      <span className="font-heading text-xl font-bold text-primary"><span className="font-mono">{pct}</span><span className="text-sm text-on-surface-variant">/100</span></span>
                     </div>
                     <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
                       <div className={`h-full ${scoreBarColor(pct)} rounded-full`} style={{ width: `${pct}%` }} />
@@ -193,11 +193,11 @@ export default function ResultsPage() {
               </div>
               <div className="grid grid-cols-2 gap-2 mb-6">
                 <div className="bg-surface/60 rounded-lg p-4 border border-outline-variant/10 text-center">
-                  <span className="block font-heading text-2xl font-bold text-primary">{totalFillers}</span>
+                  <span className="block font-heading font-mono text-2xl font-bold text-primary">{totalFillers}</span>
                   <span className="block text-xs text-on-surface-variant mt-1">Filler Words</span>
                 </div>
                 <div className="bg-surface/60 rounded-lg p-4 border border-outline-variant/10 text-center">
-                  <span className="block font-heading text-2xl font-bold text-primary">{avgWpm ?? '—'}</span>
+                  <span className="block font-heading font-mono text-2xl font-bold text-primary">{avgWpm ?? '—'}</span>
                   <span className="block text-xs text-on-surface-variant mt-1">Words / Min</span>
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function ResultsPage() {
                       className="w-full flex items-start justify-between gap-4 p-6 text-left hover:bg-surface-container-high/20 transition-colors"
                     >
                       <div>
-                        <span className="text-xs font-semibold text-secondary uppercase tracking-wider mb-1 block">Question {i + 1}{q?.category ? ` • ${q.category}` : ''}</span>
+                        <span className="text-xs font-semibold text-secondary uppercase tracking-wider mb-1 block">Question <span className="font-mono">{i + 1}</span>{q?.category ? ` • ${q.category}` : ''}</span>
                         <h4 className="text-base font-medium text-primary">{q?.text || 'Question'}</h4>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -248,7 +248,7 @@ export default function ResultsPage() {
                         )}
                         {a.scored && (
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${scoreBadgeClass(score)}`}>
-                            {score}/100
+                            <span className="font-mono">{score}</span>/100
                           </span>
                         )}
                         <span className="material-symbols-outlined text-slate-muted text-base">{isOpen ? 'expand_less' : 'expand_more'}</span>
@@ -284,7 +284,7 @@ export default function ResultsPage() {
                                 {a.integrityFlag === 'LIKELY_AI' ? 'Flagged as likely pasted / AI-generated' : 'Flagged as suspicious'}
                               </p>
                               {typeof a.scores.rawOverall === 'number' && a.scores.rawOverall !== score && (
-                                <p className="text-error/80 mt-0.5">Content quality was {a.scores.rawOverall}, discounted to {score} for this reason.</p>
+                                <p className="text-error/80 mt-0.5">Content quality was <span className="font-mono">{a.scores.rawOverall}</span>, discounted to <span className="font-mono">{score}</span> for this reason.</p>
                               )}
                               {describeIntegritySignals(a.integritySignals).map((line, k) => (
                                 <p key={k} className="text-error/80 mt-0.5">{line}</p>
@@ -296,7 +296,7 @@ export default function ResultsPage() {
                           <div className="grid grid-cols-3 gap-2">
                             {(['relevance', 'depth', 'clarity'] as const).map(dim => (
                               <div key={dim} className="border border-outline-variant/20 rounded-lg p-2 text-center bg-surface-container-lowest">
-                                <div className={`text-lg font-bold ${scoreBarColor(a.scores[dim]).replace('bg-', 'text-')}`}>{a.scores[dim]}</div>
+                                <div className={`text-lg font-bold font-mono ${scoreBarColor(a.scores[dim]).replace('bg-', 'text-')}`}>{a.scores[dim]}</div>
                                 <div className="text-xs text-slate-muted capitalize">{dim}</div>
                               </div>
                             ))}
@@ -375,7 +375,7 @@ function PanelFeedbackSection({ feedback }: {
                   <span className="font-semibold text-on-surface capitalize">{key}</span>
                   <span className="text-xs text-slate-muted block">{cfg.role}</span>
                 </div>
-                <span className={`ml-auto text-xl font-bold ${pf.score >= 80 ? 'text-primary' : pf.score >= 60 ? 'text-tertiary-container' : 'text-error'}`}>
+                <span className={`ml-auto text-xl font-bold font-mono ${pf.score >= 80 ? 'text-primary' : pf.score >= 60 ? 'text-tertiary-container' : 'text-error'}`}>
                   {pf.score}
                 </span>
               </div>

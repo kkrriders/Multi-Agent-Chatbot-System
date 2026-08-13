@@ -99,7 +99,7 @@ export default function DashboardPage() {
               {streak > 0 && (
                 <div className="bg-secondary-container/10 px-2 py-1 rounded-full border border-secondary/20 flex items-center gap-1 shrink-0">
                   <span className="material-symbols-outlined text-secondary text-base icon-fill">local_fire_department</span>
-                  <span className="text-xs font-semibold text-secondary">{streak} Day Streak</span>
+                  <span className="text-xs font-semibold text-secondary"><span className="font-mono">{streak}</span> Day Streak</span>
                 </div>
               )}
             </div>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                       <td className="py-4 px-6 text-sm text-on-surface font-medium">
                         {s.targetRole || 'Interview'} <span className="text-on-surface-variant capitalize font-normal">— {s.mode}</span>
                       </td>
-                      <td className="py-4 px-6 text-sm text-on-surface-variant">{new Date(s.createdAt).toLocaleDateString()}</td>
+                      <td className="py-4 px-6 text-sm text-on-surface-variant font-mono">{new Date(s.createdAt).toLocaleDateString()}</td>
                       <td className="py-4 px-6">
                         {s.overallScore != null ? (
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border ${scoreBadgeClass(s.overallScore)}`}>

@@ -464,7 +464,7 @@ export default function InterviewSetupPage() {
                 <div>
                   <label className="text-sm font-semibold text-on-surface mb-1 block">
                     Number of Questions
-                    <span className="ml-2 text-slate-muted font-normal">({numQuestions} selected)</span>
+                    <span className="ml-2 text-slate-muted font-normal">(<span className="font-mono">{numQuestions}</span> selected)</span>
                   </label>
                   <p className="text-xs text-slate-muted mb-3">More questions = longer session but broader coverage.</p>
                   <div className="flex flex-wrap gap-2">
@@ -490,7 +490,7 @@ export default function InterviewSetupPage() {
                     <label className="text-sm font-semibold text-on-surface mb-1 block">
                       Time per Question
                       <span className="ml-2 text-slate-muted font-normal">
-                        ({TIME_LIMITS.find(t => t.value === timeLimitPerQuestion)?.label})
+                        (<span className="font-mono">{TIME_LIMITS.find(t => t.value === timeLimitPerQuestion)?.label}</span>)
                       </span>
                     </label>
                     <p className="text-xs text-slate-muted mb-3">Strict cutoff — answer must be submitted before time runs out.</p>
@@ -520,9 +520,9 @@ export default function InterviewSetupPage() {
             <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               {showConfig && (
                 <p className="text-xs text-slate-muted">
-                  Session: <span className="font-medium text-on-surface">{numQuestions} questions</span>
+                  Session: <span className="font-medium text-on-surface"><span className="font-mono">{numQuestions}</span> questions</span>
                   {mode === 'timed' && (
-                    <> · <span className="font-medium text-on-surface">{TIME_LIMITS.find(t => t.value === timeLimitPerQuestion)?.label} each</span></>
+                    <> · <span className="font-medium text-on-surface"><span className="font-mono">{TIME_LIMITS.find(t => t.value === timeLimitPerQuestion)?.label}</span> each</span></>
                   )}
                 </p>
               )}

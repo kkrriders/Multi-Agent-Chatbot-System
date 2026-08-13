@@ -84,7 +84,7 @@ export default function ProgressPage() {
               </div>
               <div className="flex items-center gap-2 bg-primary-container/10 px-3 py-1.5 rounded-full border border-primary/20">
                 <span className="material-symbols-outlined text-primary text-lg">trending_up</span>
-                <span className="text-sm font-semibold text-primary">+12%</span>
+                <span className="font-mono text-sm font-semibold text-primary">+12%</span>
               </div>
             </div>
             {chartData.length > 1 ? (
@@ -205,12 +205,12 @@ export default function ProgressPage() {
                     </div>
                     <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end border-t border-outline-variant/10 sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
                       <div className="text-left sm:text-right">
-                        <div className="text-sm font-semibold text-on-surface">{new Date(s.completedAt || s.createdAt).toLocaleDateString()}</div>
-                        {s.durationSeconds && <div className="text-xs text-slate-muted">{Math.round(s.durationSeconds / 60)} mins</div>}
+                        <div className="font-mono text-sm font-semibold text-on-surface">{new Date(s.completedAt || s.createdAt).toLocaleDateString()}</div>
+                        {s.durationSeconds && <div className="text-xs text-slate-muted"><span className="font-mono">{Math.round(s.durationSeconds / 60)}</span> mins</div>}
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex flex-col items-end">
-                          <span className={`font-heading font-bold text-2xl leading-none ${scoreColor}`}>{score}</span>
+                          <span className={`font-heading font-mono font-bold text-2xl leading-none ${scoreColor}`}>{score}</span>
                           <span className={`text-xs ${scoreColor}`}>{scoreLabel}</span>
                         </div>
                         <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
