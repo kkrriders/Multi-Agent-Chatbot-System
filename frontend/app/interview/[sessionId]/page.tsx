@@ -445,7 +445,7 @@ export default function ActiveInterviewPage() {
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
         <span className="material-symbols-outlined text-primary text-6xl icon-fill mb-3 block">check_circle</span>
-        <p className="font-geist font-semibold text-xl text-on-surface mb-4">All questions answered</p>
+        <p className="font-heading font-semibold text-xl text-on-surface mb-4">All questions answered</p>
         <button onClick={handleComplete} disabled={completing} className="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold disabled:opacity-60 flex items-center gap-2 mx-auto">
           {completing ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>Finishing…</> : 'View Results'}
         </button>
@@ -463,8 +463,8 @@ export default function ActiveInterviewPage() {
     const flag = integrity[lastId]
     const discounted = typeof sc.rawOverall === 'number' && sc.rawOverall !== sc.overall
     return (
-      <div className="mt-4 w-full bg-surface rounded-lg p-3 border border-outline-variant/20 text-xs">
-        <p className="text-slate-muted font-medium mb-2 text-center">Last Score</p>
+      <div className="panel mt-4 w-full rounded-lg p-3 text-xs">
+        <div className="tag justify-center mb-2"><span className="tag-dot" />Last Score</div>
         <div className="flex justify-around">
           {(['relevance', 'depth', 'clarity'] as const).map(d => (
             <div key={d} className="text-center">
@@ -575,11 +575,11 @@ export default function ActiveInterviewPage() {
 
         {/* Left pane: AI Persona — hidden on mobile (replaced by compact banner above) */}
         <section className="hidden md:flex w-full md:w-56 lg:w-64 shrink-0 flex-col gap-4">
-          <div className="blueprint-card rounded-2xl p-5 flex flex-col items-center">
+          <div className="panel rounded-2xl p-5 flex flex-col items-center">
             <div className="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center mb-3 text-5xl">
               {interviewerName === 'Alex' ? '👨' : interviewerName === 'Priya' ? '👩' : '🧔'}
             </div>
-            <h2 className="font-geist font-semibold text-lg text-on-surface mb-0.5">{interviewerName}</h2>
+            <h2 className="font-heading font-semibold text-lg text-on-surface mb-0.5">{interviewerName}</h2>
             <p className="text-xs text-slate-muted mb-3 text-center">{persona.role}</p>
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
               speech.recording ? 'bg-error-container/20 text-error' : 'bg-surface-container text-on-surface-variant'
@@ -591,7 +591,7 @@ export default function ActiveInterviewPage() {
           </div>
 
           {/* Question mini-card */}
-          <div className="blueprint-card rounded-xl p-4">
+          <div className="panel rounded-xl p-4">
             <p className="text-xs font-semibold text-slate-muted uppercase tracking-wide mb-2">
               <span className="font-mono">{currentIdx + 1}</span> of <span className="font-mono">{questions.length}</span> · {currentQuestion?.category?.replace('_', ' ')}
             </p>
@@ -607,7 +607,7 @@ export default function ActiveInterviewPage() {
         </section>
 
         {/* Right pane: format-specific workspace */}
-        <section className="flex-1 flex flex-col blueprint-card rounded-xl overflow-hidden min-w-0">
+        <section className="flex-1 flex flex-col panel rounded-xl overflow-hidden min-w-0">
 
           {/* ── SYSTEM DESIGN ───────────────────────────────────────────────── */}
           {questionFormat === 'system_design' && (
@@ -642,7 +642,7 @@ export default function ActiveInterviewPage() {
 
                 {/* Evaluation rubric hints */}
                 {currentQuestion?.evaluationRubric && currentQuestion.evaluationRubric.length > 0 && (
-                  <div className="blueprint-card rounded-xl p-4">
+                  <div className="panel rounded-xl p-4">
                     <p className="text-xs font-semibold text-slate-muted uppercase tracking-wide mb-2">What a complete answer should cover</p>
                     <ul className="space-y-1">
                       {currentQuestion.evaluationRubric.map((r, i) => (
@@ -805,17 +805,13 @@ export default function ActiveInterviewPage() {
                 {messages.map(msg => (
                   <div key={msg.id} className={`flex flex-col max-w-[85%] ${msg.role === 'ai' ? 'self-start' : 'self-end items-end'}`}>
                     <span className="text-xs text-slate-muted mb-1 mx-1">{msg.role === 'ai' ? (msg.interviewer || 'Alex') : 'You'}</span>
-                    <div className={`p-4 rounded-2xl text-base leading-relaxed ${
-                      msg.role === 'ai'
-                        ? 'bg-surface-container-low text-on-surface rounded-tl-sm'
-                        : 'bg-primary-container/10 border border-primary/10 text-on-surface rounded-tr-sm'
-                    }`}>{msg.text}</div>
+                    <div className={`bubble text-base leading-relaxed ${msg.role === 'ai' ? 'bubble-q' : 'bubble-a'}`}>{msg.text}</div>
                   </div>
                 ))}
                 {speech.recording && speech.interim && (
                   <div className="flex flex-col max-w-[85%] self-end items-end">
                     <span className="text-xs text-slate-muted mb-1 mr-1">You</span>
-                    <div className="bg-primary-container/10 border border-primary/10 text-on-surface p-4 rounded-2xl rounded-tr-sm text-base">
+                    <div className="bubble bubble-a text-base">
                       {speech.interim}<span className="inline-block w-1.5 h-4 bg-primary ml-1 animate-pulse align-middle" />
                     </div>
                   </div>

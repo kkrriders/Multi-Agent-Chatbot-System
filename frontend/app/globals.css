@@ -6,16 +6,16 @@
   /* Base fonts */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-geist: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --font-heading: 'Hanken Grotesk', var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Semantic colors (used by shadcn/sonner) */
-  --color-background: #f7f9fb;
+  --color-background: #f7f4ee;
   --color-foreground: #191c1e;
   --color-border: #c6c6cd;
   --color-primary: #0F172A;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #475569;
+  --color-secondary: #7a7160;
   --color-secondary-foreground: #ffffff;
   --color-muted: #eceef0;
   --color-muted-foreground: #45464d;
@@ -23,19 +23,20 @@
   --color-accent-foreground: #191c1e;
   --color-destructive: #ba1a1a;
   --color-destructive-foreground: #ffffff;
-  --radius: 0.1875rem;
-  --radius-sm: 0.1875rem;
-  --radius-md: 0.1875rem;
-  --radius-lg: 0.1875rem;
-  --radius-xl: 0.25rem;
-  --radius-2xl: 0.25rem;
-  --radius-3xl: 0.25rem;
+  --radius: 0.5rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
 
-  /* Hard, minimal-blur shadows — replaces Tailwind's soft default blur scale */
-  --shadow-sm: 1px 1px 0 0 rgb(0 0 0 / 0.12);
-  --shadow-md: 2px 2px 0 0 rgb(0 0 0 / 0.14);
-  --shadow-lg: 2px 2px 0 0 rgb(0 0 0 / 0.18);
-  --shadow-xl: 3px 3px 0 0 rgb(0 0 0 / 0.2);
+  /* Soft, blurred elevation shadows — Session Console's replacement for the prior
+     hard-offset scale. */
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px -1px rgb(0 0 0 / 0.12);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.15), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.2), 0 4px 8px -4px rgb(0 0 0 / 0.15);
+  --shadow-xl: 0 24px 48px -12px rgb(0 0 0 / 0.25);
 
   /* === Luminous Intelligence design tokens === */
 
@@ -46,12 +47,17 @@
   --color-amber-light: #FEF3C7;
   --color-white: #FFFFFF;
 
-  /* Blueprint accent — corner brackets, annotations, highlighted metrics */
-  --color-accent-warn: #f59e0b;
+  /* Session Console bronze accent — brand/UI chrome only (nav dots, tags, panel
+     highlights, buttons, glow). Never used for score values — the existing score-tier
+     colors (primary/tertiary/error) stay separate to avoid a bronze score reading as a
+     warning. */
+  --color-accent-warn: #a5641a;
+  --color-accent-warn-dim: #a5641a;
+  --color-accent-warn-deep: #8a5015;
 
   /* Surface layers */
-  --color-surface: #f7f9fb;
-  --color-surface-bright: #f7f9fb;
+  --color-surface: #f7f4ee;
+  --color-surface-bright: #f7f4ee;
   --color-surface-dim: #d8dadc;
   --color-surface-container: #eceef0;
   --color-surface-container-low: #f2f4f6;
@@ -68,15 +74,15 @@
   --color-card-surface: var(--color-surface-container-lowest);
 
   /* On-surface */
-  --color-on-surface: #191c1e;
-  --color-on-surface-variant: #45464d;
-  --color-on-background: #191c1e;
+  --color-on-surface: #211c14;
+  --color-on-surface-variant: #5c5548;
+  --color-on-background: #211c14;
   --color-inverse-surface: #2d3133;
   --color-inverse-on-surface: #eff1f3;
 
   /* Outline */
-  --color-outline: #76777d;
-  --color-outline-variant: #c6c6cd;
+  --color-outline: #948a72;
+  --color-outline-variant: #e3ddd0;
 
   /* Primary scale — Midnight Navy */
   --color-on-primary: #ffffff;
@@ -119,11 +125,12 @@
   --color-background: #0b0f1a;
   --color-foreground: #e3e2e6;
   --color-border: #63656f;
-  /* Primary stays a rich, saturated blue (never a pale tint) — components
-     hardcode `text-white` against bg-primary throughout the app, so this
-     value must always be dark/saturated enough for white text on top of it,
-     in both themes. No indigo/violet — this is straight blue (~217° hue). */
-  --color-primary: #2563eb;
+  /* Primary stays legible with white text on top (components hardcode
+     `text-white` against bg-primary throughout the app), but toned down from
+     the earlier neon #2563eb — that read as too loud/saturated next to the
+     Session Console bronze accent and near-black panels. Muted, still
+     recognizably the brand blue (~217° hue), no indigo/violet. */
+  --color-primary: #3b5a94;
   --color-primary-foreground: #ffffff;
   /* text-secondary is used as muted BODY TEXT throughout the app (hero copy,
      card descriptions) — must be clearly legible against the near-black
@@ -138,12 +145,16 @@
   --color-destructive-foreground: #690005;
 
   /* emerald-deep is used as accent TEXT/icon color (needs to read against a
-     dark page) — a brighter blue-400 tint, same hue family as primary. */
-  --color-emerald-deep: #60a5fa;
+     dark page) — same hue family as primary, but muted rather than the
+     earlier bright blue-400 tint, which is what made icons/scores/wordmark
+     read as "blue everywhere" alongside the bronze accent. */
+  --color-emerald-deep: #8ea3c7;
   --color-ink: #e3e2e6;
   --color-slate-muted: #94a3b8;
   --color-amber-light: #4a3b00;
-  --color-accent-warn: #fbbf24;
+  --color-accent-warn: #e6a13d;
+  --color-accent-warn-dim: #d9922e;
+  --color-accent-warn-deep: #c17f1f;
 
   /* Elevation ramp — each step must be LIGHTER than the last so cards visibly
      "pop" off the page background, same relationship as light mode (where
@@ -192,44 +203,113 @@
 }
 
 @layer components {
-  /* Blueprint card — flat surface, hairline border, corner brackets (no blur). */
-  .blueprint-card {
+  /* Panel — the elevated card, replaces .blueprint-card. Gradient + soft shadow in dark,
+     solid white + soft shadow in light. */
+  .panel {
     position: relative;
-    background-color: var(--color-card-surface);
     border: 1px solid var(--color-outline-variant);
-    isolation: isolate;
-    background-image:
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn)),
-      linear-gradient(var(--color-accent-warn), var(--color-accent-warn));
-    background-repeat: no-repeat;
-    background-size:
-      10px 2px, 2px 10px,
-      10px 2px, 2px 10px,
-      10px 2px, 2px 10px,
-      10px 2px, 2px 10px;
-    background-position:
-      top 0 left 0, top 0 left 0,
-      top 0 right 0, top 0 right 0,
-      bottom 0 left 0, bottom 0 left 0,
-      bottom 0 right 0, bottom 0 right 0;
+    background-color: var(--color-card-surface);
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-card-surface) 100%, white 4%) 0%, var(--color-card-surface) 100%);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgb(255 255 255 / 0.03);
   }
-  /* Flat nav/header chrome — no blur, hairline bottom border. */
-  .blueprint-nav {
+
+  /* Flat nav/header chrome, replaces .blueprint-nav — no gradient, no glow, stays quiet. */
+  .console-nav {
     background-color: var(--color-surface);
     border-bottom: 1px solid var(--color-outline-variant);
   }
-  /* Subtle graph-paper texture for hero/section backgrounds only. */
-  .blueprint-grid {
+
+  /* Small mono-uppercase label with a leading colored dot. Used for section labels
+     ("LIVE MOCK SESSION", "SELECT MODE") and stat-tile headers. */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant);
+  }
+  .tag-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-accent-warn-dim);
+    box-shadow: 0 0 6px var(--color-accent-warn-dim);
+    flex-shrink: 0;
+  }
+
+  /* Chat-style question/answer bubble. Used decoratively on the landing hero and literally
+     as the live interview transcript UI. */
+  .bubble {
+    border-radius: var(--radius-lg);
+    padding: 0.8rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    max-width: 88%;
+    box-shadow: var(--shadow-sm);
+  }
+  .bubble-q {
+    background-color: var(--color-surface-container-low);
+    color: var(--color-on-surface);
+    border: 1px solid var(--color-outline-variant);
+    align-self: flex-start;
+  }
+  .bubble-a {
+    background-image: linear-gradient(155deg, color-mix(in srgb, var(--color-accent-warn) 18%, var(--color-card-surface)), var(--color-card-surface));
+    color: var(--color-on-surface);
+    border: 1px solid color-mix(in srgb, var(--color-accent-warn) 30%, var(--color-outline-variant));
+    align-self: flex-end;
+    margin-left: auto;
+  }
+
+  /* Live scoring readout — number + label, lifted slightly above its parent panel with its
+     own glow. Used on the landing hero mock transcript and the real interview score chip. */
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    background-image: linear-gradient(155deg, color-mix(in srgb, var(--color-accent-warn) 14%, var(--color-card-surface)), var(--color-card-surface));
+    border: 1px solid color-mix(in srgb, var(--color-accent-warn) 28%, var(--color-outline-variant));
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--color-accent-warn) 35%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.04);
+    transform: translateY(-2px);
+  }
+  .score-row-value {
+    color: var(--color-accent-warn);
+    font-weight: 700;
+    font-size: 1.125rem;
+  }
+
+  /* Stat tile — .tag header + large mono tabular-number value. */
+  .stat-tile-value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  /* Ambient radial glow for hero/marketing sections only — never inside dense card grids. */
+  .glow-hero {
     background-image:
-      linear-gradient(color-mix(in srgb, var(--color-on-surface) 6%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--color-on-surface) 6%, transparent) 1px, transparent 1px);
-    background-size: 40px 40px;
+      radial-gradient(ellipse 900px 500px at 20% 0%, color-mix(in srgb, var(--color-accent-warn) 10%, transparent), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 100%, color-mix(in srgb, var(--color-accent-warn) 6%, transparent), transparent 60%);
+  }
+
+  /* Subtle grain texture, dark mode only, hero/marketing sections only. */
+  .grain {
+    position: relative;
+  }
+  .dark .grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
 

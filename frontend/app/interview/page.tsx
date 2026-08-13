@@ -186,7 +186,7 @@ export default function InterviewSetupPage() {
               <span className="material-symbols-outlined text-base mr-1">arrow_back</span>
               Back to Dashboard
             </Link>
-            <h1 className="font-geist font-bold text-3xl md:text-5xl text-on-background mb-3">Configure Your Session</h1>
+            <h1 className="font-heading font-bold text-3xl md:text-5xl text-on-background mb-3">Configure Your Session</h1>
             <p className="text-base md:text-lg text-slate-muted max-w-2xl">
               Tailor your interview experience to match your upcoming goals.
             </p>
@@ -205,7 +205,7 @@ export default function InterviewSetupPage() {
 
           {/* CV section */}
           {user && !cvChecking && (
-            <div className={`blueprint-card rounded-2xl mb-8 transition-all ${
+            <div className={`panel rounded-2xl mb-8 transition-all ${
               cvMissing ? 'border-2 border-amber-200 dark:border-amber-800' : ''
             }`}>
               <div className="flex items-center justify-between p-5 md:p-6">
@@ -295,12 +295,12 @@ export default function InterviewSetupPage() {
           )}
 
           {/* Section 1: Context */}
-          <div className="blueprint-card rounded-2xl p-6 md:p-8 mb-8">
+          <div className="panel rounded-2xl p-6 md:p-8 mb-8">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">1</span>
               </div>
-              <h2 className="font-geist font-semibold text-xl md:text-2xl text-on-background">Interview Context</h2>
+              <h2 className="font-heading font-semibold text-xl md:text-2xl text-on-background">Interview Context</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="flex flex-col">
@@ -417,14 +417,14 @@ export default function InterviewSetupPage() {
               <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                 <span className="text-sm font-semibold text-primary">2</span>
               </div>
-              <h2 className="font-geist font-semibold text-xl md:text-2xl text-on-background">Select Mode</h2>
+              <h2 className="font-heading font-semibold text-xl md:text-2xl text-on-background">Select Mode</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               {MODES.map(m => (
                 <button
                   key={m.id}
                   onClick={() => setMode(m.id)}
-                  className={`text-left cursor-pointer blueprint-card border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-0.5 ${
+                  className={`text-left cursor-pointer panel border-2 rounded-2xl p-5 md:p-6 h-full relative overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-0.5 ${
                     mode === m.id ? 'border-primary' : 'border-transparent hover:border-outline-variant/40'
                   }`}
                 >
@@ -434,7 +434,7 @@ export default function InterviewSetupPage() {
                   <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${m.iconBg} flex items-center justify-center mb-3 md:mb-4`}>
                     <span className="material-symbols-outlined">{m.icon}</span>
                   </div>
-                  <h3 className="font-geist font-semibold text-xl md:text-2xl text-on-background mb-2">{m.label}</h3>
+                  <h3 className="font-heading font-semibold text-xl md:text-2xl text-on-background mb-2">{m.label}</h3>
                   <p className="text-sm md:text-base text-slate-muted mb-4 flex-grow">{m.desc}</p>
                   <ul className="space-y-1.5 mt-auto">
                     {m.features.map(f => (
@@ -451,12 +451,12 @@ export default function InterviewSetupPage() {
 
           {/* Section 3: Session Settings (practice / timed only) */}
           {showConfig && (
-            <div className="blueprint-card rounded-2xl p-6 md:p-8 mb-8">
+            <div className="panel rounded-2xl p-6 md:p-8 mb-8">
               <div className="flex items-center mb-6">
                 <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center mr-3">
                   <span className="text-sm font-semibold text-primary">3</span>
                 </div>
-                <h2 className="font-geist font-semibold text-xl md:text-2xl text-on-background">Session Settings</h2>
+                <h2 className="font-heading font-semibold text-xl md:text-2xl text-on-background">Session Settings</h2>
               </div>
 
               <div className="space-y-6">

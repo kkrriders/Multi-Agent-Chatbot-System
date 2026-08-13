@@ -131,3 +131,6 @@ multi-agent-chatbot/.env*
 # Superpowers subagent-driven-development scratch workspace
 .superpowers/
 
+# Docs folder
+docs/
+

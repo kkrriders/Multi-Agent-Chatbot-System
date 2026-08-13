@@ -93,7 +93,7 @@ export default function QuestionsPage() {
           </div>
 
           {showForm && (
-            <form onSubmit={handleCreate} className="blueprint-card rounded-xl p-5 mb-6 space-y-4">
+            <form onSubmit={handleCreate} className="panel rounded-xl p-5 mb-6 space-y-4">
               <h2 className="font-semibold">New Question</h2>
               <textarea
                 value={form.text} onChange={e => setForm(f => ({ ...f, text: e.target.value }))}
@@ -177,7 +177,7 @@ export default function QuestionsPage() {
           ) : (
             <div className="space-y-2">
               {items.map(q => (
-                <div key={q.id} className="flex items-start gap-4 blueprint-card rounded-xl px-4 py-3">
+                <div key={q.id} className="flex items-start gap-4 panel rounded-xl px-4 py-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm">{q.text}</p>
                     <div className="flex flex-wrap gap-1.5 mt-2">

@@ -86,7 +86,7 @@ export default function InterviewPreviewPage() {
           Exit preview
         </Link>
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-slate-muted uppercase tracking-wider capitalize">{mode} preview</span>
+          <span className="tag capitalize"><span className="tag-dot" />{mode} preview</span>
           <ThemeToggle />
         </div>
       </header>
@@ -97,7 +97,7 @@ export default function InterviewPreviewPage() {
         ) : !current ? (
           <div className="text-center py-16">
             <span className="material-symbols-outlined text-primary text-5xl icon-fill mb-4">check_circle</span>
-            <h1 className="font-geist font-bold text-2xl md:text-3xl mb-2">Nice work!</h1>
+            <h1 className="font-heading font-bold text-2xl md:text-3xl mb-2">Nice work!</h1>
             <p className="text-slate-muted mb-8">That's the end of your free preview. Create a free account for full personalised sessions, unlimited practice, and progress tracking.</p>
             <div className="flex items-center justify-center gap-3">
               <Link href="/login" className="text-sm font-semibold text-primary px-5 py-2.5 rounded-lg border border-primary/30 hover:bg-primary-container/10 transition-colors">Log in</Link>
@@ -106,10 +106,10 @@ export default function InterviewPreviewPage() {
           </div>
         ) : (
           <>
-            <p className="text-xs font-semibold text-slate-muted uppercase tracking-wider mb-2">
+            <div className="tag mb-2"><span className="tag-dot" />
               Question <span className="font-mono">{index + 1}</span> of <span className="font-mono">{questions.length}</span> · {current.category}
-            </p>
-            <h1 className="font-geist font-bold text-xl md:text-2xl text-on-background mb-6">{current.text}</h1>
+            </div>
+            <h1 className="font-heading font-bold text-xl md:text-2xl text-on-background mb-6">{current.text}</h1>
 
             <textarea
               value={answer}
@@ -131,9 +131,9 @@ export default function InterviewPreviewPage() {
                 {scoring ? <><span className="material-symbols-outlined animate-spin text-base">sync</span>Scoring…</> : 'Submit answer'}
               </button>
             ) : (
-              <div className="mt-4 blueprint-card rounded-xl p-5">
+              <div className="mt-4 panel rounded-xl p-5">
                 <div className="flex items-center gap-4 mb-3">
-                  <p className="font-mono text-3xl font-bold text-primary">{result.scores.overall}</p>
+                  <p className="stat-tile-value font-mono text-3xl text-primary">{result.scores.overall}</p>
                   <p className="text-xs text-slate-muted uppercase tracking-wider">/ 100 overall</p>
                 </div>
                 <p className="text-sm text-on-surface mb-3">{result.evidence}</p>

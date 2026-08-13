@@ -161,26 +161,26 @@ export default function AchievementsPage() {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="font-geist font-bold text-4xl md:text-5xl text-on-background mb-2">Achievements</h1>
+          <h1 className="font-heading font-bold text-4xl md:text-5xl text-on-background mb-2">Achievements</h1>
           <p className="text-lg text-slate-muted">Badges earned through consistent practice and strong performance.</p>
         </div>
 
         {/* Summary strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-          <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-mono font-bold text-4xl text-emerald-deep mb-1">{earnedCount}</div>
+          <div className="panel rounded-xl p-5 text-center">
+            <div className="stat-tile-value font-geist font-mono font-bold text-4xl text-emerald-deep mb-1">{earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Earned</div>
           </div>
-          <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-mono font-bold text-4xl text-on-surface mb-1">{totalCount - earnedCount}</div>
+          <div className="panel rounded-xl p-5 text-center">
+            <div className="stat-tile-value font-geist font-mono font-bold text-4xl text-on-surface mb-1">{totalCount - earnedCount}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Locked</div>
           </div>
-          <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-mono font-bold text-4xl text-tertiary-container mb-1">{streak}</div>
+          <div className="panel rounded-xl p-5 text-center">
+            <div className="stat-tile-value font-geist font-mono font-bold text-4xl text-tertiary-container mb-1">{streak}</div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Day Streak</div>
           </div>
-          <div className="blueprint-card rounded-xl p-5 text-center">
-            <div className="font-geist font-mono font-bold text-4xl text-primary mb-1">
+          <div className="panel rounded-xl p-5 text-center">
+            <div className="stat-tile-value font-geist font-mono font-bold text-4xl text-primary mb-1">
               {earnedCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0}%
             </div>
             <div className="text-xs text-slate-muted font-medium uppercase tracking-wider">Complete</div>
@@ -188,7 +188,7 @@ export default function AchievementsPage() {
         </div>
 
         {/* Progress bar */}
-        <div className="mb-10 blueprint-card rounded-xl p-6">
+        <div className="mb-10 panel rounded-xl p-6">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm font-semibold text-on-surface">Collection Progress</span>
             <span className="text-sm text-slate-muted"><span className="font-mono">{earnedCount}</span> / <span className="font-mono">{totalCount}</span></span>
@@ -210,7 +210,7 @@ export default function AchievementsPage() {
         {/* Earned section */}
         {earnedCount > 0 && (
           <div className="mb-10">
-            <h2 className="font-geist font-semibold text-2xl text-on-surface mb-5 flex items-center gap-2">
+            <h2 className="font-heading font-semibold text-2xl text-on-surface mb-5 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary icon-fill">workspace_premium</span>
               Earned (<span className="font-mono">{earnedCount}</span>)
             </h2>
@@ -224,7 +224,7 @@ export default function AchievementsPage() {
                   return (
                     <div
                       key={type}
-                      className={`blueprint-card rounded-xl p-6 flex flex-col items-center text-center ring-2 ${tier.ring} hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
+                      className={`panel rounded-xl p-6 flex flex-col items-center text-center ring-2 ${tier.ring} hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
                     >
                       {/* Tier label */}
                       <span className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${tier.color}`}>
@@ -236,7 +236,7 @@ export default function AchievementsPage() {
                         <span className={`material-symbols-outlined text-3xl icon-fill ${def.iconColor}`}>{def.icon}</span>
                       </div>
 
-                      <h3 className="font-geist font-bold text-base text-on-surface mb-1">{def.label}</h3>
+                      <h3 className="font-heading font-bold text-base text-on-surface mb-1">{def.label}</h3>
                       <p className="text-xs text-slate-muted leading-relaxed mb-3">{def.description}</p>
 
                       {meta && (
@@ -260,7 +260,7 @@ export default function AchievementsPage() {
         {/* Locked section */}
         {earnedCount < totalCount && (
           <div>
-            <h2 className="font-geist font-semibold text-2xl text-on-surface mb-5 flex items-center gap-2">
+            <h2 className="font-heading font-semibold text-2xl text-on-surface mb-5 flex items-center gap-2">
               <span className="material-symbols-outlined text-slate-muted">lock</span>
               Locked (<span className="font-mono">{totalCount - earnedCount}</span>)
             </h2>
@@ -285,7 +285,7 @@ export default function AchievementsPage() {
                       </div>
                     </div>
 
-                    <h3 className="font-geist font-bold text-base text-on-surface-variant mb-1">{def.label}</h3>
+                    <h3 className="font-heading font-bold text-base text-on-surface-variant mb-1">{def.label}</h3>
                     <p className="text-xs text-slate-muted leading-relaxed mb-3">{def.description}</p>
 
                     <div className="mt-auto pt-2 border-t border-outline-variant/10 w-full">
@@ -301,7 +301,7 @@ export default function AchievementsPage() {
         {earnedCount === 0 && (
           <div className="text-center py-16 border border-dashed border-outline-variant/30 rounded-xl mt-8">
             <span className="material-symbols-outlined text-slate-muted text-6xl block mb-4">emoji_events</span>
-            <h3 className="font-geist font-semibold text-xl text-on-surface mb-2">No badges yet</h3>
+            <h3 className="font-heading font-semibold text-xl text-on-surface mb-2">No badges yet</h3>
             <p className="text-slate-muted mb-6 max-w-sm mx-auto">
               Complete your first interview to start earning badges. Every session brings you closer to mastery.
             </p>

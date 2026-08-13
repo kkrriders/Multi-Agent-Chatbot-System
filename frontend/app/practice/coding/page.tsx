@@ -141,7 +141,7 @@ export default function CodingPracticePage() {
               <span className="text-slate-muted text-xs">/</span>
               <span className="text-xs text-on-surface font-medium">Code Practice</span>
             </div>
-            <h1 className="font-geist font-bold text-2xl md:text-3xl text-on-background">Code Practice</h1>
+            <h1 className="font-heading font-bold text-2xl md:text-3xl text-on-background">Code Practice</h1>
           </div>
           <Link
             href="/practice/system-design"
@@ -175,7 +175,7 @@ export default function CodingPracticePage() {
             </div>
 
             {/* Problem list */}
-            <div className="blueprint-card rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
+            <div className="panel rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
               <div className="px-4 py-3 border-b border-outline-variant/10 bg-surface-container-lowest/50 shrink-0">
                 <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">
                   {fetching ? 'Loading…' : `${filtered.length} Problem${filtered.length !== 1 ? 's' : ''}`}
@@ -207,9 +207,9 @@ export default function CodingPracticePage() {
 
             {/* Problem description */}
             {selectedProblem && (
-              <div className="blueprint-card rounded-xl p-4 shrink-0">
+              <div className="panel rounded-xl p-4 shrink-0">
                 <div className="flex items-center gap-2 mb-3">
-                  <h2 className="font-geist font-semibold text-base text-on-surface">{selectedProblem.title}</h2>
+                  <h2 className="font-heading font-semibold text-base text-on-surface">{selectedProblem.title}</h2>
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${DIFFICULTY_COLOR[selectedProblem.difficulty]}`}>
                     {selectedProblem.difficulty}
                   </span>
@@ -229,7 +229,7 @@ export default function CodingPracticePage() {
           <div className="flex-1 flex flex-col gap-3 min-h-0">
             {selectedProblem && (
               <>
-                <div className="blueprint-card rounded-xl flex-1 p-4 flex flex-col min-h-0" style={{ minHeight: 400 }}>
+                <div className="panel rounded-xl flex-1 p-4 flex flex-col min-h-0" style={{ minHeight: 400 }}>
                   <div className="flex items-center justify-between mb-3 shrink-0">
                     <p className="text-xs font-bold text-slate-muted uppercase tracking-wider">Editor</p>
                     <button
@@ -271,7 +271,7 @@ export default function CodingPracticePage() {
                 )}
 
                 {evalResult && (
-                  <div className="blueprint-card rounded-xl shrink-0 overflow-hidden">
+                  <div className="panel rounded-xl shrink-0 overflow-hidden">
                     {/* Score header */}
                     <div className={`px-4 py-3 flex items-center gap-3 ${
                       evalResult.verdict === 'correct' ? 'bg-emerald-50 border-b border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900' :
@@ -289,7 +289,7 @@ export default function CodingPracticePage() {
                         <p className="text-xs text-slate-muted">{evalResult.approachUsed}</p>
                       </div>
                       <div className="ml-auto text-right">
-                        <p className="text-2xl font-bold font-mono text-on-surface">{evalResult.score}</p>
+                        <p className="stat-tile-value text-2xl font-mono text-on-surface">{evalResult.score}</p>
                         <p className="text-[10px] text-slate-muted uppercase tracking-wider">/ 100</p>
                       </div>
                       <button onClick={() => setEvalResult(null)} className="text-slate-400 hover:text-slate-600 ml-2">

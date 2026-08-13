@@ -66,7 +66,7 @@ export default function ProfilePage() {
         <main className="flex-1 p-4 md:p-12 max-w-[1280px] mx-auto w-full flex flex-col gap-8 md:gap-12 pt-20 md:pt-24">
           {/* Page title */}
           <div className="flex flex-col gap-2">
-            <h2 className="font-geist font-bold text-2xl md:text-3xl text-on-surface">Profile &amp; Settings</h2>
+            <h2 className="font-heading font-bold text-2xl md:text-3xl text-on-surface">Profile &amp; Settings</h2>
             <p className="text-base text-slate-muted max-w-2xl">
               Manage your personal information, interview preferences, and account security. Keep your CV up to date for the best AI coaching experience.
             </p>
@@ -97,7 +97,7 @@ export default function ProfilePage() {
               {activeTab === 0 && (
                 <>
                   {/* Profile card */}
-                  <section className="blueprint-card rounded-xl overflow-hidden flex flex-col md:flex-row">
+                  <section className="panel rounded-xl overflow-hidden flex flex-col md:flex-row">
                     {/* Avatar column */}
                     <div className="p-8 md:w-1/3 border-b md:border-b-0 md:border-r border-outline-variant/15 flex flex-col items-center text-center justify-center bg-surface-bright">
                       <div className="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-surface-container relative group cursor-pointer bg-emerald-deep/10 flex items-center justify-center">
@@ -106,7 +106,7 @@ export default function ProfilePage() {
                           <span className="material-symbols-outlined text-white">photo_camera</span>
                         </div>
                       </div>
-                      <h3 className="font-geist font-semibold text-2xl text-on-surface mb-1">{user?.fullName || 'Your Name'}</h3>
+                      <h3 className="font-heading font-semibold text-2xl text-on-surface mb-1">{user?.fullName || 'Your Name'}</h3>
                       <p className="text-base text-slate-muted mb-4">Interview Candidate</p>
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-deep/10 text-emerald-deep text-xs font-semibold">
                         <span className="material-symbols-outlined text-sm icon-fill">verified</span>
@@ -160,9 +160,9 @@ export default function ProfilePage() {
                   </section>
 
                   {/* CV Upload */}
-                  <section className="blueprint-card rounded-xl p-8">
+                  <section className="panel rounded-xl p-8">
                     <div className="flex flex-col gap-2 mb-6">
-                      <h3 className="font-geist font-semibold text-2xl text-on-surface">Curriculum Vitae</h3>
+                      <h3 className="font-heading font-semibold text-2xl text-on-surface">Curriculum Vitae</h3>
                       <p className="text-base text-slate-muted">Upload your latest CV to provide context for your AI interview coach. PDF or Word documents up to 5MB.</p>
                     </div>
                     <div
@@ -217,11 +217,11 @@ export default function ProfilePage() {
 
               {/* Other tabs — coming soon */}
               {activeTab > 0 && (
-                <section className="blueprint-card rounded-xl p-12 flex flex-col items-center justify-center text-center min-h-[300px]">
+                <section className="panel rounded-xl p-12 flex flex-col items-center justify-center text-center min-h-[300px]">
                   <span className="material-symbols-outlined text-slate-muted text-6xl mb-4">
                     {activeTab === 1 ? 'tune' : activeTab === 2 ? 'workspace_premium' : 'security'}
                   </span>
-                  <h3 className="font-geist font-semibold text-2xl text-on-surface mb-2">{TABS[activeTab]}</h3>
+                  <h3 className="font-heading font-semibold text-2xl text-on-surface mb-2">{TABS[activeTab]}</h3>
                   <p className="text-slate-muted max-w-xs">This section is coming soon. Check back for updates.</p>
                 </section>
               )}

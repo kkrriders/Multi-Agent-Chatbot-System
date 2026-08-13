@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { BorderBeam } from '@/components/ui/border-beam'
+import { CVParseDemo } from '@/components/CVParseDemo'
 
 const FEATURES = [
   {
@@ -62,55 +63,77 @@ export default function LandingPage() {
 
       <main className="flex-grow flex flex-col w-full">
         {/* Hero */}
-        <section className="blueprint-grid w-full px-4 md:px-12 max-w-[1280px] mx-auto py-16 md:py-24 flex flex-col lg:flex-row items-center gap-12">
-          {/* Hero text */}
-          <div className="w-full lg:w-1/2 min-w-0 flex flex-col gap-6 items-start text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-container/10 border border-primary/20 rounded-full text-primary text-xs font-semibold">
-              <span className="material-symbols-outlined text-base">bolt</span>
-              AI-Powered Interview Coach
-            </div>
-            <h1 className="w-full font-geist font-bold text-3xl md:text-5xl text-ink leading-tight tracking-tight">
-              Master your next interview with{' '}
-              <span className="text-emerald-deep">AI precision.</span>
-            </h1>
-            <p className="w-full text-lg text-secondary leading-relaxed max-w-lg">
-              Upload your resume, select your target role, and engage in realistic, adaptive mock interviews that build your confidence and refine your answers.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto">
-              <Link
-                href="/signup"
-                className="bg-primary text-white font-semibold text-sm px-6 py-3 rounded-lg hover:brightness-90 transition-all shadow-sm flex items-center justify-center gap-2 group"
-              >
-                Start Free Trial
-                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-              </Link>
-              <Link
-                href="/login"
-                className="bg-surface-container text-on-surface font-semibold text-sm px-6 py-3 rounded-lg hover:bg-surface-container-high transition-colors border border-outline-variant/30 flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined">play_circle</span>
-                Sign In
-              </Link>
-            </div>
-            <div className="flex items-center gap-4 mt-2 pt-6 border-t border-outline-variant/15 w-full">
-              <div className="flex -space-x-2">
-                {['👩', '👨', '👩'].map((e, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-surface bg-surface-container-high flex items-center justify-center text-lg">{e}</div>
-                ))}
+        <section className="glow-hero grain w-full px-4 md:px-12 max-w-[1280px] mx-auto py-16 md:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 items-center">
+            {/* Live session mock — primary visual */}
+            <div className="panel rounded-xl p-6 md:p-7">
+              <div className="tag mb-4"><span className="tag-dot" />Live Mock Session</div>
+              <div className="flex flex-col gap-3">
+                <div className="bubble bubble-q">
+                  &ldquo;Walk me through how you&apos;d design a rate limiter for a public API.&rdquo;
+                </div>
+                <div className="bubble bubble-a">
+                  &ldquo;I&apos;d use a token bucket algorithm backed by Redis, sharded by API key,
+                  with a sliding window fallback for burst traffic...&rdquo;
+                </div>
               </div>
-              <p className="text-sm text-secondary">
-                <strong className="text-ink">10,000+</strong> candidates prepped
+              <div className="score-row mt-4">
+                <span className="score-row-value">91</span>
+                <span className="text-on-surface-variant">Technical Accuracy</span>
+                <span className="ml-auto text-on-surface-variant">2.4s</span>
+              </div>
+            </div>
+
+            {/* Hero copy */}
+            <div className="flex flex-col gap-6 items-start text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-container/10 border border-primary/20 rounded-full text-primary text-xs font-semibold">
+                <span className="material-symbols-outlined text-base">bolt</span>
+                AI-Powered Interview Coach
+              </div>
+              <h1 className="w-full font-heading font-semibold text-3xl md:text-5xl text-ink leading-tight tracking-tight">
+                Master your next interview with{' '}
+                <span className="text-emerald-deep">AI precision.</span>
+              </h1>
+              <p className="w-full text-lg text-secondary leading-relaxed max-w-lg">
+                Upload your resume, select your target role, and engage in realistic, adaptive mock interviews that build your confidence and refine your answers.
               </p>
+              <div className="flex flex-col sm:flex-row gap-4 mt-2 w-full sm:w-auto">
+                <Link
+                  href="/signup"
+                  className="bg-primary text-white font-semibold text-sm px-6 py-3 rounded-lg hover:brightness-90 transition-all shadow-sm flex items-center justify-center gap-2 group"
+                >
+                  Start Free Trial
+                  <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </Link>
+                <Link
+                  href="/login"
+                  className="bg-surface-container text-on-surface font-semibold text-sm px-6 py-3 rounded-lg hover:bg-surface-container-high transition-colors border border-outline-variant/30 flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined">play_circle</span>
+                  Sign In
+                </Link>
+              </div>
+              <div className="flex items-center gap-4 mt-2 pt-6 border-t border-outline-variant/15 w-full">
+                <div className="flex -space-x-2">
+                  {['👩', '👨', '👩'].map((e, i) => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-surface bg-surface-container-high flex items-center justify-center text-lg">{e}</div>
+                  ))}
+                </div>
+                <p className="text-sm text-secondary">
+                  <strong className="text-ink">10,000+</strong> candidates prepped
+                </p>
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* CV Upload card */}
-          <div className="w-full lg:w-1/2 min-w-0 flex justify-center lg:justify-end">
-            <div className="blueprint-card rounded-xl p-6 md:p-8 w-full max-w-md hover:shadow-lg transition-shadow duration-300 relative overflow-hidden group">
-              <BorderBeam size={120} duration={8} colorFrom="var(--color-accent-warn)" colorTo="var(--color-primary)" />
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-container/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110" />
+        {/* CV Upload */}
+        <section className="glow-hero w-full px-4 md:px-12 max-w-[1280px] mx-auto pb-16 md:pb-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            <div className="panel rounded-xl p-6 md:p-8 w-full relative overflow-hidden group">
+              <BorderBeam size={120} duration={8} colorFrom="var(--color-accent-warn)" colorTo="var(--color-accent-warn-deep)" />
               <div className="mb-6">
-                <h3 className="font-geist font-semibold text-2xl text-ink">Upload your CV</h3>
+                <h3 className="font-heading font-semibold text-2xl text-ink">Upload your CV</h3>
                 <p className="text-base text-secondary mt-1">We&apos;ll tailor the interview to your specific experience.</p>
               </div>
               <Link
@@ -133,6 +156,14 @@ export default function LandingPage() {
                 <p className="text-xs text-slate-muted flex-1">Your data is secure and never used to train public models.</p>
               </div>
             </div>
+
+            <div className="panel rounded-xl p-6 md:p-8 w-full relative overflow-hidden flex flex-col">
+              <div className="tag mb-4"><span className="tag-dot" />Live Preview</div>
+              <p className="text-sm text-secondary mb-4">Here&apos;s what we pull out the moment your CV lands.</p>
+              <div className="flex-1">
+                <CVParseDemo />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -140,17 +171,17 @@ export default function LandingPage() {
         <section className="w-full bg-surface-container-low py-16 md:py-24 border-y border-outline-variant/10">
           <div className="px-4 md:px-12 max-w-[1280px] mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="font-geist font-bold text-2xl md:text-3xl text-ink mb-4">Everything you need to succeed</h2>
+              <h2 className="font-heading font-bold text-2xl md:text-3xl text-ink mb-4">Everything you need to succeed</h2>
               <p className="text-lg text-secondary">Our AI doesn&apos;t just listen — it understands, evaluates, and coaches you to deliver your best performance.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Real-time Scoring — wide */}
-              <div className="md:col-span-2 blueprint-card rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
+              <div className="md:col-span-2 panel rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group">
                 <div className="w-full flex-1 z-10">
                   <div className="w-12 h-12 bg-primary-container/15 rounded-lg flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-primary icon-fill text-2xl">speed</span>
                   </div>
-                  <h3 className="font-geist font-semibold text-2xl text-ink mb-3">Real-time AI Scoring</h3>
+                  <h3 className="font-heading font-semibold text-2xl text-ink mb-3">Real-time AI Scoring</h3>
                   <p className="text-base text-secondary">Get instant 0–100 scores across key metrics like clarity, relevance, and confidence as you speak.</p>
                 </div>
                 <div className="w-full md:w-5/12 h-40 bg-surface-container rounded-lg border border-outline-variant/10 flex items-center justify-center relative shadow-inner z-10">
@@ -159,7 +190,7 @@ export default function LandingPage() {
                     <circle cx="50" cy="50" fill="none" r="40" stroke="var(--color-primary)" strokeDasharray="251" strokeDashoffset="60" strokeWidth="8" className="transition-all duration-1000 ease-out" />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="font-mono font-bold text-3xl text-emerald-deep">86</span>
+                    <span className="stat-tile-value font-mono text-3xl text-emerald-deep">86</span>
                     <span className="text-xs text-slate-muted uppercase tracking-wider">Score</span>
                   </div>
                 </div>
@@ -167,7 +198,7 @@ export default function LandingPage() {
               </div>
 
               {/* Speech Analysis */}
-              <div className="md:col-span-1 blueprint-card rounded-xl p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 panel rounded-xl p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-amber-light rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-tertiary-container icon-fill text-xl">mic</span>
                 </div>
@@ -186,37 +217,41 @@ export default function LandingPage() {
               </div>
 
               {/* Adaptive Follow-ups */}
-              <div className="md:col-span-1 blueprint-card rounded-xl p-6 flex flex-col relative overflow-hidden">
+              <div className="md:col-span-1 panel rounded-xl p-6 flex flex-col relative overflow-hidden">
                 <div className="w-10 h-10 bg-secondary-container/30 rounded-lg flex items-center justify-center mb-5 z-10">
                   <span className="material-symbols-outlined text-secondary icon-fill text-xl">forum</span>
                 </div>
                 <h3 className="text-[18px] font-semibold text-ink mb-2 z-10">Adaptive Follow-ups</h3>
                 <p className="text-base text-secondary z-10 mb-6">Dynamic questioning — the AI probes deeper based on your answers, just like a real interview.</p>
-                <div className="mt-auto space-y-3 z-10">
-                  <div className="bg-surface-container rounded-lg rounded-tl-none p-3 max-w-[85%] border border-outline-variant/10 text-xs text-secondary">
+                <div className="mt-auto space-y-3 z-10 flex flex-col">
+                  <div className="bubble bubble-q text-xs">
                     Could you elaborate on how you handled the team conflict?
                   </div>
-                  <div className="bg-emerald-deep/10 rounded-lg rounded-tr-none p-3 max-w-[85%] ml-auto border border-primary/10 text-xs text-primary">
+                  <div className="bubble bubble-a text-xs">
                     I scheduled a 1-on-1 to understand their perspective...
                   </div>
                 </div>
               </div>
 
               {/* Personalized Feedback — wide */}
-              <div className="md:col-span-2 bg-primary text-white rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden">
+              <div className="md:col-span-2 panel rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none opacity-20 z-0">
-                  <div className="absolute top-[-20%] right-[-10%] w-64 h-64 rounded-full bg-primary-fixed blur-2xl" />
-                  <div className="absolute bottom-[-10%] left-[20%] w-48 h-48 rounded-full bg-inverse-primary blur-2xl" />
+                  <div className="absolute top-[-20%] right-[-10%] w-64 h-64 rounded-full blur-2xl" style={{ backgroundColor: 'var(--color-accent-warn)' }} />
                 </div>
                 <div className="w-full flex-1 z-10">
-                  <h3 className="font-geist font-semibold text-2xl text-white mb-3 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary-fixed icon-fill">auto_awesome</span>
+                  <div className="tag mb-3"><span className="tag-dot" />Action Plan</div>
+                  <h3 className="font-heading font-semibold text-2xl text-ink mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined icon-fill" style={{ color: 'var(--color-accent-warn)' }}>auto_awesome</span>
                     Personalized Action Plan
                   </h3>
-                  <p className="text-base text-white/80 mb-6 max-w-md">
+                  <p className="text-base text-secondary mb-6 max-w-md">
                     Receive a detailed breakdown of your performance with actionable advice on structuring answers using the STAR method.
                   </p>
-                  <Link href="/signup" className="inline-block bg-surface-container-lowest text-emerald-deep font-semibold text-sm px-5 py-2.5 rounded hover:bg-surface-container-lowest transition-colors">
+                  <Link
+                    href="/signup"
+                    className="inline-block font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors"
+                    style={{ backgroundColor: 'var(--color-accent-warn)', color: '#1a0f00' }}
+                  >
                     Get Started Free
                   </Link>
                 </div>
@@ -229,7 +264,7 @@ export default function LandingPage() {
         <section className="w-full py-16 md:py-24 bg-surface-container-lowest">
           <div className="px-4 md:px-12 max-w-[1280px] mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="font-geist font-bold text-2xl md:text-3xl text-ink mb-4">How it works</h2>
+              <h2 className="font-heading font-bold text-2xl md:text-3xl text-ink mb-4">How it works</h2>
               <p className="text-lg text-secondary">Four simple steps to interview readiness.</p>
             </div>
             <div className="relative">

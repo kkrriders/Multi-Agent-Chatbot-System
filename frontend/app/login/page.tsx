@@ -64,13 +64,13 @@ function LoginForm() {
           <span className="text-emerald-deep font-geist font-semibold text-2xl tracking-tight">MockPrep</span>
         </div>
         <div className="z-10 mt-12 max-w-md">
-          <h1 className="font-geist font-bold text-5xl text-on-surface mb-6 leading-tight">
+          <h1 className="font-heading font-bold text-5xl text-on-surface mb-6 leading-tight">
             Welcome back,<br />future leader.
           </h1>
           <p className="text-lg text-secondary mb-12">
             Your personalized AI interview coach is ready to help you land that dream role. Let&apos;s pick up where you left off.
           </p>
-          <div className="w-full aspect-video rounded-xl overflow-hidden blueprint-card flex items-center justify-center">
+          <div className="w-full aspect-video rounded-xl overflow-hidden panel flex items-center justify-center">
             <div className="w-full h-full bg-gradient-to-br from-surface-container-low to-surface-container-high flex items-center justify-center">
               <div className="text-center">
                 <span className="material-symbols-outlined text-emerald-deep text-6xl icon-fill">trending_up</span>
@@ -92,13 +92,13 @@ function LoginForm() {
               <span className="material-symbols-outlined text-emerald-deep icon-fill">psychology</span>
               <span className="text-emerald-deep font-geist font-semibold text-2xl">MockPrep</span>
             </div>
-            <h1 className="font-geist font-bold text-2xl text-on-surface text-center">Welcome back</h1>
+            <h1 className="font-heading font-bold text-2xl text-on-surface text-center">Welcome back</h1>
             <p className="text-base text-secondary text-center mt-2">Log in to continue your preparation.</p>
           </div>
 
           {/* Desktop form header */}
           <div className="hidden md:block mb-8">
-            <h2 className="font-geist font-bold text-3xl text-on-surface">Log in</h2>
+            <h2 className="font-heading font-bold text-3xl text-on-surface">Log in</h2>
             <p className="text-base text-secondary mt-2">Access your personalized feedback and history.</p>
           </div>
 

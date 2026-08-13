@@ -50,7 +50,7 @@ export default function LeaderboardPage() {
           <h1 className="font-heading text-2xl font-bold mb-6">Rankings & Badges</h1>
 
           {streak > 0 && (
-            <div className="flex items-center gap-3 blueprint-card rounded-xl px-4 py-3 mb-6">
+            <div className="flex items-center gap-3 panel rounded-xl px-4 py-3 mb-6">
               <Flame className="w-6 h-6 text-orange-400 flex-shrink-0" />
               <div>
                 <p className="font-semibold"><span className="font-mono">{streak}</span>-day streak</p>
@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
             {achievements.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {achievements.map(a => (
-                  <div key={a._id} className="blueprint-card rounded-xl p-4 flex items-start gap-3">
+                  <div key={a._id} className="panel rounded-xl p-4 flex items-start gap-3">
                     <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
                       {BADGE_ICON[a.type] || <Award className="w-5 h-5 text-primary" />}
                     </div>
@@ -89,8 +89,8 @@ export default function LeaderboardPage() {
             {leaderboard.length > 0 ? (
               <div className="space-y-2">
                 {leaderboard.map((s, i) => (
-                  <div key={s._id} className="flex items-center gap-4 blueprint-card rounded-xl px-4 py-3">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-mono font-bold flex-shrink-0 ${
+                  <div key={s._id} className="flex items-center gap-4 panel rounded-xl px-4 py-3">
+                    <div className={`stat-tile-value w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${
                       i === 0 ? 'bg-yellow-500/20 text-yellow-400' :
                       i === 1 ? 'bg-gray-400/20 text-gray-400' :
                       i === 2 ? 'bg-amber-600/20 text-amber-600' :
@@ -102,7 +102,7 @@ export default function LeaderboardPage() {
                       <p className="text-sm font-medium truncate">{s.targetRole || 'Interview'}</p>
                       <p className="text-xs text-muted-foreground capitalize">{s.mode} · <span className="font-mono">{new Date(s.completedAt).toLocaleDateString()}</span></p>
                     </div>
-                    <div className={`text-lg font-mono font-bold ${
+                    <div className={`stat-tile-value text-lg ${
                       s.overallScore >= 80 ? 'text-green-500' :
                       s.overallScore >= 60 ? 'text-yellow-500' : 'text-red-500'
                     }`}>

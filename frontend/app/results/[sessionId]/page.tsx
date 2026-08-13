@@ -99,10 +99,10 @@ export default function ResultsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Score & Trend */}
-          <div className="md:col-span-4 blueprint-card rounded-xl p-6 flex flex-col justify-between">
+          <div className="md:col-span-4 panel rounded-xl p-6 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Overall Score</h3>
+                <div className="tag"><span className="tag-dot" />Overall Score</div>
                 {delta != null && (
                   <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium border ${delta >= 0 ? 'bg-secondary/10 text-secondary border-secondary/20' : 'bg-error/10 text-error border-error/20'}`}>
                     <span className="font-mono">{delta >= 0 ? '+' : ''}{delta}%</span> from last
@@ -110,7 +110,7 @@ export default function ResultsPage() {
                 )}
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="font-heading font-mono text-[56px] leading-none font-bold text-primary">{overallScore}</span>
+                <span className="stat-tile-value font-heading font-mono text-[56px] leading-none text-primary">{overallScore}</span>
                 <span className="text-lg text-on-surface-variant">/ 100</span>
               </div>
               <p className="text-sm text-on-surface-variant mt-2">
@@ -142,15 +142,15 @@ export default function ResultsPage() {
           </div>
 
           {/* Category Breakdown */}
-          <div className="md:col-span-8 blueprint-card rounded-xl p-6">
-            <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-6">Category Breakdown</h3>
+          <div className="md:col-span-8 panel rounded-xl p-6">
+            <div className="tag mb-6"><span className="tag-dot" />Category Breakdown</div>
             <div className="space-y-6">
               {Object.keys(categoryScores).length > 0 ? (
                 Object.entries(categoryScores).map(([cat, sc]) => (
                   <div key={cat}>
                     <div className="flex justify-between items-end mb-2">
                       <h4 className="font-semibold text-primary capitalize">{cat}</h4>
-                      <span className="font-heading text-xl font-bold text-primary"><span className="font-mono">{sc.overall}</span><span className="text-sm text-on-surface-variant">/100</span></span>
+                      <span className="font-heading text-xl font-bold text-primary"><span className="stat-tile-value font-mono">{sc.overall}</span><span className="text-sm text-on-surface-variant">/100</span></span>
                     </div>
                     <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
                       <div className={`h-full ${scoreBarColor(sc.overall)} rounded-full transition-all duration-700`} style={{ width: `${sc.overall}%` }} />
@@ -166,7 +166,7 @@ export default function ResultsPage() {
                   <div key={label}>
                     <div className="flex justify-between items-end mb-2">
                       <h4 className="font-semibold text-primary">{label}</h4>
-                      <span className="font-heading text-xl font-bold text-primary"><span className="font-mono">{pct}</span><span className="text-sm text-on-surface-variant">/100</span></span>
+                      <span className="font-heading text-xl font-bold text-primary"><span className="stat-tile-value font-mono">{pct}</span><span className="text-sm text-on-surface-variant">/100</span></span>
                     </div>
                     <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
                       <div className={`h-full ${scoreBarColor(pct)} rounded-full`} style={{ width: `${pct}%` }} />
@@ -186,18 +186,18 @@ export default function ResultsPage() {
 
           {/* Speech Analysis & Question Review */}
           {voiceAnswers.length > 0 && (
-            <div className="md:col-span-4 blueprint-card rounded-xl p-6">
+            <div className="md:col-span-4 panel rounded-xl p-6">
               <div className="flex items-center gap-2 mb-6">
                 <span className="material-symbols-outlined text-tertiary">record_voice_over</span>
-                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Speech Analysis</h3>
+                <div className="tag"><span className="tag-dot" />Speech Analysis</div>
               </div>
               <div className="grid grid-cols-2 gap-2 mb-6">
                 <div className="bg-surface/60 rounded-lg p-4 border border-outline-variant/10 text-center">
-                  <span className="block font-heading font-mono text-2xl font-bold text-primary">{totalFillers}</span>
+                  <span className="stat-tile-value block font-mono text-2xl text-primary">{totalFillers}</span>
                   <span className="block text-xs text-on-surface-variant mt-1">Filler Words</span>
                 </div>
                 <div className="bg-surface/60 rounded-lg p-4 border border-outline-variant/10 text-center">
-                  <span className="block font-heading font-mono text-2xl font-bold text-primary">{avgWpm ?? '—'}</span>
+                  <span className="stat-tile-value block font-mono text-2xl text-primary">{avgWpm ?? '—'}</span>
                   <span className="block text-xs text-on-surface-variant mt-1">Words / Min</span>
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default function ResultsPage() {
                 const score = a.scores?.overall ?? 0
                 const borderColor = !a.scored ? 'border-l-outline-variant' : score >= 70 ? 'border-l-secondary' : 'border-l-error/50'
                 return (
-                  <div key={a._id} className={`blueprint-card rounded-xl border-l-4 ${borderColor} overflow-hidden`}>
+                  <div key={a._id} className={`panel rounded-xl border-l-4 ${borderColor} overflow-hidden`}>
                     <button
                       onClick={() => setExpanded(isOpen ? null : a._id)}
                       className="w-full flex items-start justify-between gap-4 p-6 text-left hover:bg-surface-container-high/20 transition-colors"
@@ -368,7 +368,7 @@ function PanelFeedbackSection({ feedback }: {
           const cfg = PANEL_PERSONA_CONFIG[key]
           if (!cfg) return null
           return (
-            <div key={key} className={`blueprint-card rounded-xl p-6 border-t-4 ${cfg.colorClass}`}>
+            <div key={key} className={`panel rounded-xl p-6 border-t-4 ${cfg.colorClass}`}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-xl flex-shrink-0">{cfg.emoji}</div>
                 <div>

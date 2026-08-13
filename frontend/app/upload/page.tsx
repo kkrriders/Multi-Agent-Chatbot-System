@@ -101,7 +101,7 @@ export default function UploadPage() {
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
               onDragLeave={() => setDragging(false)}
               onClick={() => fileRef.current?.click()}
-              className={`blueprint-card rounded-xl p-6 flex flex-col items-center justify-center text-center border-dashed border-2 transition-all cursor-pointer group min-h-[240px] ${
+              className={`panel rounded-xl p-6 flex flex-col items-center justify-center text-center border-dashed border-2 transition-all cursor-pointer group min-h-[240px] ${
                 dragging ? 'border-primary bg-primary-container/10' : 'border-secondary/30'
               }`}
             >
@@ -137,7 +137,7 @@ export default function UploadPage() {
             </div>
 
             {profile && (
-              <div className="blueprint-card rounded-xl p-4">
+              <div className="panel rounded-xl p-4">
                 <div className="flex items-center justify-between p-2 rounded-lg">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-secondary icon-fill">verified_user</span>
@@ -173,7 +173,7 @@ export default function UploadPage() {
 
                 {/* Bento: Gauge + Skill Gaps */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="blueprint-card rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="panel rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden">
                     <div className="absolute -top-10 -right-10 w-32 h-32 bg-secondary-fixed/30 rounded-full blur-2xl" />
                     <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-6 w-full text-left">Role Match Score</h3>
                     {gaps?.fitScore != null ? (
@@ -186,7 +186,7 @@ export default function UploadPage() {
                           />
                         </svg>
                         <div className="absolute flex flex-col items-center">
-                          <span className="font-heading font-mono text-3xl font-bold text-primary">{gaps.fitScore}%</span>
+                          <span className="stat-tile-value font-heading font-mono text-3xl text-primary">{gaps.fitScore}%</span>
                           <span className="text-xs text-secondary">{gaps.fitScore >= 75 ? 'Strong Match' : gaps.fitScore >= 50 ? 'Good Match' : 'Needs Work'}</span>
                         </div>
                       </div>
@@ -198,7 +198,7 @@ export default function UploadPage() {
                     )}
                   </div>
 
-                  <div className="blueprint-card rounded-xl p-6 flex flex-col">
+                  <div className="panel rounded-xl p-6 flex flex-col">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Skill Gaps</h3>
                       <span className="material-symbols-outlined text-outline">work</span>
@@ -229,7 +229,7 @@ export default function UploadPage() {
 
                 {/* Skills pill cloud */}
                 {(profile.skills?.length ?? 0) > 0 && (
-                  <div className="blueprint-card rounded-xl p-6">
+                  <div className="panel rounded-xl p-6">
                     <div className="flex items-center gap-2 mb-4">
                       <span className="material-symbols-outlined text-secondary">psychology_alt</span>
                       <h3 className="text-xs font-bold text-primary uppercase tracking-wider">AI Extracted Skills</h3>
@@ -246,7 +246,7 @@ export default function UploadPage() {
 
                 {/* Experience timeline */}
                 {(profile.experience?.length ?? 0) > 0 && (
-                  <div className="blueprint-card rounded-xl p-6">
+                  <div className="panel rounded-xl p-6">
                     <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-4">Experience Summary</h3>
                     <div className="relative pl-4 border-l-2 border-outline-variant/30 space-y-6">
                       {profile.experience.map((e, i) => (
@@ -262,7 +262,7 @@ export default function UploadPage() {
                 )}
 
                 {/* JD gap analysis input */}
-                <div className="blueprint-card rounded-xl p-6">
+                <div className="panel rounded-xl p-6">
                   <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider mb-4">Paste a job description to analyze</h3>
                   <textarea
                     value={jd} onChange={e => setJd(e.target.value)}
@@ -292,7 +292,7 @@ export default function UploadPage() {
                 </div>
               </>
             ) : (
-              <div className="blueprint-card rounded-xl p-10 flex flex-col items-center justify-center text-center min-h-[300px]">
+              <div className="panel rounded-xl p-10 flex flex-col items-center justify-center text-center min-h-[300px]">
                 <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-4">description</span>
                 <h2 className="font-heading text-2xl font-bold text-primary mb-2">No CV on file yet</h2>
                 <p className="text-sm text-on-surface-variant max-w-sm">Upload your resume on the left and we&apos;ll extract your skills and experience to personalise your interview questions.</p>

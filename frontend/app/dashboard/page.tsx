@@ -72,12 +72,12 @@ export default function DashboardPage() {
         {/* Top Grid: Stats & Resume */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {/* Avg Score */}
-          <div className="blueprint-card rounded-xl p-6 flex flex-col justify-between relative overflow-hidden">
+          <div className="panel rounded-xl p-6 flex flex-col justify-between relative overflow-hidden">
             <div className="absolute -top-8 -right-8 w-32 h-32 bg-secondary-fixed/30 rounded-full blur-2xl" />
             <div className="relative z-10">
-              <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Avg. Score</h3>
+              <div className="tag mb-2"><span className="tag-dot" />Avg. Score</div>
               <div className="flex items-end gap-2">
-                <span className="font-mono text-4xl font-bold text-primary">{avgScore ?? '—'}</span>
+                <span className="stat-tile-value font-mono text-4xl text-primary">{avgScore ?? '—'}</span>
                 <span className="text-sm text-on-surface-variant pb-1">/100</span>
               </div>
             </div>
@@ -90,11 +90,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Sessions & Streak */}
-          <div className="blueprint-card rounded-xl p-6 flex flex-col justify-between">
+          <div className="panel rounded-xl p-6 flex flex-col justify-between">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Completed</h3>
-                <span className="font-heading text-2xl font-bold text-primary"><span className="font-mono">{completed.length}</span> <span className="text-sm text-on-surface-variant font-normal">Sessions</span></span>
+                <div className="tag mb-1"><span className="tag-dot" />Completed</div>
+                <span className="font-heading text-2xl font-bold text-primary"><span className="stat-tile-value font-mono">{completed.length}</span> <span className="text-sm text-on-surface-variant font-normal">Sessions</span></span>
               </div>
               {streak > 0 && (
                 <div className="bg-secondary-container/10 px-2 py-1 rounded-full border border-secondary/20 flex items-center gap-1 shrink-0">
@@ -111,7 +111,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Resume Status */}
-          <div className="blueprint-card rounded-xl p-6 flex flex-col justify-between relative overflow-hidden group">
+          <div className="panel rounded-xl p-6 flex flex-col justify-between relative overflow-hidden group">
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-secondary">description</span>
@@ -141,7 +141,7 @@ export default function DashboardPage() {
               <Link
                 key={m.id}
                 href="/interview"
-                className="blueprint-card rounded-xl p-4 flex flex-col items-start gap-4 hover:bg-surface-container-lowest/80 transition-all duration-300 hover:scale-[1.03] text-left group"
+                className="panel rounded-xl p-4 flex flex-col items-start gap-4 hover:bg-surface-container-lowest/80 transition-all duration-300 hover:scale-[1.03] text-left group"
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
                   m.id === 'panel' ? 'bg-primary text-on-primary' : 'bg-secondary-container/20 text-secondary'
@@ -165,7 +165,7 @@ export default function DashboardPage() {
           </div>
 
           {sessions.length > 0 ? (
-            <div className="blueprint-card rounded-xl overflow-hidden">
+            <div className="panel rounded-xl overflow-hidden">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-outline-variant/10">
@@ -204,7 +204,7 @@ export default function DashboardPage() {
               </table>
             </div>
           ) : (
-            <div className="blueprint-card rounded-xl border-dashed border-2 p-12 text-center">
+            <div className="panel rounded-xl border-dashed border-2 p-12 text-center">
               <span className="material-symbols-outlined text-slate-muted text-5xl mb-3 block">play_circle</span>
               <p className="text-slate-muted mb-6">No interviews yet — start your first session to see your progress here.</p>
               <Link href="/interview" className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:brightness-90 transition-colors shadow-sm">

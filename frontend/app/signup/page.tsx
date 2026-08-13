@@ -102,7 +102,7 @@ export default function SignupPage() {
                 </div>
                 <span className="text-xs text-on-surface-variant">Join 10,000+ candidates</span>
               </div>
-              <h1 className="font-geist font-bold text-2xl md:text-3xl text-on-background">
+              <h1 className="font-heading font-bold text-2xl md:text-3xl text-on-background">
                 Start your journey to interview success
               </h1>
               <p className="text-lg text-slate-muted">
@@ -209,13 +209,13 @@ export default function SignupPage() {
           <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-primary-container/20 rounded-full blur-[80px]" />
           <div className="absolute bottom-[-10%] left-[-10%] w-80 h-80 bg-tertiary-fixed/30 rounded-full blur-[60px]" />
           <div className="relative z-10 w-full max-w-lg space-y-6">
-            <div className="blueprint-card rounded-xl p-8">
+            <div className="panel rounded-xl p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
                   <span className="material-symbols-outlined text-primary text-[28px]">model_training</span>
                 </div>
                 <div>
-                  <h3 className="font-geist font-semibold text-xl text-on-background">AI Interview Coach</h3>
+                  <h3 className="font-heading font-semibold text-xl text-on-background">AI Interview Coach</h3>
                   <p className="text-xs text-slate-muted">Real-time analysis &amp; feedback</p>
                 </div>
               </div>
@@ -231,7 +231,7 @@ export default function SignupPage() {
                 </div>
               </div>
             </div>
-            <div className="blueprint-card rounded-xl p-6 flex gap-4 ml-8">
+            <div className="panel rounded-xl p-6 flex gap-4 ml-8">
               <div className="w-12 h-12 rounded-full bg-emerald-deep/10 border-2 border-surface flex items-center justify-center flex-shrink-0 text-xl">👩</div>
               <div>
                 <p className="text-base text-on-surface-variant italic mb-2">

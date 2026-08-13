@@ -105,7 +105,7 @@ export default function CodeEditor({ starterCode = '', initialLanguage = 'javasc
             <span className="text-sm font-semibold text-on-surface">Test Results</span>
             {codeScore && (
               <span className={`text-sm font-bold ${codeScore.passed === codeScore.total ? 'text-green-600' : 'text-red-500'}`}>
-                <span className="font-mono">{codeScore.passed}/{codeScore.total}</span> passed
+                <span className="stat-tile-value font-mono">{codeScore.passed}/{codeScore.total}</span> passed
               </span>
             )}
           </div>
