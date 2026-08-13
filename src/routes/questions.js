@@ -35,7 +35,10 @@ function requireAdmin(req, res, next) {
 router.get('/', optionalAuth, generalLimiter, async (req, res) => {
   try {
     const { role, category, difficulty, limit = '20', offset = '0' } = req.query;
-    const filter = { active: true };
+    // source:'system' only — cv-generated/jd-generated/company-tailored questions
+    // are session-specific (built from one candidate's CV or job posting) and
+    // must never be browsable by other users.
+    const filter = { active: true, source: 'system' };
     if (role)       filter.role = role.slice(0, 100);
     if (category && VALID_CATEGORIES.includes(category)) filter.category = category;
     if (difficulty && VALID_DIFFICULTIES.includes(difficulty)) filter.difficulty = difficulty;

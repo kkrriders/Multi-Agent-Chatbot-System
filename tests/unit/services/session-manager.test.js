@@ -32,7 +32,7 @@ const obsCompiler = require('../../../src/services/history/observation-compiler'
 const achievementService = require('../../../src/services/gamification/achievement-service');
 const broadcaster = require('../../../src/services/sse/broadcaster');
 const scorer = require('../../../src/services/interview/answer-scorer');
-const { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete } = require('../../../src/services/interview/session-manager');
+const { create, submitAnswer, regenerateQuestion, submitFollowUpReply, complete, getState } = require('../../../src/services/interview/session-manager');
 
 const FAKE_PROFILE = {
   skills: ['node'], skillGaps: [], experience: [],
@@ -394,5 +394,48 @@ describe('session-manager.complete', () => {
 
     expect(result.pendingScoringCount).toBe(1);
     expect(result.overallScore).toBe(80);
+  });
+});
+
+describe('session-manager.getState', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Interview.findOne.mockReturnValue({
+      lean: jest.fn().mockResolvedValue({
+        _id: 'int1', userId: 'u1', status: 'active', startedAt: new Date(),
+        questionIds: ['q1', 'q2', 'q3'],
+      }),
+    });
+    Answer.find.mockReturnValue({ sort: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }) });
+  });
+
+  test('returns questions ordered to match interview.questionIds, not Mongo $in storage order', async () => {
+    // Mongo's $in does not preserve array order — simulate it returning
+    // documents in a different order than questionIds lists them.
+    Question.find.mockReturnValue({
+      lean: jest.fn().mockResolvedValue([
+        { _id: 'q3', text: 'Third' },
+        { _id: 'q1', text: 'First' },
+        { _id: 'q2', text: 'Second' },
+      ]),
+    });
+
+    const { questions } = await getState('int1', 'u1');
+
+    expect(questions.map(q => q._id)).toEqual(['q1', 'q2', 'q3']);
+  });
+
+  test('silently drops a questionId with no matching Question doc instead of leaving a gap', async () => {
+    Question.find.mockReturnValue({
+      lean: jest.fn().mockResolvedValue([
+        { _id: 'q1', text: 'First' },
+        { _id: 'q3', text: 'Third' },
+        // q2 missing — e.g. deleted
+      ]),
+    });
+
+    const { questions } = await getState('int1', 'u1');
+
+    expect(questions.map(q => q._id)).toEqual(['q1', 'q3']);
   });
 });

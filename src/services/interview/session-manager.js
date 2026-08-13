@@ -427,10 +427,18 @@ async function getState(interviewId, userId) {
 
   await _checkAndExpireSession(interview);
 
-  const [questions, answers] = await Promise.all([
+  const [questionDocs, answers] = await Promise.all([
     Question.find({ _id: { $in: interview.questionIds || [] } }).lean(),
     Answer.find({ interviewId }).sort({ questionIndex: 1 }).lean(),
   ]);
+
+  // $in does not preserve array order — reorder to match interview.questionIds
+  // so questions[i] lines up with questionIds[i], which the client relies on
+  // when it sends back { questionId, questionIndex } on submitAnswer.
+  const questionById = new Map(questionDocs.map(q => [q._id.toString(), q]));
+  const questions = (interview.questionIds || [])
+    .map(id => questionById.get(id.toString()))
+    .filter(Boolean);
 
   const answeredIds = new Set(answers.map(a => a.questionId.toString()));
   const nextQuestion = questions.find(q => !answeredIds.has(q._id.toString())) || null;

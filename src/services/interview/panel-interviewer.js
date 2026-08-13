@@ -96,10 +96,13 @@ async function generate({ targetRole, skills, jobDescription, interviewId }) {
 }
 
 async function _bankFallback(targetRole, interviewId) {
+  // source:'system' only — without this, a different user's cv-generated/
+  // jd-generated/company-tailored questions (session-specific, built from
+  // someone else's CV or job posting) could get pulled into this session.
   const [tech, behav, closing] = await Promise.all([
-    Question.find({ category: 'technical', active: true }).limit(5).lean(),
-    Question.find({ category: { $in: ['behavioral', 'situational'] }, active: true }).limit(4).lean(),
-    Question.find({ category: 'closing', active: true }).limit(3).lean(),
+    Question.find({ category: 'technical', active: true, source: 'system' }).limit(5).lean(),
+    Question.find({ category: { $in: ['behavioral', 'situational'] }, active: true, source: 'system' }).limit(4).lean(),
+    Question.find({ category: 'closing', active: true, source: 'system' }).limit(3).lean(),
   ]);
 
   const withPersona = (questions, name) =>
