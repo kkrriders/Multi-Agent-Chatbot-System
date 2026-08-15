@@ -148,6 +148,20 @@ describe('Auth Routes', () => {
       expect(res.body.error).toMatch(/already registered/i);
     });
 
+    test('400 (not 500) — a concurrent signup wins the race past the findOne check', async () => {
+      User.findOne.mockReturnValue(chainable(null)); // this request thinks the email is free
+      const dupErr = Object.assign(new Error('duplicate key'), { code: 11000 });
+      User.create.mockRejectedValue(dupErr); // but another request already created it first
+
+      const res = await request(app)
+        .post('/api/auth/signup')
+        .set('Origin', ORIGIN)
+        .send(validBody);
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/already registered/i);
+    });
+
     test('403 — missing Origin header (CSRF protection)', async () => {
       const res = await request(app)
         .post('/api/auth/signup')
@@ -374,6 +388,18 @@ describe('Auth Routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
+    });
+
+    test('sends a per-key dot-notation update, not a whole-subdocument replace — sending one preference must not risk wiping others', async () => {
+      await request(app)
+        .put('/api/auth/update-profile')
+        .set('Authorization', `Bearer ${makeToken()}`)
+        .set('Origin', ORIGIN)
+        .send({ preferences: { theme: 'dark' } });
+
+      const [, updateData] = User.findByIdAndUpdate.mock.calls[User.findByIdAndUpdate.mock.calls.length - 1];
+      expect(updateData).toEqual({ 'preferences.theme': 'dark' });
+      expect(updateData.preferences).toBeUndefined();
     });
 
     test('401 — no token provided', async () => {

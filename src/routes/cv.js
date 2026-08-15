@@ -75,20 +75,35 @@ router.post('/upload', authenticate, (req, res, next) => {
     }
 
     // Upsert candidate profile
-    const profile = await CandidateProfile.findOneAndUpdate(
-      { userId: req.user._id },
-      {
-        userId:     req.user._id,
-        name:       extracted.name,
-        skills:     extracted.skills,
-        experience: extracted.experience,
-        education:  extracted.education,
-        cvText:     cvText.slice(0, 100_000),
-        cvFileName: path.basename(file.originalname || 'cv').slice(0, 255),
-        parsedAt:   new Date(),
-      },
-      { upsert: true, new: true, runValidators: true }
-    );
+    const profileFields = {
+      userId:     req.user._id,
+      name:       extracted.name,
+      skills:     extracted.skills,
+      experience: extracted.experience,
+      education:  extracted.education,
+      cvText:     cvText.slice(0, 100_000),
+      cvFileName: path.basename(file.originalname || 'cv').slice(0, 255),
+      parsedAt:   new Date(),
+    };
+    let profile;
+    try {
+      profile = await CandidateProfile.findOneAndUpdate(
+        { userId: req.user._id },
+        profileFields,
+        { upsert: true, new: true, runValidators: true }
+      );
+    } catch (err) {
+      if (err.code !== 11000) throw err;
+      // Concurrent first-time upload (double-click, resubmit after the AI
+      // extraction call looked stuck) raced this upsert — the other request's
+      // insert already landed, so retry as a plain update instead of failing
+      // with an opaque 500 for what's really just "someone else won the race".
+      profile = await CandidateProfile.findOneAndUpdate(
+        { userId: req.user._id },
+        profileFields,
+        { new: true, runValidators: true }
+      );
+    }
 
     res.json({
       success: true,

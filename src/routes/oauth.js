@@ -113,15 +113,33 @@ async function findOrCreateOAuthUser({ providerId, providerKey, email, fullName,
     }
   }
 
-  // 3. Create new account
-  user = await User.create({
-    fullName: fullName || email?.split('@')[0] || 'User',
-    email,
-    [providerKey]: providerId,
-    avatarUrl,
-    isActive: true,
-  });
-  return user;
+  // 3. Create new account — a concurrent request (double-clicked "Sign in
+  // with Google", browser resubmit on the callback redirect) can race past
+  // both checks above; the unique index on googleId/linkedinId/email turns
+  // that into an E11000 here instead of silently creating a duplicate
+  // account. Recover by re-fetching whichever request won the race rather
+  // than failing the login.
+  try {
+    user = await User.create({
+      fullName: fullName || email?.split('@')[0] || 'User',
+      email,
+      [providerKey]: providerId,
+      avatarUrl,
+      isActive: true,
+    });
+    return user;
+  } catch (err) {
+    if (err.code === 11000) {
+      const winner = await User.findOne({
+        $or: [{ [providerKey]: providerId }, ...(email ? [{ email }] : [])],
+      });
+      if (winner) {
+        await User.findByIdAndUpdate(winner._id, { [providerKey]: providerId, lastLogin: new Date() });
+        return winner;
+      }
+    }
+    throw err;
+  }
 }
 
 // ── Google ─────────────────────────────────────────────────────────────────────
@@ -252,3 +270,4 @@ router.get('/linkedin/callback', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.findOrCreateOAuthUser = findOrCreateOAuthUser; // exported for unit testing the race-recovery path

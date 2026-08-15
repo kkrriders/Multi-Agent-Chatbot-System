@@ -19,6 +19,7 @@ const { withRetry } = require('../../shared/retry');
 const { logger } = require('../../shared/logger');
 const AiUsageLog = require('../../models/AiUsageLog');
 const responseCache = require('./response-cache');
+const redisClient = require('../../config/redis');
 
 // Ordered fallback chain — OpenRouter only included when key is configured
 const PROVIDERS = process.env.OPENROUTER_API_KEY
@@ -68,6 +69,46 @@ const RETRYABLE = (err) => {
   return !type || type === 'transient';
 };
 
+// Global per-tier request gate for Groq. Each Groq model has its own 30
+// req/min budget, SHARED across every user of the app (not per-user) — and
+// this function is the one choke point every Groq call passes through
+// (CLAUDE.md: "ALWAYS call AI through provider-manager.js"), so it's the
+// only place that can see and coordinate usage across concurrent requests
+// from different users AND different features (scoring, question-gen,
+// decision-agent, gap-analysis, session-feedback, ...). Without this, many
+// concurrent users hitting different endpoints at once blow straight through
+// the shared budget with zero coordination between them.
+//
+// Deliberately not applied to OpenRouter — it's a different provider with
+// its own separate budget; gating it behind Groq's limit would defeat the
+// point of the fallback.
+const GROQ_LIMIT_PER_MINUTE = { fast: 28, balanced: 28, quality: 28 }; // slightly under Groq's real 30 for safety margin
+const GROQ_SLOT_MAX_WAIT_MS = 30_000; // stays under nginx's default 60s proxy_read_timeout with room to spare
+const GROQ_SLOT_POLL_MS = 500;
+
+async function _acquireGroqSlot(tier) {
+  // No Redis to coordinate against — fail open. Only true for single-instance
+  // dev without REDIS_URL set (see config/redis.js); the docker-compose
+  // deployment always has Redis, so this is the queue in production.
+  if (!redisClient) return;
+
+  const limit = GROQ_LIMIT_PER_MINUTE[tier] || GROQ_LIMIT_PER_MINUTE.balanced;
+  const deadline = Date.now() + GROQ_SLOT_MAX_WAIT_MS;
+
+  while (Date.now() < deadline) {
+    const windowKey = `airate:groq:${tier}:${Math.floor(Date.now() / 60_000)}`;
+    const count = await redisClient.incr(windowKey);
+    if (count === 1) await redisClient.expire(windowKey, 60);
+    if (count <= limit) return;
+    await new Promise(resolve => setTimeout(resolve, GROQ_SLOT_POLL_MS));
+  }
+
+  throw Object.assign(
+    new Error(`AI request queue timed out waiting for ${tier}-tier capacity — system is at capacity, please try again shortly`),
+    { providerErrorType: 'transient' }
+  );
+}
+
 async function _callWithFallback(method, tier, prompt, options) {
   const { callSite = 'unknown', ...providerOptions } = options;
   const errors = [];
@@ -77,6 +118,7 @@ async function _callWithFallback(method, tier, prompt, options) {
     const model = MODELS[tier]?.[provider.name] || MODELS.fast[provider.name];
     let attempts = 0;
     try {
+      if (provider.name === 'groq') await _acquireGroqSlot(tier);
       const result = await withRetry(
         () => { attempts++; return provider[method](model, prompt, providerOptions); },
         { maxAttempts: 2, baseDelayMs: 500, maxDelayMs: 5_000, retryOn: RETRYABLE }

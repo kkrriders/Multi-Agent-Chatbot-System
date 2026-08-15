@@ -23,11 +23,13 @@ const userSchema = new mongoose.Schema({
   },
   googleId: {
     type: String,
+    unique: true, // was missing — sparse alone doesn't enforce uniqueness, just lets it coexist with docs that lack the field
     sparse: true, // allows null + unique
     select: false,
   },
   linkedinId: {
     type: String,
+    unique: true,
     sparse: true,
     select: false,
   },

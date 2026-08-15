@@ -1,6 +1,7 @@
 'use strict';
 
 jest.mock('../../../src/services/ai/providers/groq-provider');
+jest.mock('../../../src/services/ai/providers/openrouter-provider');
 jest.mock('../../../src/models/AiUsageLog', () => ({ create: jest.fn().mockResolvedValue({}) }));
 jest.mock('../../../src/services/ai/response-cache');
 
@@ -181,5 +182,92 @@ describe('provider-manager cacheTtlSeconds', () => {
 
     expect(groq.generateJson).toHaveBeenCalledTimes(1);
     expect(responseCache.set).toHaveBeenCalledWith('x', 'fast', 'prompt', result, 3600);
+  });
+});
+
+describe('provider-manager Groq global rate gate', () => {
+  let ai, groq, redisMock;
+
+  beforeEach(() => {
+    jest.resetModules();
+    jest.useRealTimers();
+    delete process.env.OPENROUTER_API_KEY;
+    redisMock = { incr: jest.fn(), expire: jest.fn().mockResolvedValue(1) };
+    jest.doMock('../../../src/config/redis', () => redisMock);
+    groq = require('../../../src/services/ai/providers/groq-provider');
+    groq.name = 'groq';
+    ai = require('../../../src/services/ai/provider-manager');
+    groq.generateJson.mockResolvedValue({ data: { ok: true }, inputTokens: 1, outputTokens: 1, provider: 'groq' });
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  test('proceeds immediately when under the shared per-minute budget', async () => {
+    redisMock.incr.mockResolvedValue(5); // well under the cap
+    await ai.generateJson('prompt', 'fast', { callSite: 'x' });
+    expect(groq.generateJson).toHaveBeenCalledTimes(1);
+  });
+
+  test('waits for a slot to free up before calling Groq when the tier is over budget', async () => {
+    jest.useFakeTimers();
+    redisMock.incr
+      .mockResolvedValueOnce(29) // over the (28) cap — must wait
+      .mockResolvedValueOnce(29)
+      .mockResolvedValueOnce(10); // freed up on the next window
+
+    const resultPromise = ai.generateJson('prompt', 'fast', { callSite: 'x' });
+    await jest.advanceTimersByTimeAsync(1_500);
+    await resultPromise;
+
+    expect(groq.generateJson).toHaveBeenCalledTimes(1);
+    expect(redisMock.incr).toHaveBeenCalledTimes(3);
+  });
+
+  test('gives up after the bounded wait and never calls Groq if capacity never frees up', async () => {
+    // Real timers here — this exercises the actual 30s bound end-to-end
+    // rather than fighting fake-timer/promise-microtask interleaving across
+    // ~60 poll iterations, which proved unreliable for this loop shape.
+    redisMock.incr.mockResolvedValue(999); // always over budget
+
+    await expect(ai.generateJson('prompt', 'fast', { callSite: 'x' })).rejects.toThrow('All AI providers exhausted');
+
+    expect(groq.generateJson).not.toHaveBeenCalled();
+  }, 35_000);
+
+  test('does not gate OpenRouter behind Groq\'s budget', async () => {
+    process.env.OPENROUTER_API_KEY = 'test-key';
+    jest.resetModules();
+    jest.doMock('../../../src/config/redis', () => redisMock);
+    const openrouter = require('../../../src/services/ai/providers/openrouter-provider');
+    openrouter.name = 'openrouter';
+    groq = require('../../../src/services/ai/providers/groq-provider');
+    groq.name = 'groq';
+    ai = require('../../../src/services/ai/provider-manager');
+
+    redisMock.incr.mockResolvedValue(5); // Groq gate passes immediately (room in budget)
+    const quotaErr = Object.assign(new Error('exhausted'), { providerErrorType: 'quota_exhausted' });
+    groq.generateJson.mockRejectedValue(quotaErr); // the Groq CALL itself fails — unrelated to the gate — falls through
+    openrouter.generateJson.mockResolvedValue({ data: { ok: true }, inputTokens: 1, outputTokens: 1, provider: 'openrouter' });
+
+    await ai.generateJson('prompt', 'fast', { callSite: 'x' });
+
+    expect(openrouter.generateJson).toHaveBeenCalledTimes(1);
+    // Gate consulted once, for Groq's attempt only — never for OpenRouter's
+    expect(redisMock.incr).toHaveBeenCalledTimes(1);
+
+    delete process.env.OPENROUTER_API_KEY;
+  });
+
+  test('fails open (no wait, calls Groq directly) when Redis is unavailable', async () => {
+    jest.resetModules();
+    jest.doMock('../../../src/config/redis', () => null);
+    groq = require('../../../src/services/ai/providers/groq-provider');
+    groq.name = 'groq';
+    ai = require('../../../src/services/ai/provider-manager');
+    groq.generateJson.mockResolvedValue({ data: { ok: true }, inputTokens: 1, outputTokens: 1, provider: 'groq' });
+
+    await ai.generateJson('prompt', 'fast', { callSite: 'x' });
+
+    expect(groq.generateJson).toHaveBeenCalledTimes(1);
   });
 });

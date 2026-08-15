@@ -105,6 +105,13 @@ router.post('/signup', async (req, res) => {
       },
     });
   } catch (error) {
+    // A concurrent signup for the same not-yet-registered email (duplicate
+    // form submit, impatient double-click) can race past the findOne check
+    // above and hit the unique index here instead — that's an expected
+    // "already registered" outcome, not a server error.
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, error: 'Email already registered' });
+    }
     logger.error('Signup error:', error);
     res.status(500).json({
       success: false,
@@ -261,13 +268,15 @@ router.put('/update-profile', authenticate, async (req, res) => {
     if (fullName) updateData.fullName = fullName;
     if (preferences && typeof preferences === 'object' && !Array.isArray(preferences)) {
       const ALLOWED_PREF_KEYS = ['theme', 'language', 'notifications', 'fontSize'];
-      const sanitized = {};
+      // Dot-notation per key, not `updateData.preferences = {...}` — the
+      // latter $sets the whole subdocument, so a request that only sends one
+      // preference (e.g. a theme toggle) would silently wipe every other
+      // stored preference the client didn't happen to include this time.
       for (const key of ALLOWED_PREF_KEYS) {
         if (Object.prototype.hasOwnProperty.call(preferences, key)) {
-          sanitized[key] = preferences[key];
+          updateData[`preferences.${key}`] = preferences[key];
         }
       }
-      if (Object.keys(sanitized).length > 0) updateData.preferences = sanitized;
     }
 
     const user = await User.findByIdAndUpdate(
@@ -364,7 +373,12 @@ router.post('/reset-password', async (req, res) => {
     }
 
     const tokenHash = createHash('sha256').update(token).digest('hex');
-    const userId = await redisClient.get(`pwd:reset:${tokenHash}`);
+    // GETDEL, not GET-then-DEL — those are two round trips, and two concurrent
+    // requests for the same raw token (e.g. an email security scanner
+    // prefetching the reset link at the same moment the user clicks it) can
+    // both pass a GET check before either DEL runs, both treating an
+    // already-used token as still valid. GETDEL reads and deletes atomically.
+    const userId = await redisClient.getdel(`pwd:reset:${tokenHash}`);
 
     if (!userId) {
       return res.status(400).json({ success: false, error: 'Reset token is invalid or has expired' });
@@ -374,10 +388,6 @@ router.post('/reset-password', async (req, res) => {
     if (!user) {
       return res.status(400).json({ success: false, error: 'User not found' });
     }
-
-    // Consume the token before saving — if save fails the user requests a new link,
-    // which is safer than leaving a used token valid in Redis.
-    await redisClient.del(`pwd:reset:${tokenHash}`);
 
     // Hash explicitly so we can use findByIdAndUpdate (avoids document mutation)
     const hashedPassword = await User.hashPassword(password);
