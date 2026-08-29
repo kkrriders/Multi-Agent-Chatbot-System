@@ -28,7 +28,7 @@ function classifyError(err) {
 async function generate(model, prompt, options = {}) {
   try {
     const res = await getClient().chat.completions.create({
-      model: model || process.env.MANAGER_MODEL || 'llama-3.1-8b-instant',
+      model: model || process.env.MANAGER_MODEL || 'openai/gpt-oss-120b',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: options.maxTokens ?? 800,
       temperature: options.temperature ?? 0.7,
@@ -49,7 +49,7 @@ async function generate(model, prompt, options = {}) {
 async function generateJson(model, prompt, options = {}) {
   try {
     const res = await getClient().chat.completions.create({
-      model: model || process.env.MANAGER_MODEL || 'llama-3.1-8b-instant',
+      model: model || process.env.MANAGER_MODEL || 'openai/gpt-oss-120b',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: options.maxTokens ?? 800,
       temperature: options.temperature ?? 0.1,
@@ -73,7 +73,7 @@ async function generateJson(model, prompt, options = {}) {
 async function generateWithTools(model, prompt, options = {}) {
   try {
     const res = await getClient().chat.completions.create({
-      model: model || process.env.MANAGER_MODEL || 'llama-3.1-8b-instant',
+      model: model || process.env.MANAGER_MODEL || 'openai/gpt-oss-120b',
       messages: [{ role: 'user', content: prompt }],
       tools: options.tools,
       tool_choice: 'auto',

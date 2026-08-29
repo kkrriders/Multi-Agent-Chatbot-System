@@ -29,7 +29,7 @@ const PROVIDERS = process.env.OPENROUTER_API_KEY
 // Model tiers for interview workloads
 const MODELS = {
   fast: {
-    groq: 'llama-3.1-8b-instant',
+    groq: process.env.FAST_MODEL || 'openai/gpt-oss-120b',
     openrouter: 'meta-llama/llama-3.1-8b-instruct:free',
   },
   balanced: {
@@ -47,6 +47,7 @@ const MODELS = {
 // rate added here, not a new cost-tracking mechanism built later.
 const COST_PER_1K_TOKENS = {
   'llama-3.1-8b-instant': 0,
+  'openai/gpt-oss-120b': 0,
   'llama-3.3-70b-versatile': 0,
   'qwen/qwen3-32b': 0,
   'meta-llama/llama-3.1-8b-instruct:free': 0,
