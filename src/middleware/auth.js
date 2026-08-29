@@ -99,7 +99,24 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
+/**
+ * Blocks routes that consume real resources (AI calls, storage) until the
+ * account's email is confirmed. Must run after `authenticate`. OAuth users
+ * are always emailVerified:true at creation, so this never affects them.
+ */
+const requireVerifiedEmail = (req, res, next) => {
+  if (!req.user.emailVerified) {
+    return res.status(403).json({
+      success: false,
+      error: 'EMAIL_NOT_VERIFIED',
+      message: 'Please verify your email address before starting an interview.',
+    });
+  }
+  next();
+};
+
 module.exports = {
   authenticate,
   optionalAuth,
+  requireVerifiedEmail,
 };

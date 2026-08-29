@@ -32,6 +32,22 @@ describe('findOrCreateOAuthUser — race recovery', () => {
     expect(User.findByIdAndUpdate).toHaveBeenCalledWith('u1', expect.objectContaining({ googleId: 'g1' }));
   });
 
+  test('new OAuth accounts are created with emailVerified:true — the provider already verified it', async () => {
+    User.findOne
+      .mockReturnValueOnce({ select: jest.fn().mockResolvedValue(null) }) // no match by googleId
+      .mockResolvedValueOnce(null); // no match by email
+
+    const created = { _id: 'u1', email: 'a@b.com', googleId: 'g1', emailVerified: true };
+    User.create.mockResolvedValue(created);
+
+    const result = await findOrCreateOAuthUser({
+      providerId: 'g1', providerKey: 'googleId', email: 'a@b.com', fullName: 'A B', avatarUrl: null,
+    });
+
+    expect(result).toBe(created);
+    expect(User.create).toHaveBeenCalledWith(expect.objectContaining({ emailVerified: true }));
+  });
+
   test('re-throws non-duplicate errors from create', async () => {
     User.findOne
       .mockReturnValueOnce({ select: jest.fn().mockResolvedValue(null) })

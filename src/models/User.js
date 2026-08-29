@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  emailVerified: {
+    type: Boolean,
+    default: false, // OAuth signups set this true at creation — the provider already verified the address
+  },
   createdAt: {
     type: Date,
     default: Date.now,

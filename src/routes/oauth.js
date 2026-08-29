@@ -126,6 +126,7 @@ async function findOrCreateOAuthUser({ providerId, providerKey, email, fullName,
       [providerKey]: providerId,
       avatarUrl,
       isActive: true,
+      emailVerified: true, // provider already verified this address (checked at the callback)
     });
     return user;
   } catch (err) {
@@ -250,8 +251,8 @@ router.get('/linkedin/callback', async (req, res) => {
       { headers: { Authorization: `Bearer ${tokens.access_token}` } }
     );
 
-    if (!profile.email) {
-      return oauthError(res, 'Could not retrieve email from LinkedIn — ensure your LinkedIn account has a verified email');
+    if (!profile.email || profile.email_verified === false) {
+      return oauthError(res, 'Could not retrieve a verified email from LinkedIn');
     }
 
     const user = await findOrCreateOAuthUser({

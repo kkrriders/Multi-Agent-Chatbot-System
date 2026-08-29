@@ -28,6 +28,7 @@ function makeMockUser(overrides = {}) {
     fullName:   'Test User',
     email:      'test@example.com',
     isActive:   true,
+    emailVerified: true,
     createdAt:  new Date('2024-01-01'),
     lastLogin:  new Date('2024-06-01'),
     preferences: { theme: 'system', notifications: true },

@@ -16,7 +16,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate, optionalAuth } = require('../middleware/auth');
+const { authenticate, optionalAuth, requireVerifiedEmail } = require('../middleware/auth');
 const { guard } = require('../middleware/injection-guard');
 const { attachGuestId, gateGuestUsage } = require('../middleware/guestGate');
 const { generalLimiter, messageLimiter } = require('../middleware/rateLimiter');
@@ -63,6 +63,7 @@ router.get('/stream/:sessionId', authenticate, generalLimiter, async (req, res) 
 // ── Start interview ──────────────────────────────────────────────────────────
 router.post('/start',
   authenticate,
+  requireVerifiedEmail,
   messageLimiter,
   guard(['jobDescription', 'companyName', 'targetRole']),
   async (req, res) => {

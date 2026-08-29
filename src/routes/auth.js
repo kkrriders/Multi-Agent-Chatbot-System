@@ -7,9 +7,29 @@ const { authenticate } = require('../middleware/auth');
 const { logger } = require('../shared/logger');
 const { auditEvent } = require('../middleware/auditLog');
 const redisClient = require('../config/redis');
-const { sendPasswordResetEmail } = require('../services/email/email-service');
+const { sendPasswordResetEmail, sendVerificationEmail } = require('../services/email/email-service');
 
 const RESET_TTL_SECONDS = 3600; // 1 hour
+const VERIFY_TTL_SECONDS = 24 * 3600; // 24 hours
+
+/** Generates a raw token + Redis key, and best-effort sends the verification email. Never throws. */
+async function issueVerificationEmail(user) {
+  if (!redisClient) {
+    logger.warn('[auth] Redis unavailable — cannot issue verification token');
+    return;
+  }
+  try {
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+    await redisClient.set(`email:verify:${tokenHash}`, user._id.toString(), 'EX', VERIFY_TTL_SECONDS);
+
+    const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:3002'}/verify-email?token=${rawToken}`;
+    await sendVerificationEmail(user.email, verifyUrl);
+  } catch (err) {
+    // Don't fail signup over a delivery hiccup — the user can request a resend.
+    logger.error('[email] failed to send verification email:', err.message);
+  }
+}
 
 const router = express.Router();
 
@@ -84,6 +104,9 @@ router.post('/signup', async (req, res) => {
     logger.info(`[auth] signup success userId=${user._id}`);
     auditEvent({ userId: user._id, email, action: 'signup.success', ip: req.ip, userAgent: req.headers['user-agent'] });
 
+    // issueVerificationEmail never throws — signup succeeds even if the email provider is down.
+    await issueVerificationEmail(user);
+
     // Set cookie and send response
     res.cookie('token', token, {
       httpOnly: true,
@@ -99,6 +122,7 @@ router.post('/signup', async (req, res) => {
           id: user._id,
           fullName: user.fullName,
           email: user.email,
+          emailVerified: user.emailVerified,
           createdAt: user.createdAt,
         },
         // token intentionally omitted — credential is delivered via HttpOnly cookie only
@@ -400,6 +424,64 @@ router.post('/reset-password', async (req, res) => {
   } catch (error) {
     logger.error('Reset-password error:', error);
     res.status(500).json({ success: false, error: 'Error resetting password' });
+  }
+});
+
+/**
+ * @route   POST /api/auth/verify-email
+ * @desc    Confirm an account's email using the token from the verification link
+ * @access  Public
+ */
+router.post('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ success: false, error: 'Verification token is required' });
+    }
+
+    if (!redisClient) {
+      return res.status(503).json({ success: false, error: 'Email verification is temporarily unavailable' });
+    }
+
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    // GETDEL — same atomic consume-once pattern as reset-password.
+    const userId = await redisClient.getdel(`email:verify:${tokenHash}`);
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'Verification link is invalid or has expired' });
+    }
+
+    const user = await User.findByIdAndUpdate(userId, { emailVerified: true }, { new: true });
+    if (!user) {
+      return res.status(400).json({ success: false, error: 'User not found' });
+    }
+
+    auditEvent({ userId: user._id, email: user.email, action: 'email_verify.success', ip: req.ip, userAgent: req.headers['user-agent'] });
+    logger.info(`[auth] email verified userId=${user._id}`);
+
+    res.status(200).json({ success: true, message: 'Email verified successfully.' });
+  } catch (error) {
+    logger.error('Verify-email error:', error);
+    res.status(500).json({ success: false, error: 'Error verifying email' });
+  }
+});
+
+/**
+ * @route   POST /api/auth/resend-verification
+ * @desc    Resend the verification link to the signed-in user's own email
+ * @access  Private
+ */
+router.post('/resend-verification', authenticate, async (req, res) => {
+  try {
+    if (req.user.emailVerified) {
+      return res.status(400).json({ success: false, error: 'Email is already verified' });
+    }
+
+    await issueVerificationEmail(req.user);
+
+    res.status(200).json({ success: true, message: 'Verification email sent.' });
+  } catch (error) {
+    logger.error('Resend-verification error:', error);
+    res.status(500).json({ success: false, error: 'Error sending verification email' });
   }
 });
 
